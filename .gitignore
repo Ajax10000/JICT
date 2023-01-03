@@ -1,0 +1,17 @@
+#ignore all C++ files
+*.CPP
+
+*.APS
+*.BAT
+*.CGP
+*.CLW
+*.H
+*.MAK
+*.MDP
+*.NCB
+*.RC
+README1.TXT
+
+DEBUG/
+QVLIB/
+RES/
