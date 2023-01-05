@@ -298,6 +298,8 @@ public:
     } // Shape3d ctor
 
 
+    // Called from:
+    //     Globals.iwarpz
     public Shape3d(int piNumVerts) {
         if(ictdebug) {
             String msgText;
@@ -771,6 +773,8 @@ public:
     } // writeShape
 
 
+    // Called from:
+    //     Globals.iwarpz
     public void printShape(String psComment) {
         String msgText;
 
@@ -791,6 +795,7 @@ public:
     } // printShape
 
 
+    // Called from Globals.iwarpz
     public void screenBoundingBox() {
         initCurrentVertex();
         this.maxX = currentVertex.sx; 
@@ -808,6 +813,12 @@ public:
         }
     } // screenBoundingBox
 
+
+    // Called from:
+    //     Globals.getIntervals
+    //     Globals.iwarpz
+    //     RenderObject.drawStill
+    //     RenderObject.prepareCutout
     public void initCurrentVertex() {
         this.currentVertex = this.firstVertex;
     } // initCurrentVertex
@@ -818,6 +829,10 @@ public:
     } // initCurrentFace
 
 
+    // Called from:
+    //     Globals.getIntervals
+    //     RenderObject.drawStill
+    //     RenderObject.prepareCutout
     public int getNumVertices() {
         return this.numVertices;
     } // getNumVertices
@@ -850,6 +865,8 @@ public:
     } // worldBoundingBox
 
 
+    // Called from:
+    //     Globals.iwarpz
     public void transformBoundingBox() {
         initCurrentVertex();
         this.maxTX = currentVertex.tx; 
@@ -882,6 +899,8 @@ public:
     } // invertY
 
 
+    // Called from:
+    //     Globals.iwarpz
     public int addWorldVertex(float pfX, float pfY, float pfZ) {
         if (this.numVertices == this.numAllocatedVertices) {
             Globals.statusPrint("addWorldVertex: Not enough memory to add vertex");
@@ -950,6 +969,8 @@ public:
     } // getPreviousWorldVertex
 
 
+    // Called from:
+    //     RenderObject.drawStill
     public float averageX() {
         screenBoundingBox();
         return((this.maxX - this.minX)/2.0f);
@@ -1304,6 +1325,8 @@ public:
     } // addVertices
 
 
+    // Called from: 
+    //     SceneList.copyRefPoints
     public void getReferencePoint(Float pFCentroidX, Float pFCentroidY, Float pFCentroidZ) {
         pFCentroidX = this.pointOfReference.x;
         pFCentroidY = this.pointOfReference.y;
@@ -1318,6 +1341,8 @@ public:
     } // setReferencePoint
 
 
+    // Called from:
+    //     RenderObject.drawStill
     public int getScreenVertex(int piIndex, Integer pISx, Integer pISy) {
         if(piIndex < 0 || piIndex > this.numVertices - 1) {
             String msgText = "getScreenVertex.  index < 0 or >= numVertices: " + piIndex;
@@ -1510,6 +1535,8 @@ public:
 
 
     // This method came from DEPTHSRT.CPP
+    // Called from:
+    //     SceneList.calcCompoundModelRefPoint
     public void getTCentroid(Float centroidX, Float centroidY, Float centroidZ) {
         initCurrentVertex();
         float maxtX = currentVertex.tx, maxtY = currentVertex.tx,
