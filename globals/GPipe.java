@@ -2,6 +2,8 @@ package globals;
 
 import core.MemImage;
 
+import java.text.DecimalFormat;
+
 import math.TMatrix;
 import math.Vect;
 
@@ -44,6 +46,11 @@ public class GPipe {
 
     // This value came from ICT20.H
     public static final float F_DTR = 3.1415926f/180.0f;
+
+    // Effect Types
+    public static final int STILL    = 1;
+    public static final int SEQUENCE = 2;
+    public static final int MORPH    = 3;
 
 /*
 //
@@ -156,12 +163,13 @@ public:
         
         setZBuffer(true);
         setLighting(true);
-        Point3d aLight;
+        Point3d aLight = new Point3d();
         aLight.x =    0.0f;
         aLight.y =    0.0f;
         aLight.z = -100.0f;
         setLightSource(aLight);
     }
+
 
     // This destructor came from GPIPE.CPP
     public void finalize() {
@@ -187,17 +195,17 @@ public:
     }
 
     // This method came from GPIPE.CPP
+    // Called from:
+    //     MainFrame.onToolsTest
     public int initialize() {
-        //
-        //  Open the output Image
-        //
+        // Open the output image
         outputImage = new MemImage(outputRows, outputColumns);
         if (!outputImage.isValid()) {
             Globals.statusPrint("gPipe: Not enough memory to open output image");
             return -1;
         }
 
-        //  Open the zBuffer if necessary
+        // Open the zBuffer if necessary
         if( zBufferEnabled) {
             zBuffer = new MemImage(outputRows, outputColumns, 32);
             if (!zBuffer.isValid()) {
@@ -210,15 +218,19 @@ public:
         }
 
         return 0;
-    }
+    } // initialize
+
 
     // This method came from GPIPE.CPP
+    // Called from:
+    //     MainFrame.onToolsTest
     public int addFace(Point3d p1, Point3d p2, Point3d c1, Point3d c2) {
         // Input points are assumed to be oriented counter-clockwise from 
         // the first point.
-        Point3d centroid;
-        Point3d *np1, *np2, *nc1, *nc2;  // lighting normals
-        float ip1, ip2, ic1, ic2;		  // intensities at face cornerpoints
+        Point3d centroid = new Point3d();
+        // Point3d *np1, Point3d *np2, *nc1, *nc2;  // lighting normals // these variables are not used
+        float ip1;
+        // float ip2, ic1, ic2;		 // intensities at face cornerpoints, but not used
 
         if (gpdebug) {
             Globals.statusPrint("-----------------addFace--------------------");
@@ -234,14 +246,19 @@ public:
         setViewPenMatrix();
 
         //
-        //  project the four points to the screen
+        //  Project the four points to the screen
         //
-        Point2d sp1, sp2, sc1, sc2;
-        float dPrev1, dPrev2, dCur1, dCur2;
-        Point3d t1, t2, t3, t4;
+        Point2d sp1 = new Point2d();
+        Point2d sp2 = new Point2d();
+        Point2d sc1 = new Point2d(); 
+        Point2d sc2 = new Point2d();;
+        float dPrev1 = 0f, dPrev2 = 0f, dCur1 = 0f, dCur2 = 0f;
+        Point3d t1 = new Point3d();
+        Point3d t2 = new Point3d(); 
+        Point3d t3 = new Point3d(); 
+        Point3d t4 = new Point3d();
 
-        viewPenMatrix.transformAndProjectPoint1
-        (p1, sp1, ref, outputRows, outputColumns, t1);
+        viewPenMatrix.transformAndProjectPoint1(p1, sp1, ref, outputRows, outputColumns, t1);
         if(zBufferEnabled) {
             dPrev1 = Globals.getDistance3d(t1.x, t1.y, t1.z, viewPoint.x, viewPoint.y, viewPoint.z);
         }
@@ -272,10 +289,13 @@ public:
         if (gpdebug) {
             viewPoint.display("ViewPoint");
             ref.display("Reference");
-            np1.display("Normal");
-            String msgText;
-            sprintf(msgText, "dPrev1: %6.2f dPrev2 %6.2f dCur1: %6.2f dCur2: %6.2f", 
-                    dPrev1, dPrev2, dCur1, dCur2);
+            // np1.display("Normal"); // np1 has not yet been set
+            DecimalFormat sixDotTwo = new DecimalFormat("####.##");
+            String msgText = 
+                "dPrev1: " + sixDotTwo.format(dPrev1) + 
+                " dPrev2 " + sixDotTwo.format(dPrev2) + 
+                " dCur1: " + sixDotTwo.format(dCur1) + 
+                " dCur2: " + sixDotTwo.format(dCur2); 
             Globals.statusPrint(msgText);
         }
 
@@ -328,8 +348,9 @@ public:
             centroid.z = (zMax + zMin) / 2.0f;
             float dCentroid = Globals.getDistance3d(lightSource.x, lightSource.y, lightSource.z, 
                                             centroid.x, centroid.y, centroid.z);
-            Point3d np1;
+            Point3d np1 = new Point3d();
 
+            // The following method will set np1
             Vect.getNormal2(np1, t1, centroid, t2);
 
             Vect.vectorNormalize(np1);
@@ -361,10 +382,10 @@ public:
                             (int)sc2.x, (int)sc2.y, ip1, dCur2, zBuffer);
             } else {
                 outputImage.fillPolyz( 
-                            (int)sp1.x, (int)sp1.y, (byte)ip1,0.0,
-                            (int)sp2.x, (int)sp2.y, (byte)ip1,0.0,
-                            (int)sc1.x, (int)sc1.y, (byte)ip1,0.0,
-                            (int)sc2.x, (int)sc2.y, (byte)ip1, 0.0, null);
+                            (int)sp1.x, (int)sp1.y, (byte)ip1, 0.0f,
+                            (int)sp2.x, (int)sp2.y, (byte)ip1, 0.0f,
+                            (int)sc1.x, (int)sc1.y, (byte)ip1, 0.0f,
+                            (int)sc2.x, (int)sc2.y, (byte)ip1, 0.0f, null);
             }
         } else {
             if(zBufferEnabled) {
@@ -375,44 +396,56 @@ public:
                             outputImage, zBuffer);
             } else {
                 Globals.fillTrianglez( 
-                            (int)sp1.x, (int)sp1.y, (byte)ip1, 0.0,
-                            (int)sp2.x, (int)sp2.y, (byte)ip1, 0.0,
-                            (int)sc1.x, (int)sc1.y, (byte)ip1, 0.0,
+                            (int)sp1.x, (int)sp1.y, (byte)ip1, 0.0f,
+                            (int)sp2.x, (int)sp2.y, (byte)ip1, 0.0f,
+                            (int)sc1.x, (int)sc1.y, (byte)ip1, 0.0f,
                             outputImage, null);
             }
         }
 
         return 0;
-    }
+    } // addFace
+
 
     // This method came from GPIPE.CPP
     public void setPenScale(float scaleX, float scaleY, float scaleZ) {
         penScale.x = scaleX;
         penScale.y = scaleY;
         penScale.z = scaleZ;
-    }
+    } // setPenScale
     
+
     // This method came from GPIPE.CPP
+    // Called from:
+    //     MainFrame.onToolsTest
     public void setPenXRotation(float angleRad) {
         penRotation.x += angleRad;
-    }
-    
+    } // setPenXRotation
+
+
     // This method came from GPIPE.CPP
+    // Called from:
+    //     MainFrame.onToolsTest
     public void setPenYRotation(float angleRad) {
         penRotation.y += angleRad;
-    }
-    
+    } // setPenYRotation
+
+
     // This method came from GPIPE.CPP
     public void setPenZRotation(float angleRad) {
         penRotation.z += angleRad;
-    }
+    } // setPenZRotation
+
     
     // This method came from GPIPE.CPP
+    // Called from:
+    //     MainFrame.onToolsTest
     public void setPenTranslation(float tranX, float tranY, float tranZ) {
         penTranslation.x += tranX;
         penTranslation.y += tranY;
         penTranslation.z += tranZ;
-    }
+    } // setPenTranslation
+
     
     // This method came from GPIPE.CPP
     public void setPenMatrix() {
@@ -420,7 +453,8 @@ public:
         penMatrix.scale(penScale.x, penScale.y, penScale.z);
         penMatrix.rotate(penRotation.x, penRotation.y, penRotation.z);
         penMatrix.translate(penTranslation.x, penTranslation.y, penTranslation.z);
-    }
+    } // setPenMatrix
+
 
     // This method came from GPIPE.CPP
     public void setViewMatrix() {
@@ -428,41 +462,56 @@ public:
         viewMatrix.scale(1.0f, 1.0f, 1.0f);
         viewMatrix.rotate(-viewAngle.x, -viewAngle.y, -viewAngle.z);
         viewMatrix.translate(-viewPoint.x, -viewPoint.y, -viewPoint.z);
-    }
+    } // setViewMatrix
     
+
     // This method came from GPIPE.CPP
     public void setViewPenMatrix() {
         setPenMatrix();
         setViewMatrix();
         viewPenMatrix.multiply(viewMatrix, penMatrix);
-    }
+    } // setViewPenMatrix
+
 
     // This method came from GPIPE.CPP
     public void resetPenMatrix() {
         penMatrix.setIdentity();
-    }
-    
+    } // resetPenMatrix
+
+
     // This method came from GPIPE.CPP
+    // Called from:
+    //     MainFrame.onToolsTest
     public int saveZBuffer(String outputPath) {
         int status = zBuffer.saveAs8("d:\\ict20\\output\\gPipeZBuffer8.bmp");
         return status;
-    }
+    } // saveZBuffer
+
     
     // This method came from GPIPE.CPP
+    // Called from:
+    //     MainFrame.onToolsTest
     public int saveOutputImage(String outputPath) {
         int status = outputImage.writeBMP(outputPath); 
         return status;
-    }
+    } // saveOutputImage
     
+
     // This method came from GPIPE.CPP
+    // Called from:
+    //     MainFrame.onToolsTest
     public void setZBuffer(boolean indicator) {
         zBufferEnabled = indicator;
-    }  
+    } // setZBuffer
+
     
     // This method came from GPIPE.CPP
+    // Called from:
+    //     MainFrame.onToolsTest
     public void setLighting(boolean indicator) {
         lightingEnabled = indicator;
-    }
+    } // setLighting
+
 
     // This method came from GPIPE.CPP
     public void addCube(float width, float height, float depth) { 
@@ -572,7 +621,8 @@ public:
         p4.y = -height/2.0f * VP;
         p4.z = -depth/2.0f * VP;
         addFace(p1, p2, p3, p4); //bottom
-    }
+    } // addCube
+
     
     // This method came from GPIPE.CPP
     public void addSphere(float radius) { 
@@ -630,7 +680,8 @@ public:
 
             asAngle += (angleInc / 2.0f);
         }
-    }
+    } // addSphere
+
 
     // This method came from GPIPE.CPP
     public void addCylTop(float height, float radius) { 
@@ -654,7 +705,8 @@ public:
             p3.y = VP * height/2.0f;
             addFace(p3, p2, p1, null); 
         }
-    }
+    } // addCylTop
+
     
     // This method came from GPIPE.CPP
     public void addCylBottom(float height, float radius) { 
@@ -678,7 +730,8 @@ public:
             p3.y = -VP * height/2.0f;
             addFace(p3, p2, p1, null); 
         }
-    }
+    } // addCylBottom
+
     
     // This method came from GPIPE.CPP
     public void addCylSides(float height, float radius) { 
@@ -708,7 +761,8 @@ public:
             p4.y = -p3.y;
             addFace(p4, p3, p2, p1); 
         }
-    }
+    } // addCylSides
+
     
     // This method came from GPIPE.CPP
     public void addConeBottom(float height, float bottomRadius) { 
@@ -733,7 +787,8 @@ public:
             p3.y = -VP * height/2.0f;
             addFace(p3, p2, p1, null); 
         }
-    }  
+    } // addConeBottom
+
 
     // This method came from GPIPE.CPP
     public void addConeSides(float height, float bottomRadius) { 
@@ -759,7 +814,8 @@ public:
             p3.y = -VP * height/2.0f;
             addFace(p3, p2, p1, null);
         }
-    }
+    } // addConeSides
+
 
     // This method came from GPIPE.CPP
     public void updateBoundingBox(Point3d point) {
@@ -781,7 +837,8 @@ public:
             if(point.y > maxBoundingBox.y) maxBoundingBox.y = point.y;
             if(point.z > maxBoundingBox.z) maxBoundingBox.z = point.z;
         }
-    }
+    } // updateBoundingBox
+
 
     // This method came from GPIPE.CPP
     public boolean viewPointInsideBoundingBox() {
@@ -793,12 +850,15 @@ public:
         } else {
             return false;
         }
-    }
+    } // viewPointInsideBoundingBox
+
 
     // This method came from GPIPE.CPP
+    // Called from:
+    //     MainFrame.onToolsTest
     public void setLightSource(Point3d aPoint) {
         this.lightSource.x = aPoint.x;
         this.lightSource.y = aPoint.y;
         this.lightSource.z = aPoint.z;
-    }
+    } // setLightSource
 } // class GPipe
