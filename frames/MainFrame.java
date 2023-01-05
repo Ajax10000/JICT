@@ -29,8 +29,7 @@ import math.TMatrix;
 import structs.Point3d;
 
 public class MainFrame extends JFrame {
-    private JMenuBar menuBar;
-    private JMenu JFileMenu;
+
 /*
 class CMainFrame : public CMDIFrameWnd
 {
@@ -224,52 +223,52 @@ protected:
     // This value came from ICT20.H
     public static final float F_DTR = 3.1415926f/180.0f;
 
+
     public MainFrame() {
-        warpRotateX = 0.0f; 
-        warpRotateY = 0.0f; 
-        warpRotateZ = 0.0f;
+        this.warpRotateX = 0.0f; 
+        this.warpRotateY = 0.0f; 
+        this.warpRotateZ = 0.0f;
 
-        warpTranslateX = 0.0f; 
-        warpTranslateY = 0.0f; 
-        warpTranslateZ = 0.0f;
+        this.warpTranslateX = 0.0f; 
+        this.warpTranslateY = 0.0f; 
+        this.warpTranslateZ = 0.0f;
 
-        warpScaleX = 1.0f; 
-        warpScaleY = 1.0f; 
-        warpScaleZ = 1.0f;
+        this.warpScaleX = 1.0f; 
+        this.warpScaleY = 1.0f; 
+        this.warpScaleZ = 1.0f;
 
-        viewRotateX = 0.0f; 
-        viewRotateY = 0.0f; 
-        viewRotateZ = 0.0f;
+        this.viewRotateX = 0.0f; 
+        this.viewRotateY = 0.0f; 
+        this.viewRotateZ = 0.0f;
 
-        viewTranslateX = 0.0f; 
-        viewTranslateY = 0.0f; 
-        viewTranslateZ = 0.0f;
+        this.viewTranslateX = 0.0f; 
+        this.viewTranslateY = 0.0f; 
+        this.viewTranslateZ = 0.0f;
 
-        isDirty = false;
-        cutoutEnabled = false;
-        previewSceneEnabled = false;
-        previewSequenceEnabled = false;
-        renderSceneEnabled = false;
-        renderSequenceEnabled = false;
-        removeSampleColorsEnabled = false;
-        depthSortingEnabled = false;
-        motionBlurEnabled = false;
-        hazeFogEnabled = false;
-        antiAliasEnabled = false;
-        zBufferEnabled = true;
-        imageSamplingEnabled = false;
-        previewingScene = false;
-        previewingSequence = false;
-        outputRows = 250;  //set these in case a sceneList is not read in
-        outputColumns = 250;
-        changeViewPoint = false;
-        mySceneList = new SceneList();
-        viewMatrix = new TMatrix();
-        modelMatrix = new TMatrix();
-        previewWindowHandle = null;  //the scene preview window handle
+        this.isDirty = false;
+        this.cutoutEnabled = false;
+        this.previewSceneEnabled = false;
+        this.previewSequenceEnabled = false;
+        this.renderSceneEnabled = false;
+        this.renderSequenceEnabled = false;
+        this.removeSampleColorsEnabled = false;
+        this.depthSortingEnabled = false;
+        this.motionBlurEnabled = false;
+        this.hazeFogEnabled = false;
+        this.antiAliasEnabled = false;
+        this.zBufferEnabled = true;
+        this.imageSamplingEnabled = false;
+        this.previewingScene = false;
+        this.previewingSequence = false;
+        this.outputRows = 250;  // Set these in case a SceneList is not read in
+        this.outputColumns = 250;
+        this.changeViewPoint = false;
+        this.mySceneList = new SceneList();
+        this.viewMatrix = new TMatrix();
+        this.modelMatrix = new TMatrix();
+        this.previewWindowHandle = null;  // The scene preview window handle
 
-        //  initialize the gPipe object for VRML rendering
-        //
+        // Initialize the gPipe object for VRML rendering
         Globals.aGraphicPipe.initialize();
 
         JMenuBar menuBar = new JMenuBar();
@@ -277,6 +276,9 @@ protected:
         setJMenuBar(menuBar);
     }
 
+
+    // Called from:
+    //     MainFrame constructor
     private void createMenu(JMenuBar pMenuBar) {
         JMenu mnuFile = new JMenu("File");       // POPUP "&File"
         JMenu mnuEdit = new JMenu("Edit");       // POPUP "&Edit"
@@ -307,9 +309,11 @@ protected:
         pMenuBar.add(mnuView);
         pMenuBar.add(mnuWindow);
         pMenuBar.add(mnuHelp);
-    }
+    } // createMenu
 
 
+    // Called from:
+    //     createMenu
     private void createFileMenu(JMenu pFileMenu) {
 /*
 POPUP "&File"
@@ -356,9 +360,11 @@ POPUP "&File"
         pFileMenu.add(mimRecentFile);
         pFileMenu.addSeparator();
         pFileMenu.add(mimExit);
-    }
+    } // createFileMenu
 
 
+    // Called from:
+    //     createMenu
     private void createEditMenu(JMenu pEditMenu) {
         /*
         POPUP "&Edit"
@@ -382,9 +388,11 @@ POPUP "&File"
         pEditMenu.add(mimCut);
         pEditMenu.add(mimCopy);
         pEditMenu.add(mimPaste);
-    }
+    } // createEditMenu
 
 
+    // Called from:
+    //     createMenu
     private void createSearchMenu(JMenu pSearchMenu) {
 /* 
     POPUP "Search"
@@ -402,9 +410,11 @@ POPUP "&File"
         pSearchMenu.add(mimFind);
         pSearchMenu.add(mimReplace);
         pSearchMenu.add(mimNext);
-    }
+    } // createSearchMenu
 
 
+    // Called from:
+    //     createMenu
     private void createToolsMenu(JMenu pToolsMenu) {
 /*
 POPUP "Tools"
@@ -475,9 +485,11 @@ POPUP "Tools"
         pToolsMenu.add(mimRenderVRMLFile);
         pToolsMenu.addSeparator();
         pToolsMenu.add(mimTest);
-    }
+    }  // createToolsMenu
 
 
+    // Called from:
+    //     createMenu
     private void createPreviewMenu(JMenu pPreviewMenu) {
 /*
     POPUP "Preview"
@@ -492,9 +504,11 @@ POPUP "Tools"
 
         pPreviewMenu.add(mimStill);
         pPreviewMenu.add(mimSequence);
-    }
+    } // createPreviewMenu
 
 
+    // Called from:
+    //     createMenu
     private void createRenderMenu(JMenu pRenderMenu) {
 /*
     POPUP "Render"
@@ -524,8 +538,11 @@ POPUP "Tools"
         pRenderMenu.add(mimDepthSorting);
         pRenderMenu.addSeparator();
         pRenderMenu.add(mimAntiAlias);
-    }
+    } // createRenderMenu
 
+
+    // Called from:
+    //     createMenu
     private void createViewMenu(JMenu pViewMenu) {
 /*
     POPUP "&View"
@@ -536,8 +553,11 @@ POPUP "Tools"
         JMenuItem mimStatusBar = new JMenuItem("&Status Bar");
 
         pViewMenu.add(mimStatusBar);
-    }
+    } // createViewMenu
 
+
+    // Called from:
+    //     createMenu
     private void createWindowMenu(JMenu pWindowMenu) {
 /*
     POPUP "&Window"
@@ -558,8 +578,11 @@ POPUP "Tools"
         pWindowMenu.add(mimCascade);
         pWindowMenu.add(mimTile);
         pWindowMenu.add(mimArrangeIcons);
-    }
+    } // createWindowMenu
 
+
+    // Called from:
+    //     createMenu
     private void createHelpMenu(JMenu pHelpMenu) {
 /*
     POPUP "&Help"
@@ -573,229 +596,34 @@ POPUP "Tools"
         pHelpMenu.add(mimAbout);
     }
 
+
     public void finalize() {
 
-    }
+    } // finalize
 
-    int OnCreate(LPCREATESTRUCT lpCreateStruct) {
-        if (CMDIFrameWnd::OnCreate(lpCreateStruct) == -1) {
+
+    int onCreate(LPCREATESTRUCT lpCreateStruct) {
+        if (CMDIFrameWnd.OnCreate(lpCreateStruct) == -1) {
             return -1;
         }
 
-        if (
-        !m_wndStatusBar.Create(this) ||
-        !m_wndStatusBar.SetIndicators(indicators, sizeof(indicators)/sizeof(UINT))) {
-            TRACE0("Failed to create status bar\n");
-            return -1;
-        }
         return 0;
-    }
-
-    /////////////////////////////////////////////////////////////////////////////
-    // CMainFrame message handlers
+    } // onCreate
 
 
-    public void OnPreviewScene() {
-        closeAllChildren();
-        if(isDirty) {         //if the client window has been drawn on, erase it
-            isDirty = false;
-            repaint();
-        }
-        previewingScene = true;
+    // ############################################################################################
+    // Event handlers for Tools menu
 
-        // Create an imageWindow object to draw into
-        IctApp pApp = AfxGetApp();
-        ImageView preView;
-        pApp.m_pDocTemplateImage.OpenDocumentFile(null);
-        preView = ImageView.getView();
-        preView.setCaption("Scene Preview");
-        previewWindowHandle = preView; //save the imageView window so scene preview dialog can use it
-        MDITile(MDITILE_VERTICAL);	 //This maximizes the imageWindow
-
-        ScenePreviewDlg dlg = new ScenePreviewDlg(this, true);
-        dlg.setVisible(true);
-
-        renderSceneEnabled = true;
-        previewingScene = false;
-        isDirty = true;
-        closeAllChildren();
-    }
-
-
-    public void OnPreviewSequence() {
-        closeAllChildren();
-        if(isDirty) { // if the client window has been drawn on, erase it
-            isDirty = false;
-            repaint();
-        }
-        previewingSequence = true;
-
-        //  create an imageWindow object to draw into
-        IctApp pApp = AfxGetApp();
-        ImageView preView;
-        pApp.m_pDocTemplateImage.OpenDocumentFile(null);
-        preView = ImageView.getView();
-        preView.setCaption("Sequence Preview");
-        previewWindowHandle = preView; //save the imageView window so scene preview dialog can use it
-        MDITile(MDITILE_VERTICAL);	 //This maximizes the imageWindow
-
-        ScenePreviewDlg dlg = new ScenePreviewDlg(this, true);
-        dlg.setVisible(true);
-
-        renderSequenceEnabled = true;
-        previewingSequence = false;
-        isDirty = true;
-        closeAllChildren();
-    }
-
-    public void OnRenderDepthsorting() {
-        this.depthSortingEnabled = !this.depthSortingEnabled;
-    }
-
-    public void OnRenderScene() {
-        closeAllChildren();
-        if(isDirty) {         //if the client window has been drawn on, erase it
-            isDirty = false;
-            repaint();
-        }
-
-        //  create an imageWindow object to draw into
-        IctApp pApp = AfxGetApp();
-        ImageView renderView;
-        pApp.m_pDocTemplateImage.OpenDocumentFile(null);
-        renderView = ImageView.getView();
-        renderView.setCaption("Scene Render");
-        previewWindowHandle = renderView; //save the imageView window so scene preview dialog can use it
-        MDITile(MDITILE_VERTICAL);	 //This maximizes the imageWindow
-
-        getViewMatrix(viewMatrix);
-        mySceneList.render(renderView, viewMatrix, depthSortingEnabled, zBufferEnabled, 
-            antiAliasEnabled, hazeFogEnabled);
-        renderSceneEnabled = false;
-
-        isDirty = true;	
-    }
-
-    public void OnRenderSequence() {
-        closeAllChildren();
-        if(isDirty) {         //if the client window has been drawn on, erase it
-            isDirty = false;
-            repaint();
-        }
-
-        IctApp pApp = AfxGetApp();
-        ImageView renderView;
-        pApp.m_pDocTemplateImage.OpenDocumentFile(null);
-        renderView = ImageView.getView();
-        renderView.setCaption("Sequence Render");
-        previewWindowHandle = renderView; // Save the imageView window so 
-                                        // the scene preview dialog can use it
-        MDITile(MDITILE_VERTICAL);	      //Maximize the imageWindow
-
-        getViewMatrix(viewMatrix);
-        mySceneList.render(renderView, viewMatrix, depthSortingEnabled, 
-            zBufferEnabled, antiAliasEnabled, hazeFogEnabled);
-        renderSequenceEnabled = false;
-        isDirty = true;
-    }
-
-    public void OnToolsCreatealphaimage() {
-        String msgText;
-
-        Globals.statusPrint("Creating an Alpha-Channel Image");
-        if(isDirty) {         //if the client window has been drawn on, erase it
-            isDirty = false;
-            repaint();
-        }
-
-        closeAllChildren();
-        String aFileName;
-        // TODO: Replace with JFileChooser
-        // CFileDialog dlg = new CFileDialog(true, "bmp", "*.bmp");
-        JFileChooser dlg = new JFileChooser();
-        dlg.setFileSelectionMode(JFileChooser.FILES_ONLY);
-        int showDlgResult = dlg.showDialog(this, "Select bmp file");
-
-        int aStatus, imHeight, imWidth, bitsPerPixel;
-        String centeredName;
-        MemImage alphaImage, inImage;
-
-        if (showDlgResult == JFileChooser.APPROVE_OPTION) {
-            aFileName = dlg.getSelectedFile().getName();
-
-            // Center the input image by removing any chromacolor border 
-            Globals.constructPathName(centeredName, aFileName, 'q');
-            if(centeredName.equals(aFileName)) {
-                Globals.beep(10, 10);
-                Globals.statusPrint("OnToolsCreateAlphaImage: Centered image name cannot equal original image name");
-                return;
-            }
-
-            aStatus = Globals.readBMPHeader(aFileName, imHeight, imWidth, bitsPerPixel);
-            if(bitsPerPixel == 8) {
-                inImage = new MemImage(aFileName, 0, 0, RANDOM, 'R', MONOCHROME);
-            }
-            if(bitsPerPixel == 24) {
-                inImage = new MemImage(aFileName, 0, 0, RANDOM, 'R', RGBCOLOR);
-            }
-
-            //
-            // Create an alpha image
-            //
-            String alphaName;
-            Globals.constructPathName(alphaName, aFileName, 'a');
-            if(alphaName.equals(aFileName)) {
-                Globals.beep(10, 10);
-                Globals.statusPrint("OnToolsCreateAlphaImage: Alpha image name cannot equal original image name");
-                return;
-            }
-            
-            if(inImage.isValid()) {
-                alphaImage = new MemImage(inImage.getHeight(), inImage.getWidth());
-                inImage.createAlphaImage(alphaImage);
-                Globals.statusPrint("Smoothing the Mask Image");
-                alphaImage.alphaSmooth5();
-
-                Shape3d aShape = new Shape3d(8192);
-                if(!aShape.isValid()) {
-                    Globals.statusPrint("Unable to create new shape");
-                    return;
-                }
-
-                String shapeDir, shapeFile, shapeName;
-                shapeFile = aFileName;
-                strncpy(shapeFile + shapeFile.length() - 4, ".shp", 4);
-
-                //  Generate a shape file from the binary image
-                //
-                int aStatus = Globals.shapeFromImage(alphaImage, aShape);
-
-                if(aStatus == 0) {
-                    aShape.writeShape(shapeFile);
-                    msgText = "Saved a shape file: " + shapeFile + "  numVertices: " + aShape.getNumVertices();
-                    Globals.statusPrint(msgText);
-                }
-
-                Globals.constructPathName(alphaName, aFileName, 'a');
-                if(alphaName.equals(aFileName)) {
-                    Globals.statusPrint("Alpha Image Name cannot equal the original file name");
-                    return;
-                }
-
-                alphaImage.writeBMP(alphaName);
-                msgText = "Saved an alpha image: " + alphaName;
-                Globals.statusPrint(msgText);
-            }
-        }
-    }
-
-    public void OnToolsCreateascenelist() {
+    // Called when the user selects the "Create a Scene List..." menu item from the Tools menu.
+    // MENUITEM "Create a Scene List...",      ID_TOOLS_CREATEASCENELIST
+    // ON_COMMAND(ID_TOOLS_CREATEASCENELIST, OnToolsCreateascenelist)
+    public void onToolsCreateASceneList() {
         String aFileName;
         String msgText;
         int myStatus;
         
         closeAllChildren();
-        if(isDirty) {         //if the client window has been drawn on, erase it
+        if(isDirty) {         // If the client window has been drawn on, erase it
             isDirty = false;
             repaint();
         }
@@ -804,7 +632,7 @@ POPUP "Tools"
             Globals.statusPrint("Clearing Previous Scene List...");
             mySceneList.clear();
         }
-        //
+
         // Display standard Open dialog box to select a file name.
         // First, change to the default scene file directory (indicated in the ICT preference object)
         _chdir(Globals.ictPreference.getPath(Preference.SceneFileDirectory)); 
@@ -838,34 +666,155 @@ POPUP "Tools"
         getViewMatrix(viewMatrix);
 
         if(this.effectType == SEQUENCE || this.effectType == MORPH) {
-            previewSequenceEnabled = true;
-            previewSceneEnabled    = false;
-            renderSceneEnabled     = false;
-            renderSequenceEnabled  = false;
+            this.previewSequenceEnabled = true;
+            this.previewSceneEnabled    = false;
+            this.renderSceneEnabled     = false;
+            this.renderSequenceEnabled  = false;
         } else {
-            previewSceneEnabled    = true;
-            previewSequenceEnabled = false;
-            renderSceneEnabled     = false;
-            renderSequenceEnabled  = false;
+            this.previewSceneEnabled    = true;
+            this.previewSequenceEnabled = false;
+            this.renderSceneEnabled     = false;
+            this.renderSequenceEnabled  = false;
         }
-    }
+    } // onToolsCreateASceneList
 
-    public void OnToolsCreatecutout() {
+
+    // Called when the user selects the "Create Texture Image..." menu item from the Tools menu.
+    // MENUITEM "Create Texture Image...",     ID_TOOLS_CREATETEXTUREIMAGE
+    // ON_COMMAND(ID_TOOLS_CREATETEXTUREIMAGE, OnToolsCreatetextureimage)
+    public void onToolsCreateTextureImage() {
+        MakeTextureDlg dlg = new MakeTextureDlg(this, true);
+        dlg.setVisible(true);	
+    } // onToolsCreateTextureImage
+
+
+    // Called when the user selects the "Crease a Mesh Model..." menu item from the Tools menu.
+    // MENUITEM "Create a Mesh Model...",      ID_TOOLS_CREATEMESH
+    // ON_COMMAND(ID_TOOLS_CREATEMESH, OnToolsCreatemesh)
+    public void onToolsCreateMesh() { 
+        // Quad mesh model creation occurs in the dialog box
+        // member functions.
+        QuadMeshDlg dlg = new QuadMeshDlg(this, true);
+        dlg.setVisible(true);
+        // dlg.DoModal();	
+    } // onToolsCreateMesh
+
+
+    // Called when the user selects the "Create Cutout" menu item from the Tools menu.
+    // MENUITEM "Create Cutout",               ID_TOOLS_CREATECUTOUT
+    // ON_COMMAND(ID_TOOLS_CREATECUTOUT, OnToolsCreatecutout)
+    public void onToolsCreateCutout() {
         closeAllChildren();
-        if(isDirty) {         //if the client window has been drawn on, erase it
+        if(isDirty) {         // If the client window has been drawn on, erase it
             isDirty = false;
             repaint();
         }
         
         cutoutEnabled = !cutoutEnabled;
-    }
+    } // onToolsCreateCutout
 
-    public void OnToolsMorphSequence() {
-        MorphDlg dlg = new MorphDlg(this, true);
-        dlg.setVisible(true);
-    }
 
-    public void OnToolsWarpimage() {
+    // ON_UPDATE_COMMAND_UI(ID_TOOLS_CREATECUTOUT, OnUpdateToolsCreatecutout)
+    public void onUpdateToolsCreateCutout(CCmdUI pCmdUI) {
+        pCmdUI.SetCheck(cutoutEnabled); 
+    } // onUpdateToolsCreateCutout
+
+
+    // Called when the user selects the "Create Alpha Image..." menu item from the Tools menu.
+    // MENUITEM "Create Alpha Image...",       ID_TOOLS_CREATEALPHAIMAGE
+    // ON_COMMAND(ID_TOOLS_CREATEALPHAIMAGE, OnToolsCreatealphaimage)
+    public void onToolsCreateAlphaImage() {
+        String msgText;
+
+        Globals.statusPrint("Creating an Alpha-Channel Image");
+        if(isDirty) {         // If the client window has been drawn on, erase it
+            isDirty = false;
+            repaint();
+        }
+
+        closeAllChildren();
+        String aFileName;
+        // TODO: Replace with JFileChooser
+        // CFileDialog dlg = new CFileDialog(true, "bmp", "*.bmp");
+        JFileChooser dlg = new JFileChooser();
+        dlg.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        int showDlgResult = dlg.showDialog(this, "Select bmp file");
+
+        int aStatus, imHeight, imWidth, bitsPerPixel;
+        String centeredName;
+        MemImage alphaImage, inImage;
+
+        if (showDlgResult == JFileChooser.APPROVE_OPTION) {
+            aFileName = dlg.getSelectedFile().getName();
+
+            // Center the input image by removing any chromacolor border 
+            Globals.constructPathName(centeredName, aFileName, 'q');
+            if(centeredName.equals(aFileName)) {
+                Globals.beep(10, 10);
+                Globals.statusPrint("onToolsCreateAlphaImage: Centered image name cannot equal original image name");
+                return;
+            }
+
+            aStatus = Globals.readBMPHeader(aFileName, imHeight, imWidth, bitsPerPixel);
+            if(bitsPerPixel == 8) {
+                inImage = new MemImage(aFileName, 0, 0, RANDOM, 'R', MONOCHROME);
+            }
+            if(bitsPerPixel == 24) {
+                inImage = new MemImage(aFileName, 0, 0, RANDOM, 'R', RGBCOLOR);
+            }
+
+            // Create an alpha image
+            String alphaName;
+            Globals.constructPathName(alphaName, aFileName, 'a');
+            if(alphaName.equals(aFileName)) {
+                Globals.beep(10, 10);
+                Globals.statusPrint("onToolsCreateAlphaImage: Alpha image name cannot equal original image name");
+                return;
+            }
+            
+            if(inImage.isValid()) {
+                alphaImage = new MemImage(inImage.getHeight(), inImage.getWidth());
+                inImage.createAlphaImage(alphaImage);
+                Globals.statusPrint("Smoothing the Mask Image");
+                alphaImage.alphaSmooth5();
+
+                Shape3d aShape = new Shape3d(8192);
+                if(!aShape.isValid()) {
+                    Globals.statusPrint("Unable to create new shape");
+                    return;
+                }
+
+                String shapeDir, shapeFile, shapeName;
+                shapeFile = aFileName;
+                strncpy(shapeFile + shapeFile.length() - 4, ".shp", 4);
+
+                // Generate a shape file from the binary image
+                int aStatus = Globals.shapeFromImage(alphaImage, aShape);
+
+                if(aStatus == 0) {
+                    aShape.writeShape(shapeFile);
+                    msgText = "Saved a shape file: " + shapeFile + "  numVertices: " + aShape.getNumVertices();
+                    Globals.statusPrint(msgText);
+                }
+
+                Globals.constructPathName(alphaName, aFileName, 'a');
+                if(alphaName.equals(aFileName)) {
+                    Globals.statusPrint("Alpha Image Name cannot equal the original file name");
+                    return;
+                }
+
+                alphaImage.writeBMP(alphaName);
+                msgText = "Saved an alpha image: " + alphaName;
+                Globals.statusPrint(msgText);
+            }
+        }
+    } // onToolsCreateAlphaImage
+
+
+    // Called when the user selects the "Warp Image..." menu item from the Tools menu.
+    // MENUITEM "Warp Image...",               ID_TOOLS_WARPIMAGE
+    // ON_COMMAND(ID_TOOLS_WARPIMAGE, OnToolsWarpimage)
+    public void onToolsWarpImage() {
         WarpParamDlg dlg = new WarpParamDlg(this, true);
         dlg.setVisible(true);
 
@@ -874,17 +823,16 @@ POPUP "Tools"
             return;
         }
 
-        warpRotateX = Float.parseFloat(dlg.m_rx);
-        warpRotateY = Float.parseFloat(dlg.m_ry);
-        warpRotateZ = Float.parseFloat(dlg.m_rz);
-        warpScaleX  = Float.parseFloat(dlg.m_sx);
-        warpScaleY  = Float.parseFloat(dlg.m_sy);
+        this.warpRotateX = Float.parseFloat(dlg.m_rx);
+        this.warpRotateY = Float.parseFloat(dlg.m_ry);
+        this.warpRotateZ = Float.parseFloat(dlg.m_rz);
+        this.warpScaleX  = Float.parseFloat(dlg.m_sx);
+        this.warpScaleY  = Float.parseFloat(dlg.m_sy);
 
         ImageView orgView, outView;
         closeAllChildren();
         
-        //
-        //  Setup Output Image
+        // Setup Output Image
         IctApp pApp = AfxGetApp();
         pApp.m_pDocTemplateImage.OpenDocumentFile(null);
         outView = ImageView.getView();
@@ -903,7 +851,7 @@ POPUP "Tools"
         }
 
         int outHeight = 350;
-        int outWidth = 350;
+        int outWidth  = 350;
         if(!inImage.isValid()) {
             Globals.statusPrint("Unable to open warp test image");
             return;
@@ -913,12 +861,12 @@ POPUP "Tools"
 
         MDITile(MDITILE_VERTICAL);
 
-        MemImage outImage = new MemImage(outHeight, outWidth, bitsPerPixel);
+        MemImage outImage   = new MemImage(outHeight, outWidth, bitsPerPixel);
         MemImage aliasImage = new MemImage(outHeight, outWidth, bitsPerPixel);
         int xOffset, yOffset;
         TMatrix dummyMatrix = new TMatrix();
 
-        // translate test image to center of output image
+        // Translate test image to center of output image
         float xAngle = 0.0f, yAngle = 0.0f, zAngle = 0.0f;
 
         Globals.iwarpz(inImage, outImage, null, 
@@ -940,62 +888,90 @@ POPUP "Tools"
         xAngle += warpRotateX;
         yAngle += warpRotateY;
         zAngle += warpRotateZ;
-    }
+    } // onToolsWarpImage
 
 
-    public void getViewMatrix(TMatrix viewMatrix) {
-        viewMatrix.setIdentity();
-        float xRadians = viewRotateX * F_DTR;
-        float yRadians = viewRotateY * F_DTR;
-        float zRadians = viewRotateZ * F_DTR;
-        viewMatrix.rotate(-xRadians, -yRadians, -zRadians);
-        viewMatrix.translate(-viewTranslateX, -viewTranslateY, -viewTranslateZ);
-    }
-
-    public void closeAllChildren() {
-        CMDIChildWnd activeChildWindow = MDIGetActive(); // returns NULL if no child exists
-        while(activeChildWindow != null) {
-            activeChildWindow.SendMessage(WM_CLOSE);
-            activeChildWindow = MDIGetActive();
-        } 
-    }
-
-    public void OnUpdateToolsCreatecutout(CCmdUI pCmdUI) {
-        pCmdUI.SetCheck(cutoutEnabled); 
-    }
-
-    public void OnUpdatePreviewScene(CCmdUI pCmdUI) {
-        pCmdUI.Enable(previewSceneEnabled);
-    }
-
-    public void OnUpdatePreviewSequence(CCmdUI pCmdUI) {
-        pCmdUI.Enable(previewSequenceEnabled);
-    }
-
-    public void OnUpdateRenderScene(CCmdUI pCmdUI) {
-        pCmdUI.Enable(renderSceneEnabled);
-    }
-
-    public void OnUpdateRenderSequence(CCmdUI pCmdUI) {
-        pCmdUI.Enable(renderSequenceEnabled);
-    }
-
-    public void OnUpdateRenderDepthsorting(CCmdUI pCmdUI) {
-        pCmdUI.SetCheck(depthSortingEnabled); 
-    }
+    // Called when the user selects the "Sample Image" menu item from the Tools menu.
+    // MENUITEM "Sample Image",                ID_TOOLS_SAMPLEIMAGE
+    // ON_COMMAND(ID_TOOLS_SAMPLEIMAGE, OnToolsSampleimage)
+    public void onToolsSampleImage() {
+        imageSamplingEnabled = !imageSamplingEnabled;		
+        cutoutEnabled = false;
+    } // onToolsSampleImage
 
 
-    public boolean OnEraseBkgnd(CDC pDC) {
-        return CMDIFrameWnd.OnEraseBkgnd(pDC);
-    }
+    // ON_UPDATE_COMMAND_UI(ID_TOOLS_SAMPLEIMAGE, OnUpdateToolsSampleimage)
+    public void onUpdateToolsSampleImage(CCmdUI pCmdUI) {
+        pCmdUI.SetCheck(imageSamplingEnabled); 
+    } // onUpdateToolsSampleImage
 
-    public void OnToolsTest() {
-        String msgText;
+
+    // Called when the user selects the "Remove Sampled Colors" menu item from the Tools menu.
+    // MENUITEM "Remove Sampled Colors",       ID_TOOLS_REMOVESAMPLEDCOLORS
+    // ON_COMMAND(ID_TOOLS_REMOVESAMPLEDCOLORS, OnToolsRemoveSampleColors)
+    public void onToolsRemoveSampleColors() {
+        removeSampleColorsEnabled = !removeSampleColorsEnabled;
+    } // onToolsRemoveSampleColors
+
+
+    // ON_UPDATE_COMMAND_UI(ID_TOOLS_REMOVESAMPLEDCOLORS, OnUpdateToolsRemoveSampleColors)
+    public void onUpdateToolsRemoveSampleColors(CCmdUI pCmdUI) {
+        pCmdUI.SetCheck(removeSampleColorsEnabled); 
+    } // onUpdateToolsRemoveSampleColors
+
+
+    // Called when the user selects the "Motion Blur..." menu item from the Tools menu.
+    // MENUITEM "Motion Blur...",              ID_TOOLS_MOTIONBLUR
+    // ON_COMMAND(ID_TOOLS_MOTIONBLUR, OnToolsMotionblur)
+    public void onToolsMotionBlur() {
+        MotionBlurDlg dlg = new MotionBlurDlg(this, true);
+        dlg.setVisible(true);
+    } // onToolsMotionBlur
+
+
+    // Called when the user selects the "Create a Morph Sequence..." menu item from the Tools menu.
+    // MENUITEM "Create a Morph Sequence...",  ID_TOOLS_MORPHSEQUENCE
+    // ON_COMMAND(ID_TOOLS_MORPHSEQUENCE, OnToolsMorphSequence)
+    public void onToolsMorphSequence() {
+        MorphDlg dlg = new MorphDlg(this, true);
+        dlg.setVisible(true);
+    } // onToolsMorphSequence
+
+
+    // Called when the user selects the "Render VRML File..." menu item from the Tools menu.
+    // MENUITEM "Render VRML File...",         ID_TOOLS_RENDERVRMLFILE
+    // ON_COMMAND(ID_TOOLS_RENDERVRMLFILE, OnToolsRenderVrmlFile)
+    public void onToolsRenderVrmlFile() {
+        String inPath, outPath;
+        _chdir(Globals.ictPreference.getPath(Preference.VRMLDirectory)); 
+
+        // TODO: Replace with JFileChooser, maybe add FileFilter
+        // CFileDialog dlg = new CFileDialog(TRUE, "wrl", "*.wrl");
+        JFileChooser dlg = new JFileChooser();
+        dlg.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        int showDlgResult = dlg.showDialog(this, "Select WRL file");
+
+        if (showDlgResult == JFileChooser.APPROVE_OPTION) {
+            inPath = dlg.getSelectedFile().getName();
+            String msgText = "Reading VRML file: " + inPath;
+            Globals.statusPrint(msgText);
+
+            outPath = "D:\\ict20\\output\\vrmlImage.bmp";
+            VRML.renderVRML(inPath, outPath);
+        }
+    } // onToolsRenderVrmlFile
+
+
+    // Called when the user selects the "Test" menu item from the Tools menu.
+    // MENUITEM "Test",                        ID_TOOLS_TEST
+    // ON_COMMAND(ID_TOOLS_TEST, OnToolsTest)
+    public void onToolsTest() {
+        String msgText = "";
         Globals.aGraphicPipe.initialize();
         Globals.aGraphicPipe.setZBuffer(true);
         Globals.aGraphicPipe.setLighting(true);
 
-        Point3d aLight;
+        Point3d aLight = new Point3d();
         aLight.x =    0.0f;
         aLight.y =    0.0f;
         aLight.z = -100.0f;
@@ -1007,7 +983,7 @@ POPUP "Tools"
         int translationIncrement = 500 / numImages;
         translationX = -230;
         translationY = -230;
-        Globals.aGraphicPipe.setPenTranslation((float)translationX, (float)translationY, 0.0);
+        Globals.aGraphicPipe.setPenTranslation((float)translationX, (float)translationY, 0.0f);
 
         Point3d p1 = new Point3d();
         Point3d p2 = new Point3d(); 
@@ -1036,11 +1012,11 @@ POPUP "Tools"
                     "  rx: " + x + "  ry: " + y;
                 Globals.statusPrint(msgText);
                 Globals.aGraphicPipe.addFace(p1, p2, p3, p4);
-                Globals.aGraphicPipe.setPenTranslation((float)translationIncrement, 0.0, 0.0);
+                Globals.aGraphicPipe.setPenTranslation((float)translationIncrement, 0.0f, 0.0f);
                 Globals.aGraphicPipe.setPenXRotation(angleIncrement); 
             } // for x
 
-            Globals.aGraphicPipe.setPenTranslation(-500.0f, translationIncrement, 0.0);
+            Globals.aGraphicPipe.setPenTranslation(-500.0f, (float)translationIncrement, 0.0f);
             Globals.aGraphicPipe.setPenYRotation(angleIncrement); 
             Globals.aGraphicPipe.setPenXRotation(-360.0f * F_DTR); 
         } // for y
@@ -1048,93 +1024,251 @@ POPUP "Tools"
         Globals.aGraphicPipe.saveZBuffer("d:\\ict20\\output\\gPipeZBuffer8.bmp");
         Globals.aGraphicPipe.saveOutputImage("d:\\ict20\\output\\VRMLImage.bmp");
         Globals.statusPrint(msgText);
-    }
+    } // onToolsTest
 
-    public void OnRenderZbuffer() {
-        zBufferEnabled = !zBufferEnabled;	
-    }
 
-    public void OnUpdateRenderZbuffer(CCmdUI pCmdUI) {
-        pCmdUI.SetCheck(zBufferEnabled); 
-    }
+    // ############################################################################################
+    // Event handlers for Preview menu
 
-    public void OnUpdateToolsSampleimage(CCmdUI pCmdUI) {
-        pCmdUI.SetCheck(imageSamplingEnabled); 
-    }
-
-    public void OnToolsSampleimage() {
-        imageSamplingEnabled = !imageSamplingEnabled;		
-        cutoutEnabled = false;
-    }
-
-    public void OnToolsRemoveSampleColors() {
-        removeSampleColorsEnabled = !removeSampleColorsEnabled;
-    }
-
-    public void OnUpdateToolsRemoveSampleColors(CCmdUI pCmdUI) {
-        pCmdUI.SetCheck(removeSampleColorsEnabled); 
-    }
-
-    public void OnUpdateRenderHazefog(CCmdUI pCmdUI) {
-        pCmdUI.SetCheck(hazeFogEnabled); 
-    }
-
-    public void OnUpdateRenderAntialias(CCmdUI pCmdUI) {
-        pCmdUI.SetCheck(antiAliasEnabled); 
-    }
-
-    public void onToolsCreateMesh() { 
-        // Quad mesh model creation occurs in the dialog box
-        // member functions.
-        QuadMeshDlg dlg = new QuadMeshDlg(this, true);
-        dlg.setVisible(true);
-        // dlg.DoModal();	
-    }
-
-    public void onToolsCreateTextureImage() {
-        MakeTextureDlg dlg = new MakeTextureDlg(this, true);
-        dlg.setVisible(true);	
-    }
-
-    public void OnToolsMotionblur() {
-        MotionBlurDlg dlg = new MotionBlurDlg(this, true);
-        dlg.setVisible(true);
-
-        // Don't think we need the following if statement.
-        if(dlg.DoModal() != IDOK) {
-            return;
+    // Called when the user selects the "Still" menu item from the Preview menu
+    // MENUITEM "Still",                       ID_PREVIEW_SCENE, GRAYED
+    // ON_COMMAND(ID_PREVIEW_SCENE, OnPreviewScene)
+    public void onPreviewStillScene() {
+        closeAllChildren();
+        if(isDirty) {         //if the client window has been drawn on, erase it
+            isDirty = false;
+            repaint();
         }
-    }
+        previewingScene = true;
 
-    public void OnRenderHazefog() {
+        // Create an imageWindow object to draw into
+        IctApp pApp = AfxGetApp();
+        ImageView preView = new ImageView();
+        pApp.m_pDocTemplateImage.OpenDocumentFile(null);
+        preView = ImageView.getView();
+        preView.setCaption("Scene Preview");
+        previewWindowHandle = preView; //save the imageView window so scene preview dialog can use it
+        MDITile(MDITILE_VERTICAL);	 //This maximizes the imageWindow
+
+        ScenePreviewDlg dlg = new ScenePreviewDlg(this, true);
+        dlg.setVisible(true);
+
+        renderSceneEnabled = true;
+        previewingScene = false;
+        isDirty = true;
+        closeAllChildren();
+    } // onPreviewStillScene
+
+
+    // ON_UPDATE_COMMAND_UI(ID_PREVIEW_SCENE, OnUpdatePreviewScene)
+    public void onUpdatePreviewStillScene(CCmdUI pCmdUI) {
+        pCmdUI.Enable(previewSceneEnabled);
+    } // onUpdatePreviewStillScene
+
+
+    // Called when the user selects the "Sequence" menu item from the Preview menu
+    // MENUITEM "Sequence",                    ID_PREVIEW_SEQUENCE, GRAYED
+    // ON_COMMAND(ID_PREVIEW_SEQUENCE, OnPreviewSequence)
+    public void onPreviewSequenceScene() {
+        closeAllChildren();
+        if(isDirty) { // If the client window has been drawn on, erase it
+            isDirty = false;
+            repaint();
+        }
+        previewingSequence = true;
+
+        // Create an imageWindow object to draw into
+        IctApp pApp = AfxGetApp();
+        ImageView preView = new ImageView();
+        pApp.m_pDocTemplateImage.OpenDocumentFile(null);
+        preView = ImageView.getView();
+        preView.setCaption("Sequence Preview");
+        previewWindowHandle = preView; // Save the imageView window so scene preview dialog can use it
+        MDITile(MDITILE_VERTICAL);	   // This maximizes the imageWindow
+
+        ScenePreviewDlg dlg = new ScenePreviewDlg(this, true);
+        dlg.setVisible(true);
+
+        renderSequenceEnabled = true;
+        previewingSequence = false;
+        isDirty = true;
+        closeAllChildren();
+    } // onPreviewSequenceScene
+
+
+    // ON_UPDATE_COMMAND_UI(ID_PREVIEW_SEQUENCE, OnUpdatePreviewSequence)
+    public void onUpdatePreviewSequence(CCmdUI pCmdUI) {
+        pCmdUI.Enable(previewSequenceEnabled);
+    } // onUpdatePreviewSequence
+
+
+    // Called from:
+    //     onPreviewStillScene
+    //     onPreviewSequenceScene
+    public void closeAllChildren() {
+        CMDIChildWnd activeChildWindow = MDIGetActive(); // returns NULL if no child exists
+        while(activeChildWindow != null) {
+            activeChildWindow.SendMessage(WM_CLOSE);
+            activeChildWindow = MDIGetActive();
+        } 
+    } // closeAllChildren
+
+
+    // ############################################################################################
+    // Event handlers for Render menu
+
+    // Called when the user selects the "Still" menu item from the Render menu
+    // MENUITEM "Still",                       ID_RENDER_SCENE, GRAYED
+    // ON_COMMAND(ID_RENDER_SCENE, OnRenderScene)
+    public void onRenderStillScene() {
+        closeAllChildren();
+        if(isDirty) {         //if the client window has been drawn on, erase it
+            isDirty = false;
+            repaint();
+        }
+
+        // Create an imageWindow object to draw into
+        IctApp pApp = AfxGetApp();
+        ImageView renderView;
+        pApp.m_pDocTemplateImage.OpenDocumentFile(null);
+        renderView = ImageView.getView();
+        renderView.setCaption("Scene Render");
+        previewWindowHandle = renderView; //save the imageView window so scene preview dialog can use it
+        MDITile(MDITILE_VERTICAL);	 //This maximizes the imageWindow
+
+        getViewMatrix(viewMatrix);
+        mySceneList.render(renderView, viewMatrix, depthSortingEnabled, zBufferEnabled, 
+            antiAliasEnabled, hazeFogEnabled);
+        renderSceneEnabled = false;
+
+        isDirty = true;	
+    } // onRenderStillScene
+
+
+    // ON_UPDATE_COMMAND_UI(ID_RENDER_SCENE, OnUpdateRenderScene)
+    public void onUpdateRenderStillScene(CCmdUI pCmdUI) {
+        pCmdUI.Enable(renderSceneEnabled);
+    } // onUpdateRenderStillScene
+
+
+    // Called when the user selects the "Sequence" menu item from the Render menu
+    // MENUITEM "Sequence",                    ID_RENDER_SEQUENCE, GRAYED
+    // ON_COMMAND(ID_RENDER_SEQUENCE, OnRenderSequence)
+    public void onRenderSequence() {
+        closeAllChildren();
+        if(isDirty) {         //if the client window has been drawn on, erase it
+            isDirty = false;
+            repaint();
+        }
+
+        IctApp pApp = AfxGetApp();
+        ImageView renderView;
+        pApp.m_pDocTemplateImage.OpenDocumentFile(null);
+        renderView = ImageView.getView();
+        renderView.setCaption("Sequence Render");
+        previewWindowHandle = renderView; // Save the imageView window so 
+                                        // the scene preview dialog can use it
+        MDITile(MDITILE_VERTICAL);	      //Maximize the imageWindow
+
+        getViewMatrix(viewMatrix);
+        mySceneList.render(renderView, viewMatrix, depthSortingEnabled, 
+            zBufferEnabled, antiAliasEnabled, hazeFogEnabled);
+        renderSequenceEnabled = false;
+        isDirty = true;
+    } // onRenderSequence
+
+
+    // ON_UPDATE_COMMAND_UI(ID_RENDER_SEQUENCE, OnUpdateRenderSequence)
+    public void onUpdateRenderSequence(CCmdUI pCmdUI) {
+        pCmdUI.Enable(renderSequenceEnabled);
+    } // onUpdateRenderSequence
+
+
+    // Called when the user selects the "Z Buffer" menu item from the Render menu
+    // MENUITEM "Z Buffer",                    ID_RENDER_ZBUFFER, CHECKED
+    // ON_COMMAND(ID_RENDER_ZBUFFER, OnRenderZbuffer)
+    public void onRenderZBuffer() {
+        zBufferEnabled = !zBufferEnabled;	
+    } // onRenderZBuffer
+
+
+    // ON_UPDATE_COMMAND_UI(ID_RENDER_ZBUFFER, OnUpdateRenderZbuffer)
+    public void onUpdateRenderZBuffer(CCmdUI pCmdUI) {
+        pCmdUI.SetCheck(zBufferEnabled); 
+    } // onUpdateRenderZBuffer
+
+
+    // Called when the user selects the "Depth Sorting" menu item from the Render menu
+    // MENUITEM "Depth Sorting",               ID_RENDER_DEPTHSORTING
+    // ON_COMMAND(ID_RENDER_DEPTHSORTING, OnRenderDepthsorting)
+    public void onRenderDepthSorting() {
+        this.depthSortingEnabled = !this.depthSortingEnabled;
+    } // onRenderDepthSorting
+
+
+    // ON_UPDATE_COMMAND_UI(ID_RENDER_DEPTHSORTING, OnUpdateRenderDepthsorting)
+    public void onUpdateRenderDepthSorting(CCmdUI pCmdUI) {
+        pCmdUI.SetCheck(depthSortingEnabled); 
+    } // onUpdateRenderDepthSorting
+
+
+    // ON_UPDATE_COMMAND_UI(ID_RENDER_HAZEFOG, OnUpdateRenderHazefog)
+    public void onUpdateRenderHazeFog(CCmdUI pCmdUI) {
+        // Field hazeFogEnabled is passed as a parameter to method 
+        // SceneList.render in methods onRenderScene and onRenderSequence
+        pCmdUI.SetCheck(hazeFogEnabled); 
+    } // onUpdateRenderHazeFog
+
+
+    // ON_COMMAND(ID_RENDER_HAZEFOG, OnRenderHazefog)
+    public void onRenderHazeFog() {
         if(zBufferEnabled) {
+            // Field hazeFogEnabled is passed as a parameter to method 
+            // SceneList.render in methods onRenderScene and onRenderSequence
             hazeFogEnabled = !hazeFogEnabled;
         } else {
             Globals.statusPrint("mainfrm: Haze can only be used if the Z-Buffer is enabled");
         }
-    }
+    } // onRenderHazeFog
 
-    public void OnRenderAntialias() {
+
+    // Called when the user selects the "Anti-Alias" menu item from the Render menu
+    // MENUITEM "Anti-Alias",                  ID_RENDER_ANTIALIAS
+    // ON_COMMAND(ID_RENDER_ANTIALIAS, OnRenderAntialias)
+    public void onRenderAntiAlias() {
         antiAliasEnabled = !antiAliasEnabled;
-    }
+    } // onRenderAntiAlias
 
-    public void OnToolsRenderVrmlFile() {
-        String inPath, outPath;
-        _chdir(Globals.ictPreference.getPath(Preference.VRMLDirectory)); 
 
-        // TODO: Replace with JFileChooser, maybe add FileFilter
-        // CFileDialog dlg = new CFileDialog(TRUE, "wrl", "*.wrl");
-        JFileChooser dlg = new JFileChooser();
-        dlg.setFileSelectionMode(JFileChooser.FILES_ONLY);
-        int showDlgResult = dlg.showDialog(this, "Select WRL file");
+    // ON_UPDATE_COMMAND_UI(ID_RENDER_ANTIALIAS, OnUpdateRenderAntialias)
+    public void onUpdateRenderAntiAlias(CCmdUI pCmdUI) {
+        pCmdUI.SetCheck(antiAliasEnabled); 
+    } // onUpdateRenderAntiAlias
 
-        if (showDlgResult == JFileChooser.APPROVE_OPTION) {
-            inPath = dlg.getSelectedFile().getName();
-            String msgText = "Reading VRML file: " + inPath;
-            Globals.statusPrint(msgText);
 
-            outPath = "D:\\ict20\\output\\vrmlImage.bmp";
-            VRML.renderVRML(inPath, outPath);
-        }
-    }
+    // ############################################################################################
+    // Event handlers for View menu
+
+
+    // ############################################################################################
+    // Miscellaneous methods
+
+    // Called from:
+    //     onRenderScene
+    //     onRenderSequence
+    //     onToolsCreateASceneList
+    public void getViewMatrix(TMatrix viewMatrix) {
+        viewMatrix.setIdentity();
+        float xRadians = this.viewRotateX * F_DTR;
+        float yRadians = this.viewRotateY * F_DTR;
+        float zRadians = this.viewRotateZ * F_DTR;
+
+        viewMatrix.rotate(-xRadians, -yRadians, -zRadians);
+        viewMatrix.translate(-viewTranslateX, -viewTranslateY, -viewTranslateZ);
+    } // getViewMatrix
+
+    // ON_WM_ERASEBKGND()
+    public boolean onEraseBkgnd(CDC pDC) {
+        return CMDIFrameWnd.OnEraseBkgnd(pDC);
+    } // onEraseBkgnd
 } // class MainFrame
