@@ -10,7 +10,7 @@ So far my strategy has been:
 -   Convert subclasses of CDialog to subclasses of JDialog.
 -   Converted subclasses of CFrame to subclasses of JFrame.
 -   Converted uses of CFile to JFileChooser.
--   Conveted uses of MessageBox to JOptionPane.
+-   Converted uses of MessageBox to JOptionPane.
 -   Converted uses of mathematical functions (mostly cos, sin, sqrt and abs) to usage of the Math class in Java.
 
 My strategy for handling data types has been:
@@ -31,6 +31,10 @@ In subclasses of CDialog:
 -   instances of CEdit became instances of JTextField
 -   instances of CBUTTON became instances of JButton
 -   instances of CCOMBOBOX became instances of JComboBox
+
+*   instances of CTEXT became instances of JLabel
+
+The menu for ICT was defined in ICT20.RC. Of course, to implement the menu in Java I used the JMenuBar, JMenu and JMenuItem classes.
 
 ## Handling parameters to methods
 
