@@ -1,28 +1,30 @@
 package globals;
 
+import java.io.File;
+
 public class VRML {
     public static int readVRML(String pathName) {
-        QvDB::init();
+        QvDB.init();
     
         QvInput	in;
         QvNode	root;
         // Reassign "stderr" 
-        FILE *aStream;
+        File aStream;
             
-        aStream = freopen( ictPreference.getPath(VRMLLog), "w", stderr );
+        aStream = freopen( Globals.ictPreference.getPath(Preference.VRMLLog), "w", stderr );
     
-       if( aStream == NULL ) {
-          statusPrint("error on freopen\n");
+       if(aStream == null) {
+            Globals.statusPrint("error on freopen\n");
        }
     
-        FILE *newFP = fopen(pathName, "r");
+        File newFP = fopen(pathName, "r");
         if (!newFP) {
-            statusPrint("VRML file not found");
+            Globals.statusPrint("VRML file not found");
             return -1;
         }
         in.setFilePointer(newFP);
     
-        if (QvDB::read(in, root) && root != NULL) {
+        if (QvDB.read(in, root) && (root != null)) {
             Globals.statusPrint("Read was ok\n");
             fclose(newFP);
             fclose(aStream);
@@ -38,29 +40,31 @@ public class VRML {
         return 0;
     } // readVRML
     
+
+    // Called from:
+    //     MainFrame.onToolsRenderVrmlFile
     public static int renderVRML(String inWorldPath, String outImagePath) {
-        QvDB::init();
+        QvDB.init();
     
         QvInput	in;
         QvNode	root;
      
         // Reassign "stdout" 
-        FILE *aStream;
-        aStream = freopen(ictPreference.getPath(VRMLLog), "w", stdout);
+        File aStream;
+        aStream = freopen(Globals.ictPreference.getPath(Preference.VRMLLog), "w", stdout);
     
         if(aStream == null) {
             Globals.statusPrint("error on freopen\n");
         }
     
-        FILE *newFP = fopen(inWorldPath, "r");
+        File newFP = fopen(inWorldPath, "r");
         if (newFP = null) {
-            Globls.statusPrint("VRML file not found");
+            Globals.statusPrint("VRML file not found");
             return -1;
         }
         in.setFilePointer(newFP);
     
-    
-        if (QvDB::read(in, root) && (root != NULL)) {
+        if (QvDB.read(in, root) && (root != null)) {
             Globals.statusPrint("renderVRML: VRML read was ok");
         } else {
             Globals.statusPrint("renderVRML: VRML read was bad");
@@ -75,21 +79,22 @@ public class VRML {
         root.traverse(state);
         fclose(aStream);
     
-        if(aGraphicPipe.viewPointInsideBoundingBox()) {
+        if(Globals.aGraphicPipe.viewPointInsideBoundingBox()) {
             Globals.beep(10, 10);
             Globals.statusPrint("ViewPoint is inside object bounding box.");
         } else {
             Globals.statusPrint("ViewPoint is outside object bounding box.");
         }
       
-        aGraphicPipe.saveZBuffer("d:\\ict20\\output\\gPipeZBuffer8.bmp");
+        Globals.aGraphicPipe.saveZBuffer("d:\\ict20\\output\\gPipeZBuffer8.bmp");
         String msgText = "d:\\ict20\\output\\VRMLImage.bmp";
-        aGraphicPipe.saveOutputImage(msgText);
+        Globals.aGraphicPipe.saveOutputImage(msgText);
         Globals.statusPrint(msgText);
 
-        aGraphicPipe.reset();  // reset the zBuffer and clear the output image
+        Globals.aGraphicPipe.reset();  // reset the zBuffer and clear the output image
         fclose(aStream);      // close the VRML log
         fclose(newFP);        // close the VRML File
+        
         return 0;
     } // renderVRML
 } // class VRML
