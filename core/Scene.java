@@ -69,10 +69,12 @@ public class Scene {
     // friend class sceneList;
 
 
+    // Called from:
+    //     SceneList.addScene
     public Scene(String sName, int seqType, int numOutCols, int numOutRows,
     int aColorMode, Point3d rt, Point3d tr, String sensorpth) {
         if (ictdebug) {
-            String msgBuffer = "Constructor. Size of scene: " + sizeof(Scene);
+            String msgBuffer = "Constructor. Size of scene: " + sizeLowerLimit();
             Globals.statusPrint(msgBuffer);
         }
     
@@ -116,6 +118,8 @@ public class Scene {
     } // Scene ctor
 
 
+    // Called from:
+    //     SceneList.addScene
     boolean isValid() {
         return this.valid;
     } // isValid
@@ -152,6 +156,8 @@ public class Scene {
 
 
     // This method came from SCENELST.H
+    // Called from:
+    //     SceneList.display
     void display() {
         System.out.print(toString());
     } // display
@@ -172,4 +178,39 @@ public class Scene {
 
         return thisObject;
     } // toString
+
+    public int sizeLowerLimit() {
+        int mySize = 0;
+        int booleanFieldsSizeInBits = 0;
+        int booleanFieldsSize = 0;
+        int intFieldsSize = 0;
+        int referenceFieldsSize = 0;
+
+        /*
+        boolean ictdebug = false;
+        private boolean valid;  
+        public int sequenceType;
+        public int colorMode;
+        public int outputRows;
+        public int outputColumns;
+        public String sceneName;
+        private String sensorPath;
+        public MotionPath sensorMotion;
+        public Point3d rotation;
+        public Point3d translation;
+        public SceneElement tail;
+        public SceneElement head;
+        public SceneElement currentSceneElement; 
+        public Scene prevEntry;
+        public Scene nextEntry;
+        */
+
+        booleanFieldsSizeInBits = 2; // 2 booleans
+        booleanFieldsSize = 1; // 2 bits fit in a byte
+        intFieldsSize = 4*4; // 4 ints
+        referenceFieldsSize = 10*4; // 10 references to objects
+        mySize = booleanFieldsSize + intFieldsSize + referenceFieldsSize;
+
+        return mySize;
+    }
 } // class Scene
