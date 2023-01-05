@@ -7,8 +7,7 @@ public class Point2d{
 
     // This method came from VECTOR.CPP
     void display(String message) {
-        String msgText;
-        sprintf(msgText,"%s x: %f  y: %f", message, x, y);
+        String msgText = message + " x: " + x + "  y: " + y;
         Globals.statusPrint(msgText);
     }
 }
