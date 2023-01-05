@@ -227,12 +227,14 @@ public class SceneElement {
         this.nextEntry = null;
         if (ictdebug) {
             String msgBuffer;
-            msgBuffer = "Constructor. Size of sceneElement: " + sizeof(SceneElement);
+            msgBuffer = "Constructor. Size of sceneElement: " + sizeLowerLimit();
             Globals.statusPrint(msgBuffer);
         }
     } // SceneElement ctor
 
 
+    // Called from:
+    //     SceneList.display
     public void display() {
         System.out.println(toString());
     } // display
@@ -257,9 +259,12 @@ public class SceneElement {
     } // toString
 
 
+    // Called from:
+    //     SceneList.addSceneElement
     public boolean isValid() {
         return this.valid;
     }  // isValid
+
 
     void fshowlist() {  // Display scene's elements traversing
         SceneElement next = this;     // the list in the forward direction.
@@ -291,8 +296,8 @@ public class SceneElement {
         }
 
         sModelTypeArray = "Image";
-        if(this.blendIndicator == false) sBlendArray = "NoBlend";
-        if(this.warpIndicator == 0) sWarpArray = "NoWarp";
+        if(!this.blendIndicator) sBlendArray = "NoBlend";
+        if(!this.warpIndicator) sWarpArray = "NoWarp";
         if(this.modelType == IMAGE) sModelTypeArray = "Image";
         if(this.modelType == SHAPE) sModelTypeArray = "Shape";
         if(this.modelType == QUADMESH) sModelTypeArray = "QuadMesh";
@@ -328,4 +333,53 @@ public class SceneElement {
             fileout << thisObjectAsString;
         }
     } // writeFile
+
+
+    // This method returns an estimate of the size of the SceneElement object
+    // It does not take into account static field values, as those would be 
+    // part of the SceneElement class, not a SceneElement object
+    public int sizeLowerLimit() {
+        int mySize = 0;
+        int booleanFieldsSizeInBits = 0;
+        int booleanFieldsSize = 0;
+        int intFieldsSize = 0;
+        int floatFieldsSize = 0;
+        int referenceFieldsSize = 0;
+
+        /*
+        public boolean ictdebug = false;
+        public boolean compoundModelMember;
+        public boolean definedRefPoint;	 
+        public boolean blendIndicator;
+        public boolean warpIndicator; 
+        private boolean valid;
+        public int modelType;
+        public int statusIndicator;
+        public float alphaScale;
+        public  String modelName;
+        private String modelMotionPath;
+        public String fileName;
+        public String colorAdjustedPath;
+        public String alphaPath;
+        public String adjustmentType;
+        private Color colorAdjustment; 
+        public MotionPath modelMotion;
+        public Point3d pointOfReference;   
+        public Point3d rotation;
+        public Point3d scale;
+        public Point3d translation;
+        public RenderObject screenObject;
+        public SceneElement prevEntry;
+        public SceneElement nextEntry;
+        */
+
+        booleanFieldsSizeInBits = 6; // 6 booleans
+        booleanFieldsSize = 1; // 6 bits fit in a byte
+        intFieldsSize = 2*4; // 2 ints
+        floatFieldsSize = 1*4; // 1 float
+        referenceFieldsSize = 15*4; // 15 references to objects
+        mySize = booleanFieldsSize + intFieldsSize + floatFieldsSize + referenceFieldsSize;
+
+        return mySize;
+    } // sizeLowerLimit
 } // class SceneElement
