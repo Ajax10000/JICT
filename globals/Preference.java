@@ -59,6 +59,8 @@ public:
       
     
     // This method came from UTILS.CPP
+    // Called from:
+    //     MainFrame.onToolsRenderVrmlFile
     public String getPath(int pathIndicator){
         switch(pathIndicator) {
         case  ProcessLog:
