@@ -4,6 +4,8 @@ import core.Shape3d;
 
 import globals.Globals;
 
+import java.text.DecimalFormat;
+
 import structs.Point2d;
 import structs.Point3d;
 
@@ -49,6 +51,9 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
   void display(char *);
 */
 
+    // Called from:
+    //     Gloals.iwarpz
+    //     MainFrame.onToolsWarpImage
     public TMatrix() {
         if (ictdebug) {
             String msgText;
@@ -58,6 +63,9 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
         setIdentity();
     } // TMatrix ctor
     
+    
+    // Called from:
+    //     Globals.iwarpz
     public TMatrix(TMatrix aMatrix) {
         if(ictdebug) {
             String msgText;
@@ -68,16 +76,24 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
     } // TMatrix ctor
     
     
+    // Called from:
+    //     Globals.iwarpz
+    //     SceneList.previewStill
     public void multiply(TMatrix matrix1, TMatrix matrix2) {
         setIdentity();
         matmult(theMatrix, matrix1.theMatrix, matrix2.theMatrix);
     } // multiply
     
+
     public void copy(TMatrix matrix) {
         setIdentity();
         matcopy(theMatrix, matrix.theMatrix);
     } // copy
     
+
+    // Called from:
+    //     SceneList.previewStill
+    //     MainFrame.getViewMatrix
     public void setIdentity() {
         theMatrix[0][0]= 1.0f; theMatrix[1][0]= 0.0f; theMatrix[2][0]= 0.0f; theMatrix[3][0]= 0.0f;
         theMatrix[0][1]= 0.0f; theMatrix[1][1]= 1.0f; theMatrix[2][1]= 0.0f; theMatrix[3][1]= 0.0f;
@@ -90,14 +106,19 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
         matcopy(scMat, theMatrix);
         matcopy(trMat, theMatrix);
     } // setIdentity
-    
+
+
     public void finalize() { // no objects were declared with new ==> nothing to free
         if (ictdebug) {
             Globals.statusPrint("TMatrix destructor");
         }
     } // finalize
-    
-    
+
+
+    // Called from:
+    //     Globals.iwarpz
+    //     SceneList.calcCompoundModelRefPoint
+    //     SceneList.previewStill
     public void scale(float sx, float sy, float sz) {
         float[][] mat = new float[4][4];
 
@@ -108,7 +129,13 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
         matmult(mat, scMat, theMatrix);
         matcopy(theMatrix, mat);
     } // scale
-    
+
+
+    // Called from:
+    //     Globals.iwarpz
+    //     SceneList.calcCompoundModelRefPoint
+    //     SceneList.previewStill
+    //     MainFrame.getViewMatrix
     public void translate(float tx, float ty, float tz) {
         float[][] mat = new float[4][4];
         
@@ -120,6 +147,12 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
         matcopy(theMatrix, mat);
     } // translate
     
+
+    // Called from:
+    //     Globals.iwarpz
+    //     SceneList.calcCompoundModelRefPoint
+    //     SceneList.peviewStill
+    //     MainFrame.getViewMatrix
     public void rotate(float rx, float ry, float rz) {
         float[][] mat1 = new float[4][4];
         float[][] mat2 = new float[4][4];
@@ -143,6 +176,7 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
         matmult(theMatrix, rzMat, mat2);
     } // rotate
     
+
     public static void matmult(float[][] result, float[][] mat1, float[][] mat2) {
         for (int i= 0; i < 4; i++) {
             for (int j= 0; j<4; j++) {
@@ -154,6 +188,7 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
         }
     } // matmult
     
+
     public static void matcopy(float[][] dest, float[][] source) {
         for (int i= 0; i<4; i++) {
             for (int j= 0; j<4; j++) {
@@ -176,6 +211,8 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
     } // transpose
     
     
+    // Called from:
+    //     Globals.iwarpz
     public void transformPoint(float xIn, float yIn, float zIn, 
     Float xOut, Float yOut, Float zOut) {
         xOut = (xIn * theMatrix[0][0]) + (yIn * theMatrix[1][0]) + (zIn * theMatrix[2][0]) + theMatrix[3][0];
@@ -183,53 +220,72 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
         zOut = (xIn * theMatrix[0][2]) + (yIn * theMatrix[1][2]) + (zIn * theMatrix[2][2]) + theMatrix[3][2];
     } // transformPoint
     
+
     public void transformPoint1(Point3d in, Point3d out) {
         out.x = (in.x * theMatrix[0][0]) + (in.y * theMatrix[1][0]) + (in.z * theMatrix[2][0]) + theMatrix[3][0];
         out.y = (in.x * theMatrix[0][1]) + (in.y * theMatrix[1][1]) + (in.z * theMatrix[2][1]) + theMatrix[3][1];
         out.z = (in.x * theMatrix[0][2]) + (in.y * theMatrix[1][2]) + (in.z * theMatrix[2][2]) + theMatrix[3][2];
     } // transformPoint1
     
+
+    // Called from:
+    //     Globals.iwarpz
     public void display(String heading) {
         String msgText;
 
         Globals.statusPrint(heading);
-        sprintf(msgText, "%6.2f\t%6.2f\t%6.2f\t%6.2f\t",
-            theMatrix[0][0], theMatrix[1][0], theMatrix[2][0], theMatrix[3][0]);
+        DecimalFormat sixDotTwo = new DecimalFormat("####.##");
+
+        msgText = 
+            sixDotTwo.format(theMatrix[0][0]) + "\t" + 
+            sixDotTwo.format(theMatrix[1][0]) + "\t" + 
+            sixDotTwo.format(theMatrix[2][0]) + "\t" + 
+            sixDotTwo.format(theMatrix[3][0]) + "\t";
         Globals.statusPrint(msgText);
     
-        sprintf(msgText, "%6.2f\t%6.2f\t%6.2f\t%6.2f\t",
-            theMatrix[0][1], theMatrix[1][1], theMatrix[2][1], theMatrix[3][1]);
+        msgText = 
+            sixDotTwo.format(theMatrix[0][1]) + "\t" + 
+            sixDotTwo.format(theMatrix[1][1]) + "\t" + 
+            sixDotTwo.format(theMatrix[2][1]) + "\t" + 
+            sixDotTwo.format(theMatrix[3][1]) + "\t";
         Globals.statusPrint(msgText);
     
-        sprintf(msgText, "%6.2f\t%6.2f\t%6.2f\t%6.2f\t",
-            theMatrix[0][2], theMatrix[1][2], theMatrix[2][2], theMatrix[3][2]);
+        msgText = 
+            sixDotTwo.format(theMatrix[0][2]) + "\t" + 
+            sixDotTwo.format(theMatrix[1][2]) + "\t" + 
+            sixDotTwo.format(theMatrix[2][2]) + "\t" + 
+            sixDotTwo.format(theMatrix[3][2]) + "\t";
         Globals.statusPrint(msgText);
     
-        sprintf(msgText, "%6.2f\t%6.2f\t%6.2f\t%6.2f\t",
-            theMatrix[0][3], theMatrix[1][3], theMatrix[2][3], theMatrix[3][3]);
+        msgText = 
+            sixDotTwo.format(theMatrix[0][3]) + "\t" + 
+            sixDotTwo.format(theMatrix[1][3]) + "\t" + 
+            sixDotTwo.format(theMatrix[2][3]) + "\t" + 
+            sixDotTwo.format(theMatrix[3][3]) + "\t";
         Globals.statusPrint(msgText);
     } // display
     
+
+    // Called from:
+    //     Globals.iwarpz
     public int invertg() {
         final int MAXROWS = 4;
         final int MAXCOLS = 4;        // MAXCOLS defined for readability
 
+        // Invert a TMatrix object.
+        // Approach:  Augment the forward graphic transformation matrix with four
+        // b vectors which collectively make up the 4x4 identity matrix.
+        // The augmented b vectors are contained in the TMatrix object bVector.
+        // Solve the system using Gaussian elimination and partial pivoting.
+        // Back-substitute each of the four processed b vectors to obtain the inverse.
+        // Gaussian elimination is described in more detail in:
         //
-        //  Invert a TMatrix object.
-        //  Approach:  Augment the forward graphic transformation matrix with four
-        //  b vectors which collectively make up the 4x4 identity matrix.
-        //  The augmented b vectors are contained in the TMatrix object bVector.
-        //  Solve the system using Gaussian elimination and partial pivoting.
-        //  Back-substitute each of the four processed b vectors to obtain the inverse.
-        //  Gaussian elimination is described in more detail in:
-        //
-        //  Numerical Methods for Scientists and Engineers, J. D. Hoffman,
-        //  McGraw-Hill, 1992, Section 1.3.
-        //
+        // Numerical Methods for Scientists and Engineers, J. D. Hoffman,
+        // McGraw-Hill, 1992, Section 1.3.
         int i, j, k, maxValue;
         float aTemp;
         String msgText;
-        TMatrix bVector;
+        TMatrix bVector = new TMatrix();
     
         for (i = 0; i < MAXROWS; i++) {
             maxValue = i;
@@ -256,7 +312,7 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
                 float aFactor = theMatrix[i][j] / theMatrix[i][i];
                 for (k = MAXCOLS - 1; k >= i; k--) {
                     if(Math.abs(theMatrix[i][i]) < 1.0E-06) {
-                        sprintf(msgText, "invertg: i: %d j: %d k: %d pivot element cannot be zero!", i, j, k);
+                        msgText = "invertg: i: " + i + " j: " + j + " k: " + k + " pivot element cannot be zero!";
                         Globals.statusPrint(msgText);
                         return -1;
                     }
@@ -269,7 +325,6 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
             }
         }
 
-        //
         // Backsubstitute the augmented b vectors to obtain the inverse
         int col, row;
         float aSum;
@@ -301,6 +356,7 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
         return 0;
     } // invertg
     
+
     public void transformAndProjectPoint(float x, float y, float z, 
     Integer sx, Integer sy, 
     float refX, float refY, float refZ, 
@@ -326,6 +382,7 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
         //
     } // transformAndProjectPoint
     
+
     public void transformAndProjectPoint1(Point3d p, Point2d s, Point3d ref, 
     int outHeight, int outWidth, Point3d t) {
         p.x -= ref.x;
@@ -333,7 +390,6 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
         p.z -= ref.z;
         transformPoint1(p, t);
         
-        //
         // Project to the screen
         float d = -512.0f; // Distance from screen to center of projection: (0,0,-d)
         float w = (d / (t.z + d));
@@ -342,6 +398,8 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
     } // transformAndProjectPoint1
     
     
+    // Called from:
+    //     Globals.iwarpz
     public void transformAndProject(Shape3d aShape, int outHeight,
     int outWidth, boolean useExternalCentroid,
     float centroidX, float centroidY, float centroidZ) {
@@ -379,6 +437,7 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
                 maxtY = mintY = aShape.currentVertex.ty;
                 maxtZ = mintZ = aShape.currentVertex.tz;
             }
+
             // Calculate the transformed object centroid for depth sorting later
             if(aShape.currentVertex.tx > maxtX) maxtX = aShape.currentVertex.tx;
             if(aShape.currentVertex.tx < mintX) mintX = aShape.currentVertex.tx;
@@ -393,7 +452,6 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
         aShape.originY = mintY + (maxtY - mintY)/2.0f;
         aShape.originZ = mintZ + (maxtZ - mintZ)/2.0f;
 
-        //
         // Project to the screen
         aShape.initCurrentVertex();
         float d = -512.0f; // Distance from screen to center of projection: (0,0,-d)
@@ -402,7 +460,6 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
             aShape.currentVertex.sx = (aShape.currentVertex.tx) * w;
             aShape.currentVertex.sy = (aShape.currentVertex.ty) * w;
 
-            //
             //  round the  projected coordinate
             //sx = (int) (aShape.currentVertex.sx + 0.5);
             //sy = (int) (aShape.currentVertex.sy + 0.5);
