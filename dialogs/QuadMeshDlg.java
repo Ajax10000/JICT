@@ -10,11 +10,11 @@ import javax.swing.JFrame;
 import javax.swing.JTextField;
 
 public class QuadMeshDlg extends JDialog {
-	JComboBox	m_QMeshType;
+	JComboBox<String>	m_QMeshType;
 	JTextField	m_TextureImage;
 	JTextField	m_ModelDirectory;
 	JButton	    m_Locate;
-	JComboBox	m_MeshType;
+	JComboBox<String>	m_MeshType;
 
 /*
 class CQuadMeshDlg : public CDialog
