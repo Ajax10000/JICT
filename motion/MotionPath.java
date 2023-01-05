@@ -47,13 +47,21 @@ public class MotionPath {
         }
     } // allocate
   
+    
     // This method came from MOTION.CPP
+    // Called from:
+    //     SceneList.render
+    //     SceneList.previewStill
     public void getFirstLastFrame(Integer firstFrame, Integer lastFrame) {
         firstFrame = nodes[0].nodenum;
         lastFrame = nodes[numnodes-1].nodenum;
     } // getFirstLastFrame
 
+
     // This method came from MOTION.CPP
+    // Called from
+    //     SceneList.getViewMatrix
+    //     SceneList.previewStill
     public int getNode(int frameNumber, MotionNode mn) {
         int pn = 0, nn = 0, a;
         float dist, mult, diff;
@@ -127,11 +135,11 @@ public class MotionPath {
     } // getNode
   
     // This method came from MOTION.CPP
-    public public int readMotion(String pathName) {
+    public int readMotion(String pathName) {
         String msgText, theText;
         String theKeyWord;
         MotionNode tempMotionNode;
-        ifstream filein(pathName, ios::in|ios::nocreate);
+        ifstream filein = new ifstream(pathName, ios.in|ios.nocreate);
 
         if (filein.fail()) {
             msgText = "readMotion: Unable to open file: " + pathName;
