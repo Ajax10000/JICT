@@ -48,7 +48,7 @@ public class Texture {
             for (row = 1; row <= numRows; row++) {
                 for (col = 1; col <= numColumns; col++) {
                     if(bitsPerPixel == 8) {
-                        newImage.setMPixel(col, row, foreColor);
+                        newImage.setMPixel(col, row, (byte)foreColor);
                     }
 
                     if(bitsPerPixel == 32) {
