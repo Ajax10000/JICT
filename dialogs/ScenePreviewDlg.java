@@ -6,18 +6,60 @@ import frames.MainFrame;
 
 import globals.Globals;
 
+import java.text.DecimalFormat;
+
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 
+// This dialog is displayed when the user selects the 
+// Still or Sequence menu item from the Preview menu.
+// See MainFrame.onPreviewStillScene and 
+// MainFrame.onPreviewSequenceScene
 public class ScenePreviewDlg extends JDialog {
     protected MainFrame m_theFrame;
     protected boolean isDirty;
 	protected RenderObject anObject;
     protected float incrementScaleFactor;
+
+    private JButton btnOk;
+    private JButton btnCancel;
+    private JButton btnReset;
+    private JButton btnMinus;
+    private JButton btnPlus;
+
+    private JCheckBox cbxRotationX;
+    private JCheckBox cbxRotationY;
+    private JCheckBox cbxRotationZ;
+    private JCheckBox cbxScaleX;
+    private JCheckBox cbxScaleY;
+    private JCheckBox cbxScaleZ;
+    private JCheckBox cbxTranslationX;
+    private JCheckBox cbxTranslationY;
+    private JCheckBox cbxTranslationZ;
+    private JCheckBox cbxMoveViewPt;
+
+    private JComboBox<String> cboModel;
+
+    private JTextField txtIncrX;
+    private JTextField txtIncrY;
+    private JTextField txtIncrZ;
+    private JTextField txtRotationX;
+    private JTextField txtRotationY;
+    private JTextField txtRotationZ;
+    private JTextField txtScaleX;
+    private JTextField txtScaleY;
+    private JTextField txtScaleZ;
+    private JTextField txtTranslationX;
+    private JTextField txtTranslationY;
+    private JTextField txtTranslationZ;
 
     boolean	m_chkMoveViewPoint;
 	boolean	m_chkRx;
@@ -43,6 +85,8 @@ public class ScenePreviewDlg extends JDialog {
 	String	m_txtYIncr;
 	String	m_txtZIncr;
 	String	m_theModel;
+
+    private DecimalFormat sixDotTwo = new DecimalFormat("####.##");
 
     // Effect Types
     // These were defined in ICT20.H
@@ -122,8 +166,65 @@ protected:
 };
  */
 
+    // Called from:
+    //     MainFrame.onPreviewSequenceScene
+    //     MainFrame.onPreviewStillScene
     public ScenePreviewDlg(JFrame pParent, boolean pModal) {
         super(pParent, pModal);
+
+        // Try to make the dialog appear as it does on the bottom part of 
+        // Figure D.13 on page 285 of the book
+        JPanel topPnl;
+        JPanel botPnl;
+        setupTopPanel();
+        setupBottomPanel();
+    }
+
+    private void setupTopPanel() {
+        JLabel lblRotation = new JLabel("Rotation");
+        JLabel lblScale = new JLabel("Scale");
+        JLabel lblTranslation = new JLabel("Translation");
+        JLabel lblRotX = new JLabel("X");
+        JLabel lblRotY = new JLabel("Y");
+        JLabel lblRotZ = new JLabel("Z");
+        JLabel lblSclX = new JLabel("X");
+        JLabel lblSclY = new JLabel("Y");
+        JLabel lblSclZ = new JLabel("Z");
+        JLabel lblTrnX = new JLabel("X");
+        JLabel lblTrnY = new JLabel("Y");
+        JLabel lblTrnZ = new JLabel("Z");
+
+        JLabel lblIncr = new JLabel("Increment");
+        JLabel lblSelModel = new JLabel("Select a Model");
+
+        btnPlus = new JButton("+");
+        btnMinus = new JButton("-");
+        btnReset = new JButton("Reset");
+    }
+
+    private void setupBottomPanel() {
+        JLabel lblRotation = new JLabel("Rotation");
+        JLabel lblScale = new JLabel("Scale");
+        JLabel lblTranslation = new JLabel("Translation");
+        JLabel lblRotX = new JLabel("X");
+        JLabel lblRotY = new JLabel("Y");
+        JLabel lblRotZ = new JLabel("Z");
+        JLabel lblSclX = new JLabel("X");
+        JLabel lblSclY = new JLabel("Y");
+        JLabel lblSclZ = new JLabel("Z");
+        JLabel lblTrnX = new JLabel("X");
+        JLabel lblTrnY = new JLabel("Y");
+        JLabel lblTrnZ = new JLabel("Z");
+
+        txtRotationX = new JTextField("0.00", 6);
+        txtRotationY = new JTextField("0.00", 6);
+        txtRotationZ = new JTextField("0.00", 6);
+        txtScaleX = new JTextField("0.00", 6);
+        txtScaleY = new JTextField("0.00", 6);
+        txtScaleZ = new JTextField("0.00", 6);
+        txtTranslationX = new JTextField("0.00", 6);
+        txtTranslationY = new JTextField("0.00", 6);
+        txtTranslationZ = new JTextField("0.00", 6);
     }
 
 
@@ -164,6 +265,7 @@ protected:
         String selectedModel;
         float  rx, ry, rz, sx, sy, sz, tx, ty, tz;
         JComboBox theCombo;
+        
         theCombo = (JComboBox)GetDlgItem(IDC_cmbModels);
         int theChoice = theCombo.getSelectedIndex();
 
@@ -397,64 +499,64 @@ protected:
         String aBuffer;
 
         // warpRotate
-        sprintf(aBuffer,"%6.2f", m_theFrame.warpRotateX);
+        aBuffer = sixDotTwo.format(m_theFrame.warpRotateX);
         SetDlgItemText(IDC_txtCurRx, aBuffer);
 
-        sprintf(aBuffer,"%6.2f", m_theFrame.warpRotateY);
+        aBuffer = sixDotTwo.format(m_theFrame.warpRotateY);
         SetDlgItemText(IDC_txtCurRy, aBuffer);
 
-        sprintf(aBuffer,"%6.2f", m_theFrame.warpRotateZ);
+        aBuffer = sixDotTwo.format(m_theFrame.warpRotateZ);
         SetDlgItemText(IDC_txtCurRz, aBuffer);
         
         // warpScale
-        sprintf(aBuffer,"%6.2f", m_theFrame.warpScaleX);
+        aBuffer = sixDotTwo.format(m_theFrame.warpScaleX);
         SetDlgItemText(IDC_txtCurSx, aBuffer);
 
-        sprintf(aBuffer,"%6.2f", m_theFrame.warpScaleY);
+        aBuffer = sixDotTwo.format(m_theFrame.warpScaleY);
         SetDlgItemText(IDC_txtCurSy, aBuffer);
 
-        sprintf(aBuffer,"%6.2f", m_theFrame.warpScaleZ);
+        aBuffer = sixDotTwo.format(m_theFrame.warpScaleZ);
         SetDlgItemText(IDC_txtCurSz, aBuffer);
         
         // warpTranslate
-        sprintf(aBuffer,"%6.2f", m_theFrame.warpTranslateX);
+        aBuffer = sixDotTwo.format(m_theFrame.warpTranslateX);
         SetDlgItemText(IDC_txtCurTx, aBuffer);
 
-        sprintf(aBuffer,"%6.2f", m_theFrame.warpTranslateY);
+        aBuffer = sixDotTwo.format(m_theFrame.warpTranslateY);
         SetDlgItemText(IDC_txtCurTy, aBuffer);
 
-        sprintf(aBuffer,"%6.2f", m_theFrame.warpTranslateZ);
+        aBuffer = sixDotTwo.format(m_theFrame.warpTranslateZ);
         SetDlgItemText(IDC_txtCurTz, aBuffer);
-    }
+    } // setTextBoxesWithModelTransform
     
 
     // This method came from SCENEPREVIEWDLG.CPP
     void setTextBoxesWithViewTransform() {
         String aBuffer;
 
-        sprintf(aBuffer,"%6.2f", m_theFrame.viewRotateX);
+        aBuffer = sixDotTwo.format(m_theFrame.viewRotateX);
         SetDlgItemText(IDC_txtCurRx, aBuffer);
 
-        sprintf(aBuffer,"%6.2f", m_theFrame.viewRotateY);
+        aBuffer = sixDotTwo.format(m_theFrame.viewRotateY);
         SetDlgItemText(IDC_txtCurRy, aBuffer);
 
-        sprintf(aBuffer,"%6.2f", m_theFrame.viewRotateZ);
+        aBuffer = sixDotTwo.format(m_theFrame.viewRotateZ);
         SetDlgItemText(IDC_txtCurRz, aBuffer);
         
-        sprintf(aBuffer,"%6.2f", 0.0);
+        aBuffer = sixDotTwo.format(0.0f);
         SetDlgItemText(IDC_txtCurSx, aBuffer);
         SetDlgItemText(IDC_txtCurSy, aBuffer);
         SetDlgItemText(IDC_txtCurSz, aBuffer);
         
-        sprintf(aBuffer,"%6.2f", m_theFrame.viewTranslateX);
+        aBuffer = sixDotTwo.format(m_theFrame.viewTranslateX);
         SetDlgItemText(IDC_txtCurTx, aBuffer);
 
-        sprintf(aBuffer,"%6.2f", m_theFrame.viewTranslateY);
+        aBuffer = sixDotTwo.format(m_theFrame.viewTranslateY);
         SetDlgItemText(IDC_txtCurTy, aBuffer);
 
-        sprintf(aBuffer,"%6.2f", m_theFrame.viewTranslateZ);
+        aBuffer = sixDotTwo.format(m_theFrame.viewTranslateZ);
         SetDlgItemText(IDC_txtCurTz, aBuffer);
-    }
+    } // setTextBoxesWithViewTransform
     
 
     // This method came from SCENEPREVIEWDLG.CPP
