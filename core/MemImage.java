@@ -109,6 +109,11 @@ public:
  */
 
 
+    // Called from:
+    //     Globals.motionBlur
+    //     RenderObject.prepareCutout
+    //     SceneList.previewStill
+    //     MainFrame.onToolsWarpImage
     public MemImage(String psFileName, int imHeight, int imWidth, int imAccessMode, char rw, int piColorSpec) {
         String msgBuffer;
 
@@ -233,6 +238,10 @@ public:
     } // MemImage ctor
 
 
+    // Called from: 
+    //     Globals.motionBlur
+    //     SceneList.render
+    //     MainFrame.onToolsWarpImage
     public MemImage(int height, int width, int aBitsPerPixel) {
         //  Allocates a memory resident 8 bit image by default.
         this.valid = false;
@@ -246,8 +255,7 @@ public:
         allocate(height, width);
 
         if (ictdebug) {
-            String msgBuffer;
-            msgBuffer = "Constructor 1.5. Size of memImage: " + sizeof(MemImage);
+            String msgBuffer = "Constructor 1.5. Size of memImage: " + sizeof(MemImage);
             Globals.statusPrint(msgBuffer);
         }
     } // MemImage ctor
@@ -361,10 +369,10 @@ public:
         for (y = 1; y <= rows; y++) {
             for (x = 1; x <= this.imageWidth; x++) {
                 if(
-                (bytes[iBytesIdx] == blue) && 
+                (bytes[iBytesIdx]     == blue)  && 
                 (bytes[iBytesIdx + 1] == green) && 
                 (bytes[iBytesIdx + 2] == red)) {
-                    bytes[iBytesIdx] = 0;
+                    bytes[iBytesIdx]     = 0;
                     bytes[iBytesIdx + 1] = 0;
                     bytes[iBytesIdx + 2] = 0;
                     //counter++;
@@ -392,7 +400,6 @@ public:
             return -1;
         }
 
-
         SetCursor(LoadCursor( null, IDC_WAIT ));
         // Replace with something like:
         // Cursor cursor = button.getCursor();
@@ -409,15 +416,15 @@ public:
         for (y = 1; y <= rows; y++) {
             for (x = 1; x <= this.imageWidth; x++) {
                 if(
-                (bytes[iBytesIdx] >= blueLow) && (bytes[iBytesIdx] <= blueHigh) && 
+                (bytes[iBytesIdx]   >= blueLow)  && (bytes[iBytesIdx]   <= blueHigh)  && 
                 (bytes[iBytesIdx+1] >= greenLow) && (bytes[iBytesIdx+1] <= greenHigh) && 
-                (bytes[iBytesIdx+2] >= redLow) && (bytes[iBytesIdx+2] <= redHigh)) {
-                    bytes[iBytesIdx] = 0;		   //each color component must be erased
+                (bytes[iBytesIdx+2] >= redLow)   && (bytes[iBytesIdx+2] <= redHigh)) {
+                    bytes[iBytesIdx]   = 0;		   // each color component must be erased
                     bytes[iBytesIdx+1] = 0;
                     bytes[iBytesIdx+2] = 0;
                 }
 
-                iBytesIdx +=3;
+                iBytesIdx += 3;
             } // for x
 
             iBytesIdx += pads;
@@ -432,6 +439,8 @@ public:
     } // clearRGBRange
 
 
+    // Called from:
+    //     SceneList.render
     public void init32(float aValue) {
         //  Initialize a 32 bit image by setting each pixel to a designated value
         int x, y;
@@ -471,6 +480,7 @@ public:
             Globals.statusPrint("MemImage.scaleTo8: Bits per pixel mismatch");
             return 1;
         }
+        
         if((scaledImage.getHeight() != getHeight()) || (scaledImage.getWidth() != getWidth())) {
             Globals.statusPrint("MemImage.scaleTo8: Image sizes must be equal");
             return 2;
@@ -547,6 +557,8 @@ public:
 
     // TODO: Replace paramater dc with one of type Graphics2D, 
     // as this method performs graphics
+    // Called from:
+    //     SceneList.previewStill
     public void display(HDC dc, int piOutWidth, int piOutHeight) {
         HBITMAP hBitmap, holdBitmap;
         HDC newdc;
@@ -605,14 +617,18 @@ public:
 
         BitBlt(dc, 0, 0, localWidth, localHeight, newdc, 0, yDelta, SRCCOPY);
         SelectObject(newdc, holdBitmap);
+        /*
         DeleteObject(hBitmap);
         DeleteDC(newdc);
+        */
     } // display
 
 
     // TODO: Replace paramater dc with one of type Graphics2D, 
     // as this method performs graphics
-    public int drawMask(HDC dc, POINT thePoints, int numVertices) {
+    // Called from:
+    //     RenderObject.prepareCutout
+    public int drawMask(HDC dc, POINT[] thePoints, int numVertices) {
         HBITMAP hBitmap, holdBitmap;
         HDC newdc;
 
@@ -649,8 +665,10 @@ public:
         // the bitmap is stored using a width that is a 2 byte multiple
         GetBitmapBits(hBitmap, dwCount, this.bytes);
         SelectObject(newdc, holdBitmap);
+        /*
         DeleteObject(hBitmap);
         DeleteDC(newdc);
+        */
 
         return 0;
     } // drawMask
@@ -663,6 +681,7 @@ public:
             Globals.statusPrint("MemImage.copy: Destination image does not have matching pixel depth");
             return -1;
         }
+
         if((this.bitsPerPixel != 8) && (this.bitsPerPixel != 24)) {
             Globals.statusPrint("MemImage.copy: Only 8 or 24 bit images are supported");
             return -2;
@@ -710,16 +729,21 @@ public:
         int a = outImage.imageWidth  - piXOffset;
         int b = outImage.imageHeight - piYOffset;
         int c = piXOffset + this.imageWidth - outImage.imageWidth;
-        byte *outLoc = outImage.bytes + ((piYOffset * outImage.imageWidth) + piXOffset);
+
+        // Although outLoc is written to, it is not read
+        // byte *outLoc = outImage.bytes + ((piYOffset * outImage.imageWidth) + piXOffset);
+        int outLoc = ((piYOffset * outImage.imageWidth) + piXOffset);
 
         // copy b rows of image data
         int i, j;
-        byte *currentPix = this.bytes;
+        // byte *currentPix = this.bytes;
+        int currentPix = 0;
 
         for (j = 1; j <= b; j++) {
             for (i = 1; i <= a; i++) {
-                if(*currentPix != 0) {
-                    *outLoc = *currentPix;
+                if(bytes[currentPix] != 0) {
+                    // *outLoc = *currentPix;
+                    outLoc = bytes[currentPix];
                 }
 
                 outLoc++;
@@ -742,6 +766,7 @@ public:
             Globals.statusPrint("MemImage.copy8To24: Destination image must have 24 bit pixels");
             return -1;
         }
+
         if(this.bitsPerPixel != 8) {
             Globals.statusPrint("MemImage.copy8To24: Source image must have 8 bit pixels");
             return -2;
@@ -763,22 +788,27 @@ public:
         // input x and y are assumed to be 1 relative
         // returns the desired pixel from a color image
         int addr;
-        byte *thePixel;
-        byte *myTemp = bytes;
+        // byte *thePixel;
+        // byte *myTemp = bytes;
 
         if(this.accessMode == SEQUENTIAL) {
             y = 1;
         }
-        if (y < 1 || y > this.imageHeight || x < 1 || x > this.imageWidth) {
+        if ((y < 1) || (y > this.imageHeight) || (x < 1) || (x > this.imageWidth)) {
             return -1;
         }
 
         addr = ((y - 1) * (int)paddedWidth) + ((x - 1)*3);  // 3 bytes/color pixel
+        /*
         myTemp = myTemp + addr;
         thePixel = myTemp;
         if(aColor == 'B') return *thePixel;
         if(aColor == 'G') return *(thePixel + 1);
         if(aColor == 'R') return *(thePixel + 2);
+        */
+        if(aColor == 'B') return bytes[addr];
+        if(aColor == 'G') return bytes[addr + 1];
+        if(aColor == 'R') return bytes[addr + 2];
 
         Globals.statusPrint("getMPixel: unknown color value");
         return 0;
@@ -786,6 +816,9 @@ public:
 
 
     // Sets parameters red, green and blue
+    // Called from:
+    //     Globals.iwarpz
+    //     Globals.motionBlur
     public int getMPixelRGB(int x, int y, byte red, byte green, byte blue) {
         //  input x and y are assumed to be 1 relative
         //  returns the desired pixel from a color image
@@ -795,27 +828,35 @@ public:
         }
 
         int addr;
-        BYTE *thePixel;
-        BYTE *myTemp = bytes;
+        //byte *thePixel;
+        //byte *myTemp = bytes;
 
         if(this.accessMode == SEQUENTIAL) {
             y = 1;
         }
-        if (y < 1 || y > this.imageHeight || x < 1 || x > this.imageWidth) {
+        if ((y < 1) || (y > this.imageHeight) || (x < 1) || (x > this.imageWidth)) {
             return -1;
         }
 
         addr = ((y - 1) * this.paddedWidth) + ((x - 1)*(this.bitsPerPixel/8));  // 3 bytes/color pixel
+        /*
         myTemp = myTemp + addr;
         thePixel = myTemp;
         blue = *thePixel;
         green = *(thePixel + 1);
         red = *(thePixel + 2);
+        */
+        blue  = bytes[addr];
+        green = bytes[addr + 1];
+        red   = bytes[addr + 2];
 
         return 0;
     } // getMPixelRGB
 
 
+    // Called from:
+    //     Globals.iwarpz
+    //     Globals.motionBlur
     public int setMPixelRGB(int x, int y, byte red, byte green, byte blue) {
         // Inputs x and y are assumed to be 1 relative
         // Returns the desired pixel from a color image
@@ -825,42 +866,52 @@ public:
         }
 
         int addr;
-        byte *thePixel;
-        byte *myTemp = bytes;
+        // byte *thePixel;
+        // byte *myTemp = bytes;
 
         if(this.accessMode == SEQUENTIAL) {
             y = 1;
         }
-        if (y < 1 || y > this.imageHeight || x < 1 || x > this.imageWidth) {
+        if ((y < 1) || (y > this.imageHeight) || (x < 1) || (x > this.imageWidth)) {
             return -1;
         }
 
         addr = ((y - 1) * (int)paddedWidth) + ((x - 1)*(this.bitsPerPixel/8));  // 3 bytes/color pixel
+        /*
         myTemp = myTemp + addr;
         thePixel = myTemp;
         *thePixel = blue;
         *(thePixel + 1) = green;
         *(thePixel + 2) = red;
+        */
+        bytes[addr] = blue;
+        bytes[addr + 1] = green;
+        bytes[addr + 2] = red;
 
         return 0;
     } // setMPixelRGB
 
 
+    // Called from:
+    //     cleaRectangle
+    //     Globals.iwarpz
+    //     Globals.motionBlur
     public int setMPixel(int x, int y, byte value) {
         // Inputs x and y are assumed to be 1 relative
         int addr;
-        byte *myTemp = bytes;
+        // byte *myTemp = this.bytes;
 
         if(this.accessMode == SEQUENTIAL) {
             y = 1;
         }
-        if (y < 1 || y > this.imageHeight || x < 1 || x > this.imageWidth) {
+        if ((y < 1) || (y > this.imageHeight) || (x < 1) || (x > this.imageWidth)) {
             return -1;
         }
 
-        addr = ((y - 1) * (int)paddedWidth) + x - 1;
-        myTemp = myTemp + addr;
-        *myTemp = value;
+        addr = ((y - 1) * paddedWidth) + x - 1;
+        // myTemp = myTemp + addr;
+        // *myTemp = value;
+        bytes[addr] = value;
 
         return value;
     } // setMPixel
@@ -869,12 +920,13 @@ public:
     public int setMPixelA(float x, float y, byte value) {
         // Inputs x and y are assumed to be 1 relative
         int addr;
-        byte *myTemp = this.bytes;
+        // byte *myTemp = this.bytes;
+        int myTemp;
 
         if(this.accessMode == SEQUENTIAL) {
             y = 1;
         }
-        if (y < 1 || y > (float)this.imageHeight || x < 1 || x > (float)this.imageWidth) {
+        if ((y < 1) || (y > (float)this.imageHeight) || (x < 1) || (x > (float)this.imageWidth)) {
             return -1;
         }
 
@@ -883,37 +935,70 @@ public:
         byte chromaColor = 0;
 
         xa = x - (int)x;
-        xb = 1.0 - xa;
+        xb = 1.0f - xa;
         ya = y - (int)y;
-        yb = 1.0 - ya;
-        valaa = (byte)((xa * ya * (float) value) + 0.5f);
-        valba = (byte)((xb * ya * (float) value) + 0.5f);
-        valab = (byte)((xa * yb * (float) value) + 0.5f);
-        valbb = (byte)((xb * yb * (float) value) + 0.5f);
+        yb = 1.0f - ya;
+        valaa = (byte)((xa * ya * (float)value) + 0.5f);
+        valba = (byte)((xb * ya * (float)value) + 0.5f);
+        valab = (byte)((xa * yb * (float)value) + 0.5f);
+        valbb = (byte)((xb * yb * (float)value) + 0.5f);
 
-        addr = ((y - 1) * (int)paddedWidth) + x - 1;
+        addr = (((int)y - 1) * paddedWidth) + (int)x - 1;
 
         // Set the pixel value if this is the first contribution, else add this
         // pixel to what is already present.
-        if( *(myTemp + addr) == chromaColor )
+        /*
+        if( *(myTemp + addr) == chromaColor ) {
             *(myTemp + addr) = valaa;
-        else
+        } else {
             *(myTemp + addr) = *(myTemp + addr) + valaa;
+        }
+        */
+        if(bytes[addr] == chromaColor) {
+            bytes[addr] = valaa;
+        } else {
+            bytes[addr] = bytes[addr] + valaa;
+        }
 
-        if( *(myTemp + addr + 1) == chromaColor )
+        /*
+        if( *(myTemp + addr + 1) == chromaColor ) {
             *(myTemp + addr) = valba;
-        else
+        } else {
             *(myTemp + addr + 1) = *(myTemp + addr + 1) + valba;
+        }
+        */
+        if(bytes[addr + 1] == chromaColor) {
+            bytes[addr] = valba;
+        } else {
+            bytes[addr + 1] = bytes[addr + 1] + valba;
+        }
 
-        if( *(myTemp + addr + paddedWidth) == chromaColor )
+        /*
+        if( *(myTemp + addr + paddedWidth) == chromaColor ) {
             *(myTemp + addr + paddedWidth) = valab;
-        else
+        } else {
             *(myTemp + addr + paddedWidth) = *(myTemp + addr + paddedWidth) + valab;
+        }
+        */
+        if(bytes[addr + paddedWidth] == chromaColor) {
+            bytes[addr + paddedWidth] = valab;
+        } else {
+            bytes[addr + paddedWidth] = bytes[addr + paddedWidth] + valab;
+        }
 
-        if( *(myTemp + addr + paddedWidth + 1) == chromaColor )
+        /*
+        if( *(myTemp + addr + paddedWidth + 1) == chromaColor ) {
             *(myTemp + addr + paddedWidth + 1) = valbb;
-        else
+        } else {
             *(myTemp + addr + paddedWidth + 1) = *(myTemp + addr + paddedWidth + 1) + valbb;
+        }
+        */
+
+        if(bytes[addr + paddedWidth + 1] == chromaColor ) {
+            bytes[addr + paddedWidth + 1] = valbb;
+        } else {
+            bytes[addr + paddedWidth + 1] = bytes[addr + paddedWidth + 1] + valbb;
+        }
 
         return value;
     } // setMPixelA
@@ -925,17 +1010,17 @@ public:
         byte *myTemp = this.bytes;
 
         if(this.accessMode == SEQUENTIAL) {
-            y = 1;
+            y = (byte)1;
         }
-        if (y < 1 || y > (float)this.imageHeight || x < 1 || x > (float)this.imageWidth) {
-            return 0;
+        if ((y < 1) || (y > (float)this.imageHeight) || (x < 1) || (x > (float)this.imageWidth)) {
+            return (byte)0;
         }
 
         // Calculate the Weights
         float xa, xb, ya, yb, waa, wba, wab, wbb;
         float valaa, valab, valba, valbb;
         float bucket = 0.0f;
-        byte chromaColor = 0;
+        byte chromaColor = (byte)0;
         xa = x - (int)x;
         xb = 1.0f - xa;
         ya = y - (int)y;
@@ -968,6 +1053,9 @@ public:
     } // getMPixelA
 
 
+    // Called from:
+    //     Globals.iwarpz
+    //     Globals.motionBlur
     public byte getMPixel(int x, int y) {
         // Inputs x and y are assumed to be 1 relative
         int addr;
@@ -976,7 +1064,7 @@ public:
         if(this.accessMode == SEQUENTIAL) {
             y = 1;
         }
-        if (y < 1 || y > this.imageHeight || x < 1 || x > this.imageWidth) {
+        if ((y < 1) || (y > this.imageHeight) || (x < 1) || (x > this.imageWidth)) {
             return 0;
         }
 
@@ -987,6 +1075,8 @@ public:
     } // getMPixel
 
 
+    // Called from:
+    //     Globals.iwarpz
     public int setMPixel32(int x, int y, float aValue) {
         //  input x and y are assumed to be 1 relative
         int addr;
@@ -996,7 +1086,7 @@ public:
         if(this.accessMode == SEQUENTIAL) {
             y = 1;
         }
-        if (y < 1 || y > this.imageHeight || x < 1 || x > this.imageWidth) {
+        if ((y < 1) || (y > this.imageHeight) || (x < 1) || (x > this.imageWidth)) {
             return -1;
         }
 
@@ -1009,6 +1099,8 @@ public:
     } // setMPixel32
 
 
+    // Called from:
+    //     Globals.iwarpz
     public float getMPixel32(int x, int y) {
         // Inputs x and y are assumed to be 1 relative
         int addr;
@@ -1018,7 +1110,7 @@ public:
         if(this.accessMode == SEQUENTIAL) {
             y = 1;
         }
-        if (y < 1 || y > this.imageHeight || x < 1 || x > this.imageWidth) {
+        if ((y < 1) || (y > this.imageHeight) || (x < 1) || (x > this.imageWidth)) {
             return -1.0;
         }
 
@@ -1060,12 +1152,20 @@ public:
     } // getBytes
 
 
+    // Called from:
+    //     Globals.motionBlur
+    //     RenderObject.prepareCutout
+    //     SceneList.render
     public boolean isValid() {
         //  valid = 1 indicates the constructor did not encounter errors.
         return this.valid;
     } // isValid
 
 
+    // Called from:
+    //     saveAs8
+    //     Globals.motionBlur
+    //     MainFrame.onToolsWarpImage
     public int writeBMP(String fileName) {
         String msgText;
         BITMAPFILEHEADER bf;
@@ -1331,15 +1431,16 @@ public:
     } // close
 
 
-    public int writeNextRow() {
+    // Changed return value from int to boolean
+    public boolean writeNextRow() {
         boolean myStatus;
         DWORD numBytesWritten;
 
         myStatus = WriteFile(this.fp, this.bytes, this.paddedWidth, numBytesWritten, null);
         if (myStatus) {
-            return 1;
+            return true;
         } else {
-            return 0;
+            return false;
         }
     } // writeNextRow
 
@@ -1390,6 +1491,8 @@ public:
     } // getImageSizeInBytes
 
 
+    // Called from:
+    //     Globals.iwarpz
     public int saveAs8(String outImagePathName) {
         //  A utility to save a 32 bit image in a viewable 8 bit form
         String msgText;
@@ -1566,15 +1669,17 @@ public:
                 case 24:
                     getMPixelRGB(col, row, red, green, blue);
                     if (red != 0 || green != 0 || blue != 0) {
-                        newRed   = red + avgRed;
-                        newGreen = green + avgGreen;
-                        newBlue  = blue + avgBlue;
-                        if (newRed < 1) newRed = 1;
-                        if (newRed > 255) newRed = 255;
-                        if (newGreen < 1) newGreen = 1;
+                        newRed   = (int)(red + avgRed);
+                        newGreen = (int)(green + avgGreen);
+                        newBlue  = (int)(blue + avgBlue);
+
+                        if (newRed < 1)     newRed   = 1;
+                        if (newRed > 255)   newRed   = 255;
+                        if (newGreen < 1)   newGreen = 1;
                         if (newGreen > 255) newGreen = 255;
-                        if (newBlue < 1) newBlue = 1;
-                        if (newBlue > 255) newBlue = 255;
+                        if (newBlue < 1)    newBlue  = 1;
+                        if (newBlue > 255)  newBlue  = 255;
+
                         outImage.setMPixelRGB(col, row, 
                             (byte)newRed, (byte)newGreen, (byte)newBlue);
                     }
@@ -1607,7 +1712,7 @@ public:
                             newRed   = red   + desiredRed;
                             newGreen = green + desiredGreen;
                             newBlue  = blue  + desiredBlue;
-                            outImage.setMPixelRGB(col, row, (BYTE)newRed, (BYTE)newGreen, (BYTE)newBlue);
+                            outImage.setMPixelRGB(col, row, (byte)newRed, (byte)newGreen, (byte)newBlue);
                         }
                         break;
 
@@ -1718,11 +1823,11 @@ public:
                     break;
 
                 case 24:
-                    setMPixelRGB(col, row, 0, 0, 0);
+                    setMPixelRGB(col, row, (byte)0, (byte)0, (byte)0);
                     break;
 
                 case 32:
-                    setMPixel32(col, row, 0.0);
+                    setMPixel32(col, row, 0.0f);
                     break;
 
                 default:
@@ -2324,13 +2429,13 @@ public:
                     if(bpp == 8)  outImage.setMPixel(xMin, yMin, (byte)intensity);
                     if(bpp == 24) {
                         outImage.setMPixelRGB(xMin, yMin, (byte)intensity,
-                            (byte)intensity,(byte)intensity);
+                            (byte)intensity, (byte)intensity);
                     }
                 } else {   //no zBuffer
                     if(bpp == 8)  outImage.setMPixel(xMin, yMin, (byte)intensity);
                     if(bpp == 24) {
                         outImage.setMPixelRGB(xMin, yMin, (byte)intensity,
-                        (byte)intensity,(byte)intensity);
+                            (byte)intensity, (byte)intensity);
                     }
                 }
             }
@@ -2344,17 +2449,17 @@ public:
         int row, col, denominator;
 
         // Handle larger quadrangles
-        int xCent = (((float)xMin + ((float)xMax - (float)xMin) / 2.0f) + 0.5f);
-        int yCent = (((float)yMin + ((float)yMax - (float)yMin) / 2.0f) + 0.5f);
+        int xCent = (int)(((float)xMin + ((float)xMax - (float)xMin) / 2.0f) + 0.5f);
+        int yCent = (int)(((float)yMin + ((float)yMax - (float)yMin) / 2.0f) + 0.5f);
 
         //  the intensity at the centroid is the weighted sum of the intensities at each vertex
         //  The weights are the normalized distances between each vertex distance and the centroid
         //  fill the triangle bounded by the centroid and each successive pair of vertices
         float totalDistance = 0.0f;
-        float d1 = getDistance2d((float)xCent, (float)yCent, I1x, I1y);
-        float d2 = getDistance2d((float)xCent, (float)yCent, I2x, I2y);
-        float d3 = getDistance2d((float)xCent, (float)yCent, I3x, I3y);
-        float d4 = getDistance2d((float)xCent, (float)yCent, I4x, I4y);
+        float d1 = Globals.getDistance2d((float)xCent, (float)yCent, (float)I1x, (float)I1y);
+        float d2 = Globals.getDistance2d((float)xCent, (float)yCent, (float)I2x, (float)I2y);
+        float d3 = Globals.getDistance2d((float)xCent, (float)yCent, (float)I3x, (float)I3y);
+        float d4 = Globals.getDistance2d((float)xCent, (float)yCent, (float)I4x, (float)I4y);
         totalDistance = d1 + d2 + d3 + d4;
         if(totalDistance == 0.0f) {
             statusPrint("fillPolyZ: Sum of polygon diagonals must be > 0");
