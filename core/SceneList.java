@@ -7,6 +7,8 @@ import globals.Preference;
 
 import java.awt.Color;
 
+import java.util.StringTokenizer;
+
 import javax.swing.JComboBox;
 
 import math.TMatrix;
@@ -128,7 +130,7 @@ public class SceneList {
             msgBuffer = "Size of sceneList: " + sizeof(SceneList);
             Globals.statusPrint(msgBuffer);
         }
-        clear();  //clear the list of models
+        clear();  // Clear the list of models
     } // finalize
 
 
@@ -203,7 +205,8 @@ public class SceneList {
         int notFound; // = TRUE, FALSE, or THREE_NUMBERS_NOT_FOUND
         boolean theBlend, theWarp;
         int theSequence, theColorMode, theType,
-        compoundMMember, compoundMember;
+        compoundMMember;
+        boolean compoundMember = false; // changed from int to boolean
         boolean getOutImageSizeFlag = false; // changed from int to boolean
         boolean definedRefPoint = false; // changed from int to boolean
         float theAlpha;
@@ -212,6 +215,10 @@ public class SceneList {
         String adjustmentType;
         int myStatus, minLineSize = 4;
         byte midRed, midGreen, midBlue;
+        final int FALSE = 0;
+        final int TRUE = 1;
+        final int THREE_NUMBERS_NOT_FOUND = 2;
+        StringTokenizer strtok;
 
         final String BLANK = " ";
         final int DUPLICATESCENE = 3;
@@ -231,7 +238,7 @@ public class SceneList {
         lineCounter = 0;
         numScenes = 0; 
         compoundMMember = 0;
-        compoundMember = 0;
+        compoundMember = false;
         rt = new Point3d();
         sc = new Point3d();
         tr = new Point3d();
@@ -243,7 +250,7 @@ public class SceneList {
 
         while(true) {  // Get the scene components
             TheKeyWord = getNextLine(TheText, lineCounter, filein, minLineSize);
-            while(!TheKeyword.equalsIgnoreCase("MODEL")) {
+            while(!TheKeyWord.equalsIgnoreCase("MODEL")) {
                 String aBase, aSceneName, effectType, aColorMode;
                 String tempImageSize;
                 notFound = TRUE;
@@ -252,7 +259,9 @@ public class SceneList {
                     notFound = FALSE;
                     aBase = TheText + 6;
 
-                    aSceneName = strtok(aBase,BLANK);
+                    // aSceneName = strtok(aBase, BLANK);
+                    strtok = new StringTokenizer(aBase, BLANK);
+                    aSceneName = strtok.nextToken();
                     if(aSceneName != null) {
                         theSceneName = aSceneName;
                     } else {
@@ -418,12 +427,12 @@ public class SceneList {
           
             while(!TheKeyWord.equalsIgnoreCase("SCENE")) {
                 notFound = TRUE;
-                //
+
                 // We expect MODEL, ROTATION, SCALE, TRANSLATION, ADJUSTCOLOR, or MOTIONPATH
                 if (TheKeyWord.equalsIgnoreCase("MODEL")) {
                     nModels++;
                     if (nModels > 1) {
-                        //  if the color is to be adjusted, adjust it now and change the input image
+                        // If the color is to be adjusted, adjust it now and change the input image
                         // file name to point to the color corrected image.
                         if(adjustmentType.equalsIgnoreCase("None")) {
                             MemImage inputImage = new MemImage(theFileName, 0, 0, RANDOM, 'R', RGBCOLOR);
@@ -445,15 +454,15 @@ public class SceneList {
                             correctedImage.writeBMP(colorAdjustedPath);
                         }
 
-                        if(compoundMMember == 1 && theType == COMPOUND) compoundMember = 0;
-                        if(compoundMMember == 1 && theType != COMPOUND) compoundMember = 1;
+                        if(compoundMMember == 1 && theType == COMPOUND) compoundMember = false;
+                        if(compoundMMember == 1 && theType != COMPOUND) compoundMember = true;
 
                         myStatus = addSceneElement(theModelName, theFileName, theBlend, theType,
                             theWarp, theAlpha, rt, sc, tr, theMotionPath, theAlphaPath,
                             compoundMember, anAdjustment, adjustmentType, colorAdjustedPath,
                             definedRefPoint, pointOfReference);
                         if(compoundMMember == 0) {
-                            compoundMember = 0;
+                            compoundMember = false;
                         }
 
                         if(myStatus != 0) {
@@ -476,9 +485,9 @@ public class SceneList {
                     } // if (nModels > 1)
 
                     aModelName = strtok(TheText+6, BLANK);
-                    //
-                    //  if the modelName is "." set it to an empty string
-                    //  causing the model to be displayed without a label
+
+                    // If the modelName is "." set it to an empty string
+                    // causing the model to be displayed without a label
                     if(aModelName.equalsIgnoreCase(".")) {
                         theModelName = "";
                     } else {
@@ -619,9 +628,9 @@ public class SceneList {
                     int aLength = adjustment.length();
                     theColor = strtok(TheText + 12 + aLength + 1, BLANK);  // move forward to the RGB color
 
-                    anAdjustment.rgbtRed   = Integer.parseInt(strtok(theColor, ","));
-                    anAdjustment.rgbtGreen = Integer.parseInt(strtok(null, ","));
-                    anAdjustment.rgbtBlue  = Integer.parseInt(strtok(null, ","));
+                    anAdjustment.setRed(Integer.parseInt(strtok(theColor, ",")));
+                    anAdjustment.setGreen(Integer.parseInt(strtok(null, ",")));
+                    anAdjustment.setBlue(Integer.parseInt(strtok(null, ",")));
                     notFound = FALSE;
                 }
 
@@ -695,7 +704,7 @@ public class SceneList {
                         }
                         MemImage correctedImage = new MemImage(inputImage);
                         Globals.statusPrint("Adjusting color image");	    
-                        inputImage.adjustColor(anAdjustment.rgbtRed, anAdjustment.rgbtGreen, anAdjustment.rgbtBlue,
+                        inputImage.adjustColor(anAdjustment.getRed(), anAdjustment.getGreen(), anAdjustment.getBlue(),
                             midRed, midGreen, midBlue, correctedImage, adjustmentType, 0);
 
                         Globals.constructPathName(colorAdjustedPath, theFileName, 'j');     
@@ -705,14 +714,14 @@ public class SceneList {
                         correctedImage.writeBMP(colorAdjustedPath);
                     }
 
-                    if(compoundMMember == 1 && theType == COMPOUND) compoundMember = 0;
-                    if(compoundMMember == 1 && theType != COMPOUND) compoundMember = 1;
+                    if(compoundMMember == 1 && theType == COMPOUND) compoundMember = false;
+                    if(compoundMMember == 1 && theType != COMPOUND) compoundMember = true;
 
                     myStatus = addSceneElement(theModelName, theFileName, theBlend, theType,
                         theWarp, theAlpha, rt, sc, tr, theMotionPath, theAlphaPath,
                         compoundMember, anAdjustment, adjustmentType, colorAdjustedPath,
                         definedRefPoint,pointOfReference);
-                    if(compoundMMember == 0) compoundMember = 0;
+                    if(compoundMMember == 0) compoundMember = false;
 
                     if(myStatus != 0) {
                         errorText = "Could not add a model to scene list. Line " + lineCounter;
@@ -726,7 +735,7 @@ public class SceneList {
                     return 0;
                 }
             
-                if (notFound) {
+                if (notFound != 0) {
                     if(notFound == 1) {
                         errorText = "Unknown Keyword: " + TheKeyWord + "  Line " + lineCounter;
                     }
@@ -749,9 +758,9 @@ public class SceneList {
     } // readList
 
 
-    public void showModels(JComboBox theCombo) {
+    public void showModels(JComboBox<String> theCombo) {
         Scene theScene = this.sceneListHead;
-        int numItems = theCombo.getItemCount(); //clear the present contents ofthe comboBox
+        int numItems = theCombo.getItemCount(); // Clear the present contents ofthe comboBox
         for(int i = 1; i <= numItems; i++) {
             theCombo.setSelectedIndex(0);
             theCombo.removeAllItems();
@@ -771,7 +780,7 @@ public class SceneList {
 
     public int listLength() {
         Scene theScene = this.sceneListHead;
-        theScene = theScene.nextEntry;  //Skip over the list header
+        theScene = theScene.nextEntry;  // Skip over the list header
         if(theScene == null) {
             return(0);
         }
@@ -786,41 +795,48 @@ public class SceneList {
     } // listLength
 
 
-    public int getSceneInfo(String name, Integer type,
-    Integer cMode, Integer outRows, Integer outCols) {
+    // Called from:
+    //     preview
+    //     previewStill
+    //     render
+    public int getSceneInfo(String psName, Integer pIType,
+    Integer pICMode, Integer pIOutRows, Integer piOutCols) {
         Scene theScene = this.sceneListHead;
-        theScene = theScene.nextEntry;  //Skip over the list header
+        theScene = theScene.nextEntry;  // Skip over the list header
         if (theScene == null) {
             return -1;
         }
 
-        name = theScene.sceneName;
-        type = theScene.sequenceType;
-        cMode = theScene.colorMode;
-        outRows = theScene.outputRows;
-        outCols = theScene.outputColumns;
+        // Set the output parameters
+        psName    = theScene.sceneName;
+        pIType    = theScene.sequenceType;
+        pICMode   = theScene.colorMode;
+        pIOutRows = theScene.outputRows;
+        piOutCols = theScene.outputColumns;
 
         return 0;
     } // getSceneInfo
 
 
-    public int setSceneOutImageSize(int outRows, int outCols) {
+    // Called from:
+    //     readList
+    public int setSceneOutImageSize(int piOutRows, int piOutCols) {
         Scene theScene = this.sceneListHead;
-        theScene = theScene.nextEntry;  //Skip over the list header
+        theScene = theScene.nextEntry;  // Skip over the list header
         if (theScene == null) {
             return -1;
         }
 
-        theScene.outputRows = outRows;
-        theScene.outputColumns = outCols;
+        theScene.outputRows    = piOutRows;
+        theScene.outputColumns = piOutCols;
         return 0;
     } // setSceneOutImageSize
 
 
     // Called from:
     //     depthSort
-    public int getViewTransform(Float viewX, Float viewY, Float viewZ, 
-    Float rotateX, Float rotateY, Float rotateZ) {
+    public int getViewTransform(Float pFViewX, Float pFViewY, Float pFViewZ, 
+    Float pFRotateX, Float pFRotateY, Float pFRotateZ) {
         Scene theScene = this.sceneListHead;
         theScene = theScene.nextEntry;  //Skip over the list header
         if (theScene == null) { 
@@ -828,37 +844,41 @@ public class SceneList {
         }
 
         // Assume the default viewer location is centered in the output frame
-        viewX = theScene.translation.x;
-        viewY = theScene.translation.y;
-        viewZ = theScene.translation.z;
+        // Set the output parameters
+        pFViewX = theScene.translation.x;
+        pFViewY = theScene.translation.y;
+        pFViewZ = theScene.translation.z;
 
-        rotateX = theScene.rotation.x;
-        rotateY = theScene.rotation.y;
-        rotateZ = theScene.rotation.z;
+        pFRotateX = theScene.rotation.x;
+        pFRotateY = theScene.rotation.y;
+        pFRotateZ = theScene.rotation.z;
+
         return 0;
     } // getViewTransform
 
 
-    public int setViewTransform(float viewX, float viewY, float viewZ,
-    float rotateX, float rotateY, float rotateZ) {
+    public int setViewTransform(float pfViewX, float pfViewY, float pfViewZ,
+    float pfRotateX, float pfRotateY, float pfRotateZ) {
         Scene theScene = sceneListHead;
         theScene = theScene.nextEntry;  //Skip over the list header
         if (theScene == null) { 
             return -1;
         }
 
-        theScene.translation.x = viewX;
-        theScene.translation.y = viewY;
-        theScene.translation.z = viewZ;
+        theScene.translation.x = pfViewX;
+        theScene.translation.y = pfViewY;
+        theScene.translation.z = pfViewZ;
         
-        theScene.rotation.x = rotateX;
-        theScene.rotation.y = rotateY;
-        theScene.rotation.z = rotateZ;
+        theScene.rotation.x = pfRotateX;
+        theScene.rotation.y = pfRotateY;
+        theScene.rotation.z = pfRotateZ;
 
         return 0;
     } // setViewTransform
 
 
+    // Called from:
+    //     render
     public int getViewPoint(Float viewX, Float viewY, Float viewZ,
     Float rotateX, Float rotateY, Float rotateZ) {
         Scene theScene = this.sceneListHead;
@@ -867,6 +887,7 @@ public class SceneList {
             return -1;
         }
 
+        // Set the output parameters
         // The default camera (viewpoint) location is centered on the origin
         // and translated 512 units along the positive z axis.
         // Add to this location any viewpoint translation and rotation 
@@ -885,13 +906,13 @@ public class SceneList {
     } // getViewPoint
 
 
-    public int writeList(String errorText, String fileName) {
+    public int writeList(String psErrorText, String psFileName) {
         Scene theScene = this.sceneListHead;
         theScene = theScene.nextEntry;  // Skip over the list header
 
-        ofstream fileOut(fileName);
+        ofstream fileOut(psFileName);
         if (fileOut.fail()) {
-            errorText = "Unable to open file: " + fileName;
+            psErrorText = "Unable to open file: " + psFileName;
             return -1;
         }
         theScene.writeFile(fileOut); // Write out the scene description
@@ -996,7 +1017,7 @@ public class SceneList {
                     }
                 }
 
-                if(theModel.statusIndicator == 0) {  // if this is a valid model...
+                if(theModel.statusIndicator == 0) {  // If this is a valid model...
                     modelMatrix.setIdentity();
 
                     // Compose the model transforms
@@ -1043,9 +1064,11 @@ public class SceneList {
         copyRefPoints();		  // copy model ref points to corresponding renderObjects
         // clean up the memoryDC
         SelectObject(memoryDC, hOldBitmap);
+        /*
         DeleteDC(memoryDC);
         ReleaseDC(theWindow, dc);
         DeleteObject(hBitmap);
+        */
         return myStatus;
     } // preview
 
@@ -1118,7 +1141,7 @@ public class SceneList {
 
                 // Setup the scene's background plate if needed
                 if(modelCounter == 1 && 
-                theModel.warpIndicator == 0 &&
+                theModel.warpIndicator == false &&
                 theModel.blendIndicator == false && theModel.modelType != COMPOUND) {
                     if(backgroundPlate == null) {
                         backgroundPlate = new MemImage(theModel.fileName, 0, 0, RANDOM, 'R', GREENCOLOR);
@@ -1153,7 +1176,7 @@ public class SceneList {
                     }
                     
                     // Combine the model matrix with the view Matrix
-                    if(theModel.compoundModelMember == 1) {
+                    if(theModel.compoundModelMember) {
                         tempMatrix.setIdentity();
                         tempMatrix.multiply(viewMatrix, modelMatrix);
                         viewModelMatrix.multiply(cModelMatrix, tempMatrix);
@@ -1172,13 +1195,13 @@ public class SceneList {
                     //  Transform the points
                     if(theModel.fileName.equalsIgnoreCase("Output Image Rectangle") && 
                     theModel.modelType != COMPOUND &&	     
-                    theModel.compoundModelMember == 0) {    
+                    theModel.compoundModelMember == false) {    
                         theModel.screenObject.transformAndProject(viewModelMatrix, outputRows, outputColumns);
                     }
 
                     if(theModel.fileName.equalsIgnoreCase("Output Image Rectangle") && 
                     theModel.modelType != COMPOUND &&
-                    theModel.compoundModelMember == 1) {   
+                    theModel.compoundModelMember) {   
                         theModel.screenObject.transformAndProject(viewModelMatrix,
                           outputRows, outputColumns, theModel.compoundModelMember, cmCentroidx, cmCentroidy, cmCentroidz);
                     }
@@ -1188,7 +1211,7 @@ public class SceneList {
                     // If this is a background plate, blt it to the screen
                     if(modelCounter == 1 && 
                     theModel.modelType != COMPOUND && 
-                    theModel.warpIndicator == 0 &&
+                    theModel.warpIndicator == false &&
                     theModel.blendIndicator == false) {
                         HDC theDC = GetDC(theWindow);
                         backgroundPlate.display(theDC, outputColumns, outputRows);
@@ -1212,7 +1235,7 @@ public class SceneList {
                         false, SHAPE, false, 
                         1.0f, null, null, null, 
                         "None", "Default", 
-                        0, aColor, "None", "None", 
+                        false, aColor, "None", "None", 
                         false, null);
                     theModel = saveModel.nextEntry;
                     if(theModel != null) {
@@ -1230,6 +1253,9 @@ public class SceneList {
     } // previewStill
 
 
+    // Called from:
+    //     MainFrame.onRenderScene
+    //     MainFrame.onRenderSequence
     public int render(ImageView displayWindow, TMatrix viewMatrix,
     boolean depthSortingEnabled, boolean zBufferEnabled, boolean antiAliasEnabled, 
     boolean hazeFogEnabled) {
@@ -1306,7 +1332,7 @@ public class SceneList {
                     return -1;
                 }
 
-                // Loop through each Model in the scene list
+                // Loop through each model in the scene list
                 for(int currentModel = 0; currentModel <= numModels - 1; currentModel++) {
                     theModel = models[currentModel];
                     if (theModel.statusIndicator == 0) {
@@ -1472,8 +1498,8 @@ public class SceneList {
                         HDC theDC = GetDC(hwnd);
                         outputImage.display(theDC, outputColumns, outputRows);
                         ReleaseDC(hwnd, theDC);
-                    } // end if theModel.statusIndicator == 0
-                } // end model loop
+                    } // if theModel.statusIndicator == 0
+                } // for currentModel
 
                 // One color channel of the scene is complete! Save it in the proper location
                 String outputDir, outputPath;
@@ -1502,7 +1528,7 @@ public class SceneList {
                 if(zBufferEnabled) {
                     zBuffer.init32(ZBUFFERMAXVALUE);
                 }
-            }  //end of color loop
+            } // for theColor
 
             // Combine the color channels together
             myStatus = 0;
@@ -1528,6 +1554,8 @@ public class SceneList {
     } // render
 
 
+    // Called from:
+    //     render
     public void getSequenceFileName(String psTheInputPath, int piFrameCounter) {
         String sTempPath;
         sTempPath = psTheInputPath;
@@ -1566,11 +1594,15 @@ public class SceneList {
     } // getFileName
 
 
+    // Called from:
+    //     preview
+    //     previewStill
     public void adjustTransforms(int piEffectType, SceneElement theModel, MotionNode aMotion, Bundle xfrm) {
         // float viewX, viewY, viewZ, rotateX, rotateY, rotateZ; // these local variables are not used
 
         // Copy model transforms into a bundle object
         if((piEffectType == SEQUENCE) && (theModel.modelMotion != null)) {
+            // Set output parameter xfrm
             xfrm.rx = aMotion.rx;
             xfrm.ry = aMotion.ry;
             xfrm.rz = aMotion.rz;
@@ -1584,6 +1616,7 @@ public class SceneList {
             xfrm.tz = aMotion.tz;
             xfrm.alpha = aMotion.alpha;
         } else {
+            // Set output parameter xfrm
             xfrm.rx = theModel.rotation.x;
             xfrm.ry = theModel.rotation.y;
             xfrm.rz = theModel.rotation.z;
@@ -1600,8 +1633,12 @@ public class SceneList {
     } // adjustTransforms
 
 
+    // Called from:
+    //     preview
+    //     previewStill
+    //     render
     public void getViewMatrix(TMatrix pViewMatrix, int piFrameCounter, Scene pTheScene) {
-        MotionNode aMotion = null;
+        MotionNode aMotion = new MotionNode();
         pViewMatrix.setIdentity();
         float xRadians, yRadians, zRadians;
 
@@ -1625,26 +1662,32 @@ public class SceneList {
     } // getViewMatrix
 
 
+    // Called from:
+    //     readList
     public int checkFor3(String aString) {
         // Perform a syntax check on the input string:
         // The string must have two commas and three numeric values
         int numChars = aString.length();
-        String aChar;
-        aChar = aString;
+        char aChar;
+        int iStrIdx = 0;
+        
         int numCommas = 0;
         int numNumbers = 0;
 
         for (int j = 0; j < numChars; j++) {
-            if (*aChar == ',') { 
+            aChar = aString.charAt(j);
+            if (aChar == ',') { 
               numCommas++;
-              aChar++;
+              iStrIdx++;
             } else {
-                if(isdigit((int) *aChar) || *aChar == '.'|| *aChar == '-') {
+                if(Character.isDigit(aChar) || aChar == '.'|| aChar == '-') {
                     numNumbers++;
                 }
 
-                while (isdigit((int) *aChar) || *aChar == '.'|| *aChar == '-') {
-                    aChar++;
+                while (iStrIdx < numChars - 1 && 
+                (Character.isDigit(aChar) || aChar == '.'|| aChar == '-')) {
+                    iStrIdx++;
+                    aChar = aString.charAt(iStrIdx);
                 }
             }
         }
@@ -1657,17 +1700,19 @@ public class SceneList {
     } // checkFor3
 
 
+    // Called from:
+    //     previewStill
     public int calcCompoundModelRefPoint(SceneElement theModel, int outputRows, int outputColumns, 
     Float cmCentroidX, Float cmCentroidY, Float cmCentroidZ) {
         cmCentroidX = 0.0f;
         cmCentroidY = 0.0f;
         cmCentroidZ = 0.0f;
         SceneElement saveModel;
-        float bucketX, bucketY, bucketZ;
-        float mCentroidX, mCentroidY, mCentroidZ;
-        int prevModelIsACompoundMember = 0;
+        float bucketX = 0f, bucketY = 0f, bucketZ = 0f;
+        Float mCentroidX = 0f, mCentroidY = 0f, mCentroidZ = 0f;
+        boolean prevModelIsACompoundMember = false; // changed from int to boolean
         int modelCounter = 0;
-        TMatrix modelMatrix;
+        TMatrix modelMatrix = new TMatrix();
         
         // theModel is assumed to point to the compound model object.
         //
@@ -1701,7 +1746,7 @@ public class SceneList {
             }
 
             // Transform the model and get its transformed centroid
-            if(theModel.compoundModelMember == 1) {
+            if(theModel.compoundModelMember) {
                 // Transform the individual model
                 theModel.screenObject.transformAndProject(modelMatrix, outputRows, outputColumns);
                 theModel.screenObject.currentShape.getTCentroid(mCentroidX, mCentroidY, mCentroidZ);
@@ -1718,7 +1763,8 @@ public class SceneList {
                 modelCounter++;
             }
 
-            if(theModel.compoundModelMember == 0 && prevModelIsACompoundMember == 1) {
+            if(!theModel.compoundModelMember && prevModelIsACompoundMember) {
+                // Set the output parameters
                 cmCentroidX = bucketX / modelCounter;
                 cmCentroidY = bucketY / modelCounter;
                 cmCentroidZ = bucketZ / modelCounter;
@@ -1729,11 +1775,12 @@ public class SceneList {
 
             prevModelIsACompoundMember = theModel.compoundModelMember;
             theModel = theModel.nextEntry;  // Get the pointer to next model
-        }
+        } // while
 
         // Handle the case where a compound model is the last model in the
         // scene list.
-        if(prevModelIsACompoundMember == 1) {
+        if(prevModelIsACompoundMember) {
+            // Set the output parameters
             cmCentroidX = bucketX / modelCounter;
             cmCentroidY = bucketY / modelCounter;
             cmCentroidZ = bucketZ / modelCounter;
@@ -1760,6 +1807,8 @@ public class SceneList {
     } // addScene
 
 
+    // Called from:
+    //     previewStill
     public int addSceneElement(String mdName, String fName, boolean blendI,
     int theType, boolean warpI, float aScale, 
     Point3d rt, Point3d sc, Point3d tr, 
@@ -1816,6 +1865,8 @@ public class SceneList {
     } // display
 
 
+    // Called from:
+    //     finalize
     public void clear() {
         Scene aScene = this.sceneListHead;
         SceneElement theModel, nextModel;
@@ -1834,6 +1885,7 @@ public class SceneList {
 
         aScene = this.sceneListHead;
         aScene.nextEntry = null;
+
         // Reset the background plate
         if(backgroundPlate != null) {
             backgroundPlate = null;
@@ -1841,7 +1893,9 @@ public class SceneList {
     } // clear
 
 
-    public int setModelReferencePoint(String modelName, float centroidX, float centroidY, float centroidZ) {
+    // Called from:
+    //     setCompoundRefPoints
+    public int setModelReferencePoint(String psModelName, float pfCentroidX, float pfCentroidY, float pfCentroidZ) {
         Scene aScene = this.sceneListHead;
         SceneElement theModel;
         String msgText;
@@ -1856,17 +1910,17 @@ public class SceneList {
         boolean found = false;
 
         while (theModel != null) {
-            if(modelName.equalsIgnoreCase(theModel.modelName)) {
-                theModel.pointOfReference.x = centroidX;
-                theModel.pointOfReference.y = centroidY;
-                theModel.pointOfReference.z = centroidZ;
+            if(psModelName.equalsIgnoreCase(theModel.modelName)) {
+                theModel.pointOfReference.x = pfCentroidX;
+                theModel.pointOfReference.y = pfCentroidY;
+                theModel.pointOfReference.z = pfCentroidZ;
                 found = true;
             }
             theModel = theModel.nextEntry;  // Get the pointer to next model
         }
 
         if(found == false) {
-            msgText = "setModelReferencePoint: Model Not Found: " + modelName;
+            msgText = "setModelReferencePoint: Model Not Found: " + psModelName;
             Globals.statusPrint(msgText);
             return -1;
         }
@@ -1891,7 +1945,7 @@ public class SceneList {
         theModel = aScene.head;
         // int found = FALSE; // this variable is not used
         int modelCounter = 0;
-        int prevModelIsACompoundMember = 0;
+        boolean prevModelIsACompoundMember = false;
 
         while (theModel != null) {
             if(theModel.modelType == COMPOUND) {
@@ -1902,14 +1956,14 @@ public class SceneList {
                 modelCounter = 0;
             }
 
-            if(theModel.compoundModelMember == 1) {
+            if(theModel.compoundModelMember) {
                 bucketX += theModel.pointOfReference.x;
                 bucketY += theModel.pointOfReference.y;
                 bucketZ += theModel.pointOfReference.z;
                 modelCounter++;
             }
 
-            if((theModel.compoundModelMember == 0) && (prevModelIsACompoundMember == 1)) {
+            if((!theModel.compoundModelMember) && (prevModelIsACompoundMember)) {
                 centroidX = bucketX / modelCounter;
                 centroidY = bucketY / modelCounter;
                 centroidZ = bucketZ / modelCounter;
@@ -1922,7 +1976,7 @@ public class SceneList {
 
         // Handle the case where a compound model is the last model in the
         // scene list.
-        if(prevModelIsACompoundMember == 1) {
+        if(prevModelIsACompoundMember) {
             centroidX = bucketX / modelCounter;
             centroidY = bucketY / modelCounter;
             centroidZ = bucketZ / modelCounter;
@@ -1933,6 +1987,8 @@ public class SceneList {
     } // setCompoundRefPoints
 
 
+    // Called from:
+    //     previewStill
     public int copyRefPoints() {
         // Copies reference points into a model from its corresponding
         // renderObject
@@ -1963,6 +2019,8 @@ public class SceneList {
 
 
     // This method camae from DEPTHSRT.CPP
+    // Called from:
+    //     render
     public int depthSort(SceneElement[] models, float[] distances,
     Integer numModels, boolean depthSortingEnabled) {
         Float viewX = 0f, viewY = 0f, viewZ = 0f;
@@ -1985,7 +2043,7 @@ public class SceneList {
         while (theModel != null) {
             if(
             modelCounter == 0 && 
-            theModel.warpIndicator == 0 &&
+            theModel.warpIndicator == false &&
             theModel.blendIndicator == false) {
                 distances[modelCounter] = 999999999.9f;  // set the distance of the backdrop image
                 models[modelCounter] = theModel;
