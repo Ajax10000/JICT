@@ -10,6 +10,7 @@ import frames.MainFrame;
 
 import globals.Globals;
 
+import java.awt.Color;
 import java.io.File;
 
 import javax.swing.JDialog;
@@ -81,6 +82,9 @@ protected:
     // This value ws defined in SHAPE3D.H
     public static final int I_MAXVERTICES = 1024;
     
+    // Called from:
+    //     MainFrame.onPreviewStillScene
+    //     MainFrame.onPreviewSequenceScene
     public ImageView() {
         firstPress = false;
         m_eraseMe = false;
@@ -98,7 +102,7 @@ protected:
     } // GetDocument
 
 
-    public void OnInitialUpdate() {
+    public void onInitialUpdate() {
         String anImage;
         ScrollView.OnInitialUpdate();
         ASSERT(getDocument() != null);
@@ -118,6 +122,8 @@ protected:
     } // OnInitialUpdate
 
     
+    // Called from:
+    //     MainFrame.onToolsWarpImage
     public void setCaption(String aCaption) {
          GetParent().SetWindowText(aCaption);
     } // setCaption
@@ -127,17 +133,19 @@ protected:
         CPoint aLocation;
 
         aLocation = GetDeviceScrollPosition();
+
+        // Set the output parameters
         xPixels = aLocation.x;
         yPixels = aLocation.y;
     } // getScrollPos
     
 
-    public void OnUpdate() {
+    public void onUpdate() {
         repaint();
-    } // OnUpdate
+    } // onUpdate
     
 
-    public void OnDraw(CDC qdc) {
+    public void onDraw(CDC qdc) {
         int status;
         MainFrame theFrame = (MainFrame)AfxGetMainWnd();
     
@@ -206,9 +214,11 @@ protected:
         SelectObject(memDC, holdBitmap);
         DeleteDC(memDC);
         DeleteDC(dc);
-    } // OnDraw
+    } // onDraw
     
 
+    // Called from:
+    //     MainFrame.onToolsWarpImage
     public boolean associateMemImage(MemImage theImage) {
         m_anImage = theImage;                      //  set the view's image
         getDocument().setImagePointer(theImage);  //  set the document's image
@@ -271,6 +281,10 @@ protected:
     } // loadBMP
     
     
+    // Called from:
+    //     MainFrame.onPreviewStillScene
+    //     MainFrame.onPreviewSequenceScene
+    //     MainFrame.onToolsWarpImage
     public static ImageView getView() {
         CMDIChildWnd pChild = ((AfxGetApp().m_pMainWnd)).MDIGetActive();
         if(!pChild) {
@@ -291,7 +305,7 @@ protected:
     } // getView
     
 
-    public void OnLButtonDown(UINT nFlags, CPoint point) {
+    public void onLButtonDown(UINT nFlags, CPoint point) {
         // Peek into the CMainFrame window object to see if the cutout enabled option has been checked.
         String msgText;
         MainFrame theFrame = (MainFrame)AfxGetMainWnd();
@@ -361,10 +375,10 @@ protected:
         }
 
         CScrollView.OnLButtonDown(nFlags, point);
-    } // OnLButtonDown
+    } // onLButtonDown
     
 
-    public void OnLButtonUp(UINT nFlags, CPoint point) {
+    public void onLButtonUp(UINT nFlags, CPoint point) {
         if(m_cutoutEnabled) {
             String msgText;
             if(firstPress == false) {
@@ -381,7 +395,7 @@ protected:
             
             HPEN hpen;
             HDC theDC = ::GetDC(m_hWnd);
-            hpen = CreatePen(PS_SOLID, 1, RGB(255, 255, 255));
+            hpen = CreatePen(PS_SOLID, 1, Color.WHITE);
             SelectObject(theDC, hpen);
 
             float x, y, z;
@@ -398,10 +412,10 @@ protected:
         }
 
         CScrollView.OnLButtonUp(nFlags, point);
-    } // OnLButtonUp
+    } // onLButtonUp
     
 
-    public void OnLButtonDblClk(UINT nFlags, CPoint point) {
+    public void onLButtonDblClk(UINT nFlags, CPoint point) {
         String msgText;
         String cutoutName, imageFileName;
         CSize docSize = getDocument().getDocSize();
@@ -435,10 +449,10 @@ protected:
         }
 
         CScrollView.OnLButtonDblClk(nFlags, point);
-    } // OnLButtonDblClk
+    } // onLButtonDblClk
     
     
-    public void OnRButtonDown(UINT nFlags, CPoint point) {
+    public void onRButtonDown(UINT nFlags, CPoint point) {
         if(m_cutoutEnabled) {
             String msgText;
             int xOffset, yOffset;
@@ -449,7 +463,7 @@ protected:
             HPEN hpen;
             HDC theDC = ::GetDC(m_hWnd);
         
-            hpen = CreatePen(PS_SOLID, 1, RGB(0, 0, 0));  
+            hpen = CreatePen(PS_SOLID, 1, Color.BLACK);  
             SelectObject(theDC, hpen);
             int theStatus;
 
@@ -491,18 +505,18 @@ protected:
         }
 
         CScrollView.OnRButtonDown(nFlags, point);
-    } // OnRButtonDown
+    } // onRButtonDown
 
 
-    public void OnRButtonUp(UINT nFlags, CPoint point) {
+    public void onRButtonUp(UINT nFlags, CPoint point) {
         // TODO: Add your message handler code here and/or call default
         CScrollView.OnRButtonUp(nFlags, point);
-    } // OnRButtonUp
+    } // onRButtonUp
 
 
-    public void OnMouseMove(UINT nFlags, CPoint point) {
+    public void onMouseMove(UINT nFlags, CPoint point) {
         ScrollView.OnMouseMove(nFlags, point);
-    } // OnMouseMove
+    } // onMouseMove
 
 
     int getSampleRange(MemImage theImage, int x, int y, 
