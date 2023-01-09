@@ -161,7 +161,7 @@ public class MotionPath {
             }
 
             nodeCounter++;
-            theKeyWord = getNextMotionLine(theText, lineCounter, filein)
+            theKeyWord = getNextMotionLine(theText, lineCounter, filein);
         }
 
         allocate(nodeCounter);
@@ -171,7 +171,7 @@ public class MotionPath {
         }
   
         filein.close();
-        ifstream filein2(pathName);
+        ifstream filein2 = new ifstream(pathName);
         nodeCounter = 0;
         theKeyWord = getNextMotionLine(theText, lineCounter, filein2);
         while(!theKeyWord.equalsIgnoreCase("EOF")) {
