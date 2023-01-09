@@ -10,6 +10,9 @@ public class Vect {
         return;
     }
     
+
+    // Called from:
+    //     RenderObject.transformAndProjectPoint2
     public static void vectorSubtract(Point3d result, Point3d p1, Point3d p2) {
         result.x = p1.x - p2.x;
         result.y = p1.y - p2.y;
@@ -18,6 +21,7 @@ public class Vect {
         return;
     }
     
+
     public static float vectorMagnitude2(Point3d p1, Point3d p2) {
         float result;
         result = (float)Math.sqrt((p1.x * p2.x) + (p1.y * p2.y) + (p1.z * p2.z));
@@ -25,6 +29,7 @@ public class Vect {
         return result;
     }
     
+
     public static float vectorMagnitude1(Point3d p1) {
         float result;
         result = (float)Math.sqrt((p1.x * p1.x) + (p1.y * p1.y) + (p1.z * p1.z));
@@ -32,6 +37,9 @@ public class Vect {
         return result;
     }
     
+
+    // Called from:
+    //     RenderObject.renderMeshz
     public static void vectorNormalize(Point3d p1) {
         float mag = vectorMagnitude1(p1);
         if(mag > 1.0f) {
@@ -43,6 +51,7 @@ public class Vect {
         return;
     }
     
+
     public static void crossProduct(Point3d result, Point3d p1, Point3d p2, Point3d p3) {
         //  Watt's definition. p 15. P2 is the origin common to p1 and p3.
         float v1 = p3.x - p2.x;
@@ -60,12 +69,14 @@ public class Vect {
         return;
     }
     
+
     public static float dotProduct(Point3d p1, Point3d p2) {
         float result;
         result = (p1.x * p2.x) + (p1.y * p2.y) + (p1.z * p2.z);
         return result;
     }
     
+
     public static void getNormal1(float x0, float y0, float z0, float x1, float y1, float z1, 
               float x2, float y2, float z2, Float xN, Float yN, Float zN) {
         //  Compute the surface normal of the three input points
@@ -82,6 +93,9 @@ public class Vect {
         zN = (xv * yw) - (yv * xw);
     }
     
+
+    // Called from:
+    //     RenderObject.renderMeshz
     public static void getNormal2(Point3d result, Point3d p0, Point3d p1, Point3d p2) {
         //  Compute the surface normal of the three input points
         float xv = p1.x - p0.x;
