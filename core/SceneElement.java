@@ -59,6 +59,7 @@ public class SceneElement {
     // The model's point of reference. Default is the model's centroid.
     // This is the point about which the model is transformed. i.e. its origin.
     // Changed from private to public as it is used by SceneList
+    // Set in SceneList.copyRefPoints
     public Point3d pointOfReference;   
 
     // Path Name of image
@@ -120,7 +121,9 @@ public class SceneElement {
 
     // 1 if constructor successful
     // Changed from int to boolean
-    private boolean valid;
+    // Changed fromprivate to public as it is used
+    // by SceneList in method preview
+    public boolean valid;
     
     // Point to previous Scene element
     // Changed from private to public as it is used 
@@ -282,6 +285,8 @@ public class SceneElement {
     } // finalize
 
 
+    // Called from:
+    //     SceneList.writeList
     void writeFile(ofstream fileout) {
         // Creates the model portion of a scene file
         String sBlendArray, sWarpArray, sModelTypeArray;
