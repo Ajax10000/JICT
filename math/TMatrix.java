@@ -54,10 +54,11 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
     // Called from:
     //     Gloals.iwarpz
     //     MainFrame.onToolsWarpImage
+    //     RenderObject ctor that takes 4 Point3d parameters
+    //     RenderObject ctor that takes 4 parameters: a String, int, boolean and Point3d
     public TMatrix() {
         if (ictdebug) {
-            String msgText;
-            sprintf(msgText, "tMatrix constructor 1.  Sizeof TMatrix: %d",sizeof(TMatrix));
+            String msgText = String.format("TMatrix constructor 1.  Sizeof TMatrix: %d", sizeofLowerLimit());
             Globals.statusPrint(msgText);
         }
         setIdentity();
@@ -68,8 +69,7 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
     //     Globals.iwarpz
     public TMatrix(TMatrix aMatrix) {
         if(ictdebug) {
-            String msgText;
-            sprintf(msgText, "tMatrix constructor 2.  Sizeof TMatrix: %d", sizeof(TMatrix));
+            String msgText = String.format("TMatrix constructor 2.  Sizeof TMatrix: %d", sizeofLowerLimit());
             Globals.statusPrint(msgText);
         }
         matcopy(theMatrix, aMatrix.theMatrix);
@@ -85,6 +85,8 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
     } // multiply
     
 
+    // Called from:
+    //     RenderObject.transformAndProject
     public void copy(TMatrix matrix) {
         setIdentity();
         matcopy(theMatrix, matrix.theMatrix);
@@ -92,8 +94,9 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
     
 
     // Called from:
-    //     SceneList.previewStill
     //     MainFrame.getViewMatrix
+    //     SceneList.previewStill
+    //     ScenePreviewDlg.onCmdPlus
     public void setIdentity() {
         theMatrix[0][0]= 1.0f; theMatrix[1][0]= 0.0f; theMatrix[2][0]= 0.0f; theMatrix[3][0]= 0.0f;
         theMatrix[0][1]= 0.0f; theMatrix[1][1]= 1.0f; theMatrix[2][1]= 0.0f; theMatrix[3][1]= 0.0f;
@@ -133,9 +136,10 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
 
     // Called from:
     //     Globals.iwarpz
+    //     MainFrame.getViewMatrix
     //     SceneList.calcCompoundModelRefPoint
     //     SceneList.previewStill
-    //     MainFrame.getViewMatrix
+    //     ScenePreviewDlg.onCmdPlus
     public void translate(float tx, float ty, float tz) {
         float[][] mat = new float[4][4];
         
@@ -150,9 +154,10 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
 
     // Called from:
     //     Globals.iwarpz
+    //     MainFrame.getViewMatrix
     //     SceneList.calcCompoundModelRefPoint
     //     SceneList.peviewStill
-    //     MainFrame.getViewMatrix
+    //     ScenePreviewDlg.onCmdPlus
     public void rotate(float rx, float ry, float rz) {
         float[][] mat1 = new float[4][4];
         float[][] mat2 = new float[4][4];
@@ -213,6 +218,7 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
     
     // Called from:
     //     Globals.iwarpz
+    //     RenderObject.transformAndProjectPoint2
     public void transformPoint(float xIn, float yIn, float zIn, 
     Float xOut, Float yOut, Float zOut) {
         xOut = (xIn * theMatrix[0][0]) + (yIn * theMatrix[1][0]) + (zIn * theMatrix[2][0]) + theMatrix[3][0];
@@ -289,7 +295,8 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
     
         for (i = 0; i < MAXROWS; i++) {
             maxValue = i;
-            for (j = i + 1; j < MAXROWS; j++) {  // Partial pivot (swap rows) if necessary
+            for (j = i + 1; j < MAXROWS; j++) {  
+                // Partial pivot (swap rows) if necessary
                 if(Math.abs(theMatrix[i][j]) > Math.abs(theMatrix[i][maxValue])) {
                     maxValue = j;
                 }
@@ -338,7 +345,7 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
                     }
                 }
 
-                if(Math.abs(theMatrix[j][j]) < 1.0E-06) {
+                if(Math.abs(theMatrix[j][j]) < 1.0E-06f) {
                     Globals.statusPrint("invertg: Zero Diagonal Not Allowed. Exiting");
                     return -1;
                 }
@@ -357,6 +364,8 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
     } // invertg
     
 
+    // Called from:
+    //     RenderObject.renderMeshz
     public void transformAndProjectPoint(float x, float y, float z, 
     Integer sx, Integer sy, 
     float refX, float refY, float refZ, 
@@ -370,7 +379,6 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
         //y += refY;
         //z += refZ;
     
-        //
         // Project to the screen
         float d = -512.0f; // Distance from screen to center of projection: (0,0,-d)
         float w = (d / (tz + d));
@@ -393,22 +401,22 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
         // Project to the screen
         float d = -512.0f; // Distance from screen to center of projection: (0,0,-d)
         float w = (d / (t.z + d));
-        s.x = ((t.x * w) + ref.x) + (outWidth/2); //(center in output image)
+        s.x = ((t.x * w) + ref.x) + (outWidth/2); // Center in output image
         s.y = ((t.y * w) + ref.y) + (outHeight/2);
     } // transformAndProjectPoint1
     
     
     // Called from:
     //     Globals.iwarpz
+    //     RenderObject.transformAndProject
     public void transformAndProject(Shape3d aShape, int outHeight,
     int outWidth, boolean useExternalCentroid,
     float centroidX, float centroidY, float centroidZ) {
-        //
+
         // Default behavior is to rotate the object about its own centroid.
-        // If useExternalCentroid is TRUE then the object is rotated about
+        // If useExternalCentroid is true then the object is rotated about
         // the point (centroidX, centroidY, centroidZ).
-        //
-        float cX, cY, cZ;	   //  The translation that moves the shape to the origin
+        Float cX = 0f, cY = 0f, cZ = 0f;	   //  The translation that moves the shape to the origin
         int sx, sy;
     
         if(!useExternalCentroid) {
@@ -421,7 +429,9 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
         aShape.translateW(-cX, -cY, -cZ);
     
         aShape.initCurrentVertex();
-        float maxtX, maxtY, maxtZ, mintX, mintY, mintZ;
+        float maxtX = 0f, maxtY = 0f, maxtZ = 0f;
+        float mintX = 0f, mintY = 0f, mintZ = 0f;
+
         // Transform the shape using the perspective matrix
         for (int index = 0; index < aShape.getNumVertices(); index++) {
             transformPoint(
@@ -445,7 +455,8 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
             if(aShape.currentVertex.ty < mintY) mintY = aShape.currentVertex.ty;
             if(aShape.currentVertex.tz > maxtZ) maxtZ = aShape.currentVertex.tz;
             if(aShape.currentVertex.tz < mintZ) mintZ = aShape.currentVertex.tz;
-            aShape.currentVertex++;
+            // aShape.currentVertex++;
+            aShape.incCurrentVertex();
         }
 
         aShape.originX = mintX + (maxtX - mintX)/2.0f;
@@ -467,10 +478,40 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
             sy = (int)(aShape.currentVertex.sy);
             aShape.currentVertex.sx = (float)sx;
             aShape.currentVertex.sy = (float)sy;
-            aShape.currentVertex++;
+            // aShape.currentVertex++;
+            aShape.incCurrentVertex();
         }
     
-        aShape.translateW(cX, cY, cZ);    // move world coords back
-        aShape.translateS((int)cX, (int)cY); // move Screen coords back
+        aShape.translateW(cX, cY, cZ);    // Move world coords back
+        aShape.translateS((int)cX.floatValue(), (int)cY.floatValue()); // Move screen coords back
     } // transformAndProject
+
+
+    public int sizeofLowerLimit() {
+        int mySize = 0;
+        int booleanFieldsSizeInBits = 0;
+        int booleanFieldsSize = 0;
+        int intFieldsSize = 0;
+        int floatFieldsSize = 0;
+        int referenceFieldsSize = 0;
+
+        /*
+        boolean ictdebug = false;
+        protected float[][] theMatrix = new float[4][4];    // Composite transformation matrix
+        protected float[][] rxMat = new float[4][4];			 // X rotation matrix
+        protected float[][] ryMat = new float[4][4];			 // Y rotation matrix
+        protected float[][] rzMat = new float[4][4];			 // Z rotation matrix
+        protected float[][] scMat = new float[4][4];			 // Scaling matrix
+        protected float[][] trMat = new float[4][4];			 // Translation matrix
+        */
+
+        booleanFieldsSizeInBits = 1; // 1 booleans
+        booleanFieldsSize = 1; // 1 bit fits in a byte
+        intFieldsSize = 0*4; // 0 ints
+        floatFieldsSize = 0*4; // 0 floats
+        referenceFieldsSize = 6*4; // 6 references to objects (6 matrices)
+        mySize = booleanFieldsSize + intFieldsSize + floatFieldsSize + referenceFieldsSize;
+
+        return mySize;
+    } // sizeofLowerLimit
 } // class TMatrix
