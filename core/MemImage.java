@@ -19,6 +19,7 @@ public class MemImage {
     protected boolean valid;          
     protected byte[] bytes;         // Pointer to the image bytes
 
+    // These were defined in MEMIMAGE.H
     public static final int REDCOLOR = 1;
     public static final int GREENCOLOR = 2;
     public static final int BLUECOLOR = 3;
@@ -32,10 +33,34 @@ public class MemImage {
     public static final int CHROMAGREEN  = 0;
     public static final int CHROMABLUE   = 0;
 
+    // These were defined in MEMIMAGE.H
+    // Used in: 
+    //     the constructor that takes 6 parameters (to check parameter imAccessMode)
+    //     finalize
+    //     clear
+    //     clearRGB
+    //     clearRGBRange
+    //     init32
+    //     scaleTo8
+    //     getMPixel(int x, int y, char aColor)
+    //     getMPixelRGB
+    //     setMPixelRGB
+    //     setMPixel
+    //     setMPixelA
+    //     getMPixelA
+    //     getMPixel(int x, int y)
+    //     setMPixel32
+    //     getMPixel32
+    //     readBMP
     public static final int SEQUENTIAL = 1;
+
+    // Used in: 
+    // the constructor that takes 6 parameters
     public static final int RANDOM = 0;
 
     // This value came from ICT20.H
+    // Used in: 
+    //     scaleTo8
     public static final float ZBUFFERMAXVALUE = 2.0E31f;
 /*
 protected:
@@ -111,10 +136,12 @@ public:
 
     // Called from:
     //     Globals.motionBlur
+    //     RenderObject ctor that takes 4 parameters: a String, int, boolean and Point3d
     //     RenderObject.prepareCutout
     //     SceneList.previewStill
     //     MainFrame.onToolsWarpImage
-    public MemImage(String psFileName, int imHeight, int imWidth, int imAccessMode, char rw, int piColorSpec) {
+    public MemImage(String psFileName, int imHeight, int imWidth, int imAccessMode, 
+    char rw, int piColorSpec) {
         String msgBuffer;
 
         if (
@@ -180,7 +207,7 @@ public:
         this.accessMode = imAccessMode;
 
         if(rw == 'W' || rw == 'w') {
-            DWORD numRows = this.imageHeight;
+            int numRows = this.imageHeight;
             if (this.accessMode == SEQUENTIAL) {
                 numRows = 1;
             }
@@ -239,9 +266,11 @@ public:
 
 
     // Called from: 
+    //     saveAs8
     //     Globals.motionBlur
     //     SceneList.render
     //     MainFrame.onToolsWarpImage
+    //     RenderObject.renderMeshz
     public MemImage(int height, int width, int aBitsPerPixel) {
         //  Allocates a memory resident 8 bit image by default.
         this.valid = false;
@@ -261,6 +290,8 @@ public:
     } // MemImage ctor
 
 
+    // Called from:
+    //     RenderObject.renderMeshz
     public MemImage(int height, int width) {
         this(height, width, 8);
     } // MemImage ctor
@@ -298,8 +329,10 @@ public:
 
 
     // Called from:
+    //     The MemImage constructor that takes 6 parameters
     //     MemImage(int height, int width, int aBitsPerPixel)
     //     MemImage(MemImage m) ctor
+    //     readBMP
     protected void allocate(int piHeight, int piWidthInPixels) {
         int totalBytes;
         byte[] buffer;
@@ -354,8 +387,8 @@ public:
             return -1;
         }
 
-        SetCursor(LoadCursor( null, IDC_WAIT ));
-        // Replace line above with something like:
+        // SetCursor(LoadCursor( null, IDC_WAIT ));
+        // TODO: Replace line above with something like:
         // Cursor cursor = button.getCursor();
         // button.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
@@ -384,8 +417,8 @@ public:
             iBytesIdx += pads;
         } // for y
 
-        SetCursor(LoadCursor( null, IDC_ARROW ));
-        // Replace line above with something like:
+        // SetCursor(LoadCursor( null, IDC_ARROW ));
+        // TODO: Replace line above with something like:
         // Cursor cursor = button.getCursor();
         // button.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
         return 0;
@@ -393,15 +426,15 @@ public:
 
 
     public int clearRGBRange(byte redLow, byte redHigh, byte greenLow, byte greenHigh, byte blueLow, byte blueHigh) {
-        //  clear all pixels whose colors match the specified color
-        //  use the fastest traversal method
+        // Clear all pixels whose colors match the specified color
+        // Use the fastest traversal method
         if (this.bitsPerPixel != 24) {
             Globals.statusPrint("clearRGB: bits Per pixel must = 24");
             return -1;
         }
 
-        SetCursor(LoadCursor( null, IDC_WAIT ));
-        // Replace with something like:
+        // SetCursor(LoadCursor( null, IDC_WAIT ));
+        // TODO: Replace line above with something like:
         // Cursor cursor = button.getCursor();
         // button.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
@@ -430,8 +463,8 @@ public:
             iBytesIdx += pads;
         } // for y
 
-        SetCursor(LoadCursor( null, IDC_ARROW ));
-        // Replace line above with something like:
+        // SetCursor(LoadCursor( null, IDC_ARROW ));
+        // TODO: Replace line above with something like:
         // Cursor cursor = button.getCursor();
         // button.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 
@@ -440,6 +473,7 @@ public:
 
 
     // Called from:
+    //     RenderObject.renderMeshz
     //     SceneList.render
     public void init32(float aValue) {
         //  Initialize a 32 bit image by setting each pixel to a designated value
@@ -465,6 +499,8 @@ public:
     } // init32
 
 
+    // Called from:
+    //     saveAs8
     public int scaleTo8(MemImage scaledImage) {
         // Scale a 32 bit memimage to 8 bits and copy it to the memImage passed in.
         // This version scales to the maximum dynamic range permitted by 8 bits of resolution
@@ -511,7 +547,7 @@ public:
                     actMin = *myTemp;
                 }
                 if(IGNOREMAXVALUE) {
-                    if(*myTemp > actMax && (*(myTemp) != ZBUFFERMAXVALUE)) {
+                    if((*myTemp > actMax) && (*(myTemp) != ZBUFFERMAXVALUE)) {
                         actMax = *myTemp;
                     }
                 } else {
@@ -519,6 +555,7 @@ public:
                         actMax = *myTemp;
                     }
                 }
+
                 myTemp++;
             } // for x
         } // for y
@@ -568,7 +605,7 @@ public:
         RGBQUAD pal = new RGBQUAD[256];
 
         hloc = LocalAlloc(LMEM_ZEROINIT | LMEM_MOVEABLE, sizeof(BITMAPINFOHEADER) + (sizeof(RGBQUAD) * 256));
-        pbmi = (PBITMAPINFO)LocalLock(hloc);
+        pbmi = LocalLock(hloc);
 
         for(int a = 0; a < 256; a++) {
             pal[a].rgbRed = a;
@@ -587,14 +624,14 @@ public:
         memcpy(pbmi.bmiColors, pal, sizeof(RGBQUAD) * 256);
 
         // Create a bitmap data structure containing the MemImage bits
-        hBitmap = CreateDIBitmap(dc, (BITMAPINFOHEADER)pbmi, CBM_INIT, this.bytes, pbmi, DIB_RGB_COLORS);
+        hBitmap = CreateDIBitmap(dc, pbmi, CBM_INIT, this.bytes, pbmi, DIB_RGB_COLORS);
         LocalFree(hloc);
 
         // Create a memory DC
         newdc = CreateCompatibleDC(dc);
 
         // Select the bitmap into the memory DC
-        holdBitmap = (HBITMAP)SelectObject(newdc, hBitmap);
+        holdBitmap = SelectObject(newdc, hBitmap);
 
         int localHeight = this.imageHeight;
         int localWidth = this.imageWidth;
@@ -617,10 +654,6 @@ public:
 
         BitBlt(dc, 0, 0, localWidth, localHeight, newdc, 0, yDelta, SRCCOPY);
         SelectObject(newdc, holdBitmap);
-        /*
-        DeleteObject(hBitmap);
-        DeleteDC(newdc);
-        */
     } // display
 
 
@@ -628,11 +661,11 @@ public:
     // as this method performs graphics
     // Called from:
     //     RenderObject.prepareCutout
-    public int drawMask(HDC dc, POINT[] thePoints, int numVertices) {
+    public int drawMask(POINT[] thePoints, int numVertices) {
         HBITMAP hBitmap, holdBitmap;
         HDC newdc;
 
-        hBitmap = CreateBitmap(this.imageWidth, this.imageHeight, (UINT)1, (UINT)1, bytes);
+        hBitmap = CreateBitmap(this.imageWidth, this.imageHeight, 1, 1, bytes);
         if(hBitmap == 0) {
             Globals.statusPrint("drawMask: Unable to create internal bitmap");
             return 1;
@@ -642,33 +675,29 @@ public:
         newdc = CreateCompatibleDC(dc);
 
         // Select the bitmap into the memory DC
-        holdBitmap = (HBITMAP)SelectObject(newdc, hBitmap);
+        holdBitmap = SelectObject(newdc, hBitmap);
 
         // Clear the memory dc by drawing a filled black rectangle
         RECT myRect;
         SetRect(myRect, 0, 0, this.imageWidth, this.imageHeight);
-        FillRect(newdc, myRect, (HBRUSH)GetStockObject(BLACK_BRUSH));
+        FillRect(newdc, myRect, GetStockObject(BLACK_BRUSH));
 
         // Create the image mask by drawing a filled white polygon
         HPEN hpen = CreatePen(PS_SOLID, 1, 0xFFFFFFFFL);
         SelectObject(newdc, hpen);
         SelectObject(newdc, GetStockObject(WHITE_BRUSH));
         SetPolyFillMode(newdc, WINDING);
-        Polygon(newdc, thePoints, numVertices);
+        graphics2d.drawPolygon(newdc, thePoints, numVertices);
 
         // Display the mask
-        BitBlt(dc, 0, 0, this.imageWidth, this.imageHeight, newdc, 0, 0, SRCCOPY);
+        BitBlt(0, 0, this.imageWidth, this.imageHeight, newdc, 0, 0, SRCCOPY);
 
         // Copy the completed mask image back to the memImage buffer
-        DWORD dwCount = (DWORD)this.paddedWidth * (DWORD)this.imageHeight;
+        int dwCount = this.paddedWidth * this.imageHeight;
 
         // the bitmap is stored using a width that is a 2 byte multiple
         GetBitmapBits(hBitmap, dwCount, this.bytes);
         SelectObject(newdc, holdBitmap);
-        /*
-        DeleteObject(hBitmap);
-        DeleteDC(newdc);
-        */
 
         return 0;
     } // drawMask
@@ -817,6 +846,8 @@ public:
 
     // Sets parameters red, green and blue
     // Called from:
+    //     adjustColor
+    //     copy (if this.bitsPerPixel = 24)
     //     Globals.iwarpz
     //     Globals.motionBlur
     public int getMPixelRGB(int x, int y, byte red, byte green, byte blue) {
@@ -828,8 +859,6 @@ public:
         }
 
         int addr;
-        //byte *thePixel;
-        //byte *myTemp = bytes;
 
         if(this.accessMode == SEQUENTIAL) {
             y = 1;
@@ -839,13 +868,7 @@ public:
         }
 
         addr = ((y - 1) * this.paddedWidth) + ((x - 1)*(this.bitsPerPixel/8));  // 3 bytes/color pixel
-        /*
-        myTemp = myTemp + addr;
-        thePixel = myTemp;
-        blue = *thePixel;
-        green = *(thePixel + 1);
-        red = *(thePixel + 2);
-        */
+
         blue  = bytes[addr];
         green = bytes[addr + 1];
         red   = bytes[addr + 2];
@@ -855,6 +878,9 @@ public:
 
 
     // Called from:
+    //     adjustColor
+    //     copy (if this.bitsPerPixel = 24)
+    //     copy8To24
     //     Globals.iwarpz
     //     Globals.motionBlur
     public int setMPixelRGB(int x, int y, byte red, byte green, byte blue) {
@@ -866,8 +892,6 @@ public:
         }
 
         int addr;
-        // byte *thePixel;
-        // byte *myTemp = bytes;
 
         if(this.accessMode == SEQUENTIAL) {
             y = 1;
@@ -876,14 +900,8 @@ public:
             return -1;
         }
 
-        addr = ((y - 1) * (int)paddedWidth) + ((x - 1)*(this.bitsPerPixel/8));  // 3 bytes/color pixel
-        /*
-        myTemp = myTemp + addr;
-        thePixel = myTemp;
-        *thePixel = blue;
-        *(thePixel + 1) = green;
-        *(thePixel + 2) = red;
-        */
+        addr = ((y - 1) * paddedWidth) + ((x - 1)*(this.bitsPerPixel/8));  // 3 bytes/color pixel
+
         bytes[addr] = blue;
         bytes[addr + 1] = green;
         bytes[addr + 2] = red;
@@ -893,13 +911,14 @@ public:
 
 
     // Called from:
-    //     cleaRectangle
+    //     adjustColor
+    //     clearRectangle
+    //     copy (if this.bitsPerPixel = 8)
     //     Globals.iwarpz
     //     Globals.motionBlur
     public int setMPixel(int x, int y, byte value) {
         // Inputs x and y are assumed to be 1 relative
         int addr;
-        // byte *myTemp = this.bytes;
 
         if(this.accessMode == SEQUENTIAL) {
             y = 1;
@@ -909,8 +928,6 @@ public:
         }
 
         addr = ((y - 1) * paddedWidth) + x - 1;
-        // myTemp = myTemp + addr;
-        // *myTemp = value;
         bytes[addr] = value;
 
         return value;
@@ -1054,6 +1071,10 @@ public:
 
 
     // Called from:
+    //     adjustColor
+    //     copy (if this.bitsPerPixel = 8)
+    //     copy8To24
+    //     histogram
     //     Globals.iwarpz
     //     Globals.motionBlur
     public byte getMPixel(int x, int y) {
@@ -1068,7 +1089,7 @@ public:
             return 0;
         }
 
-        addr = ((y - 1) * (int)paddedWidth) + x - 1;
+        addr = ((y - 1) * paddedWidth) + x - 1;
         iBytesIdx = iBytesIdx + addr;
 
         return this.bytes[iBytesIdx];
@@ -1076,6 +1097,7 @@ public:
 
 
     // Called from:
+    //     Globals.createQMeshModel
     //     Globals.iwarpz
     public int setMPixel32(int x, int y, float aValue) {
         //  input x and y are assumed to be 1 relative
@@ -1101,6 +1123,7 @@ public:
 
     // Called from:
     //     Globals.iwarpz
+    //     RenderObject.renderMeshz
     public float getMPixel32(int x, int y) {
         // Inputs x and y are assumed to be 1 relative
         int addr;
@@ -1111,7 +1134,7 @@ public:
             y = 1;
         }
         if ((y < 1) || (y > this.imageHeight) || (x < 1) || (x > this.imageWidth)) {
-            return -1.0;
+            return -1.0f;
         }
 
         addr = ((y - 1) * (int)paddedWidth) + ((x - 1) * (this.bitsPerPixel/8));
@@ -1122,11 +1145,26 @@ public:
     } // getMPixel32
 
 
+    // Called from:
+    //     adjustColor
+    //     histogram
+    //     printValue
+    //     saveAs8
+    //     scaleTo8
+    //     RenderObject.renderMeshz
+    //     RenderObject.renderShapez
     public int getHeight() {
         return this.imageHeight;
     } // getHeight
 
 
+    // Called from:
+    //     adjustColor
+    //     histogram
+    //     printValue
+    //     saveAs8
+    //     scaleTo8
+    //     RenderObject.renderMeshz
     public int getWidth() {
         return this.imageWidth;
     } // getWidth
@@ -1142,6 +1180,11 @@ public:
     } // getColorSpec
 
 
+    // Called from:
+    //     adjustColor
+    //     histogram
+    //     printValue
+    //     saveAs8
     public int getBitsPerPixel() {
         return this.bitsPerPixel;
     } // getBitsPerPixel
@@ -1153,8 +1196,10 @@ public:
 
 
     // Called from:
+    //     saveAs8
     //     Globals.motionBlur
     //     RenderObject.prepareCutout
+    //     RenderObject.renderMeshz
     //     SceneList.render
     public boolean isValid() {
         //  valid = 1 indicates the constructor did not encounter errors.
@@ -1163,6 +1208,7 @@ public:
 
 
     // Called from:
+    //     The MemImage constructor that takes 6 parameters
     //     saveAs8
     //     Globals.motionBlur
     //     MainFrame.onToolsWarpImage
@@ -1171,7 +1217,7 @@ public:
         BITMAPFILEHEADER bf;
         BITMAPINFOHEADER bi;
         RGBQUAD[] palinfo = new RGBQUAD[256];
-        DWORD a;
+        int a;
         this.valid = true;
 
         bi.biSize = (int)sizeof(BITMAPINFOHEADER);
@@ -1218,7 +1264,7 @@ public:
             return 1;
         }
 
-        DWORD numBytesWritten;
+        int numBytesWritten;
         WriteFile(fp, bf, sizeof(BITMAPFILEHEADER), numBytesWritten, null);
         if(numBytesWritten != sizeof(BITMAPFILEHEADER)) {
             msgText = "writeBMP: WriteFile error 1. numBytesWritten " + numBytesWritten + " " + fileName;
@@ -1246,12 +1292,13 @@ public:
             return 1;
         }
 
-        BOOL writeStatus;
+        boolean writeStatus;
         int myIndex;
-        byte *theBytes = bytes;
+        // byte *theBytes = bytes;
+        int iBytesIdx = 0;
         if (this.accessMode == RANDOM) {
             for(myIndex = 1; myIndex <= this.imageHeight; myIndex++) {
-                writeStatus = WriteFile(fp, theBytes, this.paddedWidth, numBytesWritten, null);
+                writeStatus = WriteFile(fp, bytes[iBytesIdx], this.paddedWidth, numBytesWritten, null);
 
                 if(numBytesWritten != this.paddedWidth) {
                     msgText= "writeBMP: WriteFile error 4. numBytesWritten " + numBytesWritten + " " + fileName;
@@ -1260,7 +1307,8 @@ public:
                     this.valid = false;
                     return 1;
                 }
-                theBytes += paddedWidth;
+                // theBytes += paddedWidth;
+                iBytesIdx += paddedWidth;
             } // for myIndex
         }
 
@@ -1272,6 +1320,8 @@ public:
     } // writeBMP
 
 
+    // Called from:
+    //     The MemImage constructor that takes 6 parameters
     public int readBMP(String psFileName, int piColorSpec) {
         BITMAPFILEHEADER bmFH;
         BITMAPINFOHEADER pbmIH;
@@ -1282,7 +1332,7 @@ public:
         String msgText;
 
         this.valid = true;
-        fp = CreateFile((LPCTSTR)psFileName, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+        fp = CreateFile(psFileName, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
         if(fp == null) {
             msgText = "readBMP:  Couldn't open image. " + psFileName;
             Globals.statusPrint(msgText);
@@ -1290,12 +1340,12 @@ public:
             return 2;
         }
 
-        SetCursor(LoadCursor( NULL, IDC_WAIT ));
-        // Replace line above with something like:
+        // SetCursor(LoadCursor( null, IDC_WAIT ));
+        // TODO: Replace line above with something like:
         // Cursor cursor = button.getCursor();
         // button.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
         
-        DWORD numBytesRead;
+        int numBytesRead;
         ReadFile(fp, bmFH, sizeof(BITMAPFILEHEADER), numBytesRead, null);
         if(bmFH.bfType != 0x4D42) {   // if type isn't "BM" ...
             msgText = "readBMP: Not a .BMP image. " + psFileName;
@@ -1305,23 +1355,23 @@ public:
             return 3;
         }
 
-        pbmIH = (BITMAPINFOHEADER)GlobalLock(GlobalAlloc(GMEM_FIXED, sizeof(BITMAPINFOHEADER)));
-        ReadFile(fp, pbmIH, sizeof(BITMAPINFOHEADER), numBytesRead, NULL);
+        pbmIH = GlobalLock(GlobalAlloc(GMEM_FIXED, sizeof(BITMAPINFOHEADER)));
+        ReadFile(fp, pbmIH, sizeof(BITMAPINFOHEADER), numBytesRead, null);
         this.bitsPerPixel = mapColorSpecToBitsPerPixel(piColorSpec);
-        WORD fileBitsPerPixel = (WORD)pbmIH.biBitCount;
+        int fileBitsPerPixel = pbmIH.biBitCount;
 
-        if((DWORD)pbmIH.biCompression != BI_RGB) {
+        if(pbmIH.biCompression != BI_RGB) {
             msgText = "readBMP: Compressed images not supported. " + psFileName;
             Globals.statusPrint(msgText);
             CloseHandle(fp);
             return 5;
         }
 
-        pbmInfo = (BITMAPINFO)GlobalLock(GlobalAlloc( GHND, PalSize + sizeof(BITMAPINFOHEADER) ));
+        pbmInfo = GlobalLock(GlobalAlloc( GHND, PalSize + sizeof(BITMAPINFOHEADER) ));
         pbmInfo.bmiHeader = *pbmIH;
 
-        GlobalUnlock((HANDLE)pbmIH);
-        GlobalFree((HANDLE)pbmIH);
+        GlobalUnlock(pbmIH);
+        GlobalFree(pbmIH);
 
         bmWidth  = pbmInfo.bmiHeader.biWidth;
         bmHeight = pbmInfo.bmiHeader.biHeight;
@@ -1350,7 +1400,7 @@ public:
         bmImgSize= bmScanWidth8*bmHeight;
         pbmInfo.bmiHeader.biSizeImage = bmImgSize;
         
-        DWORD numRows = bmHeight;
+        int numRows = bmHeight;
         if (this.accessMode == SEQUENTIAL) {
             numRows = 1;
         }
@@ -1367,9 +1417,9 @@ public:
         if (this.accessMode == RANDOM) {
             byte *theBytes = bytes;
             int numItems, myIndex;
-            if(this.bitsPerPixel == fileBitsPerPixel) {        //we are reading a mono image
+            if(this.bitsPerPixel == fileBitsPerPixel) {  // We are reading a mono image
                 for(myIndex = 1; myIndex <= this.imageHeight; myIndex++) {
-                    ReadFile(fp, (LPVOID) theBytes, (DWORD)paddedWidth, numBytesRead, null);
+                    ReadFile(fp, theBytes, paddedWidth, numBytesRead, null);
 
                     if(numItems == -1) {
                         msgText = "readBMP: ReadFile error. " + psFileName;
@@ -1399,13 +1449,13 @@ public:
             } // end else
         }
 
-        GlobalFree((HANDLE)GlobalHandle( pbmInfo ));
+        GlobalFree((GlobalHandle( pbmInfo ));
         if (this.accessMode == RANDOM) {
             CloseHandle(fp);
         }
 
-        SetCursor(LoadCursor( null, IDC_ARROW ));
-        // Replace with something like:
+        // SetCursor(LoadCursor( null, IDC_ARROW ));
+        // TODO: Replace with something like:
         // Cursor cursor = button.getCursor();
         // button.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 
@@ -1415,7 +1465,7 @@ public:
 
     public int readNextRow() {
         boolean myStatus;
-        DWORD numBytesRead;
+        int numBytesRead;
 
         myStatus = ReadFile(this.fp, this.bytes, this.paddedWidth, numBytesRead, null);
         if (myStatus) {
@@ -1434,7 +1484,7 @@ public:
     // Changed return value from int to boolean
     public boolean writeNextRow() {
         boolean myStatus;
-        DWORD numBytesWritten;
+        int numBytesWritten;
 
         myStatus = WriteFile(this.fp, this.bytes, this.paddedWidth, numBytesWritten, null);
         if (myStatus) {
@@ -1447,7 +1497,9 @@ public:
 
     // TODO: Not a method
     // Called from:
-    //     MemImage(String psFileName, int imHeight, int imWidth, int imAccessMode, char rw, int piColorSpec) ctor
+    //     The MemImage constructor that takes 6 parameters
+    //     readBMP
+    //     writeBMP
     int mapColorSpecToBitsPerPixel(int piColorSpec) {
         int bpp = -1;
 
@@ -1474,6 +1526,9 @@ public:
 
 
     // TODO: Not a method
+    // Called from:
+    //     The MemImage constructor that takes 6 parameters
+    //     The MemImage constructor that takes 3 parameters
     int mapBitsPerPixelToColorSpec(int piBitsPerPixel) {
         int colorSpec = EIGHTBITMONOCHROME;
 
@@ -1526,6 +1581,8 @@ public:
     } // saveAs8
 
 
+    // Called from:
+    //     saveAs8
     public int histogram() {
         String msgBuffer;
 
@@ -1572,10 +1629,9 @@ public:
     public int adjustColor(int desiredRed, int desiredGreen, int desiredBlue,
     byte midRed, byte midGreen, byte midBlue, MemImage outImage, 
     String adjustmentType, int inputImageColor) {
-        //  calculate the average color in the image excluding zeros
-        //  compute the color difference vector between the average color and the desired color
-        //  create a new image by adjusting each color by the difference vector, clipping outliers
-        //
+        // Calculate the average color in the image excluding zeros
+        // Compute the color difference vector between the average color and the desired color
+        // Create a new image by adjusting each color by the difference vector, clipping outliers
         float redBucket, greenBucket, blueBucket;
         float avgRed, avgGreen, avgBlue;
         int bpp = getBitsPerPixel();
@@ -1668,7 +1724,7 @@ public:
                 switch(bpp) {
                 case 24:
                     getMPixelRGB(col, row, red, green, blue);
-                    if (red != 0 || green != 0 || blue != 0) {
+                    if ((red != 0) || (green != 0) || (blue != 0)) {
                         newRed   = (int)(red + avgRed);
                         newGreen = (int)(green + avgGreen);
                         newBlue  = (int)(blue + avgBlue);
@@ -1688,7 +1744,7 @@ public:
                 case 8:
                     aValue = getMPixel(col, row);
                     if (aValue != 0) {
-                        newValue = aValue + avgGreen;
+                        newValue = aValue + (int)avgGreen;
                         if (newValue < 1) {
                             newValue = 1;
                         }
@@ -1708,7 +1764,7 @@ public:
                     switch(bpp) {
                     case 24:
                         getMPixelRGB(col, row, red, green, blue);
-                        if (red != 0 || green != 0 || blue != 0) {
+                        if ((red != 0) || (green != 0) || (blue != 0)) {
                             newRed   = red   + desiredRed;
                             newGreen = green + desiredGreen;
                             newBlue  = blue  + desiredBlue;
@@ -1747,15 +1803,15 @@ public:
             return -1;
         }
 
-        byte[] lineBuffer = new byte[32];
+        byte[] lineBuffer   = new byte[32];
         float[] fLineBuffer = new float[32];
 
         msgBuffer = "Display of: " + savedFileName;
         Globals.statusPrint(msgBuffer);
         sprintf(msgBuffer,"   %6ld %6ld %6ld %6ld %6ld %6ld %6ld %6ld %6ld %6ld %6ld %6ld",
-                x, x + 1, x +  2, x +  3, 
-            x + 4, x + 5, x +  6, x +  7, 
-            x + 8, x + 9, x + 10, x + 11);
+                x,     x + 1, x +  2, x +  3, 
+                x + 4, x + 5, x +  6, x +  7, 
+                x + 8, x + 9, x + 10, x + 11);
         Globals.statusPrint(msgBuffer);
 
         int i,j;
@@ -1777,7 +1833,7 @@ public:
                     lineBuffer[j] = getMPixel(x + j, i);
                 }
 
-                sprintf(msgBuffer, "%3d: %4d %4d %4d %4d %4d %4d %4d %4d %4d %4d %4d %4d",
+                msgBuffer = String.format("%3d: %4d %4d %4d %4d %4d %4d %4d %4d %4d %4d %4d %4d",
                     i, 
                     lineBuffer[0], lineBuffer[1], lineBuffer[2],
                     lineBuffer[3], lineBuffer[4], lineBuffer[5], 
@@ -1791,7 +1847,7 @@ public:
                     fLineBuffer[j] = getMPixel32(x + j, i);
                 }
 
-                sprintf(msgBuffer,"%3d: %6g %6g %6g %6g %6g %6g %6g %6g %6g %6g %6g %6g",
+                msgBuffer = String.format("%3d: %6g %6g %6g %6g %6g %6g %6g %6g %6g %6g %6g %6g",
                     i, 
                     fLineBuffer[0], fLineBuffer[1], fLineBuffer[2],
                     fLineBuffer[3], fLineBuffer[4], fLineBuffer[5], 
@@ -1806,6 +1862,8 @@ public:
     } // printValue
     
 
+    // Called from:
+    //     RenderObject.renderMeshz
     public void setFileName(String psFileName) {
         this.savedFileName = psFileName;
     } // setFileName
@@ -1903,6 +1961,8 @@ public:
 
 
     // This method came from BLEND.CPP
+    // Called from:
+    //     RenderObject.renderMeshz
     public int createAlphaImage(MemImage outImage) {
         int x, y;
         byte thePixel, aRed, aGreen, aBlue;
@@ -2149,6 +2209,8 @@ public:
     
 
     // This method came from IWARP.CPP
+    // Called from:
+    //     RenderObject.renderMeshz
     public int alphaSmooth5() {
         //
         // Each image must be the same size.
@@ -2379,10 +2441,19 @@ public:
 
 
     // This method came from SHADERS.CPP
-    public int fillPolyz(int I1x, int I1y, float I1p, float I1d,
-    int I2x, int I2y, float I2p, float I2d, 
-    int I3x, int I3y, float I3p, float I3d, 
-    int I4x, int I4y, float I4p, float I4d,
+    // Called from:
+    //     RenderObject.renderMesh
+    //     RenderObject.renderMeshz
+    //     RenderObject.renderShape
+    //     RenderObject.renderShapez
+    public int fillPolyz(int I1x, int I1y, 
+    float I1p, float I1d,
+    int I2x, int I2y, 
+    float I2p, float I2d, 
+    int I3x, int I3y, 
+    float I3p, float I3d, 
+    int I4x, int I4y, 
+    float I4p, float I4d,
     MemImage zBuffer) {
 
         // this	 -	output image
@@ -2416,7 +2487,7 @@ public:
         int bpp = outImage.getBitsPerPixel();
 
         // single point
-        if(xMin == xMax && yMin == yMax) {
+        if((xMin == xMax) && (yMin == yMax)) {
             distance  = (I1d + I2d + I3d + I4d)/4.0f;
             intensity = (I1p + I2p + I3p + I4p)/4.0f;
 
@@ -2462,7 +2533,7 @@ public:
         float d4 = Globals.getDistance2d((float)xCent, (float)yCent, (float)I4x, (float)I4y);
         totalDistance = d1 + d2 + d3 + d4;
         if(totalDistance == 0.0f) {
-            statusPrint("fillPolyZ: Sum of polygon diagonals must be > 0");
+            Globals.statusPrint("fillPolyZ: Sum of polygon diagonals must be > 0");
             return -1;
         }
 
@@ -2478,19 +2549,19 @@ public:
 
         // Fill the polygon by subdividing it into 4 triangles and interpolatively 
         // shading each one.
-        fillTrianglez(xCent, yCent, iCent, dCent, 
+        Globals.fillTrianglez(xCent, yCent, iCent, dCent, 
             I1x, I1y, I1p, I1d, 
             I2x, I2y, I2p, I2d, 
             outImage, zBuffer);
-        fillTrianglez(xCent, yCent, iCent, dCent, 
+        Globals.fillTrianglez(xCent, yCent, iCent, dCent, 
             I2x, I2y, I2p, I2d, 
             I3x, I3y, I3p, I3d, 
             outImage, zBuffer);
-        fillTrianglez(xCent, yCent, iCent, dCent, 
+        Globals.fillTrianglez(xCent, yCent, iCent, dCent, 
             I3x, I3y, I3p, I3d, 
             I4x, I4y, I4p, I4d,
             outImage, zBuffer);
-        fillTrianglez(xCent, yCent, iCent, dCent, 
+        Globals.fillTrianglez(xCent, yCent, iCent, dCent, 
             I4x, I4y, I4p, I4d, 
             I1x, I1y, I1p, I1d,
             outImage, zBuffer);
