@@ -54,13 +54,14 @@ protected:
 };
 */
 
-    // Instantiated by MainFrame.OnToolsCreatemesh
+    // Instantiated by MainFrame.onToolsCreatemesh
     public QuadMeshDlg(JFrame pParent /*=NULL*/, boolean pModal) {
         super(pParent, pModal);
         //{{AFX_DATA_INIT(CQuadMeshDlg)
         //}}AFX_DATA_INIT
-    }
+    } // QuadMeshDlg ctor
 
+    
     // This method came from QUADMESHDLG.CPP
     void DoDataExchange(CDataExchange pDX)
     {
@@ -75,7 +76,7 @@ protected:
 
 
     // This method came from QUADMESHDLG.CPP
-    void OnOK() {
+    void onOK() {
         String texturePath,destinationDir;
         String aTexture, aDirectory;
 
@@ -105,10 +106,11 @@ protected:
 
         // This method came from QUADMESHDLG.CPP
         CDialog.OnOK();
-    }
+    } // onOK
+
 
     // This method came from QUADMESHDLG.CPP
-    void OnLocatetexture() {
+    void onLocateTexture() {
         // TODO: Replace with JFileChooser
         // CFileDialog dlg = new CFileDialog(true, "bmp", "*.bmp");	//find a bmp file
         JFileChooser dlg = new JFileChooser();
@@ -118,10 +120,11 @@ protected:
         if (result == JFileChooser.APPROVE_OPTION) {
             m_TextureImage.setText(dlg.getSelectedFile().getName());
         }	
-    }
+    } // onLocateTexture
+
 
     // This method came from QUADMESHDLG.CPP
-    void OnLocatedestdir() {
+    void onLocateDestDir() {
         // TODO: Replace with JFileChooser
         // CFileDialog dlg = new CFileDialog(true, "*", "*.*");	//find a destination directory
         JFileChooser dlg = new JFileChooser();
@@ -131,5 +134,5 @@ protected:
         if (result == JFileChooser.APPROVE_OPTION) {
             m_ModelDirectory.setText(dlg.getSelectedFile().getName());	
         }
-    }
+    } // onLocateDestDir
 } // class QuadMeshDlg
