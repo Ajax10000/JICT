@@ -46,6 +46,9 @@ CIctApp theApp;
 
 
     public IctApp() {
+        CMultiDocTemplate m_pDocTemplateImage;
+        CMultiDocTemplate m_pDocTemplateText;
+
         // TODO: add construction code here,
         // Place all significant initialization in InitInstance
     } // IctApp ctor
@@ -99,7 +102,7 @@ CIctApp theApp;
 
         Globals.ictPreference = new Preference();
 
-        //  remove the old ict log and create a new one
+        // Remove the old ict log and create a new one
         remove(Globals.ictPreference.getPath(Preference.ProcessLog));
         time_t theTime;
         time(theTime);
@@ -110,7 +113,9 @@ CIctApp theApp;
     } // initInstance
 
 
-    // App command to run the dialog
+    // Called when the user clicks on the Help menu
+    // MENUITEM "&About ICT 2.0...",           ID_APP_ABOUT
+    // ON_COMMAND(ID_APP_ABOUT, OnAppAbout)
     public void onAppAbout() {
         AboutDlg aboutDlg = new AboutDlg(null, true);
         aboutDlg.setVisible(true);
@@ -119,6 +124,9 @@ CIctApp theApp;
     /////////////////////////////////////////////////////////////////////////////
     // CIctApp commands
 
+    // Called when the user selects the Open Image menu item from the File menu
+    // MENUITEM "Open Image",                  ID_FILE_OPENIMAGE
+    // ON_COMMAND(ID_FILE_OPENIMAGE, OnFileOpenimage)
     public void onFileOpenImage() {
         // change to the default output file directory (indicated in the ICT preference object)
         _chdir(Globals.ictPreference.getPath(Preference.OutputImageDirectory)); 
@@ -135,6 +143,9 @@ CIctApp theApp;
     } // onFileOpenImage
 
 
+    // Called when the user selects the Open ICT Log menu item from the File menu
+    // MENUITEM "Open ICT Log",                ID_FILE_OPENICTLOG
+    // ON_COMMAND(ID_FILE_OPENICTLOG, OnFileOpenictlog)
     public void onFileOpenIctLog() {
         String processLogPath;
 
@@ -143,6 +154,9 @@ CIctApp theApp;
     } // onFileOpenIctLog
 
 
+    // Called when the user selects the Open Scene menu item from the File menu
+    // MENUITEM "&Open Scene...\tCtrl+O",      ID_FILE_OPEN
+    // ON_COMMAND(ID_FILE_OPEN, OnFileOpen)
     public void onFileOpen() {
         // Change to the default scene file directory (indicated in the ICT preference object)
         _chdir(Globals.ictPreference.getPath(Preference.SceneFileDirectory));
