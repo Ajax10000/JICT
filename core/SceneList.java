@@ -115,6 +115,7 @@ public class SceneList {
             msgBuffer = "Constructor 1. Size of sceneList: " + sizeof(SceneList);
             Globals.statusPrint(msgBuffer);
         }
+
         Point3d rt = new Point3d();
         Point3d sc = new Point3d();
         this.sceneListHead = new Scene("sceneList", 0, 0, 0, 0, rt, sc, " ");
@@ -130,10 +131,13 @@ public class SceneList {
             msgBuffer = "Size of sceneList: " + sizeof(SceneList);
             Globals.statusPrint(msgBuffer);
         }
+
         clear();  // Clear the list of models
     } // finalize
 
 
+    // Called from:
+    //     ScenePreviewDlg.onSelChangeCmbModels
     public SceneElement setCurrentModel(String desiredModel) {
         Scene theScene = this.sceneListHead;
         SceneElement aModel;
@@ -142,16 +146,19 @@ public class SceneList {
         aModel = theScene.head;
         while (aModel != null) {
             if(aModel.modelName.equals(desiredModel)) {
-                theScene.currentSceneElement = aModel;  //Indicate scene's current model
+                theScene.currentSceneElement = aModel;  // Indicate scene's current model
                 return(aModel);
             }
+
             aModel = aModel.nextEntry;  // point to the next model
         }
 
-        return null;  //Model not found
+        return null;  // Model not found
     } // setCurrentModel
 
 
+    // Called from:
+    //     ScenePreviewDlg.onCmdPlus
     public void setCurrentModelTransform(float rx, float ry, float rz,
     float sx, float sy, float sz, 
     float tx, float ty, float tz) {
@@ -174,6 +181,9 @@ public class SceneList {
     } // setCurrentModelTransform
 
 
+    // Called from:
+    //     ScenePreviewDlg.chooseModel
+    //     ScenePreviewDlg.onSelChangeCmbModels
     public void getCurrentModelTransform(Float rx, Float ry, Float rz,
     Float sx, Float sy, Float sz, 
     Float tx, Float ty, Float tz) {
@@ -182,6 +192,7 @@ public class SceneList {
         theScene = theScene.nextEntry; // Point to the scene Node
         currentModel = theScene.currentSceneElement;
 
+        // Set the output parameters
         rx = currentModel.rotation.x;
         ry = currentModel.rotation.y;
         rz = currentModel.rotation.z;
@@ -445,7 +456,8 @@ public class SceneList {
                             MemImage correctedImage = new MemImage(inputImage);
                             Globals.statusPrint("Adjusting color image");	    
                             inputImage.adjustColor(anAdjustment.getRed(), anAdjustment.getGreen(), anAdjustment.getBlue(),
-                                midRed, midGreen, midBlue, correctedImage, adjustmentType, 0);
+                                midRed, midGreen, midBlue, 
+                                correctedImage, adjustmentType, 0);
 
                             Globals.constructPathName(colorAdjustedPath, theFileName, 'j');     
                             msgBuffer = "sceneList.readList: Saving adjusted color image: " + colorAdjustedPath;
@@ -705,7 +717,8 @@ public class SceneList {
                         MemImage correctedImage = new MemImage(inputImage);
                         Globals.statusPrint("Adjusting color image");	    
                         inputImage.adjustColor(anAdjustment.getRed(), anAdjustment.getGreen(), anAdjustment.getBlue(),
-                            midRed, midGreen, midBlue, correctedImage, adjustmentType, 0);
+                            midRed, midGreen, midBlue, 
+                            correctedImage, adjustmentType, 0);
 
                         Globals.constructPathName(colorAdjustedPath, theFileName, 'j');     
                         msgBuffer = "Saving adjusted color image: " + colorAdjustedPath;
@@ -778,6 +791,8 @@ public class SceneList {
     } // showModels
 
 
+    // Called from:
+    //     MainFrame.onToolsCreateASceneList
     public int listLength() {
         Scene theScene = this.sceneListHead;
         theScene = theScene.nextEntry;  // Skip over the list header
@@ -857,6 +872,8 @@ public class SceneList {
     } // getViewTransform
 
 
+    // Called from:
+    //     ScenePreviewDlg.onOK
     public int setViewTransform(float pfViewX, float pfViewY, float pfViewZ,
     float pfRotateX, float pfRotateY, float pfRotateZ) {
         Scene theScene = sceneListHead;
@@ -882,7 +899,7 @@ public class SceneList {
     public int getViewPoint(Float viewX, Float viewY, Float viewZ,
     Float rotateX, Float rotateY, Float rotateZ) {
         Scene theScene = this.sceneListHead;
-        theScene = theScene.nextEntry;  //Skip over the list header
+        theScene = theScene.nextEntry;  // Skip over the list header
         if (theScene == null) { 
             return -1;
         }
@@ -906,6 +923,8 @@ public class SceneList {
     } // getViewPoint
 
 
+    // Called from:
+    //     ScenePreviewDlg.onOK
     public int writeList(String psErrorText, String psFileName) {
         Scene theScene = this.sceneListHead;
         theScene = theScene.nextEntry;  // Skip over the list header
@@ -953,15 +972,15 @@ public class SceneList {
         HDC memoryDC, dc;
         dc = GetDC(theWindow);
         MemImage tempImage = new MemImage(outputRows, outputColumns);
-        hBitmap = CreateBitmap((int)outputColumns, (int)outputRows, (UINT)1,
-        (UINT)1, (const void *)tempImage.getBytes());
+        hBitmap = CreateBitmap((int)outputColumns, (int)outputRows, 1,
+            1, tempImage.getBytes());
         if(hBitmap == 0) {
             Globals.statusPrint("SceneList::PreviewSequence. Unable to create internal bitmap");
             return -1;
         }
 
         memoryDC = CreateCompatibleDC(dc);
-        hOldBitmap = (HBITMAP)SelectObject(memoryDC, hBitmap);
+        hOldBitmap = SelectObject(memoryDC, hBitmap);
         RECT myRect;
         SetRect(myRect, 0, 0, outputColumns, outputRows);
 
@@ -977,14 +996,15 @@ public class SceneList {
         if(effectType == SEQUENCE) {
             theScene.sensorMotion.getFirstLastFrame(firstFrame, lastFrame);
         }
-        int modelCounter, eraseOldBoundary;
+        int modelCounter;
+        boolean eraseOldBoundary; // variable is set, but not read
 
         for(frameCounter = firstFrame; frameCounter <= lastFrame; frameCounter++) {
             // Clear the memoryDC by drawing a filled white rectangle
-            FillRect(memoryDC, myRect, (HBRUSH)GetStockObject(WHITE_BRUSH));
+            FillRect(memoryDC, myRect, GetStockObject(WHITE_BRUSH));
             SceneElement theModel = theScene.head;
             modelCounter = 0;
-            eraseOldBoundary = TRUE;
+            eraseOldBoundary = true;
             if(effectType == SEQUENCE) {
                 getViewMatrix(viewMatrix, frameCounter, theScene);
             }
@@ -992,7 +1012,7 @@ public class SceneList {
             while (theModel != null) {
                 // If the renderObject has not been created, create it
                 modelCounter++;
-                if(theModel.screenObject == 0) {
+                if(theModel.screenObject == null) {
                     theModel.statusIndicator = 0;
                     msgText = "PreviewSequence: Creating RenderObject: " + theModel.modelName;
                     Globals.statusPrint(msgText);
@@ -1009,9 +1029,9 @@ public class SceneList {
 
                     // Get the scene's background plate if needed
                     if(modelCounter == 1 && 
-                    theModel.warpIndicator == 0 &&
+                    theModel.warpIndicator == false &&
                     theModel.blendIndicator == false) {
-                        if(backgroundPlate == 0) {
+                        if(backgroundPlate == null) {
                             backgroundPlate = new MemImage(theModel.fileName, 0, 0, RANDOM, 'R', GREENCOLOR);
                         }
                     }
@@ -1042,26 +1062,27 @@ public class SceneList {
                     // If this is a background plate, copy it to the screen
                     if(
                     modelCounter == 1 && 
-                    theModel.warpIndicator == 0 &&
-                    theModel.blendIndicator == 0) {
+                    theModel.warpIndicator == false &&
+                    theModel.blendIndicator == false) {
                         HDC theDC = GetDC(theWindow);
                         backgroundPlate.display(theDC, outputColumns, outputRows);
                         ReleaseDC(theWindow, theDC);
-                        eraseOldBoundary = FALSE;
+                        eraseOldBoundary = false;
                     } else {
                         // Draw the object
-                        theModel.screenObject.drawSequence(memoryDC, theModel.modelName, outputRows, outputColumns, frameCounter);
+                        theModel.screenObject.drawSequence(memoryDC, theModel.modelName, 
+                            outputRows, outputColumns, frameCounter);
                     }
                 } // end if valid screen object
 
-                theModel = theModel.nextentry;
+                theModel = theModel.nextEntry;
                 BitBlt(dc, 0, 0, outputColumns, outputRows, memoryDC, 0, 0, SRCCOPY);
             }  // end of single frame 
 
             for(int i = 0; i <= 400000; i++)  {} // delay loop to approximate 30 Hz frame rate
         } // end of sequence 
       
-        copyRefPoints();		  // copy model ref points to corresponding renderObjects
+        copyRefPoints();  // Copy model ref points to corresponding renderObjects
         // clean up the memoryDC
         SelectObject(memoryDC, hOldBitmap);
         /*
@@ -1080,7 +1101,7 @@ public class SceneList {
         int outputRows, outputColumns;
         int firstFrame, lastFrame, frameCounter;
         int modelCounter;
-        boolean eraseOldBoundary;
+        boolean eraseOldBoundary; // variable is set, but not read
         Scene theScene;
         SceneElement theModel, saveModel;
         MotionNode aMotion;    // current model location, orientation if moving
@@ -1199,17 +1220,19 @@ public class SceneList {
                         theModel.screenObject.transformAndProject(viewModelMatrix, outputRows, outputColumns);
                     }
 
-                    if(theModel.fileName.equalsIgnoreCase("Output Image Rectangle") && 
+                    if(
+                    theModel.fileName.equalsIgnoreCase("Output Image Rectangle") && 
                     theModel.modelType != COMPOUND &&
                     theModel.compoundModelMember) {   
                         theModel.screenObject.transformAndProject(viewModelMatrix,
-                          outputRows, outputColumns, theModel.compoundModelMember, cmCentroidx, cmCentroidy, cmCentroidz);
+                            outputRows, outputColumns, theModel.compoundModelMember, cmCentroidx, cmCentroidy, cmCentroidz);
                     }
 
                     // Draw the points
                     //
                     // If this is a background plate, blt it to the screen
-                    if(modelCounter == 1 && 
+                    if(
+                    modelCounter == 1 && 
                     theModel.modelType != COMPOUND && 
                     theModel.warpIndicator == false &&
                     theModel.blendIndicator == false) {
@@ -1240,13 +1263,13 @@ public class SceneList {
                     theModel = saveModel.nextEntry;
                     if(theModel != null) {
                         theModel.screenObject = new RenderObject(theModel.fileName,
-                          theModel.modelType, theModel.definedRefPoint, theModel.pointOfReference);
+                            theModel.modelType, theModel.definedRefPoint, theModel.pointOfReference);
                     }
                 
                     theModel = theModel.nextEntry;
                 }
             }
-        }  // end of a single frame calculation
+        }  // frame
         
         copyRefPoints();  // Copy model ref points to corresponding renderObjects
         return myStatus;
@@ -1469,9 +1492,11 @@ public class SceneList {
                             case IMAGE:
                             // case SEQUENCE: // this was causing a duplicate case error (duplicate with SHAPE)
                                 myStatus = Globals.iRenderz(outputImage, alphaImage, inputImage,
-                                    zImage, zBuffer,
-                                    xfrm.rx, xfrm.ry, xfrm.rz, xfrm.sx, xfrm.sy, xfrm.sz,
-                                    xfrm.tx, xfrm.ty, xfrm.tz, vx, vy, vz,
+                                    zImage,  zBuffer,
+                                    xfrm.rx, xfrm.ry, xfrm.rz, 
+                                    xfrm.sx, xfrm.sy, xfrm.sz,
+                                    xfrm.tx, xfrm.ty, xfrm.tz, 
+                                    vx,      vy,      vz,
                                     viewMatrix,
                                     theModel.warpIndicator, theModel.blendIndicator, xfrm.alpha,
                                     theModel.pointOfReference.x,
@@ -1480,13 +1505,13 @@ public class SceneList {
                                 break;
     
                             case QUADMESH:
-                                myStatus = theModel.screenObject.renderMesh(outputImage,inputImage,
-                                            theModel.blendIndicator);
+                                myStatus = theModel.screenObject.renderMesh(outputImage, inputImage,
+                                    theModel.blendIndicator);
                                 break;
 
                             case SHAPE:
                                 myStatus = theModel.screenObject.renderShape(outputImage,
-                                        theModel.blendIndicator);
+                                    theModel.blendIndicator);
                                 break;
                             } // end switch
                         } // end else (z buffer)
@@ -1795,7 +1820,7 @@ public class SceneList {
     Point3d rt, Point3d tr, String thePath) {
         int status = 0;
         Scene newScene = new Scene(theSceneName, theType, outImCols, outImRows,
-        theColorMode, rt, tr, thePath);
+            theColorMode, rt, tr, thePath);
         if (!newScene.isValid()) {
             status = 1;
         }
@@ -2018,7 +2043,7 @@ public class SceneList {
     } // copyRefPoints
 
 
-    // This method camae from DEPTHSRT.CPP
+    // This method came from DEPTHSRT.CPP
     // Called from:
     //     render
     public int depthSort(SceneElement[] models, float[] distances,
