@@ -228,6 +228,7 @@ protected:
     }
 
 
+    /*
     // This method came from SCENEPREVIEWDLG.CPP
     void DoDataExchange(CDataExchange pDX) {
         CDialog.DoDataExchange(pDX);
@@ -258,10 +259,10 @@ protected:
         DDX_CBString(pDX, IDC_cmbModels, m_theModel);
         //}}AFX_DATA_MAP
     }
-    
+    */
 
     // This method came from SCENEPREVIEWDLG.CPP
-    void OnSelchangecmbModels() {
+    void onSelChangeCmbModels() {
         String selectedModel;
         float  rx, ry, rz, sx, sy, sz, tx, ty, tz;
         JComboBox theCombo;
@@ -288,29 +289,31 @@ protected:
             m_theFrame.warpRotateZ  = rz;
             setTextBoxesWithModelTransform();
         }
-    }
+    } // onSelChangeCmbModels
     
 
     // This method came from SCENEPREVIEWDLG.CPP
-    void OnchkMoveViewPoint() {
+    void onChkMoveViewPoint() {
         m_theFrame.changeViewPoint = !m_theFrame.changeViewPoint;
         if(m_theFrame.changeViewPoint == true) {
             setTextBoxesWithViewTransform();
         } else {
             setTextBoxesWithModelTransform();
         }
-    }
+    } // onChkMoveViewPoint
     
 
     // This method came from SCENEPREVIEWDLG.CPP
-    void OncmdMinus() {
+    void onCmdMinus() {
         incrementScaleFactor = -1.0f;
-        OncmdPlus();	
-    }
+        onCmdPlus();	
+    } // onCmdMinus
     
 
     // This method came from SCENEPREVIEWDLG.CPP
-    void OncmdPlus() {
+    // Called from:
+    //     onCmdMinus
+    void onCmdPlus() {
         String theBuffer;
         boolean changingModel = (m_theFrame.changeViewPoint == false);
         JComboBox cmbModels = (JComboBox)GetDlgItem(IDC_cmbModels);
@@ -437,11 +440,11 @@ protected:
         //  Redraw the scene list
         m_theFrame.previewWindowHandle.repaint();
         incrementScaleFactor = 1.0f;
-    }
+    } // onCmdPlus
     
 
     // This method came from SCENEPREVIEWDLG.CPP
-    void OncmdReset() {
+    void onCmdReset() {
         if(m_theFrame.changeViewPoint == false) {  // If manipulating a model...
             m_theFrame.warpTranslateX = 0.0f;
             m_theFrame.warpTranslateY = 0.0f;
@@ -465,16 +468,16 @@ protected:
             m_theFrame.viewRotateZ = 0.0f;
             setTextBoxesWithViewTransform();
         }	
-    }
+    } // onCmdReset
     
 
     // This method came from SCENEPREVIEWDLG.CPP
-    void OnOK() {
+    void onOK() {
         String Buffer;
 
         m_theFrame.mySceneList.setViewTransform(
             m_theFrame.viewTranslateX, m_theFrame.viewTranslateY, m_theFrame.viewTranslateZ, 
-            m_theFrame.viewRotateX, m_theFrame.viewRotateY, m_theFrame.viewRotateZ);
+            m_theFrame.viewRotateX,    m_theFrame.viewRotateY,    m_theFrame.viewRotateZ);
 
         if(isDirty) {
             //int result = MessageBox("Do you want to save the scene file?", "A model has changed",
@@ -491,10 +494,17 @@ protected:
             m_theFrame.repaint();
             CDialog.OnOK();
         }
-    }
+    } // onOK
     
 
     // This method came from SCENEPREVIEWDLG.CPP
+    // Called from:
+    //     chooseModel
+    //     onChkMoveViewPoint
+    //     onCmdPlus
+    //     onCmdReset
+    //     onInitDialog
+    //     onSelChangeCmbModels
     void setTextBoxesWithModelTransform() {
         String aBuffer;
 
@@ -531,6 +541,10 @@ protected:
     
 
     // This method came from SCENEPREVIEWDLG.CPP
+    // Called from:
+    //     onChkMoveViewPoint
+    //     onCmdPlus
+    //     onCmdReset
     void setTextBoxesWithViewTransform() {
         String aBuffer;
 
@@ -560,9 +574,13 @@ protected:
     
 
     // This method came from SCENEPREVIEWDLG.CPP
+    // Called from:
+    //     onCmdPlus
     void chooseModel() {
         String selectedModel;
-        float  rx, ry, rz, sx, sy, sz, tx, ty, tz;
+        Float rx = 0f, ry = 0f, rz = 0f;
+        Float sx = 0f, sy = 0f, sz = 0f;
+        Float tx = 0f, ty = 0f, tz = 0f;
         JComboBox theCombo;
         theCombo = (JComboBox)GetDlgItem(IDC_cmbModels);
         theCombo.GetLBText(theCombo.getSelectedIndex(), selectedModel);
@@ -582,11 +600,11 @@ protected:
         m_theFrame.warpRotateZ  = rz;
         setTextBoxesWithModelTransform();
         m_theFrame.changeViewPoint = false;
-    }
+    } // chooseModel
     
 
     // This method came from SCENEPREVIEWDLG.CPP
-    boolean OnInitDialog() {
+    boolean onInitDialog() {
         CDialog.OnInitDialog();
         
         setTextBoxesWithModelTransform();
@@ -604,18 +622,20 @@ protected:
         
         // return true unless you set the focus to a control
         return true;
-    }
+    } // onInitDialog
     
 
     // This method came from SCENEPREVIEWDLG.CPP
+    // Called from:
+    //     onCmdPlus
     boolean isChecked(int chkBoxID) {
        JButton aChkBox = (JButton)GetDlgItem(chkBoxID);
        return aChkBox.GetCheck();
-    }
+    } // isChecked
     
     
     // This method came from SCENEPREVIEWDLG.CPP
-    void OnMove(int x, int y) {
+    void onMove(int x, int y) {
         CDialog.OnMove(x, y);	
-    }
+    } // onMove
 } // class ScenePreviewDlg
