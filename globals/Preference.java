@@ -35,26 +35,26 @@ public:
     public Preference() {
         // Read the default pathnames from the ict20.ini file
         GetPrivateProfileString("Directories", "InputDir", ",,,", inputImageDir,
-          inputImageDir.length(), "c:\\windows\\ict20.ini");
+            inputImageDir.length(), "c:\\windows\\ict20.ini");
         GetPrivateProfileString("Directories", "OutputDir", ",,,", outputImageDir,
-          outputImageDir.length(), "c:\\windows\\ict20.ini");
+            outputImageDir.length(), "c:\\windows\\ict20.ini");
         GetPrivateProfileString("Directories", "SceneDir", ",,,", sceneFileDir,
-          sceneFileDir.length(), "c:\\windows\\ict20.ini");
+            sceneFileDir.length(), "c:\\windows\\ict20.ini");
         GetPrivateProfileString("Directories", "SequenceDir", ",,,", sequenceFileDir,
-          sequenceFileDir.length(), "c:\\windows\\ict20.ini");
+            sequenceFileDir.length(), "c:\\windows\\ict20.ini");
         GetPrivateProfileString("Directories", "ShapeDir", ",,,", shapeFileDir,
-          shapeFileDir.length(), "c:\\windows\\ict20.ini");
+            shapeFileDir.length(), "c:\\windows\\ict20.ini");
         GetPrivateProfileString("Directories", "MaskDir", ",,,", maskDir,
-          maskDir.length(), "c:\\windows\\ict20.ini");
+            maskDir.length(), "c:\\windows\\ict20.ini");
         GetPrivateProfileString("Directories", "VRMLDir", ",,,", VRMLDir,
-          VRMLDir.length(), "c:\\windows\\ict20.ini");
+            VRMLDir.length(), "c:\\windows\\ict20.ini");
         
-        GetPrivateProfileString("Paths","LogPath",",,,",processLogPath,
-          processLogPath.length(),"c:\\windows\\ict20.ini");
-        GetPrivateProfileString("Paths","WarpTestPath",",,,",warpTestPath,
-          warpTestPath.length(),"c:\\windows\\ict20.ini");
-        GetPrivateProfileString("Paths","VRMLLogPath",",,,",VRMLLogPath,
-          VRMLLogPath.length(),"c:\\windows\\ict20.ini");
+        GetPrivateProfileString("Paths", "LogPath", ",,,", processLogPath,
+            processLogPath.length(), "c:\\windows\\ict20.ini");
+        GetPrivateProfileString("Paths", "WarpTestPath",",,,", warpTestPath,
+            warpTestPath.length(), "c:\\windows\\ict20.ini");
+        GetPrivateProfileString("Paths", "VRMLLogPath",",,,", VRMLLogPath,
+            VRMLLogPath.length(), "c:\\windows\\ict20.ini");
     }
       
     
