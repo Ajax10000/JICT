@@ -191,10 +191,10 @@ protected:
             increment = 1.0f/(float)(m_numFrames - 1.0f);
 
             for(i = 1; i <= m_numFrames; i++){
-                sprintf(imagePath, "%s%s%#04d%c.bmp", directory, prefix, i, suffix);
+                imagePath = directory + prefix + String.format("%04o", i) + suffix + ".bmp";
                 Globals.statusPrint(imagePath);
 
-                sprintf(shapePath, "%s%s%#04d%c.shp", directory, prefix, i, suffix);
+                shapePath = directory + prefix + String.format("%04o", i) + suffix + ".shp";
                 aStatus = tweenImage(aFraction, inImageA, inImageB, imagePath, shapePath);
                 aFraction += increment;
             }
@@ -218,7 +218,7 @@ protected:
             Globals.constructPathName(aZPath, aTexPath, 'z');
             aStatus = Globals.readBMPHeader(aTexPath, aHeight, aWidth, bpp);
             if(aStatus != 0) {
-                Globals.statusPrint("CMorphDialog.OnOK(): Unable to open image header.");
+                Globals.statusPrint("MorphDlg.onOK(): Unable to open image header.");
                 return;
             }
 
@@ -233,7 +233,7 @@ protected:
                 break;
 
             default:
-                Globals.statusPrint ("CMorphDialog.OnOK(): Image a must have 8 or 24 bit pixels");
+                Globals.statusPrint ("MorphDlg.onOK(): Image a must have 8 or 24 bit pixels");
                 return;
                 break;
             } // switch
@@ -257,7 +257,7 @@ protected:
                 break;
 
             default:
-                Globals.statusPrint("CMorphDialog.OnOK(): Image b must have 8 or 24 bit pixels");
+                Globals.statusPrint("MorphDlg.onOK(): Image b must have 8 or 24 bit pixels");
                 return;
                 break;
             } // switch
@@ -294,7 +294,8 @@ protected:
                 aStatus = Globals.translateMesh(oX, oY, oZ,
                     -centroidX, -centroidY, -centroidZ);
 
-                sprintf(imagePath, "%s%s%#04d%c.bmp", directory, prefix, i, suffix);
+                // sprintf(imagePath, "%s%s%#04d%c.bmp", directory, prefix, i, suffix);
+                imagePath = directory + prefix + String.format("%04o", i) + suffix + ".shp";
                 Globals.statusPrint(imagePath);
                 aStatus = Globals.renderMesh(imagePath, oTexture, oX, oY, oZ, aMatrix);
 
