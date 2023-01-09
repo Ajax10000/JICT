@@ -114,6 +114,8 @@ public class Globals {
       
         
     // This method came from UTILS.CPP
+    // Called from:
+    //     ScenePreviewDlg.onCmdPlus
     public static float fPolar(float angle) {
         if(angle > 0.0f) {
             while(angle >= 360.0f) {
@@ -160,12 +162,16 @@ public class Globals {
     
 
     // This method came from UTILS.CPP
+    // Called from:
+    //     motionBlur
     public static void makePath(String currentPath, String inPath, String prefix, int frameCounter, String inSuffix) {
         sprintf(currentPath, "%s%.31s%#04d%s.bmp\0", inPath, prefix, frameCounter, inSuffix);
     } // makePath
       
 
     // This method came from UTILS.CPP
+    // Called from:
+    //     motionBlur
     public static int getPathPieces(String firstImagePath, String directory, String fileName,
       String prefix, Integer frameNum, String inSuffix) {
         String ddrive, dext, aFrameNum, tempDirectory;
@@ -195,12 +201,20 @@ public class Globals {
 
 
     // This method came from DEPTHSRT.CPP
+    // Called from:
+    //     getIntervals
     public static float getDistance2d(float x1, float y1, float x2, float y2) {
         return (float)Math.sqrt(((x1 - x2) * (x1 - x2)) + ((y1 - y2) * (y1 - y2)));
     } // getDistance2d
       
 
     // This method came from DEPTHSRT.CPP
+    // Called from: 
+    //     iwarpz
+    //     RenderObject.renderMeshz
+    //     RenderObject.renderShapez
+    //     RenderObject.transformAndProjectPoint2
+    //     SceneList.depthSort
     public static float getDistance3d(float x1, float y1, float z1, float x2, float y2, float z2) {
         return (float)Math.sqrt(((x1 - x2) * (x1 - x2)) + ((y1 - y2) * (y1 - y2)) +
           ((z1 - z2) * (z1 - z2)));
@@ -208,6 +222,8 @@ public class Globals {
 
 
     // This method came from DEPTHSRT.CPP
+    // Called from:
+    //     SceneList.depthSort
     public static void insertionSort2(float theItems[], SceneElement itemData[], int numItems) {
         float itemTemp, theValue;
         SceneElement itemDataTemp;
@@ -259,10 +275,10 @@ public class Globals {
                     inWeight = (float)maskPixel / 255.0f * alphaScale;
                     outWeight = 1.0f - inWeight;
 
-                    if(alphaScale > 0.0) {
-                        addedPixel = (inWeight * (float)inPixel) + (outWeight * (float)outPixel) + 0.5f;
+                    if(alphaScale > 0.0f) {
+                        addedPixel = (byte)((inWeight * (float)inPixel) + (outWeight * (float)outPixel) + 0.5f);
                     } else {
-                        addedPixel = (float)outPixel + (inWeight * (float)inPixel) + 0.5f;
+                        addedPixel = (byte)((float)outPixel + (inWeight * (float)inPixel) + 0.5f);
                         // Make certain shadows won't produce negative values
                         if (addedPixel > outPixel) {
                             addedPixel = outPixel;
@@ -270,11 +286,11 @@ public class Globals {
                     }
 
                     if (addedPixel < 1) {
-                        addedPixel = 1;
+                        addedPixel = (byte)1;
                     }
 
-                    if (alphaScale == 0.0) {
-                        addedPixel = 0;
+                    if (alphaScale == 0.0f) {
+                        addedPixel = (byte)0;
                     }
 
                     outImage.setMPixel(x, y, addedPixel);
@@ -287,6 +303,8 @@ public class Globals {
   
 
     // This method came from BLEND.CPP
+    // Called from:
+    //     RenderObject.renderMeshz
     public static int blendz(MemImage inImage, MemImage matteImage, 
     MemImage zImage, MemImage zBuffer,
     MemImage outImage,
@@ -343,9 +361,9 @@ public class Globals {
                         outWeight = 1.0f - inWeight;
 
                         if(alphaScale > 0.0f) {
-                            addedPixel = (inWeight * (float)inPixel) + (outWeight *(float)outPixel) + 0.5f;
+                            addedPixel = (byte)((inWeight * (float)inPixel) + (outWeight *(float)outPixel) + 0.5f);
                         } else {
-                            addedPixel = (float)outPixel + (inWeight *(float)inPixel) + 0.5f;
+                            addedPixel = (byte)((float)outPixel + (inWeight *(float)inPixel) + 0.5f);
                             // Make certain shadows won't produce negative intensities
                             if (addedPixel > outPixel) {
                                 addedPixel = outPixel;
@@ -373,18 +391,18 @@ public class Globals {
                 case 24:                           // RGB Blend with Z-Buffer
                     inImage.getMPixelRGB(x, y, inRed, inGreen, inBlue);
                     if((mattePixel > CHROMAVALUE) && (inGreen > CHROMAVALUE)) {
-                        outPixel = outImage.getMPixelRGB(x, y, outRed, outGreen, outBlue);
+                        outPixel = (byte)outImage.getMPixelRGB(x, y, outRed, outGreen, outBlue);
                         inWeight = (float)mattePixel / 255.0f * alphaScale;
                         outWeight = 1.0f - inWeight;
 
                         if(alphaScale > 0.0f) {
-                            addedRed   = (inWeight * (float)inRed)   + (outWeight *(float)outRed)   + 0.5f;
-                            addedGreen = (inWeight * (float)inGreen) + (outWeight *(float)outGreen) + 0.5f;
-                            addedBlue  = (inWeight * (float)inBlue)  + (outWeight *(float)outBlue)  + 0.5f;
+                            addedRed   = (byte)((inWeight * (float)inRed)   + (outWeight *(float)outRed)   + 0.5f);
+                            addedGreen = (byte)((inWeight * (float)inGreen) + (outWeight *(float)outGreen) + 0.5f);
+                            addedBlue  = (byte)((inWeight * (float)inBlue)  + (outWeight *(float)outBlue)  + 0.5f);
                         } else {  // shadow
-                            addedRed   = (float)outRed   + (inWeight *(float)inRed)   + 0.5f;
-                            addedGreen = (float)outGreen + (inWeight *(float)inGreen) + 0.5f;
-                            addedBlue  = (float)outBlue  + (inWeight *(float)inBlue)  + 0.5f;
+                            addedRed   = (byte)((float)outRed   + (inWeight *(float)inRed)   + 0.5f);
+                            addedGreen = (byte)((float)outGreen + (inWeight *(float)inGreen) + 0.5f);
+                            addedBlue  = (byte)((float)outBlue  + (inWeight *(float)inBlue)  + 0.5f);
 
                             // Make certain shadows won't produce negative intensities
                             if (addedRed > outRed)     addedRed = outRed;
@@ -420,6 +438,8 @@ public class Globals {
   
 
     // This method came from BLEND.CPP
+    // Called from:
+    //     RenderObject.prepareCutout
     public static int createCutout(MemImage pOriginalImage, MemImage pMaskImage,
     String psCutoutName, Shape3d aShape) {
         String msgText;
@@ -654,8 +674,6 @@ public class Globals {
     //
     //	Returns 0 if the point is not in the boundary.
     //	Returns 1 if the point is     in the boundary.
-    //
-    //
     public static boolean in_boundary(MemImage anImage, int x, int y) {
         int imHeight = anImage.getHeight();
         int imWidth = anImage.getWidth();
@@ -705,9 +723,7 @@ public class Globals {
     //
     //	Returns 0 if the neighbor is not in the boundary.
     //	Returns 1 if the neighbor is     in the boundary.
-    //
-    //
-    public static int probe(MemImage anImage, int x, int y, int dir, Integer new_x, Integer new_y) {
+    public static boolean probe(MemImage anImage, int x, int y, int dir, Integer new_x, Integer new_y) {
         // Figure out coordinates of neighbor
         if ( (dir < 2) || (dir > 6) ) {
             ++x;
@@ -794,7 +810,7 @@ public class Globals {
 
         // Probe the neighbors, looking for one on the edge
         for (n = 0; n < 8; n++) {
-            if (probe(anImage, x, y, new_dir, new_x, new_y) != 0) {
+            if (probe(anImage, x, y, new_dir, new_x, new_y)) {
                 // Found the next clockwise edge neighbor --
                 // its coordinates have already been
                 // stuffed into new_x, new_y
@@ -833,8 +849,8 @@ public class Globals {
         int counter = 0;
 
         int imHeight = anImage.getHeight();
-        int imWidth = anImage.getWidth();
-        int bpp = anImage.getBitsPerPixel();
+        int imWidth  = anImage.getWidth();
+        int bpp      = anImage.getBitsPerPixel();
         if((bpp != 8) && (bpp != 24)) {
             statusPrint("shapeFromImage: Binary image must have 8 or 24 bit pixels.");
             return -1;
@@ -878,7 +894,7 @@ public class Globals {
         dir = 0;
 
         for ( ; ; ) {
-            if (probe(anImage, x, y, dir, new_x, new_y) != 0) {
+            if (probe(anImage, x, y, dir, new_x, new_y)) {
                 // Found a neighbor in that direction (its coordinates are in new_x, new_y
                 // but we don't use them here)
 
@@ -928,13 +944,12 @@ public class Globals {
 
     // This method came from MOTION.CPP
     public static String getNextMotionLine(String theText, Integer lineNumber, ifstream *filein) {
-        boolean aComment;
+        boolean aComment = true;
         int theLength = 80;
         String theKeyWord;
-        aComment = true;
       
         while (aComment) {
-            filein.getline(theText, theLength);  //ignore comments and near empty lines
+            filein.getline(theText, theLength);  // Ignore comments and near empty lines
             if(filein.eof()) {
                 theText = "EOF";
                 theKeyWord = theText;
@@ -942,7 +957,7 @@ public class Globals {
             }
 
             lineNumber++;
-            if (strncmp(theText,"//",2) == 0 || strlen(theText) < 2) //single C/R
+            if (strncmp(theText, "//", 2) == 0 || theText.length() < 2) // Single C/R
                 aComment = true;
             else
                 aComment = false;
@@ -964,14 +979,15 @@ public class Globals {
         byte red, green, blue;
         int blur, numOpenImages, bucket, redBucket, greenBucket, blueBucket;
         int frameNum, i, j, status;
-        int imHeight, imWidth, bpp, frameCounter, row, col;
+        Integer imHeight = 0, imWidth = 0, bpp = 0;
+        int frameCounter, row, col;
 
         if(blurDepth > 15) {
             statusPrint("motionBlur: blurDepth cannot be > 15");
             return -1;
         }
 
-        // the directory includes the drive letter
+        // The directory includes the drive letter
         status = getPathPieces(firstImagePath, directory, fileName, prefix, 
             frameNum, inSuffix);
         if(status != 0) {
@@ -1010,7 +1026,6 @@ public class Globals {
                     }
                 }
             } else {
-                delete images[0];               //close oldest image
                 for (j = 0; j < numOpenImages - 1; j++) {//move the image pointers
                     images[j] = images[j + 1];
                 }
@@ -1078,9 +1093,9 @@ public class Globals {
                         avgGreenBucket = greenBucket / numOpenImages;
                         avgBlueBucket = blueBucket / numOpenImages;
                         outImage.setMPixelRGB(col, row, 
-                            (byte)(avgRedBucket + 0.5),
-                            (byte)(avgGreenBucket + 0.5),
-                            (byte)(avgBlueBucket + 0.5));
+                            (byte)(avgRedBucket + 0.5f),
+                            (byte)(avgGreenBucket + 0.5f),
+                            (byte)(avgBlueBucket + 0.5f));
                         break;
                     } // switch
                 }  //end inner loop
@@ -1090,18 +1105,15 @@ public class Globals {
             msgText = "Saving: " + outPath;
             statusPrint(msgText);
             outImage.writeBMP(outPath);
-        }   //end sequence loop;
-
-        //  Close the remaining images
-        for(i = 0; i < numOpenImages; i++) {
-            delete images[i];
-        }
+        } // for frameCounter
 
         return 0;
     } // motionBlur
 
 
     // This method came from SceneList
+    // Called from:
+    //     createCutout
     public static void appendFileName(String psOutputFileName, String psPrefix, String psSuffix) {
         sprintf(psOutputFileName, "%.31s%s.bmp\0", psPrefix, psSuffix);
     } // appendFileName
@@ -1122,6 +1134,8 @@ public class Globals {
 
     // This method came from IWARP.CPP
     //	iwarpz  - zbuffered planar texture mapping
+    // Called from:
+    //     MainFrame.onToolsWarpImage
     public static int iwarpz(MemImage inImage, MemImage outImage, MemImage zImage,
     float rx, float ry, float rz, 
     float sx, float sy, float sz,
@@ -1133,24 +1147,27 @@ public class Globals {
         // in this case, vx, vy, and vz are ignored
         String msgText;
         int x, y;
-        int myStatus, numXCoordsFound;
+        int myStatus;
+        Integer numXCoordsFound;
         int[] screenXCoords = new int[I_MAXWVERTICES];
-        float[] tZCoords = new float[I_MAXWVERTICES], tXCoords = new float[I_MAXWVERTICES], tYCoords = new float[MAXWVERTICES];
+        float[] tZCoords = new float[I_MAXWVERTICES]; 
+        float[] tXCoords = new float[I_MAXWVERTICES]; 
+        float[] tYCoords = new float[I_MAXWVERTICES];
 
-        //  The shape object contains the projected 4 sided polygon and a z coordinate
-        //  at each of the projected vertices.
+        // The shape object contains the projected 4 sided polygon and a z coordinate
+        // at each of the projected vertices.
         if(ictdebug) {
             statusPrint("iwarpz input arguments");
-            sprintf(msgText, "rx: %6.2f  ry: %6.2f  rz: %6.2f", rx, ry, rz);
+            msgText = String.format("rx: %6.2f  ry: %6.2f  rz: %6.2f", rx, ry, rz);
             statusPrint(msgText);
 
-            sprintf(msgText, "sx: %6.2f  sy: %6.2f  sz: %6.2f", sx, sy, sz);
+            msgText = String.format("sx: %6.2f  sy: %6.2f  sz: %6.2f", sx, sy, sz);
             statusPrint(msgText);
 
-            sprintf(msgText, "tx: %6.2f  ty: %6.2f  tz: %6.2f", tx, ty, tz);
+            msgText = String.format("tx: %6.2f  ty: %6.2f  tz: %6.2f", tx, ty, tz);
             statusPrint(msgText);
 
-            sprintf(msgText, "refx: %6.2f  refy: %6.2f  refz: %6.2f", refPointX, refPointY, refPointZ);
+            msgText = String.format("refx: %6.2f  refy: %6.2f  refz: %6.2f", refPointX, refPointY, refPointZ);
             statusPrint(msgText);
         }
 
@@ -1197,10 +1214,10 @@ public class Globals {
 
         // Load a shape object with the original image boundary coordinates
         Shape3d aShape = new Shape3d(4);
-        aShape.addWorldVertex(1.0f, 1.0f, 0.0f);
-        aShape.addWorldVertex((float)inWidth, 1.0f, 0.0f);
+        aShape.addWorldVertex(          1.0f,            1.0f, 0.0f);
+        aShape.addWorldVertex((float)inWidth,            1.0f, 0.0f);
         aShape.addWorldVertex((float)inWidth, (float)inHeight, 0.0f);
-        aShape.addWorldVertex(1.0f, (float)inHeight, 0.0f);
+        aShape.addWorldVertex(          1.0f, (float)inHeight, 0.0f);
 
         // Transform and project the image coords, taking into account the reference point
         viewModelMatrix.transformAndProject(aShape, outHeight, outWidth, 
@@ -1219,8 +1236,7 @@ public class Globals {
         aShape.transformBoundingBox();
 
         if (ictdebug) {
-            //
-            // Inverse check.  Map transformed shape cornerpoints into original image
+            // Inverse check. Map transformed shape cornerpoints into original image
             aShape.initCurrentVertex();
             float xo, yo, zo;
 
@@ -1229,8 +1245,10 @@ public class Globals {
                 float anY = aShape.currentVertex.ty;
                 float anZ = aShape.currentVertex.tz;
                 inverseMatrix.transformPoint (anX, anY, anZ, xo, yo, zo);
-                aShape.currentVertex++;
-                sprintf(msgText, "transformed: %6.2f %6.2f %6.2f texture: %6.2f %6.2f %6.2f",
+                // aShape.iCurrVtxIdx++;
+                incCurrentVertex();
+
+                msgText = String.format("transformed: %6.2f %6.2f %6.2f texture: %6.2f %6.2f %6.2f",
                     anX, anY, anZ, xo + halfInWidth, yo + halfInHeight, zo);
                 statusPrint(msgText);
             }
@@ -1267,8 +1285,8 @@ public class Globals {
             if (ictdebug) {
                 statusPrint("y:\tsx  \ttx  \tty  \ttz");
                 for(int i = 0; i < numXCoordsFound; i++) {
-                    sprintf(msgText,"%d\t%d\t%6.2f\t%6.2f\t%6.2f" , y, screenXCoords[i],
-                    tXCoords[i], tYCoords[i], tZCoords[i]);
+                    msgText = String.format("%d\t%d\t%6.2f\t%6.2f\t%6.2f" , y, screenXCoords[i],
+                        tXCoords[i], tYCoords[i], tZCoords[i]);
                     statusPrint(msgText);
                 }
             }
@@ -1277,8 +1295,8 @@ public class Globals {
                 msgText = "iWarp: numCoords <> 2. y: " + y + " numCoords " + numXCoordsFound;
                 statusPrint(msgText);
                 for(int i = 0; i < numXCoordsFound; i++) {
-                    sprintf(msgText,"%d\t%d\t%6.2f\t%6.2f\t%6.2f" , y, screenXCoords[i],
-                      tXCoords[i], tYCoords[i], tZCoords[i]);
+                    msgText = String.format("%d\t%d\t%6.2f\t%6.2f\t%6.2f" , y, screenXCoords[i],
+                        tXCoords[i], tYCoords[i], tZCoords[i]);
                     statusPrint(msgText);
                     goto nextScanLine;
                 }
@@ -1306,8 +1324,8 @@ public class Globals {
             float dpx, dpy;
             dpx = 1.0f / sx;
             dpy = 1.0f / sy;
-            if(dpx > 0.5) dpx = 0.5f;
-            if(dpy > 0.5) dpy = 0.5f;
+            if(dpx > 0.5f) dpx = 0.5f;
+            if(dpy > 0.5f) dpy = 0.5f;
 
             // Loop through a single scan line
             for(x = (int)screenXCoords[0];x <= (int)screenXCoords[1]; x++) {
@@ -1323,8 +1341,8 @@ public class Globals {
                     if(
                     (x == (int)screenXCoords[0]) || 
                     (x == (int)screenXCoords[1])) {
-                        sprintf(msgText,"scanLine: %2d xi: %6.2f yi: %6.2f zi: %6.2f xo: %6.2f yo: %6.2f zo: %6.2f",
-                            y,xIn, yIn, zIn, xOut, yOut, zOut);
+                        msgText = String.format("scanLine: %2d xi: %6.2f yi: %6.2f zi: %6.2f xo: %6.2f yo: %6.2f zo: %6.2f",
+                            y, xIn, yIn, zIn, xOut, yOut, zOut);
                         statusPrint(msgText);
                     }
                 }
@@ -1344,30 +1362,30 @@ public class Globals {
                 }
 
                 if(zImage != null) {
-                    theZ = zImage.getMPixel32((int)x + xCentOffset, (int)y + yCentOffset);
+                    theZ = zImage.getMPixel32((int)(x + xCentOffset), (int)(y + yCentOffset));
                     aDist = getDistance3d(xIn, yIn, zIn, vx, vy, vz);
 
-                    //update the zbuffer if a smaller distance and non transparent color
+                    // Update the zbuffer if a smaller distance and non transparent color
                     if((aDist < theZ) && ((int)intensity != CHROMAVALUE)) {
-                        zImage.setMPixel32((int)x + xCentOffset, (int)y + yCentOffset, aDist);
+                        zImage.setMPixel32((int)(x + xCentOffset), (int)(y + yCentOffset), aDist);
                         switch(bpp) {
                         case 8:
-                            outImage.setMPixel((int)x + xCentOffset, (int)y + yCentOffset, intensity);
+                            outImage.setMPixel((int)(x + xCentOffset), (int)(y + yCentOffset), intensity);
                             break;
 
                         case 24:
-                            outImage.setMPixelRGB((int)x + xCentOffset, (int)y + yCentOffset, red, green, blue);
+                            outImage.setMPixelRGB((int)(x + xCentOffset), (int)(y + yCentOffset), red, green, blue);
                             break;
                         }
                     }
                 } else {
                     switch(bpp) {
                     case 8:
-                        outImage.setMPixel((int)x + xCentOffset, (int)y + yCentOffset, intensity);
+                        outImage.setMPixel((int)(x + xCentOffset), (int)(y + yCentOffset), intensity);
                         break;
 
                     case 24:
-                        outImage.setMPixelRGB((int)x + xCentOffset, (int)y + yCentOffset, red, green, blue);
+                        outImage.setMPixelRGB((int)(x + xCentOffset), (int)(y + yCentOffset), red, green, blue);
                         break;
                     }
                 }
@@ -1392,9 +1410,12 @@ public class Globals {
 
 
     // This method came from IWARP.CPP
-    public static void getLineEquation(int x1,int y1, int x2, int y2, Float m,
-    Float b, Boolean horzFlag, Boolean vertFlag) {
-        // Determine the line equation y = mx + b from 2 points on the line
+    // Called from:
+    //     getIntervals
+    public static void getLineEquation(int x1, int y1, int x2, int y2, 
+    Float m, Float b, 
+    Boolean horzFlag, Boolean vertFlag) {
+        // Determine the line equation y = mx + b from 2 (integer) points on the line
         m = 0.0f;
         b = 0.0f;
         horzFlag = false;
@@ -1402,30 +1423,36 @@ public class Globals {
         float rise = (y2 - y1);
         float run  = (x2 - x1);
 
+        // Set output parameters horzFlag, vertFlag, m and b
         if (rise == 0.0f) horzFlag = true;
         if (run == 0.0f)  vertFlag = true;
         if (!(vertFlag || horzFlag)) {
             m = rise / run;
-            b = (float) y2 - (m * ((float) x2));
+            b = (float)y2 - (m * ((float)x2));
         }
     } // getLineEquation
 
 
     // This method came from IWARP.CPP
-    public static void getFLineEquation(float x1,float y1, float x2, float y2, Float m,
-    Float b, Boolean horzFlag, Boolean vertFlag) {
-        // Determine the line equation y = mx + b from 2 points on the line
+    // Called from:
+    //     Shape3d.getBoundaryPoint
+    public static void getFLineEquation(float x1, float y1, float x2, float y2, 
+    Float m, Float b, 
+    Boolean horzFlag, Boolean vertFlag) {
+        // Determine the line equation y = mx + b from 2 (float) points on the line
         m = 0.0f;
         b = 0.0f;
         horzFlag = false;
         vertFlag = false;
 
         float rise = (y2 - y1);
-        float run = (x2 - x1);
-        if (rise == 0.0) {
+        float run  = (x2 - x1);
+
+        // Set the output parameters horzFlag, vertFlag, m and b
+        if (rise == 0.0f) {
             horzFlag = true;
         }
-        if (run == 0.0) {
+        if (run == 0.0f) {
             vertFlag = true;
         }
 
@@ -1437,9 +1464,11 @@ public class Globals {
 
 
     // This method came from IWARP.CPP
+    // Called from: 
+    //     iwarpz
     public static int getIntervals(Shape3d theShape, int y, Integer numCoords,
-    int numAllocatedXCoords, Integer screenXCoords,
-    Float tXCoords, Float tYCoords, Float tZCoords) {
+    int numAllocatedXCoords, int[] screenXCoords,
+    float[] tXCoords, float[] tYCoords, float[] tZCoords) {
         //  Scan Conversion. For the indicated scan line y,  find all screen x coords
         //  where the
         //  shape crosses scan line y.  Sort the resulting screen x coordinate array.
@@ -1459,110 +1488,114 @@ public class Globals {
             return -1;
         }
 
-        float m, b;
+        Float m = 0f, b = 0f;
         int i, index, newX;
         Boolean horzFlag = false, vertFlag = false;
-        int *currentScreenX;
-        float *currenttX, *currenttY, *currenttZ; 
+        int iCurrentScreenXIdx; // index into array screenXCoords
+        // float *currenttX, *currenttY, *currenttZ; 
+        int tXCoordsIdx, tYCoordsIdx, tZCoordsIdx;
         float theX;
-        currentScreenX = screenXCoords;
-        currenttX = tXCoords;
-        currenttY = tYCoords;
-        currenttZ = tZCoords;
-        *numCoords = 0;
+        iCurrentScreenXIdx = 0;
+        tXCoordsIdx = 0;
+        tYCoordsIdx = 0;
+        tZCoordsIdx = 0;
+        numCoords   = 0;
         int sx1, sy1, sx2, sy2, minx, maxx, miny, maxy;
         float tx1, ty1, tz1, tx2, ty2, tz2;
         float partialDistance, totalDistance, ratio;
 
         theShape.initCurrentVertex();
         for (index = 1; index <= numShapeVertices; index++) {
-            sx1 = theShape.currentVertex.sx;
-            sy1 = theShape.currentVertex.sy;
+            sx1 = (int)theShape.currentVertex.sx;
+            sy1 = (int)theShape.currentVertex.sy;
             
             tx1 = theShape.currentVertex.tx;
             ty1 = theShape.currentVertex.ty;
             tz1 = theShape.currentVertex.tz;
-            theShape.currentVertex++;
+            // theShape.currentVertex++;
+            theShape.incCurrentVertex();
 
-            // if this is the last line segment, circle around to the beginning
+            // If this is the last line segment, circle around to the beginning
             if(index == numShapeVertices) {
                 theShape.initCurrentVertex();
             }
-            sx2 = theShape.currentVertex.sx;  //Can't use (currentVertex+1).x
+            sx2 = theShape.currentVertex.sx;  // Can't use (currentVertex+1).x
             sy2 = theShape.currentVertex.sy;
             
             tx2 = theShape.currentVertex.tx;
             ty2 = theShape.currentVertex.ty;	 
             tz2 = theShape.currentVertex.tz;
-            theShape.currentVertex--;
+            theShape.decCurrentVertex();
+
             minx = Math.min(sx1, sx2);
             maxx = Math.max(sx1, sx2);
             miny = Math.min(sy1, sy2);
             maxy = Math.max(sy1, sy2);
 
+            // The following method sets variables m, b, horzFlag and vertFlag
             getLineEquation(sx1, sy1, sx2, sy2, m, b, horzFlag, vertFlag);
-            theX = 0.0;
-            if(m != 0.0) {
+            theX = 0.0f;
+            if(m != 0.0f) {
                 theX = ((float)y - b) / m;
             }
             newX = (int)theX;
             
             if(ictdebug) {
-                sprintf(msgText,"getIntervals: sx1: %d  sx2: %d  sy1: %d sy2: %d",
-                    sx1,sx2,sy1,sy2);
+                msgText = "getIntervals: sx1: " + sx1 + "  sx2: " + sx2 + 
+                    "  sy1: " + sy1 + " sy2: " + sy2;
                 statusPrint(msgText);
 
-                sprintf(msgText,"getIntervals: index: %d newX: %d  Horz: %d  vert: %d ", 
-                    index, newX, horzFlag, vertFlag);
+                msgText = "getIntervals: index: " + index + " newX: " + newX + 
+                    "  Horz: " + horzFlag + "  vert: " + vertFlag; 
                 statusPrint(msgText);
             }
             
             if (!(horzFlag || vertFlag)) {
-                // determine z by interpolating between screen line segment endpoints
+                // Determine z by interpolating between screen line segment endpoints
                 totalDistance   = getDistance2d(sx1, sy1, sx2, sy2);
-                partialDistance = getDistance2d(newX, y, sx1, sy1);
-                //this is a ratio of screen coordinates
-                if(totalDistance != 0.0) {
+                partialDistance = getDistance2d(newX,  y, sx1, sy1);
+                // This is a ratio of screen coordinates
+                if(totalDistance != 0.0f) {
                     ratio = partialDistance/totalDistance; // 0 <= ratio <= 1
                 } else {
                     statusPrint("getIntervals: totalDistance cannot equal 0");
                     return -1;
                 }
                 
-                ratio = 1.0 - ratio;
+                ratio = 1.0f - ratio;
                 
                 if ((newX >= minx && newX <= maxx) && (y >= miny && y <= maxy)) {
-                    *currentScreenX = newX;
-                    *currenttX = tx2 + (ratio * (tx1 - tx2));
-                    *currenttY = ty2 + (ratio * (ty1 - ty2));	
-                    *currenttZ = tz2 + (ratio * (tz1 - tz2));
+                    screenXCoords[iCurrentScreenXIdx] = newX;
+                    tXCoords[tXCoordsIdx] = tx2 + (ratio * (tx1 - tx2));
+                    tYCoords[tYCoordsIdx] = ty2 + (ratio * (ty1 - ty2));	
+                    tZCoords[tZCoordsIdx] = tz2 + (ratio * (tz1 - tz2));
                     if(ictdebug) {
                         statusPrint("diagPoint");
                     }
 
-                    currenttX++;
-                    currenttY++;
-                    currenttZ++;
-                    currentScreenX++;
-                    intDistance[index-1] = intervalDistance(minx, maxx, theX);
+                    tXCoordsIdx++;
+                    tYCoordsIdx++;
+                    tZCoordsIdx++;
+                    iCurrentScreenXIdx++;
+                    intDistance[index-1] = intervalDistance(minx, maxx, (int)theX);
                     numCoords++;
                     // end if between sx1 and sx2
                 } else { 
                     // Store the point for possible later use
-                    tempScreenXCoords[tempIndex] = theX;
+                    tempScreenXCoords[tempIndex] = (int)theX;
                     tempXCoords[tempIndex] = tx2 + (ratio * (tx1 - tx2));
                     tempYCoords[tempIndex] = ty2 + (ratio * (ty1 - ty2));	
                     tempZCoords[tempIndex] = tz2 + (ratio * (tz1 - tz2));
-                    intDistance[tempIndex] = intervalDistance(minx, maxx, theX);
+                    intDistance[tempIndex] = intervalDistance(minx, maxx, (int)theX);
                     tempIndex++;
 
                     if(ictdebug) {
-                        statusPrint(" non diagPoint");
+                        statusPrint("non diagPoint");
                     }
                 }
                 // end if not horizontal or vertical
             } else {
-                // handle horizontal and vertical lines
+                // Handle horizontal and vertical lines
                 if (vertFlag) {
                     totalDistance   = Math.abs(sy2 - sy1);
                     partialDistance = Math.abs(y - sy1);		
@@ -1573,23 +1606,24 @@ public class Globals {
                         return -1;
                     }
 
-                    ratio = 1.0 - ratio;
+                    ratio = 1.0f - ratio;
                     if (y >= miny && y <= maxy) {
-                        *currentScreenX = sx1;
-                        *currenttX = tx1;
-                        *currenttY = ty2 + (ratio * (ty1 - ty2));	
-                        *currenttZ = tz2 + (ratio * (tz1 - tz2));
-                        currentScreenX++;
-                        currenttX++;
-                        currenttY++;
-                        currenttZ++;
+                        screenXCoords[iCurrentScreenXIdx] = sx1;
+                        tXCoords[tXCoordsIdx] = tx1;
+                        tYCoords[tYCoordsIdx] = ty2 + (ratio * (ty1 - ty2));	
+                        tZCoords[tZCoordsIdx] = tz2 + (ratio * (tz1 - tz2));
+
+                        iCurrentScreenXIdx++;
+                        tXCoordsIdx++;
+                        tYCoordsIdx++;
+                        tXCoordsIdx++;
                         intDistance[index-1] = intervalDistance(miny, maxy, y);
                         numCoords++;
                         if(ictdebug) {
                             statusPrint("vertPoint");
                         }
                     } else {
-                        // store the point for possible later use
+                        // Store the point for possible later use
                         tempScreenXCoords[tempIndex] = sx1;
                         tempXCoords[tempIndex] = tx1;
                         tempYCoords[tempIndex] = ty2 + (ratio * (ty1 - ty2));	
@@ -1599,7 +1633,8 @@ public class Globals {
                     }
                 }
             }
-            theShape.currentVertex++;
+            // theShape.currentVertex++;
+            theShape.iCurrVtxIdx++;
         }
 
         //  Sort the found x coordinates in ascending order
@@ -1607,7 +1642,7 @@ public class Globals {
         removeDuplicates(screenXCoords, tXCoords, tYCoords, tZCoords, numCoords);
 
         if(numCoords > 2) {
-            removeSimilar (screenXCoords, tXCoords, tYCoords, tZCoords, numCoords, 2);
+            removeSimilar(screenXCoords, tXCoords, tYCoords, tZCoords, numCoords, 2);
         }
 
         int minIntDist = 999999999;
@@ -1639,9 +1674,9 @@ public class Globals {
         }
 
         if(ictdebug) {
-            statusPrint("GetIntervals Found: intdist\t sx  \t tx  \t ty  \t tz");
+            statusPrint("getIntervals Found: intdist\t sx  \t tx  \t ty  \t tz");
             for(i = 0; i < numCoords; i++) {
-                sprintf(msgText, "\t%d\t%d\t%6.2f\t%6.2f\t%6.2f" , intDistance[i], screenXCoords[i], tXCoords[i], tYCoords[i], tZCoords[i]);
+                msgText = String.format("\t%d\t%d\t%6.2f\t%6.2f\t%6.2f" , intDistance[i], screenXCoords[i], tXCoords[i], tYCoords[i], tZCoords[i]);
                 statusPrint(msgText);
             }
         }
@@ -1651,11 +1686,12 @@ public class Globals {
 
 
     // This method came from IWARP.CPP
+    // Called from:
+    //     getIntervals
     public static void insertionSort(int theItems[], float itemData1[], float itemData2[],
     float itemData3[], int numItems) {
         //  Sort theItems into ascending order, carrying along the three optional 
         //  itemData arrays.
-        //
         int itemTemp;
         float itemData1Temp,itemData2Temp,itemData3Temp;
         int index, indexTmp, theValue;
@@ -1728,6 +1764,8 @@ public class Globals {
 
 
     // This method came from IWARP.CPP
+    // Called from:
+    //     getIntervals
     public static int removeDuplicates(int theList[], float theItemData1[],
     float theItemData2[], float theItemData3[], Integer listLength) {
         // Remove duplicates from a list pre-sorted in ascending order.
@@ -1793,6 +1831,8 @@ public class Globals {
 
 
     // This method came from IWARP.CPP
+    // Called from:
+    //     getIntervals
     public static int removeSimilar(int theList[], float theItemData1[],
     float theItemData2[], float theItemData3[], Integer listLength, int difference) {
         // Remove items from a list that are less then difference units apart.  
@@ -1851,7 +1891,9 @@ public class Globals {
             }
 
             fwarpz(inImage, midImage, null, 
-                rx, ry, rz, sx, sy, sz, tx, ty, tz,
+                rx, ry, rz, 
+                sx, sy, sz, 
+                tx, ty, tz,
                 vx, vy, vz,
                 viewMatrix,
                 refPointX, refPointY, refPointZ);
@@ -1864,7 +1906,10 @@ public class Globals {
                 statusPrint("Unable to open intermediate warp mask image");
                 return -1;
             }
-            fwarpz(maskImage, midMaskImage, null, rx, ry, rz, sx, sy, sz, tx, ty, tz,
+            fwarpz(maskImage, midMaskImage, null, 
+                rx, ry, rz, 
+                sx, sy, sz, 
+                tx, ty, tz,
                 vx, vy, vz,
                 viewMatrix,
                 refPointX, refPointY, refPointZ);
@@ -1984,7 +2029,6 @@ public class Globals {
             }
         }
 
-        //
         // Composite the element into the background plate
         int myStatus;
         if(blendIndicator) {
@@ -1994,24 +2038,15 @@ public class Globals {
             } else {
                 // blend and warp
                 myStatus = blendz(midImage, alphaImage, zImage, zBuffer, outImage, alphaScale);
-                delete midImage;
             }
         } else {
             if(warpIndicator) { 
                 // copy warped image to background plate
                 midImage.copy(outImage, 0, 0);
-                delete midImage;
             } else {
                 // copy input image to output
                 inImage.copy(outImage, xOffset, yOffset);
             }
-        }
-
-        if(
-        (matteImage == null) && 
-        (blendIndicator == true) && 
-        alphaImage.isValid()) {
-            delete alphaImage;
         }
 
         return myStatus;
@@ -2019,6 +2054,8 @@ public class Globals {
 
 
     // This method came from IWARP.CPP
+    // Called from:
+    //     MainFrame.onToolsWarpImage
     public static int antiAlias(MemImage inImage, MemImage outImage) {
         // Each image must be the same size.
         if(
@@ -2094,7 +2131,7 @@ public class Globals {
 
                     sum = q00 + q10 + q20 + q10 + q11 + q12 + q20 + q21 + q22;
                     sum = bound(sum, 0.0f, 255.0f);
-                    outImage.setMPixel(col,row, (BYTE)(sum + 0.5f));
+                    outImage.setMPixel(col, row, (byte)(sum + 0.5f));
                     break;
 
                 case 24:
@@ -2122,7 +2159,7 @@ public class Globals {
                     sumr = bound(sumr, 0.0f, 255.0f);
                     sumg = bound(sumg, 0.0f, 255.0f);
                     sumb = bound(sumb, 0.0f, 255.0f);
-                    outImage.setMPixelRGB(col, row, (BYTE)(sumr + 0.5f), (BYTE)(sumg + 0.5f), (BYTE)(sumb + 0.5f));
+                    outImage.setMPixelRGB(col, row, (byte)(sumr + 0.5f), (byte)(sumg + 0.5f), (byte)(sumb + 0.5f));
                     break;
                 } // switch
             }
@@ -2134,8 +2171,10 @@ public class Globals {
 
     // This method came from IWARP.CPP
     public static int fWarp1(MemImage inImage, MemImage outImage,
-    float rx, float ry, float rz, float sx, float sy, float sz,
-    float tx, float ty, float tz, TMatrix viewMatrix,
+    float rx, float ry, float rz, 
+    float sx, float sy, float sz,
+    float tx, float ty, float tz, 
+    TMatrix viewMatrix,
     float refPointX, float refPointY, float refPointZ) {
         //  Project the points to the screen and copy from the input image 
         //
@@ -2156,16 +2195,16 @@ public class Globals {
         // at each of the projected vertices.
         if (ictdebug) {
             statusPrint("fWarp inputs:");
-            sprintf(msgText, "rx: %6.2f  ry: %6.2f  rz: %6.2f", rx, ry, rz);
+            msgText = String.format("rx: %6.2f  ry: %6.2f  rz: %6.2f", rx, ry, rz);
             statusPrint(msgText);
 
-            sprintf(msgText, "sx: %6.2f  sy: %6.2f  sz: %6.2f", sx, sy, sz);
+            msgText = String.format("sx: %6.2f  sy: %6.2f  sz: %6.2f", sx, sy, sz);
             statusPrint(msgText);
 
-            sprintf(msgText, "tx: %6.2f  ty: %6.2f  tz: %6.2f", tx, ty, tz);
+            msgText = String.format("tx: %6.2f  ty: %6.2f  tz: %6.2f", tx, ty, tz);
             statusPrint(msgText);
 
-            sprintf(msgText, "refx: %6.2f  refy: %6.2f  refz: %6.2f", refPointX, refPointY, refPointZ);
+            msgText = String.format("refx: %6.2f  refy: %6.2f  refz: %6.2f", refPointX, refPointY, refPointZ);
             statusPrint(msgText);
         }
 
@@ -2201,10 +2240,10 @@ public class Globals {
         halfHeight -= (halfHeight - intRefPointY);
 
         // Calculate offsets that will center the warped image in the output image
-        int xOffset = outWidth / 2.0;
-        int yOffset = outHeight/ 2.0;
+        int xOffset = int(outWidth / 2.0);
+        int yOffset = int(outHeight/ 2.0);
         
-        //  shortcut:  if no rotation or scale, just copy the image
+        // shortcut: if no rotation or scale, just copy the image
         if(
         rx == 0.0f && ry == 0.0f && rz == 0.0f && 
         sx == 1.0f && sy == 1.0f && sz == 1.0f && 
@@ -2227,7 +2266,7 @@ public class Globals {
             yIn = y - halfHeight;
         
             for(x = 1; x < inWidth; x += increment) {
-                intensity = inImage.getMPixel(x, y);
+                intensity = inImage.getMPixel((int)x, (int)y);
                 xIn = x - halfWidth;
                 forwardMatrix.transformAndProjectPoint(xIn, yIn, zIn, xOut, yOut, 
                     refPointX, refPointY, refPointZ, 
@@ -2273,16 +2312,16 @@ public class Globals {
         // at each of the projected vertices.
         if (ictdebug) {
             statusPrint("fWarp inputs:");
-            sprintf(msgText, "rx: %6.2f  ry: %6.2f  rz: %6.2f", rx, ry, rz);
+            msgText = String.format("rx: %6.2f  ry: %6.2f  rz: %6.2f", rx, ry, rz);
             statusPrint(msgText);
 
-            sprintf(msgText, "sx: %6.2f  sy: %6.2f  sz: %6.2f", sx, sy, sz);
+            msgText = String.format("sx: %6.2f  sy: %6.2f  sz: %6.2f", sx, sy, sz);
             statusPrint(msgText);
 
-            sprintf(msgText, "tx: %6.2f  ty: %6.2f  tz: %6.2f", tx, ty, tz);
+            msgText = String.format("tx: %6.2f  ty: %6.2f  tz: %6.2f", tx, ty, tz);
             statusPrint(msgText);
 
-            sprintf(msgText, "refx: %6.2f  refy: %6.2f  refz: %6.2f", refPointX, refPointY, refPointZ);
+            msgText = String.format("refx: %6.2f  refy: %6.2f  refz: %6.2f", refPointX, refPointY, refPointZ);
             statusPrint(msgText);
         }
 
@@ -2309,16 +2348,15 @@ public class Globals {
         float halfWidth = inWidth / 2.0f;
         int bpp = inImage.getBitsPerPixel();
 
-        int xOffset = outWidth / 2.0;
-        int yOffset = outHeight/ 2.0;
+        int xOffset = (int)(outWidth / 2.0);
+        int yOffset = (int)(outHeight/ 2.0);
     
-        //
-        //  shortcut:  if no rotation or scale, just copy the image
+        // shortcut: if no rotation or scale, just copy the image
         if(
         rx == 0.0f && ry == 0.0f && rz == 0.0f && 
         sx == 1.0f && sy == 1.0f && sz == 1.0f && 
         tz == 0.0f) {
-            inImage.copy(outImage, (int)tx + halfWidth, (int)ty + halfHeight);
+            inImage.copy(outImage, (int)(tx + halfWidth), (int)(ty + halfHeight));
             statusPrint("fWarpz: shortcut");
             return 0;
         }
@@ -2341,18 +2379,18 @@ public class Globals {
             yIn = y - halfHeight;
         
             for(x = inverseInc * increment; x <= inWidth; x += increment) {
-                if(bpp == 8) intensity1 = inImage.getMPixel(x - increment, y);
-                if(bpp == 8) intensity2 = inImage.getMPixel(x, y);
-                if(bpp == 8) intensity3 = inImage.getMPixel(x, y - increment);
-                if(bpp == 8) intensity4 = inImage.getMPixel(x - increment, y - increment);
+                if(bpp == 8) intensity1 = inImage.getMPixel((int)(x - increment), (int)y);
+                if(bpp == 8) intensity2 = inImage.getMPixel(              (int)x, (int)y);
+                if(bpp == 8) intensity3 = inImage.getMPixel(              (int)x, (int)(y - increment));
+                if(bpp == 8) intensity4 = inImage.getMPixel((int)(x - increment), (int)(y - increment));
             
-                if(bpp == 24) inImage.getMPixelRGB(x - increment, y, red1, intensity1, blue1);
-                if(bpp == 24) inImage.getMPixelRGB(x, y, red2, intensity2, blue2);
-                if(bpp == 24) inImage.getMPixelRGB(x, y - increment, red3, intensity3, blue3);
-                if(bpp == 24) inImage.getMPixelRGB(x - increment, y - increment, red4, intensity4, blue4);
+                if(bpp == 24) inImage.getMPixelRGB((int)(x - increment),               (int)y, red1, intensity1, blue1);
+                if(bpp == 24) inImage.getMPixelRGB(              (int)x,               (int)y, red2, intensity2, blue2);
+                if(bpp == 24) inImage.getMPixelRGB(              (int)x, (int)(y - increment), red3, intensity3, blue3);
+                if(bpp == 24) inImage.getMPixelRGB((int)(x - increment), (int)(y - increment), red4, intensity4, blue4);
 
                 xIn = x - halfWidth;
-                forwardMatrix.transformAndProjectPoint(xIn-increment, yIn, zIn, 
+                forwardMatrix.transformAndProjectPoint(xIn - increment, yIn, zIn, 
                     xOut1, yOut1, 
                     refPointX, refPointY, refPointZ, outHeight, outWidth, 
                     atx, aty, atz);
@@ -2368,7 +2406,7 @@ public class Globals {
                     d2 = getDistance3d(vx, vy, vz, atx, aty, atz);
                 }
             
-                forwardMatrix.transformAndProjectPoint(xIn, yIn-increment, zIn, 
+                forwardMatrix.transformAndProjectPoint(xIn, yIn - increment, zIn, 
                     xOut3, yOut3, 
                     refPointX, refPointY, refPointZ, outHeight, outWidth, 
                     atx, aty, atz);
@@ -2376,7 +2414,7 @@ public class Globals {
                     d3 = getDistance3d(vx, vy, vz, atx, aty, atz);
                 }
             
-                forwardMatrix.transformAndProjectPoint(xIn-increment, yIn-increment, zIn, 
+                forwardMatrix.transformAndProjectPoint(xIn-increment, yIn - increment, zIn, 
                     xOut4, yOut4, 
                     refPointX, refPointY, refPointZ, outHeight, outWidth, 
                     atx, aty, atz);
@@ -2417,13 +2455,18 @@ public class Globals {
         String msgText;
 
         // Create the line buffer data structures
-        int *xBuffer, *yBuffer,  *xTemp, *yTemp;
-        float *wxBuffer, *wyBuffer, *wzBuffer, *dBuffer;
-        float *wxTemp, *wyTemp, *wzTemp;
-        BYTE *iBuffer, *iTemp, iTemp1, iTemp2, *iPrev1, *iPrev2;
+        int[] xBuffer, yBuffer; 
+        int xBufferIdx, yBufferIdx;
+        // float *wxBuffer, *wyBuffer, *wzBuffer; // these variables are not used
+        float[] dBuffer;
+        // float *wxTemp, *wyTemp, *wzTemp; // these variables are not used
+        byte[] iBuffer;
+        int iBufferIdx;
+        byte *iTemp1, iTemp2, *iPrev1, *iPrev2;
         int xTemp1, yTemp1, xTemp2, yTemp2;
         int *xPrev1, *yPrev1, *xPrev2, *yPrev2;
-        float *dTemp, dTemp1, dTemp2, *dPrev1, *dPrev2;
+        int dBufferIdx;
+        float dTemp1, dTemp2, *dPrev1, *dPrev2;
         
         // Build the forward transformation matrix
         TMatrix forwardMatrix = new TMatrix();
@@ -2450,47 +2493,47 @@ public class Globals {
         
         float increment = 0.5f;
         float inverseInc = 1.0f / increment;
-        int numCalcs = inWidth * inverseInc;
+        int numCalcs = (int)(inWidth * inverseInc);
     
-        xBuffer = (int)malloc(numCalcs * sizeof(int));
+        xBuffer = new int[numCalcs];
         if (xBuffer == null) {
             statusPrint("fwarpz2: Not enough memory for xBuffer");
             return -1;
         }
 
-        yBuffer = (int)malloc(numCalcs * sizeof(int));
+        yBuffer = new int[numCalcs];
         if (yBuffer == null) {
             statusPrint("fwarpz2: Not enough memory for yBuffer");
             return -1;
         }
     
-        dBuffer = (float)malloc(numCalcs * sizeof(float));
+        dBuffer = new float[numCalcs];
         if (dBuffer == null) {
             statusPrint("fwarpz2: Not enough memory for distance Buffer");
             return -1;
         }
     
-        iBuffer = (BYTE)malloc(numCalcs * sizeof(BYTE));
+        iBuffer = new byte[numCalcs];
         if (iBuffer == null) {
             statusPrint("fwarpz2: Not enough memory for iBuffer");
             return -1;
         }
     
-        //  Temporary - for testing
+        // Temporary - for testing
         vx = (float)outWidth/2.0f;
         vy = (float)outHeight/2.0f;
         vz = 512.0f;
     
-        sprintf(msgText, "fwarpz2: Viewer location: vx: %f, vy: %f, vz: %f", vx, vy, vz);
+        msgText = String.format("fwarpz2: Viewer location: vx: %f, vy: %f, vz: %f", vx, vy, vz);
         statusPrint(msgText);
-        xTemp = xBuffer;
-        yTemp = yBuffer;
-        iTemp = iBuffer;
-        dTemp = dBuffer;
+        xBufferIdx = 0;
+        yBufferIdx = 0;
+        iBufferIdx = 0;
+        dBufferIdx = 0;
 
         float row, col;
-        float x1,y1,z1;
-        BYTE i1, red1, green1, blue1;
+        float x1, y1, z1;
+        byte i1, red1, green1, blue1;
         int sx1, sy1;
         float refX, refY, refZ;
     
@@ -2498,38 +2541,44 @@ public class Globals {
             for (col = inverseInc * increment; col <= inWidth; col+= increment) {
                 x1 = col - halfWidth;
                 y1 = row - halfHeight;
-                z1 = 0.0;
+                z1 = 0.0f;
                 if(bpp == 8) {
-                    i1 = inputImage.getMPixel(col, row);
+                    i1 = inputImage.getMPixel((int)col, (int)row);
                 }
                 if(bpp == 24) {
-                    i1 = inputImage.getMPixelRGB(col, row, red1, i1, blue1);
+                    i1 = inputImage.getMPixelRGB((int)col, (int)row, red1, i1, blue1);
                 }
     
                 // project to the screen
                 viewModelMatrix.transformAndProjectPoint(x1, y1, z1, sx1, sy1, 
                     refX, refY, refZ, outHeight, outWidth, tx, ty, tz);
                 if(row == 1.0f) {
-                    *xTemp = sx1;
-                    xTemp++;
-                    *yTemp = sy1;
-                    yTemp++;
-                    *iTemp = i1;
-                    iTemp++;
-                    *dTemp = getDistance3d(tx, ty, tz, vx, vy, vz);
-                    dTemp++;
+                    xBuffer[xBufferIdx] = sx1;
+                    xBufferIdx++;
+
+                    yBuffer[yBufferIdx] = sy1;
+                    yBufferIdx++;
+
+                    iBuffer[iBufferIdx] = i1;
+                    iBufferIdx++;
+
+                    dBuffer[dBufferIdx] = getDistance3d(tx, ty, tz, vx, vy, vz);
+                    dBufferIdx++;
                 }
             
                 if ((row > 1.0f) && (col == 1.0f)) {
                     xTemp1 = sx1;
                     yTemp1 = sy1;
                     iTemp1 = i1;
+
                     xPrev1 = xBuffer;
                     yPrev1 = yBuffer;
+
                     xPrev2 = xBuffer;
                     yPrev2 = yBuffer;
                     xPrev2++;
                     yPrev2++;
+
                     iPrev1 = iBuffer;
                     iPrev2 = iBuffer;
                     iPrev2++;
@@ -2537,6 +2586,7 @@ public class Globals {
                     dPrev1 = dBuffer;
                     dPrev2 = dBuffer;
                     dPrev2++;
+
                     if(zBuffer != null) {
                         dTemp1 = getDistance3d(tx, ty, tz, vx, vy, vz);
                     }
@@ -2562,18 +2612,23 @@ public class Globals {
                     *xPrev1 = xTemp1;
                     *yPrev1 = yTemp1;
                     *iPrev1 = iTemp1;
+
                     xTemp1 = xTemp2;
                     yTemp1 = yTemp2;
                     iTemp1 = iTemp2;
+
                     xPrev1++;
                     yPrev1++;
+
                     xPrev2++;
                     yPrev2++;
+
                     iPrev1++;
                     iPrev2++;
         
                     *dPrev1 = dTemp1;
                     dTemp1 = dTemp2;
+
                     dPrev1++;
                     dPrev2++;
                 }
@@ -2585,13 +2640,15 @@ public class Globals {
   
 
     // This method came from IWARP.CPP
+    // Called from:
+    //     getIntervals
     public static int intervalDistance(int a, int b, int c) {
         // returns 0 if c is inside the interval (a,b).  i.e. a <= c <= b
         // else returns distance between c and interval (a,b)
         int b1 = a - c;
         int b2 = c - b;
         int b3 = Math.max(b1, b2);
-        if( b3 < 0) {
+        if(b3 < 0) {
             return 0;
         } else {
             return b3;
@@ -2600,6 +2657,8 @@ public class Globals {
 
 
     // This method came from QMESHMODEL.CPP
+    // Called from:
+    //     QuadMeshDlg.onOK
     public static int createQMeshModel(String inputImagePath, String destinationDir, int modelType) {  
         float Pi = 3.1415926f;
         int row, col; 
@@ -2613,8 +2672,8 @@ public class Globals {
         float smallerSide, cubeFaceSize;
         int v1, v2, v3, v4;
  
-        int imHeight, imWidth;
-        int bitsPerPixel, aStatus;
+        Integer imHeight = 0, imWidth = 0, bitsPerPixel = 0;
+        int aStatus;
         aStatus = readBMPHeader(inputImagePath, imHeight, imWidth, bitsPerPixel);
         if(aStatus != 0) {
             statusPrint("createQMeshModel: Unable to open texture image");
@@ -2635,16 +2694,16 @@ public class Globals {
         switch(modelType) {
         case CYLINDER:
             radius = (float)imWidth/(2.0f * Pi);
-            startTheta = 0.0f;
-            stopTheta = 360.0f;
+            startTheta =   0.0f;
+            stopTheta  = 360.0f;
             angularInc = 360.0f / (float)imWidth;
-            angleTemp = 0.0f;
+            angleTemp  =   0.0f;
             for (row = 1; row <= imHeight; row++) {
                 angleTemp = 0.0f;
 
                 for (col = 1; col <= imWidth; col++) {
-                    x = radius * cos(angleTemp * F_DTR);
-                    y = radius * sin(angleTemp * F_DTR);
+                    x = radius * Math.cos(angleTemp * F_DTR);
+                    y = radius * Math.sin(angleTemp * F_DTR);
                     angleTemp += angularInc;
                     xImage.setMPixel32(col, row, x);
                     yImage.setMPixel32(col, row, (float)row);
@@ -2669,26 +2728,28 @@ public class Globals {
             startTheta = 0.0f;
             stopTheta = 360.0f;
             asAngle = 0.0f;
-            theDimension = (float)imHeight;  //set the horz and vert dims equal to the max of the rectangle sides
+            theDimension = (float)imHeight;  // Set the horz and vert dims equal to the max of the rectangle sides
             if (imWidth > imHeight) {
                 theDimension = (float)imWidth;
             }
 
-            asAngleInc = 180.0f / (float)imHeight; //the height traces out a hemispherical arc
-            angularInc = 360.0f / (float)imWidth;  //Width
-            angleTemp = 0.0f;
+            asAngleInc = 180.0f / (float)imHeight; // The height traces out a hemispherical arc
+            angularInc = 360.0f / (float)imWidth;
+            angleTemp  =   0.0f;
 
             for (row = 1; row <= imHeight; row++) {
-                radius = Math.sin(asAngle * F_DTR) * sizeFactor;
+                radius = (float)Math.sin(asAngle * F_DTR) * sizeFactor;
                 angleTemp = 0.0f;
 
                 for (col = 1; col <= imWidth; col++) {
-                    x = (radius * Math.cos(angleTemp * F_DTR) ) + sizeFactor; //put the left most edge in the positive quadrant
-                    z = (radius * Math.sin(angleTemp * F_DTR) ) + sizeFactor;
+                    x = (radius * (float)Math.cos(angleTemp * F_DTR) ) + sizeFactor; //put the left most edge in the positive quadrant
+                    z = (radius * (float)Math.sin(angleTemp * F_DTR) ) + sizeFactor;
                     xImage.setMPixel32(col, row, x);
                     zImage.setMPixel32(col, row, z);
-                    yValue = acos(asAngle * F_DTR) * sizeFactor;
+
+                    yValue = (float)Math.acos(asAngle * F_DTR) * sizeFactor;
                     yImage.setMPixel32(col, row, yValue);
+
                     angleTemp += angularInc;
                 } // for col
                 asAngle += asAngleInc;
@@ -2712,8 +2773,8 @@ public class Globals {
             break;
  
         case SINE2D:
-            //  Circumfrence = 2*Pi*radius
-            radius = (float)(imWidth/(2.0f * Pi)/3.0f);   // make r small enough for three sinusoidal rotations
+            //  Circumference = 2*Pi*radius
+            radius = (float)(imWidth/(2.0f * Pi)/3.0f);   // Make r small enough for three sinusoidal rotations
             angularInc = 360.0f / (float)imWidth;
             xCent = (float)imWidth/2.0f;
             yCent = (float)imHeight/2.0f;
@@ -2776,9 +2837,9 @@ public class Globals {
 
         // Insure that a generated path is not the same as the texture path
         if(
-        strcmpi(xPath,inputImagePath) == 0 ||
-        strcmpi(yPath,inputImagePath) == 0 ||
-        strcmpi(zPath,inputImagePath) == 0) {
+        xPath.equalsIgnoreCase(inputImagePath) ||
+        yPath.equalsIgnoreCase(inputImagePath) ||
+        zPath.equalsIgnoreCase(inputImagePath)) {
             statusPrint("createQMeshModel: A surface image may not have the same name as the texture image.");
             msgText = "textureImage: " + inputImagePath;
             statusPrint(msgText);
@@ -2800,13 +2861,15 @@ public class Globals {
         float xMin, xMax, yMin, yMax, zMin, zMax;
         xMin = xImage.getMPixel32(1, 1);
         xMax = xMin;
+
         yMin = yImage.getMPixel32(1, 1);
         yMax = yMin;
+
         zMin = zImage.getMPixel32(1, 1);
         zMax = zMin;
 
         // Get an approximate model centroid, bounding box and display it.
-        statusPrint("calculating approximate mesh centroid and bounding box");
+        statusPrint("Calculating approximate mesh centroid and bounding box");
         xBucket = 0.0f;
         yBucket = 0.0f;
         zBucket = 0.0f;
@@ -2818,12 +2881,16 @@ public class Globals {
                 x1 = xImage.getMPixel32(col, row);
                 y1 = yImage.getMPixel32(col, row);
                 z1 = zImage.getMPixel32(col, row);
+
                 if(x1 > xMax) xMax = x1;
                 if(x1 < xMin) xMin = x1;
+
                 if(y1 > yMax) yMax = y1;
                 if(y1 < yMin) yMin = y1;
+
                 if(z1 > zMax) zMax = z1;
                 if(z1 < zMin) zMin = z1;
+
                 xBucket += x1;
                 yBucket += y1;
                 zBucket += z1;
@@ -2873,6 +2940,8 @@ public class Globals {
  
 
     // This method came from QMESHMODEL.CPP
+    // Called from:
+    //     RenderObject ctor that takes 4 parameters: a String, int, boolean and Point3d
     public static int getMeshCentroid(MemImage xImage, MemImage yImage, MemImage zImage,
     Float centroidX, Float centroidY, Float centroidZ) {
         String msgText;
@@ -2902,7 +2971,7 @@ public class Globals {
         }
     
         int imHeight = xImage.getHeight();
-        int imWidth = xImage.getWidth();
+        int imWidth  = xImage.getWidth();
         float x1 = 0.0f;
         float y1 = 0.0f;
         float z1 = 0.0f;
@@ -2919,25 +2988,29 @@ public class Globals {
             } // for col
         } // for row
 
+        // Set the output parameters
         centroidX = x1/totalCells;
         centroidY = y1/totalCells;
         centroidZ = z1/totalCells;
-        msgText = "Mesh centroid calculated: " centroidX + " " + centroidY + " " + centroidZ;
+        msgText = "Mesh centroid calculated: " + centroidX + " " + centroidY + " " + centroidZ;
         statusPrint(msgText);
         return 0;
     } // getMeshCentroid
   
 
     // This method came from QMESHMODEL.CPP
+    // Called from:
+    //     RenderObject ctor that takes 4 parameters: a String, int, boolean and Point3d
     public static int translateMesh(MemImage xImage, MemImage yImage, MemImage zImage,
     float offsetX, float offsetY, float offsetZ) {
         statusPrint("Translating mesh.");
 
         // Each image must be the same size.
-        if(xImage.getHeight() == yImage.getHeight() && 
-            yImage.getHeight() == zImage.getHeight() &&
-            xImage.getWidth() == yImage.getWidth() && 
-            yImage.getWidth() == zImage.getWidth()) {
+        if(
+        xImage.getHeight() == yImage.getHeight() && 
+        yImage.getHeight() == zImage.getHeight() &&
+        xImage.getWidth() == yImage.getWidth() && 
+        yImage.getWidth() == zImage.getWidth()) {
             //Do nothing cause Everything's OK
         } else {
             statusPrint("translateMesh: Surface images must have equal size.");
@@ -2956,7 +3029,7 @@ public class Globals {
         }
     
         int imHeight = xImage.getHeight();
-        int imWidth = xImage.getWidth();
+        int imWidth  = xImage.getWidth();
         float x1 = 0.0f;
         float y1 = 0.0f;
         float z1 = 0.0f;
@@ -2994,21 +3067,21 @@ public class Globals {
         MemImage theRed = new MemImage(redImage, 0, 0, SEQUENTIAL, 'R', REDCOLOR);
         if (!theRed.isValid()) {
             msgBuffer = "makeRGBIMage: Unable to open Red image: " + redImage;
-            Globals.statusPrint(msgBuffer);
+            statusPrint(msgBuffer);
             return 1;
         }
 
         MemImage theGreen = new MemImage(greenImage, 0, 0, SEQUENTIAL,'R', GREENCOLOR);
         if (!theGreen.isValid()) {
             msgBuffer = "makeRGBIMage: Unable to open Green image: " + greenImage;
-            Globals.statusPrint(msgBuffer);
+            statusPrint(msgBuffer);
             return 1;
         }
 
         MemImage theBlue = new MemImage(blueImage, 0, 0, SEQUENTIAL,'R', BLUECOLOR);
         if (!theBlue.isValid()) {
             msgBuffer = "makeRGBIMage: Unable to open Blue image: %s" + blueImage;
-            Globals.statusPrint(msgBuffer);
+            statusPrint(msgBuffer);
             return 1;
         }
 
@@ -3022,17 +3095,17 @@ public class Globals {
         bWidth  = theBlue.getWidth();
 
         if (!(rWidth == gWidth && gWidth == bWidth && rWidth == bWidth)) {
-            Globals.statusPrint("makeRGBIMage: R,G, and B image widths are not equal.");
+            statusPrint("makeRGBIMage: R,G, and B image widths are not equal.");
             return 1;
         }
         if (!(rHeight == gHeight && gHeight == bHeight && rHeight == bHeight)) {
-            Globals.statusPrint("makeRGBIMage: R,G, and B image heights are not equal.");
+            statusPrint("makeRGBIMage: R,G, and B image heights are not equal.");
             return 1;
         }
 
         MemImage theRGB = new MemImage(outFileName, gHeight, gWidth, SEQUENTIAL, 'W', RGBCOLOR);
         if (!theRGB.isValid()) {
-            Globals.statusPrint("makeRGBIMage: Unable to open RGB image.");
+            statusPrint("makeRGBIMage: Unable to open RGB image.");
 
             theRed.close();
             theGreen.close();
@@ -3040,13 +3113,13 @@ public class Globals {
             return 1;
         }
 
-        byte *redPixel, *greenPixel, *bluePixel, *rgbPixel;
+        byte[] redPixel, greenPixel, bluePixel, rgbPixel;
         int rStatus, gStatus, bStatus;
 
         for (int y = 1; y <= gHeight; y++) {
             rStatus = theRed.readNextRow();
             if (rStatus != 0) {
-                Globals.statusPrint("makeRGBImage: red readNextRow error.");
+                statusPrint("makeRGBImage: red readNextRow error.");
 
                 theRed.close();
                 theGreen.close();
@@ -3056,7 +3129,7 @@ public class Globals {
 
             gStatus = theGreen.readNextRow();
             if (gStatus != 0) {
-                Globals.statusPrint("makeRGBImage: green readNextRow error.");
+                statusPrint("makeRGBImage: green readNextRow error.");
 
                 theRed.close();
                 theGreen.close();
@@ -3066,7 +3139,7 @@ public class Globals {
 
             bStatus = theBlue.readNextRow();
             if (bStatus != 0) {
-                Globals.statusPrint("makeRGBImage: blue readNextRow error.");
+                statusPrint("makeRGBImage: blue readNextRow error.");
 
                 theRed.close();
                 theGreen.close();
@@ -3075,23 +3148,27 @@ public class Globals {
             }
 
             redPixel   = theRed.getBytes();
+            int redPixelIdx = 0;
             greenPixel = theGreen.getBytes();
+            int greenPixelIdx = 0;
             bluePixel  = theBlue.getBytes();
+            int bluePixelIdx = 0;
             rgbPixel   = theRGB.getBytes();
+            int rgbPixelIdx = 0;
 
             for (int x = 1; x <= gWidth; x++) {
-                *rgbPixel = *bluePixel;
-                rgbPixel++;
+                rgbPixel[rgbPixelIdx] = bluePixel[bluePixelIdx];
+                rgbPixelIdx++;
 
-                *rgbPixel =*greenPixel;
-                rgbPixel++;
+                rgbPixel[rgbPixelIdx] = greenPixel[greenPixelIdx];
+                rgbPixelIdx++;
 
-                *rgbPixel = *redPixel;
-                rgbPixel++;
+                rgbPixel[rgbPixelIdx] = redPixel[redPixelIdx];
+                rgbPixelIdx++;
 
-                redPixel++;
-                greenPixel++;
-                bluePixel++;
+                redPixelIdx++;
+                greenPixelIdx++;
+                bluePixelIdx++;
             } // for x
 
             // Write the output
@@ -3139,13 +3216,13 @@ public class Globals {
                 break;
             } // switch
 
-            if(intervalStatus == 0 && aValue != CHROMAVALUE) {  //interval start
+            if(intervalStatus == 0 && aValue != CHROMAVALUE) {  // interval start
                 intervalList[counter] = col;
                 counter++;
                 intervalStatus = 1;
             }
 
-            if(intervalStatus == 1 && aValue == CHROMAVALUE) {  //interval stop
+            if(intervalStatus == 1 && aValue == CHROMAVALUE) {  // interval stop
                 intervalList[counter] = col;
                 counter++;
                 intervalStatus = 0;
@@ -3180,7 +3257,7 @@ public class Globals {
 
 
     // This method came from TWEEN.CPP
-    int indexToCoord(int index, int *intervalList, int numIntervals) {
+    int indexToCoord(int index, int[] intervalList, int numIntervals) {
         // Map index into the interval list
         String msgText;
         int count, runningCount,countDelta;
@@ -3500,7 +3577,7 @@ public class Globals {
             // handle pointontop, pointonbottom cases
             for(row = minY; row <= maxY; row++) {
                 // interpolate the x interval and the intensities at the interval boundary
-                if(triangleType == POINTONTOP) {
+                if(triangleType == I_POINTONTOP) {
                     ix1 = (int)interpolate((float)minX, (float)maxX, (float)minY, (float)maxY, (float)row);
                     ix2 = (int)interpolate((float)minX, (float)midX, (float)minY, (float)midY, (float)row);
                     ip1 = (int)interpolate(       minI,        maxI, (float)minY, (float)maxY, (float)row);
@@ -3510,7 +3587,7 @@ public class Globals {
                         id2 = interpolate(minD, midD, (float)minY, (float)midY, (float)row);
                     }
                 }
-                if(triangleType == POINTONBOTTOM) {
+                if(triangleType == I_POINTONBOTTOM) {
                     ix1 = (int)interpolate((float)minX, (float)maxX, (float)minY, (float)maxY, (float)row);
                     ix2 = (int)interpolate((float)midX, (float)maxX, (float)midY, (float)maxY, (float)row);
                     ip1 = (int)interpolate(       minI,        maxI, (float)minY, (float)maxY, (float)row);
@@ -3581,6 +3658,8 @@ public class Globals {
 
 
     // This method came from SHADERS.CPP
+    // Called from:
+    //     RenderObject.renderShapez
     public static byte getLight(Point3d p1, Point3d p2, Point3d c1, Point3d c2) {
         // Input points are oriented counterclockwise from the first point
         Point3d centroid;
@@ -3653,9 +3732,9 @@ public class Globals {
         float dCentroid = getDistance3d(lightSource.x, lightSource.y, lightSource.z, 
                                         centroid.x, centroid.y, centroid.z);
         
-        getNormal2(np1, p1, centroid, p2);
+        Vect.getNormal2(np1, p1, centroid, p2);
         
-        vectorNormalize(np1);
+        Vect.vectorNormalize(np1);
         //
         //  kd     the coefficient of reflection or reflectivity of the surface material
         //         highly reflective = 1, highly absorptive = 0
@@ -3675,6 +3754,8 @@ public class Globals {
 
 
     // This method came from VECTOR.CPP
+    // Called from:
+    //     RenderObject.renderMeshz
     public static float lightModel(float kd, int Ip, int Ia, Point3d N, Point3d L, float d) {
         //  kd     the coefficient of reflection or reflectivity of the surface material
         //         highly reflective = 1, highly absorptive = 0
@@ -3703,58 +3784,63 @@ public class Globals {
         //  This version of renderMesh renders a mesh without the need for the
         //  renderObject that provides the context information from the graphic
         //  pipeline.
-        int *xBuffer, *yBuffer,  *xTemp, *yTemp;
-        float *wxBuffer, *wyBuffer, *wzBuffer, *dBuffer;
-        float *wxTemp, *wyTemp, *wzTemp;
-        byte *iBuffer, *iTemp, iTemp1, iTemp2, *iPrev1, *iPrev2;
+        int[] xBuffer, yBuffer;
+        int xBufferIdx, yBufferIdx; // previously named xTemp, yTemp;
+        // float *wxBuffer, *wyBuffer, *wzBuffer; // these variables are not used
+        float[] dBuffer;
+        // float *wxTemp, *wyTemp, *wzTemp; // these variables are not used
+        byte[] iBuffer;
+        int iBufferIdx; // previously byte *iTemp;
+        byte iTemp1, iTemp2, *iPrev1, *iPrev2;
         int xTemp1, yTemp1, xTemp2, yTemp2;
         int *xPrev1, *yPrev1, *xPrev2, *yPrev2;
-        float *dTemp, dTemp1, dTemp2, *dPrev1, *dPrev2;
+        int dBufferIdx; // previously float *dTemp;
+        float dTemp1, dTemp2, *dPrev1, *dPrev2;
         float vx, vy, vz;
 
         if (
         !xImage.isValid() ||
         !yImage.isValid() ||
         !zImage.isValid()) {
-            Globals.statusPrint("renderMesh: One or more quad-mesh image is not valid");
+            statusPrint("renderMesh: One or more quad-mesh image is not valid");
             return -1;
         }
 
         // Create the line buffer data structures
-        xBuffer = (int)malloc(xImage.getWidth() * sizeof(int));
+        xBuffer = new int[xImage.getWidth()];
         if (xBuffer == null) {
-            Globals.statusPrint("renderMesh: Not enough memory for xBuffer");
+            statusPrint("renderMesh: Not enough memory for xBuffer");
             return -1;
         }
 
-        yBuffer = (int)malloc(yImage.getWidth() * sizeof(int));
+        yBuffer = new int[yImage.getWidth()];
         if (yBuffer == null) {
-            Globals.statusPrint("renderMesh: Not enough memory for yBuffer");
+            statusPrint("renderMesh: Not enough memory for yBuffer");
             return -1;
         }
 
-        dBuffer = (float)malloc(zImage.getWidth() * sizeof(float));
+        dBuffer = new float[zImage.getWidth()];
         if (dBuffer == null) {
-            Globals.statusPrint("renderMesh: Not enough memory for Z Buffer");
+            statusPrint("renderMesh: Not enough memory for Z Buffer");
             return -1;
         }
 
-        iBuffer = (byte)malloc(textureImage.getWidth() * sizeof(BYTE));
+        iBuffer = new byte[textureImage.getWidth()];
         if (iBuffer == null) {
-            Globals.statusPrint("renderMeshz: Not enough memory for intensity Buffer");
+            statusPrint("renderMeshz: Not enough memory for intensity Buffer");
             return -1;
         }
 
         MemImage outputImage = new MemImage(textureImage.getHeight(), textureImage.getWidth());
         if(!outputImage.isValid()) {
-            Globals.statusPrint("renderMeshZ: Not enough memory to open output image");
+            statusPrint("renderMeshZ: Not enough memory to open output image");
             return -1;
         }
         outputImage.setFileName("outputImage");
 
         MemImage midZImage = new MemImage(outputImage.getHeight(), outputImage.getWidth(), 32);
         if(!midZImage.isValid()) {
-            Globals.statusPrint("renderMeshZ: Not enough memory to open intermediate Z image");
+            statusPrint("renderMeshZ: Not enough memory to open intermediate Z image");
             return -1;
         }
 
@@ -3771,11 +3857,11 @@ public class Globals {
         vz = 512.0f;
 
         String msgText = "renderMeshz: Viewer location: vx: " + vx + ", vy: " + vy + ", vz: " + vz;
-        Globals.statusPrint(msgText);
-        xTemp = xBuffer;
-        yTemp = yBuffer;
-        iTemp = iBuffer;
-        dTemp = dBuffer;
+        statusPrint(msgText);
+        xBufferIdx = 0;
+        yBufferIdx = 0;
+        iBufferIdx = 0;
+        dBufferIdx = 0;
 
         byte i1;
         int row, col, sx1, sy1;
@@ -3797,17 +3883,17 @@ public class Globals {
                   refX, refY, refZ, outHeight, outWidth, tx, ty, tz);
  
                 if(row == 1) {
-                    xTemp = sx1;
-                    xTemp++;
+                    xBuffer[xBufferIdx] = sx1;
+                    xBufferIdx++;
 
-                    yTemp = sy1;
-                    yTemp++;
+                    yBuffer[yBufferIdx] = sy1;
+                    yBufferIdx++;
 
-                    iTemp = i1;
-                    iTemp++;
+                    iBuffer[iBufferIdx] = i1;
+                    iBufferIdx++;
 
-                    dTemp = Globals.getDistance3d(tx, ty, tz, vx, vy, vz);
-                    dTemp++;
+                    dBufferIdx[dBufferIdx] = getDistance3d(tx, ty, tz, vx, vy, vz);
+                    dBufferIdx++;
                 }
               
                 if ((row > 1) && (col == 1)) {
@@ -3832,14 +3918,14 @@ public class Globals {
                     dPrev2 = dBuffer;
                     dPrev2++;
 
-                    dTemp1 = Globals.getDistance3d(tx, ty, tz, vx, vy, vz);
+                    dTemp1 = getDistance3d(tx, ty, tz, vx, vy, vz);
                 }
       
                 if ((row > 1) && (col > 1)) {
                     xTemp2 = sx1;
                     yTemp2 = sy1;
                     iTemp2 = i1;
-                    dTemp2 = Globals.getDistance3d(tx, ty, tz, vx, vy, vz);
+                    dTemp2 = getDistance3d(tx, ty, tz, vx, vy, vz);
 
                     outputImage.fillPolyz( 
                         xPrev1, yPrev1, iPrev1, dPrev1,
@@ -3881,6 +3967,11 @@ public class Globals {
 
     // This method came from MEMIMG32.CPP
     // Sets height, width and bitsPerPixel parameters
+    // Called from:
+    //     createQMeshModel
+    //     motionBlur
+    //     MainFrame.onToolsWarpImage
+    //     MemImage constructor that takes 6 parameters
     public static int readBMPHeader(String psFileName, Integer height, Integer width, Integer bitsPerPixel) {
         BITMAPFILEHEADER bmFH;
         BITMAPINFOHEADER pbmIH;
@@ -3894,7 +3985,7 @@ public class Globals {
         fp = CreateFile((LPCTSTR)psFileName, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
         if(fp == null) {
             errText = "readBMPHeader: Can't open " + psFileName;
-            Globals.statusPrint(errText);
+            statusPrint(errText);
             return 1;
         }
 
@@ -3903,7 +3994,7 @@ public class Globals {
 
         if( bmFH.bfType != 0x4D42 ) {   // if type isn't "BM" ...
             errText = "readBMPHeader: Cannot open: " + psFileName;
-            Globals.statusPrint(errText);
+            statusPrint(errText);
             CloseHandle(fp);
             return 2;
         }
@@ -3912,10 +4003,11 @@ public class Globals {
 
         ReadFile(fp, pbmIH, (DWORD)sizeof(BITMAPINFOHEADER), numBytesRead, null);
 
-        bitsPerPixel = (WORD)pbmIH.biBitCount;
+        // Set the output parameter bitsPerPixel
+        bitsPerPixel = (int)pbmIH.biBitCount;
         if((DWORD)pbmIH.biCompression != BI_RGB) {
             errText = "Compressed image. Not supported: " + psFileName;
-            Globals.statusPrint(errText);
+            statusPrint(errText);
             CloseHandle(fp);
             return 3;
         }
@@ -3924,8 +4016,10 @@ public class Globals {
         pbmInfo.bmiHeader = *pbmIH;
         GlobalUnlock( (HANDLE)pbmIH );
         GlobalFree( (HANDLE)pbmIH );
-        width = (DWORD) pbmInfo.bmiHeader.biWidth;
-        height = (DWORD) pbmInfo.bmiHeader.biHeight;
+
+        // Set the output parameters width and height
+        width = (int) pbmInfo.bmiHeader.biWidth;
+        height = (int) pbmInfo.bmiHeader.biHeight;
         imageSize = (DWORD) pbmInfo.bmiHeader.biSizeImage;
         GlobalFree((HANDLE)GlobalHandle(pbmInfo));
         CloseHandle(fp);
@@ -3964,7 +4058,7 @@ public class Globals {
         }
 
         int bpp = aTexture.getBitsPerPixel();
-        if (bpp != 8 && bpp != 24){
+        if ((bpp != 8) && (bpp != 24)) {
             statusPrint("tweenMesh: Texture image must have 8 or 24 bit pixels.");
             return -3;
         }
