@@ -38,10 +38,20 @@ public class Scene {
 
     // viewPoint Angles
     // Changed from private to public as it is used by SceneList
+    // Read in: 
+    //     SceneList.getViewPoint
+    //     SceneList.getViewTransform
+    // Written to in:
+    //     SceneList.setViewTransform
     public Point3d rotation;
 
     // viewPoint location relative to (0,0,0)
     // Changed from private to public as it is used by SceneList
+    // Read in: 
+    //     SceneList.getViewPoint
+    //     SceneList.getViewTransform
+    // Written to in:
+    //     SceneList.setViewTransform
     public Point3d translation;
 
     // point to last Scene element
@@ -55,6 +65,7 @@ public class Scene {
     
     // point to current scene element
     // Changed from private to public as it is accessed by SceneList
+    // Set in SceneList.setCurrentModel
     public SceneElement currentSceneElement; 
 
     // Changed from private to public as it is accessed by SceneList
@@ -132,6 +143,8 @@ public class Scene {
     } // finalize
 
 
+    // Called from:
+    //     SceneList.writeList
     void writeFile(ofstream fileout) {
         String sSequenceArray, sColorArray;
 
