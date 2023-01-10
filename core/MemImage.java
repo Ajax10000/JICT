@@ -145,25 +145,29 @@ public:
         String msgBuffer;
 
         if (
-        piColorSpec != ONEBITMONOCHROME && piColorSpec != REDCOLOR &&
-        piColorSpec != GREENCOLOR && piColorSpec != BLUECOLOR &&
-        piColorSpec != RGBCOLOR && piColorSpec != EIGHTBITMONOCHROME &&
-        piColorSpec != 0 && piColorSpec != A32BIT) {
-            msgBuffer = "MemImage: ColorSpec not valid: " + piColorSpec;
+        piColorSpec != ONEBITMONOCHROME && 
+        piColorSpec != REDCOLOR &&
+        piColorSpec != GREENCOLOR && 
+        piColorSpec != BLUECOLOR &&
+        piColorSpec != RGBCOLOR && 
+        piColorSpec != EIGHTBITMONOCHROME &&
+        piColorSpec != 0 && 
+        piColorSpec != A32BIT) {
+            msgBuffer = "MemImage Constructor 1: ColorSpec not valid - " + piColorSpec;
             Globals.statusPrint(msgBuffer);
             this.valid = false;
             return;
         }
 
-        if(rw != 'R' && rw != 'r' && rw != 'W' && rw != 'w') {
-            msgBuffer = "MemImage: rw must be R or W: " + rw;
+        if((rw != 'R') && (rw != 'r') && (rw != 'W'() && (rw != 'w')) {
+            msgBuffer = "MemImage Constructor 1: rw must be R or W - " + rw;
             Globals.statusPrint(msgBuffer);
             this.valid = false;
             return;
         }
 
         if((imAccessMode != RANDOM) && (imAccessMode != SEQUENTIAL)) {
-            msgBuffer = "MemImage: accessMode must be RANDOM or SEQUENTIAL: " + imAccessMode;
+            msgBuffer = "MemImage Constructor 1: accessMode must be RANDOM or SEQUENTIAL - " + imAccessMode;
             Globals.statusPrint(msgBuffer);
             this.valid = false;
             return;
@@ -171,7 +175,7 @@ public:
         if(
         (rw == 'W' || rw == 'w') && 
         (imHeight <= 0 || imWidth <= 0 || piColorSpec == 0)) {
-            Globals.statusPrint("MemImage: length, width and colorSpec must be > 0 for write access");
+            Globals.statusPrint("MemImage Constructor 1: length, width and colorSpec must be > 0 for write access");
             this.valid = false;
             return;
         }
@@ -188,7 +192,7 @@ public:
             myStatus = Globals.readBMPHeader(psFileName, myHeight, myWidth, myBitsPerPixel);
             if(myStatus != 0) {
                 this.valid = false;
-                Globals.statusPrint("MemImage: Unable to open BMP header for read access");
+                Globals.statusPrint("MemImage Constructor 1: Unable to open BMP header for read access");
                 return;
             }
 
@@ -206,7 +210,7 @@ public:
         this.theColorSpec = piColorSpec;
         this.accessMode = imAccessMode;
 
-        if(rw == 'W' || rw == 'w') {
+        if((rw == 'W') || (rw == 'w')) {
             int numRows = this.imageHeight;
             if (this.accessMode == SEQUENTIAL) {
                 numRows = 1;
@@ -214,7 +218,7 @@ public:
 
             allocate(numRows, this.imageWidth);
             if(!isValid()) {
-                Globals.statusPrint("MemImage: Could not allocate memory for write");
+                Globals.statusPrint("MemImage Constructor 1: Could not allocate memory for write");
             }
         }
 
@@ -235,7 +239,7 @@ public:
 
         if(this.accessMode == RANDOM) {
             if((rw == 'W' || rw == 'w') && (piColorSpec == RGBCOLOR)) {
-                Globals.statusPrint("MemImage: RANDOM 24 bit BMPs not supported for writing");
+                Globals.statusPrint("MemImage Constructor 1: RANDOM 24 bit BMPs not supported for writing");
                 this.valid = false;
                 return;
             }
@@ -247,7 +251,7 @@ public:
                 myStatus = Globals.readBMPHeader(psFileName, myHeight, myWidth, myBitsPerPixel);
                 if(myStatus != 0) {
                     this.valid = false; // Indicate that the file could not be opened
-                    Globals.statusPrint("MemImage: Unable to open BMP header");
+                    Globals.statusPrint("MemImage Constructor 1: Unable to open BMP header");
                     return;
                 }
 
@@ -259,7 +263,7 @@ public:
         }
         
         if (ictdebug) {
-            msgBuffer = "Constructor 1. Size of memImage: " + sizeof(MemImage);
+            msgBuffer = "MemImage Constructor 1: Size of MemImage: " + sizeof(MemImage);
             Globals.statusPrint(msgBuffer);
         }
     } // MemImage ctor
@@ -284,7 +288,7 @@ public:
         allocate(height, width);
 
         if (ictdebug) {
-            String msgBuffer = "Constructor 1.5. Size of memImage: " + sizeof(MemImage);
+            String msgBuffer = "MemImage Constructor 2: Size of MemImage: " + sizeof(MemImage);
             Globals.statusPrint(msgBuffer);
         }
     } // MemImage ctor
@@ -311,7 +315,7 @@ public:
 
         if (ictdebug) {
             String msgBuffer;
-            msgBuffer = "Constructor 2. Size of memImage: " + sizeof(MemImage);
+            msgBuffer = "MemImage Constructor 4: Size of MemImage: " + sizeof(MemImage);
             Globals.statusPrint(msgBuffer);
         }
     } // MemImage ctor
@@ -323,7 +327,7 @@ public:
         }
 
         if(ictdebug) {
-            Globals.statusPrint("memImage Destructor");
+            Globals.statusPrint("MemImage Destructor");
         }
     } // finalize
 
@@ -383,7 +387,7 @@ public:
         // Clear all pixels whose colors match the specified color
         // Use the fastest image traversal method
         if (this.bitsPerPixel != 24) {
-            Globals.statusPrint("clearRGB: bits Per pixel must = 24");
+            Globals.statusPrint("MemImage.clearRGB: Bits per pixel must = 24");
             return -1;
         }
 
@@ -429,7 +433,7 @@ public:
         // Clear all pixels whose colors match the specified color
         // Use the fastest traversal method
         if (this.bitsPerPixel != 24) {
-            Globals.statusPrint("clearRGB: bits Per pixel must = 24");
+            Globals.statusPrint("MemImage.clearRGBRange: Bits per pixel must = 24");
             return -1;
         }
 
@@ -560,7 +564,7 @@ public:
             } // for x
         } // for y
         
-        msgText = "scaleTo8: actual Max: " + actMax + " Min: " + actMin;
+        msgText = "MemImage.scaleTo8: actual Max: " + actMax + " Min: " + actMin;
         Globals.statusPrint(msgText);
 
         sFactor = (desMax - desMin) / (actMax - actMin);
@@ -667,7 +671,7 @@ public:
 
         hBitmap = CreateBitmap(this.imageWidth, this.imageHeight, 1, 1, bytes);
         if(hBitmap == 0) {
-            Globals.statusPrint("drawMask: Unable to create internal bitmap");
+            Globals.statusPrint("MemImage.drawMask: Unable to create internal bitmap");
             return 1;
         }
 
@@ -692,7 +696,7 @@ public:
         // Display the mask
         BitBlt(0, 0, this.imageWidth, this.imageHeight, newdc, 0, 0, SRCCOPY);
 
-        // Copy the completed mask image back to the memImage buffer
+        // Copy the completed mask image back to the MemImage buffer
         int dwCount = this.paddedWidth * this.imageHeight;
 
         // the bitmap is stored using a width that is a 2 byte multiple
@@ -839,7 +843,7 @@ public:
         if(aColor == 'G') return bytes[addr + 1];
         if(aColor == 'R') return bytes[addr + 2];
 
-        Globals.statusPrint("getMPixel: unknown color value");
+        Globals.statusPrint("MemImage.getMPixel: Unknown color value");
         return 0;
     } // getMPixel
 
@@ -854,7 +858,7 @@ public:
         //  input x and y are assumed to be 1 relative
         //  returns the desired pixel from a color image
         if(this.bitsPerPixel != 24) {
-            Globals.statusPrint("getMPixelRGB: Image must be 24 bits per pixel");
+            Globals.statusPrint("MemImage.getMPixelRGB: Image must be 24 bits per pixel");
             return -1;
         }
 
@@ -887,7 +891,7 @@ public:
         // Inputs x and y are assumed to be 1 relative
         // Returns the desired pixel from a color image
         if(this.bitsPerPixel != 24) {
-            Globals.statusPrint("setMPixelRGB: Image must be 24 bits per pixel");
+            Globals.statusPrint("MemImage.setMPixelRGB: Image must be 24 bits per pixel");
             return -1;
         }
 
@@ -1258,7 +1262,7 @@ public:
 
         fp = CreateFile(fileName, GENERIC_WRITE, 0, 0, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
         if(fp == null) {
-            msgText = "writeBMP: Couldn't open output image. " + fileName;
+            msgText = "MemImage.writeBMP: Couldn't open output image " + fileName;
             Globals.statusPrint(msgText);
             this.valid = false;
             return 1;
@@ -1267,7 +1271,7 @@ public:
         int numBytesWritten;
         WriteFile(fp, bf, sizeof(BITMAPFILEHEADER), numBytesWritten, null);
         if(numBytesWritten != sizeof(BITMAPFILEHEADER)) {
-            msgText = "writeBMP: WriteFile error 1. numBytesWritten " + numBytesWritten + " " + fileName;
+            msgText = "MemImage.writeBMP: WriteFile error 1. numBytesWritten " + numBytesWritten + " " + fileName;
             Globals.statusPrint(msgText);
             CloseHandle(fp);
             this.valid = false;
@@ -1276,7 +1280,7 @@ public:
 
         WriteFile(fp, bi, sizeof(BITMAPINFOHEADER), numBytesWritten, null);
         if(numBytesWritten != sizeof(BITMAPINFOHEADER)) {
-            msgText = "writeBMP: WriteFile error 2. numBytesWritten " + numBytesWritten + " " + fileName;
+            msgText = "MemImage.writeBMP: WriteFile error 2. numBytesWritten " + numBytesWritten + " " + fileName;
             Globals.statusPrint(msgText);
             CloseHandle(fp);
             this.valid = false;
@@ -1285,7 +1289,7 @@ public:
 
         WriteFile(fp, palinfo, sizeof(RGBQUAD) * 256, numBytesWritten, null);
         if(numBytesWritten != sizeof(RGBQUAD) * 256) {
-            msgText = "writeBMP: WriteFile error 3. numBytesWritten " + numBytesWritten + " " + fileName;
+            msgText = "MemImage.writeBMP: WriteFile error 3. numBytesWritten " + numBytesWritten + " " + fileName;
             Globals.statusPrint(msgText);
             CloseHandle(fp);
             this.valid = false;
@@ -1301,7 +1305,7 @@ public:
                 writeStatus = WriteFile(fp, bytes[iBytesIdx], this.paddedWidth, numBytesWritten, null);
 
                 if(numBytesWritten != this.paddedWidth) {
-                    msgText= "writeBMP: WriteFile error 4. numBytesWritten " + numBytesWritten + " " + fileName;
+                    msgText= "MemImage.writeBMP: WriteFile error 4. numBytesWritten " + numBytesWritten + " " + fileName;
                     Globals.statusPrint(msgText);
                     CloseHandle(fp);
                     this.valid = false;
@@ -1334,7 +1338,7 @@ public:
         this.valid = true;
         fp = CreateFile(psFileName, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
         if(fp == null) {
-            msgText = "readBMP:  Couldn't open image. " + psFileName;
+            msgText = "MemImage.readBMP: Couldn't open image " + psFileName;
             Globals.statusPrint(msgText);
             this.valid = false;
             return 2;
@@ -1348,7 +1352,7 @@ public:
         int numBytesRead;
         ReadFile(fp, bmFH, sizeof(BITMAPFILEHEADER), numBytesRead, null);
         if(bmFH.bfType != 0x4D42) {   // if type isn't "BM" ...
-            msgText = "readBMP: Not a .BMP image. " + psFileName;
+            msgText = "MemImage.readBMP: Not a .BMP image. " + psFileName;
             Globals.statusPrint(msgText);
             CloseHandle(fp);
             this.valid = false;
@@ -1361,7 +1365,7 @@ public:
         int fileBitsPerPixel = pbmIH.biBitCount;
 
         if(pbmIH.biCompression != BI_RGB) {
-            msgText = "readBMP: Compressed images not supported. " + psFileName;
+            msgText = "MemImage.readBMP: Compressed images not supported. " + psFileName;
             Globals.statusPrint(msgText);
             CloseHandle(fp);
             return 5;
@@ -1407,7 +1411,7 @@ public:
 
         allocate(numRows, bmWidth);
         if(this.valid == false) {
-            msgText = "readBMP: Couldn't allocate memory. " + psFileName;
+            msgText = "MemImage.readBMP: Couldn't allocate memory. " + psFileName;
             Globals.statusPrint(msgText);
             CloseHandle(fp);
             return 6;
@@ -1422,7 +1426,7 @@ public:
                     ReadFile(fp, theBytes, paddedWidth, numBytesRead, null);
 
                     if(numItems == -1) {
-                        msgText = "readBMP: ReadFile error. " + psFileName;
+                        msgText = "MemImage.readBMP: ReadFile error. " + psFileName;
                         Globals.statusPrint(msgText);
                         CloseHandle(fp);
                         this.valid = false;
@@ -1554,7 +1558,7 @@ public:
         int bpp = getBitsPerPixel();
 
         if(bpp != 32) {
-            msgText = "saveAs8: Input image must be 32 bits per pixel. " + outImagePathName;
+            msgText = "MemImage.saveAs8: Input image must be 32 bits per pixel. " + outImagePathName;
             Globals.statusPrint(msgText);
             return -1;
         }
@@ -1563,17 +1567,17 @@ public:
         int outputCols = getWidth();
         MemImage testImage = new MemImage(outputRows, outputCols, 8);
         if (!testImage.isValid()) {
-            msgText = "saveAs8: Unable to create intermediate image. " + outImagePathName;
+            msgText = "MemImage.saveAs8: Unable to create intermediate image. " + outImagePathName;
             Globals.statusPrint(msgText);
             return -1;
         }
 
         scaleTo8(testImage);
-        msgText = "saveAs8: saving: " + outImagePathName;
+        msgText = "MemImage.saveAs8: Saving " + outImagePathName;
         Globals.statusPrint(msgText);
 
         testImage.writeBMP(outImagePathName);
-        msgText = "Histogram of " + outImagePathName;
+        msgText = "MemImage.saveAs8: Histogram of " + outImagePathName;
         Globals.statusPrint(msgText);
         testImage.histogram();
 
@@ -1587,7 +1591,7 @@ public:
         String msgBuffer;
 
         if(getBitsPerPixel() != 8) {
-            Globals.statusPrint("histogram: Only 8 bit pixel images are supported");
+            Globals.statusPrint("MemImage.histogram: Only 8 bit pixel images are supported");
             return -1;
         }
 
@@ -1609,7 +1613,7 @@ public:
         } // for i
 
         // Display the histogram to the ict log
-        msgBuffer = "Histogram of " + savedFileName;
+        msgBuffer = "MemImage.histogram: Histogram of " + savedFileName;
         Globals.statusPrint(msgBuffer);
         for(i = 0; i <= 240; i+=16) {
             sprintf(msgBuffer,"%3d: %6ld %6ld %6ld %6ld %6ld %6ld %6ld %6ld %6ld %6ld %6ld %6ld %6ld %6ld %6ld %6ld",
@@ -1636,7 +1640,7 @@ public:
         float avgRed, avgGreen, avgBlue;
         int bpp = getBitsPerPixel();
         if((bpp != 24) && (bpp != 8)) {
-            Globals.statusPrint("adjustColor:  Input image must be 8 or 24 bits per pixel");
+            Globals.statusPrint("MemImage.adjustColor: Input image must be 8 or 24 bits per pixel");
             return -1;
         }
         int numRows = getHeight();
@@ -1676,7 +1680,7 @@ public:
             } // for row
 
             if(totalPixels == 0) {
-                Globals.statusPrint("adjustColor: Cannot adjust image color: no non-zero pixels!");
+                Globals.statusPrint("MemImage.adjustColor: Cannot adjust image color. No non-zero pixels!");
                 return -1;
             }
 
@@ -1793,12 +1797,12 @@ public:
         int bpp = getBitsPerPixel();
 
         if((bpp != 8) && (bpp != 32)) {
-            Globals.statusPrint("printValue: Only 8 or 32 bit images are supported");
+            Globals.statusPrint("MemImage.printValue: Only 8 or 32 bit images are supported");
             return -1;
         }
 
         if((x > getWidth()) || (y > getHeight())) {
-            msgBuffer = "printValue: Either x or y are > image bounds. x: " + x + "  y: " + y;
+            msgBuffer = "MemImage.printValue: Either x or y are > image bounds. x: " + x + "  y: " + y;
             Globals.statusPrint(msgBuffer);
             return -1;
         }
@@ -1806,7 +1810,7 @@ public:
         byte[] lineBuffer   = new byte[32];
         float[] fLineBuffer = new float[32];
 
-        msgBuffer = "Display of: " + savedFileName;
+        msgBuffer = "MemImage.printValue: Display of " + savedFileName;
         Globals.statusPrint(msgBuffer);
         sprintf(msgBuffer,"   %6ld %6ld %6ld %6ld %6ld %6ld %6ld %6ld %6ld %6ld %6ld %6ld",
                 x,     x + 1, x +  2, x +  3, 
@@ -1889,7 +1893,7 @@ public:
                     break;
 
                 default:
-                    Globals.statusPrint("clearRectangle: Unsupported pixel depth");
+                    Globals.statusPrint("MemImage.clearRectangle: Unsupported pixel depth");
                     return -1;
                     break;
                 } // switch
@@ -1952,7 +1956,7 @@ public:
             } // for y
 
             Globals.statusPrint(savedFileName);
-            String msgText = "getBoundingBox: xBeg: " + xBeg + "  xEnd: " + xEnd + " yBeg: " + yBeg + "  yEnd: " + yEnd; 
+            String msgText = "MemImage.getBoundingBox: xBeg: " + xBeg + "  xEnd: " + xEnd + " yBeg: " + yBeg + "  yEnd: " + yEnd; 
             Globals.statusPrint(msgText);
         } // for x
 
@@ -1967,7 +1971,7 @@ public:
         int x, y;
         byte thePixel, aRed, aGreen, aBlue;
         if(outImage.bitsPerPixel != 8) {
-            Globals.statusPrint("createAlphaImage: Output image must be 8 bits per pixel");
+            Globals.statusPrint("MemImage.createAlphaImage: Output image must be 8 bits per pixel");
             return -1;
         }
 
@@ -2008,19 +2012,19 @@ public:
         // The output image must be 8 bits per pixel
         // The output image must be opened for RANDOM access
         if (theColorSpec != ONEBITMONOCHROME) {
-            Globals.statusPrint("unPack: input image colorSpec must be ONEBITMONOCHROME");
+            Globals.statusPrint("MemImage.unPack: Input image colorSpec must be ONEBITMONOCHROME");
             return 1;
         }
       
         if(outputImage.accessMode != RANDOM) {
-            Globals.statusPrint("unPack: output image access mode must be RANDOM");
+            Globals.statusPrint("MemImage.unPack: Output image access mode must be RANDOM");
             return 2;
         }
 
         if (
         outputImage.theColorSpec == RGBCOLOR ||
         outputImage.theColorSpec == ONEBITMONOCHROME) {
-            Globals.statusPrint("unPack: output image colorSpec must be REDCOLOR, GREENCOLOR, or BLUECOLOR");
+            Globals.statusPrint("MemImage.unPack: Output image colorSpec must be REDCOLOR, GREENCOLOR, or BLUECOLOR");
             return 3;
         }
 
@@ -2074,7 +2078,7 @@ public:
         int imHeight = getHeight();
         int imWidth  = getWidth();
         if(this.bitsPerPixel != 24) {
-            Globals.statusPrint("adjustImageBorder: Image must have 24 bit pixels.");
+            Globals.statusPrint("MemImage.adjustImageBorder: Image must have 24 bit pixels.");
             return -1;
         }
 
@@ -2104,7 +2108,7 @@ public:
         int newImWidth  = maxX - minX + 1;
         MemImage outImage = new MemImage(newImHeight, newImWidth, 24);
         if(!outImage.isValid()) {
-            Globals.statusPrint("adjustImageBorder: Unable to create output image.");
+            Globals.statusPrint("MemImage.adjustImageBorder: Unable to create output image.");
             return -2;
         }
 
@@ -2137,7 +2141,7 @@ public:
         inImage.getWidth() == outImage.getWidth()) {
             // do nothing?
         } else {
-            Globals.statusPrint("alphaSmooth3: Images must have equal size.");
+            Globals.statusPrint("MemImage.alphaSmooth3: Images must have equal size.");
             return -1;
         }
 
@@ -2147,7 +2151,7 @@ public:
         (inImage.getBitsPerPixel() == 8)) {
             // do nothing?
         } else {
-            Globals.statusPrint("alphaSmooth3: images must have 8 or 24 bit pixels.");
+            Globals.statusPrint("MemImage.alphaSmooth3: Images must have 8 or 24 bit pixels.");
             return -2;
         }
         int bpp = inImage.getBitsPerPixel();
@@ -2223,7 +2227,7 @@ public:
         inImage.getWidth() == outImage.getWidth()) {
             // do nothing?
         } else {
-            Globals.statusPrint("antiAlias: Images must have equal size.");
+            Globals.statusPrint("MemImage.alphaSmooth5: Images must have equal size.");
             return -1;
         }
 
@@ -2233,7 +2237,7 @@ public:
         (inImage.getBitsPerPixel() == 8)) {
             // do nothing?
         } else {
-            Globals.statusPrint("antiAlias: images must have 8 or 24 bit pixels.");
+            Globals.statusPrint("MemImage.alphaSmooth5: Images must have 8 or 24 bit pixels.");
             return -2;
         }
 
@@ -2325,10 +2329,10 @@ public:
 
         if(
         inImage.getHeight() == outImage.getHeight() && 
-        inImage.getWidth() == outImage.getWidth() ) {
+        inImage.getWidth()  == outImage.getWidth() ) {
             // do nothing?
         } else {
-            Globals.statusPrint("antiAlias: Images must have equal size.");
+            Globals.statusPrint("MemImage.alphaSmooth7: Images must have equal size.");
             return -1;
         }
 
@@ -2338,7 +2342,7 @@ public:
         (inImage.getBitsPerPixel() == 8)) {
             // do nothing?
         } else {
-            Globals.statusPrint("antiAlias: images must have 8 or 24 bit pixels.");
+            Globals.statusPrint("MemImage.alphaSmooth7: Images must have 8 or 24 bit pixels.");
             return -2;
         }
         int bpp = inImage.getBitsPerPixel();
@@ -2350,13 +2354,14 @@ public:
         float z1 = 0.0f;
         float totalCells = 0.0f;
         int row, col;
-        float sum, q00,q10,q20, q30, q40, q50, q60;
-        float      q01,q11,q21, q31, q41, q51, q61;
-        float      q02,q12,q22, q32, q42, q52, q62;
-        float      q03,q13,q23, q33, q43, q53, q63;
-        float      q04,q14,q24, q34, q44, q54, q64;
-        float      q05,q15,q25, q35, q45, q55, q65;
-        float      q06,q16,q26, q36, q46, q56, q66;
+        float sum;
+        float q00, q10, q20, q30, q40, q50, q60;
+        float q01, q11, q21, q31, q41, q51, q61;
+        float q02, q12, q22, q32, q42, q52, q62;
+        float q03, q13, q23, q33, q43, q53, q63;
+        float q04, q14, q24, q34, q44, q54, q64;
+        float q05, q15, q25, q35, q45, q55, q65;
+        float q06, q16, q26, q36, q46, q56, q66;
         float factor = 1.0f/49.0f;
 
         for (row = 4; row <= imHeight - 3; row++) {
@@ -2533,7 +2538,7 @@ public:
         float d4 = Globals.getDistance2d((float)xCent, (float)yCent, (float)I4x, (float)I4y);
         totalDistance = d1 + d2 + d3 + d4;
         if(totalDistance == 0.0f) {
-            Globals.statusPrint("fillPolyZ: Sum of polygon diagonals must be > 0");
+            Globals.statusPrint("MemImage.fillPolyZ: Sum of polygon diagonals must be > 0");
             return -1;
         }
 
