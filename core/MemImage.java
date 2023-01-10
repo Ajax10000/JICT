@@ -263,7 +263,7 @@ public:
         }
         
         if (ictdebug) {
-            msgBuffer = "MemImage Constructor 1: Size of MemImage: " + sizeof(MemImage);
+            msgBuffer = "MemImage Constructor 1: Size of MemImage: " + sizeofLowerLimit();
             Globals.statusPrint(msgBuffer);
         }
     } // MemImage ctor
@@ -288,7 +288,7 @@ public:
         allocate(height, width);
 
         if (ictdebug) {
-            String msgBuffer = "MemImage Constructor 2: Size of MemImage: " + sizeof(MemImage);
+            String msgBuffer = "MemImage Constructor 2: Size of MemImage: " + sizeofLowerLimit();
             Globals.statusPrint(msgBuffer);
         }
     } // MemImage ctor
@@ -315,7 +315,7 @@ public:
 
         if (ictdebug) {
             String msgBuffer;
-            msgBuffer = "MemImage Constructor 4: Size of MemImage: " + sizeof(MemImage);
+            msgBuffer = "MemImage Constructor 4: Size of MemImage: " + sizeofLowerLimit();
             Globals.statusPrint(msgBuffer);
         }
     } // MemImage ctor
@@ -1616,7 +1616,7 @@ public:
         msgBuffer = "MemImage.histogram: Histogram of " + savedFileName;
         Globals.statusPrint(msgBuffer);
         for(i = 0; i <= 240; i+=16) {
-            sprintf(msgBuffer,"%3d: %6ld %6ld %6ld %6ld %6ld %6ld %6ld %6ld %6ld %6ld %6ld %6ld %6ld %6ld %6ld %6ld",
+            msgBuffer = String.format("%3d: %6d %6d %6d %6d %6d %6d %6d %6d %6d %6d %6d %6d %6d %6d %6d %6d",
                 i, 
                 histogArray[i+ 0], histogArray[i+ 1], histogArray[i+ 2], histogArray[i+ 3], 
                 histogArray[i+ 4], histogArray[i+ 5], histogArray[i+ 6], histogArray[i+ 7], 
@@ -1812,7 +1812,7 @@ public:
 
         msgBuffer = "MemImage.printValue: Display of " + savedFileName;
         Globals.statusPrint(msgBuffer);
-        sprintf(msgBuffer,"   %6ld %6ld %6ld %6ld %6ld %6ld %6ld %6ld %6ld %6ld %6ld %6ld",
+        msgBuffer = String.format("   %6d %6d %6d %6d %6d %6d %6d %6d %6d %6d %6d %6d",
                 x,     x + 1, x +  2, x +  3, 
                 x + 4, x + 5, x +  6, x +  7, 
                 x + 8, x + 9, x + 10, x + 11);
@@ -2572,4 +2572,37 @@ public:
             outImage, zBuffer);
         return 0;
     } // fillPolyz
+
+
+    public int sizeofLowerLimit() {
+        int mySize = 0;
+        int booleanFieldsSizeInBits = 0;
+        int booleanFieldsSize = 0;
+        int intFieldsSize = 0;
+        int floatFieldsSize = 0;
+        int referenceFieldsSize = 0;
+
+        /*
+        protected boolean valid;
+        protected int imageHeight;
+        protected int imageWidth;
+        protected int bitsPerPixel;
+        protected int paddedWidth;
+        protected int pads;
+        protected int accessMode;
+        protected int theColorSpec;
+        protected byte[] bytes;
+        protected HANDLE fp;
+        protected String savedFileName;
+        */
+
+        booleanFieldsSizeInBits = 1; // 1 booleans
+        booleanFieldsSize = 1; // 1 bit fits in a byte
+        intFieldsSize = 7*4; // 7 ints
+        floatFieldsSize = 0*4; // 0 floats
+        referenceFieldsSize = 3*4; // 3 references to objects
+        mySize = booleanFieldsSize + intFieldsSize + floatFieldsSize + referenceFieldsSize;
+
+        return mySize;
+    }
 } // class MemImage
