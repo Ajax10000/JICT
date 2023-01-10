@@ -41,13 +41,17 @@ The menu for ICT was defined in ICT20.RC. Of course, to implement the menu in Ja
 -   Handling object parameters to methods has been easy. In C++, the object type is often followed by an asterisk, indicating it is a pointer to an object of that type. In converting, I just removed the '\*'.
 -   For integer and float parameters that are being modified in a method (so that the new value is seen by the calling method), I substitued Integer and Float parameters.
 
-I was able to convert many of the sprintf statements to simple String concatenations in Java. I believe others will be converted using DecimalFormat.
+I was able to convert many of the sprintf statements to simple String concatenations in Java. I believe others will be converted using String.format and DecimalFormat.
 
 There are still a lot of conversion to be done. Some changes I have planned are:
 
 -   Usage of the strtok function will be changed to usage of the StringTokenizer class.
 -   Usage of the RGBTRIPLE will be changed to usage of the java.awt.Color class.
 -   Usage of SETCURSOR and LOADCURSOR will be changed to usage of the java.awt.Component class's setCursor and getCursor methods. But there is a glitch, in that the SETCURSOR and LOADCURSOR are used in MEMIMAGE.CPP, which does not extend CFrame nor CDialog.
+
+*   Usage of the SetTextColor method will be changed to usage of the Graphics2D.drawString method.
+*   Usage of the RGB function will be changed to usage of the java.awt.Color class.
+
 -   The message handlers will have to be converted to event handlers.
 
 I started the conversion on Dec. 21, 2022, so I'm still the early stages of converting.
