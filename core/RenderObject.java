@@ -290,6 +290,8 @@ protected:
         Graphics2D graphics2D = pBuffImg.createGraphics();
         HPEN hBlackPen, hWhitePen;
         boolean highlightVertices = false;
+        int iPt1X, iPt1Y;
+        int iPt2X, iPt2Y;
         // float referenceX, referenceY, referenceZ; // These variables are not used
 
         SetMapMode(MM_TEXT); // Logical units = physical units = pixel
@@ -318,29 +320,52 @@ protected:
         if(currentShape.getNumFaces() == 0) {
             firstx = (int)currentShape.currentVertex.sx;
             firsty = (int)(screenHeight - currentShape.currentVertex.sy);
-            MoveToEx(firstx + xOffset, firsty - yOffset);
+            iPt1X = firstx + xOffset;
+            iPt1Y = firsty - yOffset;
             for (index = 1; index < currentShape.getNumVertices(); index++) {
                 // currentShape.currentVertex++;
                 currentShape.incCurrentVertex();
-                LineTo(currentShape.currentVertex.sx + xOffset, screenHeight - currentShape.currentVertex.sy - yOffset);
+                iPt2X = (int)currentShape.currentVertex.sx + xOffset;
+                iPt2Y = screenHeight - (int)currentShape.currentVertex.sy - yOffset;
+                graphics2D.drawLine(iPt1X, iPt1Y, iPt2X, iPt2Y);
+                iPt1X = iPt2X;
+                iPt1Y = iPt2Y;
             }
-            LineTo(firstx + xOffset, firsty - yOffset);
+            
+            // Now draw a line from the last point to the first point.
+            graphics2D.drawLine(iPt2X, iPt2Y, firstx + xOffset, firsty - yOffset);
         } else {  // the model has faces
             currentShape.initCurrentFace();
             for (index = 1; index <= currentShape.getNumFaces(); index++) {
                 currentShape.getScreenVertex(currentShape.currentFace.i1, firstx, firsty);
-                MoveToEx(firstx + xOffset, screenHeight - firsty - yOffset);
-                
                 currentShape.getScreenVertex(currentShape.currentFace.i2, nextx, nexty);
-                LineTo(nextx + xOffset, screenHeight - nexty - yOffset);
+                iPt1X = firstx + xOffset;
+                iPt1Y = screenHeight - firsty - yOffset;
+                iPt2X = nextx + xOffset;
+                iPt2Y = screenHeight - nexty - yOffset;
+                graphics2D.drawLine(iPt1X, iPt1Y, iPt2X, iPt2Y);
 
                 currentShape.getScreenVertex(currentShape.currentFace.i3, nextx, nexty);
-                LineTo(nextx + xOffset, screenHeight - nexty - yOffset);
+                iPt1X = iPt2X;
+                iPt1Y = iPt2Y;
+                iPt2X = nextx + xOffset;
+                iPt2Y = screenHeight - nexty - yOffset;
+                graphics2D.drawLine(iPt1X, iPt1Y, iPt2X, iPt2Y);
 
                 currentShape.getScreenVertex(currentShape.currentFace.i4, nextx, nexty);
-                LineTo(nextx + xOffset, screenHeight - nexty - yOffset);
+                iPt1X = iPt2X;
+                iPt1Y = iPt2Y;
+                iPt2X = nextx + xOffset;
+                iPt2Y = screenHeight - nexty - yOffset;
+                graphics2D.drawLine(iPt1X, iPt1Y, iPt2X, iPt2Y);
 
-                LineTo(firstx + xOffset, screenHeight - firsty - yOffset);
+                // Now draw a line from the last point to the first point.
+                iPt1X = iPt2X;
+                iPt1Y = iPt2Y;
+                iPt2X = firstx + xOffset;
+                iPt2Y = screenHeight - firsty - yOffset;
+                graphics2D.drawLine(iPt1X, iPt1Y, iPt2X, iPt2Y);
+
                 // currentShape.currentFace++;
                 currentShape.incCurrentFace();
             }
@@ -395,6 +420,8 @@ protected:
         int index;
         float ax, ay;
         int firstx, firsty, nextx, nexty;
+        int iPt1X, iPt1Y;
+        int iPt2X, iPt2Y;
 
         currentShape.initCurrentVertex();
 
@@ -415,21 +442,26 @@ protected:
                     firstx + xOffset, 
                     firsty - yOffset);
             }
-            MoveToEx(firstx + xOffset, firsty - yOffset, 0L);
 
+            iPt1X = firstx + xOffset;
+            iPt1Y = firsty - yOffset;
             for (index = 1; index < currentShape.getNumVertices(); index++) {
                 // currentShape.iCurrVtxIdx++;
                 currentShape.incCurrentVertex();
-                LineTo(
-                    currentShape.vertices[currentShape.iCurrVtxIdx].sx + xOffset, 
-                    piScreenHeight - currentShape.vertices[currentShape.iCurrVtxIdx].sy - yOffset);
+                iPt2X = (int)currentShape.currentVertex.sx + xOffset;
+                iPt2Y = piScreenHeight - (int)currentShape.currentVertex.sy - yOffset;
+                graphics2D.drawLine(iPt1X, iPt1Y, iPt2X, iPt2Y);
+                iPt1X = iPt2X;
+                iPt1Y = iPt2Y;
+
                 if(highlightVertices) {
                      drawBox(graphics2D, hPointPen, hBlackPen, 
-                        currentShape.vertices[currentShape.iCurrVtxIdx].sx + xOffset, 
-                        piScreenHeight - currentShape.vertices[currentShape.iCurrVtxIdx].sy - yOffset);
+                        iPt2X, iPt2Y);
                 }
-            }
-            LineTo(firstx + xOffset, firsty - yOffset);
+            } // for
+            
+            // Now draw a line from the last point to the first point
+            graphics2D.drawLine(iPt2X, iPt2Y, firstx + xOffset, firsty - yOffset);
         } else {  // The model has faces
             currentShape.initCurrentFace();
             for (index = 1; index <= currentShape.getNumFaces(); index++) {
@@ -440,10 +472,14 @@ protected:
                         firstx + xOffset, 
                         firsty - yOffset);
                 }
-                MoveToEx(firstx + xOffset, piScreenHeight - firsty - yOffset, 0L);
+                iPt1X = firstx + xOffset;
+                iPt1Y = piScreenHeight - firsty - yOffset;
               
                 currentShape.getScreenVertex(currentShape.currentFace.i2, nextx, nexty);
-                LineTo(nextx + xOffset, piScreenHeight - nexty - yOffset);
+                iPt2X = nextx + xOffset;
+                iPt2Y = piScreenHeight - nexty - yOffset;
+                graphics2D.drawLine(iPt1X, iPt1Y, iPt2X, iPt2Y);
+
                 if(highlightVertices) {
                     drawBox(graphics2D, hPointPen, hBlackPen, 
                         nextx + xOffset, 
@@ -451,7 +487,12 @@ protected:
                 }
 
                 currentShape.getScreenVertex(currentShape.currentFace.i3, nextx, nexty);
-                LineTo(nextx + xOffset, piScreenHeight - nexty - yOffset);
+                iPt1X = iPt2X;
+                iPt1Y = iPt2Y;
+                iPt2X = nextx + xOffset;
+                iPt2Y = piScreenHeight - nexty - yOffset;
+                graphics2D.drawLine(iPt1X, iPt1Y, iPt2X, iPt2Y);
+
                 if(highlightVertices) {
                     drawBox(graphics2D, hPointPen, hBlackPen, 
                         nextx + xOffset, 
@@ -459,17 +500,27 @@ protected:
                 }
 
                 currentShape.getScreenVertex(currentShape.currentFace.i4, nextx, nexty);
-                LineTo(nextx + xOffset, piScreenHeight - nexty - yOffset);
+                iPt1X = iPt2X;
+                iPt1Y = iPt2Y;
+                iPt2X = nextx + xOffset;
+                iPt2Y = piScreenHeight - nexty - yOffset;
+                graphics2D.drawLine(iPt1X, iPt1Y, iPt2X, iPt2Y);
+
                 if(highlightVertices) {
                     drawBox(graphics2D, hPointPen, hBlackPen, 
                         nextx + xOffset, 
                         piScreenHeight - nexty - yOffset);
                 }
-                LineTo(firstx + xOffset, piScreenHeight - firsty - yOffset);
+
+                iPt1X = iPt2X;
+                iPt1Y = iPt2Y;
+                iPt2X = firstx + xOffset;
+                iPt2Y = piScreenHeight - firsty - yOffset;
+                graphics2D.drawLine(iPt1X, iPt1Y, iPt2X, iPt2Y);
 
                 // currentShape.currentFace++;
                 currentShape.incCurrentFace();
-            }
+            } // for
         } // if
 
         // Display the model's name
@@ -556,7 +607,7 @@ protected:
     // TODO: Not a method
     int prepareCutout(Shape3d aShape, HWND HWindow, String imageFileName,
       String cutoutName, int imageWidth, int imageHeight) {
-        // creates a cutout image, alpha image, and shape file from
+        // Creates a cutout image, alpha image, and shape file from
         // a boundary traced by the user
         int numVertices = aShape.getNumVertices();
 
@@ -845,17 +896,22 @@ protected:
                     // Draw only if the texture is not transparent 
                     if((iPrev2 != 0) && (iTemp2 != 0) && (iTemp1 != 0)) {
                           if(row == (meshIncrement + 1)) {   // draw the first row
-                              MoveToEx(xPrev1, screenHeight - (yPrev1));
-                              LineTo(xPrev2, screenHeight - (yPrev2));
+                              graphics2D.drawLine(
+                                  xPrev1, screenHeight - (yPrev1),
+                                  xPrev2, screenHeight - (yPrev2));
                           }
                           if(col == (meshIncrement + 1)) {  // draw the first column
-                              MoveToEx(xPrev1, screenHeight - (yPrev1));
-                              LineTo(xTemp1, screenHeight - yTemp1);
+                              graphics2D.drawLine(
+                                  xPrev1, screenHeight - (yPrev1),
+                                  xTemp1, screenHeight - yTemp1);
                           }
 
-                          MoveToEx(xPrev2, screenHeight - (yPrev2));
-                          LineTo(xTemp2, screenHeight - yTemp2);
-                          LineTo(xTemp1, screenHeight - yTemp1);
+                          graphics2D.drawLine(
+                              xPrev2, screenHeight - (yPrev2),
+                              xTemp2, screenHeight - yTemp2);
+                          graphics2D.drawLine(
+                              xTemp2, screenHeight - yTemp2,
+                              xTemp1, screenHeight - yTemp1);
                     }
 
                     *xPrev1 = xTemp1;		// Advance pointers
@@ -1431,13 +1487,35 @@ protected:
     void drawBox(Graphics2D graphics2D, HPEN hPointPen, HPEN hBlackPen, int x, int y) {
         //  Draw a box 2 * offset + 1 pixels wide and high around the point x,y
         int offset = 2;
+        int iPt1X, iPt1Y;
+        int iPt2X, iPt2Y;
         SelectObject(hPointPen);
-        MoveToEx(x - offset, y + offset);
-        LineTo(x + offset, y + offset);
-        LineTo(x + offset, y - offset);
-        LineTo(x - offset, y - offset);
-        LineTo(x - offset, y + offset);
-        MoveToEx(x, y);
+
+        iPt1X = x - offset;
+        iPt1Y = y + offset;
+        iPt2X = x + offset;
+        iPt2Y = y + offset;
+        graphics2D.drawLine(iPt1X, iPt1Y, iPt2X, iPt2Y);
+
+        iPt1X = iPt2X;
+        iPt1Y = iPt2Y;
+        iPt2X = x + offset;
+        iPt2Y = y - offset;
+        graphics2D.drawLine(iPt1X, iPt1Y, iPt2X, iPt2Y);
+
+        iPt1X = iPt2X;
+        iPt1Y = iPt2Y;
+        iPt2X = x - offset;
+        iPt2Y = y - offset;
+        graphics2D.drawLine(iPt1X, iPt1Y, iPt2X, iPt2Y);
+
+        iPt1X = iPt2X;
+        iPt1Y = iPt2Y;
+        iPt2X = x - offset;
+        iPt2Y = y + offset;
+        graphics2D.drawLine(iPt1X, iPt1Y, iPt2X, iPt2Y);
+
+        // MoveToEx(x, y); // this doesn't actually draw anyting
         SelectObject(hBlackPen);
     } // drawBox
 
