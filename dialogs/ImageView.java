@@ -81,7 +81,8 @@ protected:
 
     // This value ws defined in SHAPE3D.H
     public static final int I_MAXVERTICES = 1024;
-    
+
+
     // Called from:
     //     MainFrame.onPreviewStillScene
     //     MainFrame.onPreviewSequenceScene
@@ -90,7 +91,8 @@ protected:
         m_eraseMe = false;
         m_anImage = null;
     } // ImageView ctor
-    
+
+
     public void finalize() {
         // DeleteObject(hBitmap);
     } // finalize
@@ -99,7 +101,7 @@ protected:
     public ImageDoc getDocument() {
         ASSERT (m_pDocument.IsKindOf(RUNTIME_CLASS(imageDoc)));
         return (ImageDoc)m_pDocument;
-    } // GetDocument
+    } // getDocument
 
 
     public void onInitialUpdate() {
@@ -119,7 +121,7 @@ protected:
     
         MainFrame theFrame = (MainFrame)AfxGetMainWnd();
         m_cutoutEnabled = theFrame.cutoutEnabled;
-    } // OnInitialUpdate
+    } // onInitialUpdate
 
     
     // Called from:
@@ -167,7 +169,7 @@ protected:
     
         HBITMAP holdBitmap;
         if(!hBitmap) {
-            Globals.statusPrint("imageView::OnDraw  hBitmap not defined");
+            Globals.statusPrint("ImageView.onDraw  hBitmap not defined");
             return;
         }
       
@@ -178,14 +180,13 @@ protected:
 
         CSize docSize = getDocument().getDocSize();
         
-        HDC dc = ::GetDC(m_hWnd);
         CRect clientRect;
         GetClientRect(clientRect);
         
-        HDC memDC = CreateCompatibleDC(dc);
+        HDC memDC = CreateCompatibleDC();
 
         // Select the bitmap into the memory DC
-        holdBitmap =(HBITMAP)SelectObject(memDC, hBitmap);
+        holdBitmap = SelectObject(memDC, hBitmap);
         SetStretchBltMode(memDC, COLORONCOLOR);
         RECT imageRect;
         imageRect.left = 0; imageRect.top = 0;
@@ -199,21 +200,19 @@ protected:
         clientRect.top    += YPos;
         clientRect.bottom += YPos;
         
-        BitBlt(dc, imageRect.left, imageRect.top,
+        BitBlt(imageRect.left, imageRect.top,
           imageRect.right - imageRect.left,
           imageRect.bottom - imageRect.top,
           memDC, imageRect.left + XPos,
           imageRect.top + YPos, SRCCOPY);
     
-        PatBlt(dc, docSize.cx, 0,
-               clientRect.right - docSize.cx,
-               clientRect.bottom, PATCOPY);
-        PatBlt(dc, 0,docSize.cy,
-        clientRect.right, clientRect.bottom - docSize.cy, PATCOPY);
+        PatBlt(docSize.cx, 0,
+            clientRect.right - docSize.cx,
+            clientRect.bottom, PATCOPY);
+        PatBlt(0, docSize.cy,
+            clientRect.right, clientRect.bottom - docSize.cy, PATCOPY);
     
         SelectObject(memDC, holdBitmap);
-        DeleteDC(memDC);
-        DeleteDC(dc);
     } // onDraw
     
 
@@ -235,14 +234,12 @@ protected:
     
 
     public void getBitmap() {
-        HDC dc;
         HANDLE hloc;
         PBITMAPINFO pbmi;
         RGBQUAD pal = new RGBQUAD[256];
 
-        dc = ::GetDC(m_hWnd);
         hloc = LocalAlloc(LMEM_ZEROINIT | LMEM_MOVEABLE, sizeof(BITMAPINFOHEADER) + (sizeof(RGBQUAD) * 256));
-        pbmi = (PBITMAPINFO)LocalLock(hloc);
+        pbmi = LocalLock(hloc);
         
         for(int a = 0; a < 256; a++) {
             pal[a].rgbRed   = (unsigned char)a;
@@ -260,10 +257,8 @@ protected:
         
         memcpy(pbmi.bmiColors, pal, sizeof(RGBQUAD) * 256);
         //create a bitmap data structure containing the memImage bits
-        hBitmap = CreateDIBitmap(dc, (BITMAPINFOHEADER) pbmi, CBM_INIT,
+        hBitmap = CreateDIBitmap(pbmi, CBM_INIT,
             m_anImage.getBytes(), pbmi, DIB_RGB_COLORS);
-        LocalFree(hloc);
-        ::ReleaseDC(m_hWnd, dc);
     } // getBitmap
     
 
@@ -296,7 +291,7 @@ protected:
             return null;
         }
         
-        //  Fail if view is the wrong kind
+        // Fail if view is the wrong kind
         if (!pView.IsKindOf(RUNTIME_CLASS(ImageView))) {
             return null;
         }
@@ -306,7 +301,8 @@ protected:
     
 
     public void onLButtonDown(UINT nFlags, CPoint point) {
-        // Peek into the CMainFrame window object to see if the cutout enabled option has been checked.
+        // Peek into the CMainFrame window object to see if 
+        // the cutout enabled option has been checked.
         String msgText;
         MainFrame theFrame = (MainFrame)AfxGetMainWnd();
         m_cutoutEnabled = theFrame.cutoutEnabled;
@@ -368,7 +364,6 @@ protected:
                     (byte)blueLow, (byte)blueHigh);
                 }
             
-                DeleteObject(hBitmap);
                 getBitmap();
                 repaint();
             } 
@@ -391,24 +386,21 @@ protected:
                 ": (" + point.x + xOffset + ", " + point.y - yOffset + ")";
             Globals.statusPrint(msgText);
             int myStatus;
-            myStatus = m_aShape.addWorldVertex((float)point.x + xOffset, (float)point.y - yOffset, 0.0f); // z = 0 at the screen
+            myStatus = m_aShape.addWorldVertex((float)(point.x + xOffset), (float)(point.y - yOffset), 0.0f); // z = 0 at the screen
             
             HPEN hpen;
-            HDC theDC = ::GetDC(m_hWnd);
             hpen = CreatePen(PS_SOLID, 1, Color.WHITE);
-            SelectObject(theDC, hpen);
+            SelectObject(hpen);
 
             float x, y, z;
             myStatus = m_aShape.getPreviousWorldVertex(x, y, z);
             if (myStatus == 0) {
-                MoveToEx(theDC, (int)(x - xOffset + 0.5), (int)(y + yOffset + 0.5), 0L);
-                LineTo(theDC, point.x, point.y);
+                MoveToEx((int)(x - xOffset + 0.5), (int)(y + yOffset + 0.5), 0L);
+                LineTo(point.x, point.y);
             } else {
-                MoveToEx(theDC, point.x, point.y, 0L); //draw a single point
-                LineTo(theDC, point.x+1, point.y+1);
+                MoveToEx(point.x, point.y, 0L); // draw a single point
+                LineTo(point.x+1, point.y+1);
             }
-            ::ReleaseDC(m_hWnd, theDC);
-            DeleteObject(hpen);
         }
 
         CScrollView.OnLButtonUp(nFlags, point);
@@ -461,23 +453,18 @@ protected:
             msgText = "Deleting: (" + point.x + xOffset + ", " + point.y - yOffset + ")";
             Globals.statusPrint(msgText);
             HPEN hpen;
-            HDC theDC = ::GetDC(m_hWnd);
         
             hpen = CreatePen(PS_SOLID, 1, Color.BLACK);  
-            SelectObject(theDC, hpen);
+            SelectObject(hpen);
             int theStatus;
 
             float x, y, z, px, py, pz;
             m_aShape.getLastWorldVertex(x, y, z);
             m_aShape.getPreviousWorldVertex(px, py, pz);
 
-            MoveToEx(theDC, (int)(px + 0.5f), (int)(py + 0.5f), 0L);
-            LineTo(theDC, (int)(x + 0.5f), (int)(y + 0.5f));
+            MoveToEx((int)(px + 0.5f), (int)(py + 0.5f), 0L);
+            LineTo((int)(x + 0.5f), (int)(y + 0.5f));
             theStatus = m_aShape.deleteLastWorldVertex();
-            if (theStatus == -1) {}
-
-            ::ReleaseDC(m_hWnd, theDC);
-            DeleteObject(hpen);
         }
         MainFrame theFrame = (MainFrame)AfxGetMainWnd();
         
@@ -527,7 +514,7 @@ protected:
         int status;
 
         theImage.getMPixelRGB(x, y, red, green, blue);
-        if(red == 0 && green == 0 && blue == 0) {
+        if((red == 0) && (green == 0) && (blue == 0)) {
             return -1;  //a background pixel was clicked on
         }
         redLow = redHigh = red;
