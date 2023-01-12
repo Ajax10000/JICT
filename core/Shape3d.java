@@ -231,7 +231,7 @@ public:
             this.vertices = nullPointer;
             this.faces = null;
             // this.currentVertex = this.firstVertex;
-            initCurrVtx();
+            initCurrentVertex();
             
             this.numAllocatedVertices = this.numVertices;
 
@@ -314,6 +314,8 @@ public:
 
 
     // Called from:
+    //     copyAndExpand
+    //     getBoundaryPoint
     //     Globals.iwarpz
     //     RenderObject ctor that takes 4 Point3d parameters
     //     RenderObject ctor that takes 4 parameters: a String, int, boolean and Point3d
@@ -642,6 +644,8 @@ public:
     } // readShape
 
 
+    // Called from:
+    //     readShape
     public int getShapeFileInfo(String psPathName,  
     Integer pIFileType, Integer pINumVertices, Integer pINumFaces) {
         ifstream filein;
@@ -829,7 +833,10 @@ public:
     } // printShape
 
 
-    // Called from Globals.iwarpz
+    // Called from: 
+    //     averageX
+    //     averageY
+    //     Globals.iwarpz
     public void screenBoundingBox() {
         initCurrentVertex();
         this.maxX = currentVertex.sx; 
@@ -886,6 +893,10 @@ public:
 
     
     // Called from:
+    //     addVertices
+    //     divideLongestArc
+    //     getBoundaryPoint
+    //     insertVertexAfter
     //     Globals.getIntervals
     //     RenderObject.drawStill
     //     RenderObject.prepareCutout
@@ -902,6 +913,8 @@ public:
     } // getNumFaces
 
 
+    // Called from:
+    //     copyAndExpand
     public void setNumVertices(int piNv) {
         this.numVertices = piNv;
     } // setNumVertices
@@ -980,6 +993,8 @@ public:
     } // addWorldVertex
 
 
+    // Called from:
+    //     getBoundaryPoint
     public int addTransformedVertex(float pfX, float pfY, float pfZ) {
         if (this.numVertices == this.numAllocatedVertices) {
             Globals.statusPrint("addTransformedVertex: Not enough memory to add vertex");
@@ -1063,6 +1078,9 @@ public:
 
 
     // Called from:
+    //     addVertices
+    //     getBoundaryPoint
+    //     shapeFromBMP
     //     RenderObject ctor that takes 4 Point3d parameters
     //     RenderObject ctor that takes 4 parameters: a String, int, boolean and Point3d
     public void getWCentroid(Float pFCentroidX, Float pFCentroidY, Float pFCentroidZ) {
@@ -1094,6 +1112,7 @@ public:
     } // getWCentroid
 
 
+    // Not called from within this file
     // Called from:
     //     RenderObject ctor that takes 4 Point3d parameters
     //     RenderObject ctor that takes 4 parameters: a String, int, boolean and Point3d
@@ -1127,6 +1146,7 @@ public:
     } // floor
 
 
+    // Not called from within this file
     public void translateT(float pfOffsetX, float pfOffsetY, float pfOffsetZ) {
         initCurrentVertex();
 
@@ -1140,6 +1160,7 @@ public:
     } // translateT
 
 
+    // Not called from within this file
     public void translateS(int piOffsetX, int piOffsetY) {
         initCurrentVertex();
 
@@ -1152,6 +1173,9 @@ public:
     } // translateS
 
 
+    // Called from:
+    //     getShapeFileInfo
+    //     readShape
     public String getNextLine(String psTheText, Integer piLineNumber, ifstream *filein, int piMinLineLength) {
         boolean aComment;
         int theLength = 80;
@@ -1181,6 +1205,8 @@ public:
 
 
     // TODO: Not a method
+    // Called from:
+    //     Constructor that takes 2 parameters, a String and an int
     public void getShapePath(String psModelPath, String psShapeDir, String psShapePath) {
         String drive, dir, file, ext;
         _splitpath(psModelPath, drive, dir, file, ext);
@@ -1192,12 +1218,14 @@ public:
             psShapePath.concat(file);
             psShapePath.concat(".shp");
         } else {
-            Globals.statusPrint("GetShapePath: Empty fileName");
+            Globals.statusPrint("getShapePath: Empty fileName");
         }
     } // getShapePath
 
 
     // Called from:
+    //     copyAndExpand
+    //     getBoundaryPoint
     //     RenderObject ctor that takes 4 parameters: a String, int, boolean and Point3d
     public boolean isValid() {
         if(this.numAllocatedVertices == 0) {
@@ -1208,6 +1236,7 @@ public:
     } // isValid
 
 
+    // Not called from within this file
     public int getBoundaryPoint(Shape3d theShape, 
     float rayCentroidX, float rayCentroidY,
     float rayX2, float rayY2,
@@ -1285,7 +1314,10 @@ public:
                 theX = (minx + maxx) / 2.0f;
                 theY = (miny + maxy) / 2.0f;
             } else {
-                if (raySlope.floatValue() == m.floatValue()) goto next;	  //  parallel lines
+                if (raySlope.floatValue() == m.floatValue()) { //  parallel lines
+                    theShape.incCurrentVertex();
+                    continue;
+                }
                 if (!(horzFlag || vertFlag) && (!rayHorzFlag && !rayVertFlag)) {  // Ray is diagonal
                     theX = (rayYIntercept - b) / (m - raySlope);
                     theY = (m * theX) + b;
@@ -1331,7 +1363,8 @@ public:
                     }
                 }
             }  // end if between x1 and x2
-    next:   // theShape.currentVertex++;
+
+            // theShape.currentVertex++;
             theShape.incCurrentVertex();
         } // for
 
@@ -1353,12 +1386,13 @@ public:
 
             // tempShape.currentVertex++;
             tempShape.incCurrentVertex();
-        }
+        } // for index
 
         return 0;
     } // getBoundaryPoint
 
 
+    // Not called from within this file.
     public int addVertices(Shape3d child) {
         // Add the vertices of the child shape to the shape pointed to by this 
         int numVertices = child.getNumVertices();
@@ -1436,6 +1470,7 @@ public:
     } // addVertices
 
 
+    // Not called from within this file.
     // Called from: 
     //     RenderObject.renderMeshz
     //     SceneList.copyRefPoints
@@ -1447,6 +1482,7 @@ public:
     } // getReferencePoint
 
 
+    // Not called from within this file.
     // Called from:
     //     RenderObject ctor that takes 4 Point3d parameters
     //     RenderObject ctor that takes 4 parameters: a String, int, boolean and Point3d
@@ -1458,6 +1494,7 @@ public:
     } // setReferencePoint
 
 
+    // Not called from within this file.
     // Called from:
     //     RenderObject.drawStill
     //     RenderObject.renderShape
@@ -1476,6 +1513,7 @@ public:
     } // getScreenVertex
 
 
+    // Not called from within this file.
     // Called from:
     //     RenderObject.renderShapez
     public int getTransformedVertex(int piIndex, Float pFTx, Float pFTy, Float pFTz) {
@@ -1496,6 +1534,8 @@ public:
     } // getTransformedVertex
 
 
+    // Called from:
+    //     getWorldVertex
     public float getWorldDistance(int piVertexNumber) {
         // Calculate the sum of distances of the first vertexNumber line
         // segments in a shape.  VeertexNumber is 1 relative.  If vertexNumber 
@@ -1543,51 +1583,56 @@ public:
     } // getWorldDistance
 
 
+    // Not called from within this file.
     public int getWorldVertex(float pfDistanceFraction, Integer pIVertex, 
     Float pFX, Float pFY, Float pFZ) {
-        //
         // Determine the world coordinate that corresponds to the supplied distance fraction.
         // The resulting coordinate is interpolated linearly from the two vertices
         // that are located between the corresponding distanceFraction.
-        // vertex is the 0 relative index after which the vertex is to be added.
-        //
+        // piVertex is the 0 relative index after which the vertex is to be added.
         if((pfDistanceFraction < 0.0f) || (pfDistanceFraction > 1.0f)) {
             Globals.statusPrint("getWorldVertex: distanceFraction must be between 0 and 1");
             return -1;
         }
 
-        float totalDistance = getWorldDistance(0);
-        float df1, df2;
-        float x1, x2, y1, y2, z1, z2, firstx, firsty, firstz;
+        float fTotalDistance = getWorldDistance(0);
+        float fDf1, fDf2; // distance fraction 1 and distance fraction 2
+        float fX1, fX2, fY1, fY2, fZ1, fZ2;
+        float fFirstx, fFirsty, fFirstz;
         initCurrentVertex();
 
         for (int index = 0; index < numVertices - 1; index++) {
-            df1 = getWorldDistance(index + 1) / totalDistance;
-            df2 = getWorldDistance(index + 2) / totalDistance;
-            x1 = currentVertex.x;
-            y1 = currentVertex.y;
-            z1 = currentVertex.z;
+            fDf1 = getWorldDistance(index + 1) / fTotalDistance;
+            fDf2 = getWorldDistance(index + 2) / fTotalDistance;
+
+            // Get fX1, fY1, and fZ1
+            fX1 = currentVertex.x;
+            fY1 = currentVertex.y;
+            fZ1 = currentVertex.z;
             if(index == 0) {
-                firstx = x1;
-                firsty = y1;
-                firstz = z1;
+                fFirstx = fX1;
+                fFirsty = fY1;
+                fFirstz = fZ1;
             }
 
             // currentVertex++;
             incCurrentVertex();
-            x2 = currentVertex.x;
-            y2 = currentVertex.y;
-            z2 = currentVertex.z;
+
+            // Now get fX2, fY2, fZ2
+            fX2 = currentVertex.x;
+            fY2 = currentVertex.y;
+            fZ2 = currentVertex.z;
             if(index == (numVertices - 2)) {
-                x2 = firstx;
-                y2 = firsty;
-                z2 = firstz;
+                fX2 = fFirstx;
+                fY2 = fFirsty;
+                fZ2 = fFirstz;
             }
 
-            if((df1 <= pfDistanceFraction) && (pfDistanceFraction <= df2)) {
-                pFX = Globals.interpolate(x1, x2, df1, df2, pfDistanceFraction);
-                pFY = Globals.interpolate(y1, y2, df1, df2, pfDistanceFraction);
-                pFZ = Globals.interpolate(z1, z2, df1, df2, pfDistanceFraction);
+            if((fDf1 <= pfDistanceFraction) && (pfDistanceFraction <= fDf2)) {
+                // Set the output parameters
+                pFX = Globals.interpolate(fX1, fX2, fDf1, fDf2, pfDistanceFraction);
+                pFY = Globals.interpolate(fY1, fY2, fDf1, fDf2, pfDistanceFraction);
+                pFZ = Globals.interpolate(fZ1, fZ2, fDf1, fDf2, pfDistanceFraction);
                 pIVertex = index;
                 return 0;
             }
@@ -1602,94 +1647,105 @@ public:
     } // getWorldVertex
 
 
+    // Not called from within this file.
     public int removeDuplicates() {
         // If two successive world coords are equal, remove the second one.
-        int i, j, numVertsToCopy;
-        float x1, x2, y1, y2, z1, z2; 
-        float firstX, firstY, firstZ;
-        int counter = 0;
+        int i, j; // for loop variables
+        int iNumVertsToCopy;
+        float fX1, fX2, fY1, fY2, fZ1, fZ2; 
+        float fFirstX, fFirstY, fFirstZ;
+        int iCounter = 0;
         initCurrentVertex();
 
         for(i = 1; i <= this.numVertices; i++) {
-            x1 = currentVertex.x;
-            y1 = currentVertex.y;
-            z1 = currentVertex.z;
+            fX1 = currentVertex.x;
+            fY1 = currentVertex.y;
+            fZ1 = currentVertex.z;
             if(i == 1) {
-                firstX = x1;
-                firstY = y1;
-                firstZ = z1;
+                fFirstX = fX1;
+                fFirstY = fY1;
+                fFirstZ = fZ1;
             }
 
             // currentVertex++;
             incCurrentVertex();
-            x2 = currentVertex.x;
-            y2 = currentVertex.y;
-            z2 = currentVertex.z;
-            if((x1 == x2) && (y1 == y2) && (z1 == z2)) {
-                counter++;
+            fX2 = currentVertex.x;
+            fY2 = currentVertex.y;
+            fZ2 = currentVertex.z;
+            if((fX1 == fX2) && (fY1 == fY2) && (fZ1 == fZ2)) {
+                iCounter++;
                 int currentVertex2Idx = iCurrVtxIdx - 1;
                 int nextVertexIdx = iCurrVtxIdx;
-                numVertsToCopy = numVertices - i;
+                iNumVertsToCopy = numVertices - i;
 
-                for(j = 1; j <= numVertsToCopy; j++) {
+                for(j = 1; j <= iNumVertsToCopy; j++) {
                     vertices[currentVertex2Idx].x = vertices[nextVertexIdx].x;
                     vertices[currentVertex2Idx].y = vertices[nextVertexIdx].y;
                     vertices[currentVertex2Idx].z = vertices[nextVertexIdx].z;
-                    currentVertex2++;
-                    nextVertex++;
+                    currentVertex2Idx++;
+                    nextVertexIdx++;
                 } // for j
                 // currentVertex--;
                 decCurrentVertex();
             }
         } // for i
 
-        if(counter > 0) {
-            counter--;
+        if(iCounter > 0) {
+            iCounter--;
         }
 
         // Remove the last vertex if it is identical to the first.
         if(
-        firstX == currentVertex.x &&
-        firstY == currentVertex.y &&
-        firstZ == currentVertex.z) {
+        fFirstX == currentVertex.x &&
+        fFirstY == currentVertex.y &&
+        fFirstZ == currentVertex.z) {
             this.numVertices--;
-            counter++;
+            iCounter++;
         }
 
-        this.numVertices -= counter;
+        this.numVertices -= iCounter;
         return 0;
     } // removeDuplicates
 
 
     // This method came from DEPTHSRT.CPP
+    // Not called from within this file.
     // Called from:
     //     SceneList.calcCompoundModelRefPoint
-    public void getTCentroid(Float centroidX, Float centroidY, Float centroidZ) {
+    public void getTCentroid(Float pFCentroidX, Float pFCentroidY, Float pFCentroidZ) {
         initCurrentVertex();
-        float maxtX = currentVertex.tx, maxtY = currentVertex.tx,
-        maxtZ = currentVertex.tx;
-        float mintX = currentVertex.tx, mintY = currentVertex.tx,
-        mintZ = currentVertex.tx;
+        float fMaxtX = currentVertex.tx;
+        float fMaxtY = currentVertex.ty;
+        float fMaxtZ = currentVertex.tz;
+
+        float fMintX = currentVertex.tx;
+        float fMintY = currentVertex.ty;
+        float fMintZ = currentVertex.tz;
 
         for (int index = 0; index < numVertices; index++) {
-            if(currentVertex.tx > maxtX) maxtX = currentVertex.tx;
-            if(currentVertex.tx < mintX) mintX = currentVertex.tx;
-            if(currentVertex.ty > maxtY) maxtY = currentVertex.ty;
-            if(currentVertex.ty < mintY) mintY = currentVertex.ty;
-            if(currentVertex.tz > maxtZ) maxtZ = currentVertex.tz;
-            if(currentVertex.tz < mintZ) mintZ = currentVertex.tz;
+            if(currentVertex.tx > fMaxtX) fMaxtX = currentVertex.tx;
+            if(currentVertex.tx < fMintX) fMintX = currentVertex.tx;
+
+            if(currentVertex.ty > fMaxtY) fMaxtY = currentVertex.ty;
+            if(currentVertex.ty < fMintY) fMintY = currentVertex.ty;
+
+            if(currentVertex.tz > fMaxtZ) fMaxtZ = currentVertex.tz;
+            if(currentVertex.tz < fMintZ) fMintZ = currentVertex.tz;
             // currentVertex++;
             incCurrentVertex();
-        }
+        } // for
 
         // Set output parameters
-        centroidX = (maxtX - mintX)/2.0f;
-        centroidY = (maxtY - mintY)/2.0f;
-        centroidZ = (maxtZ - mintZ)/2.0f;
+        pFCentroidX = (fMaxtX - fMintX)/2.0f;
+        pFCentroidY = (fMaxtY - fMintY)/2.0f;
+        pFCentroidZ = (fMaxtZ - fMintZ)/2.0f;
     } // getTCentroid
 
 
     // This method came from TWEEN.CPP
+    // Called from:
+    //     addVertices
+    //     divideLongestArc
     public int insertVertexAfter(int index, float x, float y, float z) {
         // This function assumes that there is enough room in the existing shape to accomodate
         // a new world vertex.  If there is not enough room in the shape to accomodate the new
@@ -1699,7 +1755,7 @@ public:
         // be added
         int numVerts = getNumVertices();
         if(index > numVerts) {
-            String msgText = String.format("insertVertexAfter. index: %d > num Vertices: %d", index, numVerts);
+            String msgText = String.format("insertVertexAfter: index: %d > num Vertices: %d", index, numVerts);
             Globals.statusPrint(msgText);
             return -1;
         }
@@ -1737,21 +1793,22 @@ public:
 
 
     // This method came from TWEEN.CPP
-    public Shape3d copyAndExpand(int numAddedVertices) {
+    // Not called from within this file.
+    public Shape3d copyAndExpand(int piNumAddedVertices) {
         // Copy a shape object, also adding enough space for numAddedVertices 
         // new vertices
         Shape3d inShape = this;
-        int numVertices = inShape.numVertices;
-        Shape3d newShape = new Shape3d(numVertices + numAddedVertices);
+        int iNumVertices = inShape.numVertices;
+        Shape3d newShape = new Shape3d(iNumVertices + piNumAddedVertices);
         if(!newShape.isValid()) {
-            Globals.statusPrint("copyVertices: Unable to create new shape object");
+            Globals.statusPrint("copyAndExpand: Unable to create new shape object");
             return null;
         }
 
         newShape.initCurrentVertex();
-        newShape.setNumVertices(numVertices);
+        newShape.setNumVertices(iNumVertices);
         inShape.initCurrentVertex();
-        for (int index = 0; index < numVertices; index++) {
+        for (int index = 0; index < iNumVertices; index++) {
             newShape.currentVertex.sx = inShape.currentVertex.sx;  // screen coord.
             newShape.currentVertex.sy = inShape.currentVertex.sy;
             newShape.currentVertex.x  = inShape.currentVertex.x;   // initial coord.
@@ -1776,52 +1833,57 @@ public:
 
 
     // This method came from TWEEN.CPP
+    // Not called from within this file.
     public int divideLongestArc() {
-        // add a vertex to a shape object by finding the longest arc and
+        // Add a vertex to a shape object by finding the longest arc and
         // subdividing it.
-        int numVertices = getNumVertices();
+        int iNumVertices = getNumVertices();
         int j; 
-        int saveJ; // will be used as a parameter to insertVertexAfter
-        float maxDistance = 0.0f;
-        float x1, y1, x2, y2; 
-        float x1Save, y1Save, x2Save, y2Save;
-        float firstX, firstY, distance;
+
+        // saveJ will be used as a parameter to insertVertexAfter
+        // It is set in the for j loop
+        int iSaveJ; 
+        float fMaxDistance = 0.0f;
+        float fX1, fY1, fX2, fY2; 
+        float fX1Save, fY1Save, fX2Save, fY2Save;
+        float fFirstX, fFirstY, fDistance;
         
         initCurrentVertex();
-        for (j = 1; j < numVertices; j++) {
-            x1 = currentVertex.x;
-            y1 = currentVertex.y;
+        for (j = 1; j < iNumVertices; j++) {
+            fX1 = currentVertex.x;
+            fY1 = currentVertex.y;
             if(j == 1) {
-                firstX = x1;
-                firstY = y1;
+                fFirstX = fX1;
+                fFirstY = fY1;
             }
 
             // currentVertex++;
             incCurrentVertex();
-            x2 = currentVertex.x;
-            y2 = currentVertex.y;
-            distance = Globals.getDistance2d(x1, y1, x2, y2);
+            fX2 = currentVertex.x;
+            fY2 = currentVertex.y;
+            fDistance = Globals.getDistance2d(fX1, fY1, fX2, fY2);
 
-            if(distance > maxDistance) {
-                saveJ = j;
-                maxDistance = distance;
+            if(fDistance > fMaxDistance) {
+                iSaveJ = j;
+                fMaxDistance = fDistance;
 
-                x1Save = x1;
-                y1Save = y1;
+                fX1Save = fX1;
+                fY1Save = fY1;
 
-                x2Save = x2;
-                y2Save = y2;
+                fX2Save = fX2;
+                fY2Save = fY2;
             }
-        }
+        } // for j
 
         // Calculate the average point
-        float newX = (x1Save + x2Save) / 2.0f;
-        float newY = (y1Save + y2Save) / 2.0f;
+        float fNewX = (fX1Save + fX2Save) / 2.0f;
+        float fNewY = (fY1Save + fY2Save) / 2.0f;
 
-        int aStatus = insertVertexAfter(saveJ, newX, newY, 0.0f);
-        return aStatus;
+        int iStatus = insertVertexAfter(iSaveJ, fNewX, fNewY, 0.0f);
+        return iStatus;
     } // divideLongestArc
 
+    
     public int sizeofLowerLimit() {
         int mySize = 0;
         int booleanFieldsSizeInBits = 0;
