@@ -9,6 +9,10 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JTextField;
 
+// This dialog is displayed when the user selects the 
+// "Create a Mesh Model..." menu item from the Tools menu.
+// See method onToolsCreateMesh of the MainFrame class.
+// To see what it should look like, see Figure D.6 on p 278 of the book.
 public class QuadMeshDlg extends JDialog {
 	JComboBox<String>	m_QMeshType;
 	JTextField	m_TextureImage;
