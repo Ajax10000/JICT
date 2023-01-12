@@ -20,9 +20,9 @@ import javax.swing.JTextField;
 
 
 // This dialog is displayed when the user selects the 
-// Still or Sequence menu item from the Preview menu.
-// See MainFrame.onPreviewStillScene and 
-// MainFrame.onPreviewSequenceScene
+// "Still" or "Sequence" menu item from the Preview menu.
+// See methods onPreviewStillScene and onPreviewSequenceScene of the MainFrame class.
+// To see what it should look like, see Figure D.13 on p 285 of the book.
 public class ScenePreviewDlg extends JDialog {
     protected MainFrame m_theFrame;
     protected boolean isDirty;
@@ -216,12 +216,12 @@ protected:
         JLabel lblTrnY = new JLabel("Y");
         JLabel lblTrnZ = new JLabel("Z");
 
-        txtRotationX = new JTextField("0.00", 6);
-        txtRotationY = new JTextField("0.00", 6);
-        txtRotationZ = new JTextField("0.00", 6);
-        txtScaleX = new JTextField("0.00", 6);
-        txtScaleY = new JTextField("0.00", 6);
-        txtScaleZ = new JTextField("0.00", 6);
+        txtRotationX    = new JTextField("0.00", 6);
+        txtRotationY    = new JTextField("0.00", 6);
+        txtRotationZ    = new JTextField("0.00", 6);
+        txtScaleX       = new JTextField("0.00", 6);
+        txtScaleY       = new JTextField("0.00", 6);
+        txtScaleZ       = new JTextField("0.00", 6);
         txtTranslationX = new JTextField("0.00", 6);
         txtTranslationY = new JTextField("0.00", 6);
         txtTranslationZ = new JTextField("0.00", 6);
