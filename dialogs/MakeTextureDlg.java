@@ -18,7 +18,9 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 // This dialog is displayed when the user selects 
-// the "Create a Texture Image..." menu item from the Tools menu
+// the "Create a Texture Image..." menu item from the Tools menu.
+// See method onToolsCreateTextureImage of the MainFrame class.
+// To see what it should look like, see Figure D.5 on p 277 of the book.
 public class MakeTextureDlg extends JDialog {
 	JComboBox<String>	m_textureType;
 	JTextField	m_numRows;
@@ -179,7 +181,7 @@ protected:
 
         // LTEXT          "Background Color",IDC_STATIC,189,95,61,10
         lblBackColor = new JLabel("Background Color"); 
-    }
+    } // createLabels
 
     
     // This method came from MAKETEXTUREDLG.CPP
@@ -224,7 +226,7 @@ protected:
         }
 
         CDialog.OnOK();
-    }
+    } // onOK
 
 
     // This method came from MAKETEXTUREDLG.CPP
@@ -240,5 +242,5 @@ protected:
             String pathName = file.getName();
             m_textureDirectory.setText(pathName);
         }
-    }
-}
+    } // onLocateDestDir
+} // class MakeTextureDlg
