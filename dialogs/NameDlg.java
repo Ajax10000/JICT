@@ -3,6 +3,8 @@ package dialogs;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 
+// This dialog is displayed when the user double-clicks the left mouse button on an ImageView.
+// See method onLButtonDblClk of the ImageView class.
 public class NameDlg extends JDialog {
     String	m_Name;
 
@@ -43,7 +45,7 @@ protected:
     public NameDlg(JFrame pParent, boolean pModal) {
         super(pParent, pModal);
         m_Name = "";
-    }
+    } // NameDlg ctor
 
 
     // This method came from NAMEDLG.CPP
@@ -61,9 +63,9 @@ protected:
     // CNameDialog message handlers
 
     // This method came from NAMEDLG.CPP
-    void OnOK() {
+    void onOK() {
         // TODO: Add extra validation here
         
         CDialog.OnOK();
-    }
-}
+    } // onOK
+} // class NameDlg
