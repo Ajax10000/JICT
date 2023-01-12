@@ -8,6 +8,10 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JTextField;
 
+// This dialog is displayed when the user selects the 
+// "Motion Blur..." menu item from the Tools menu.
+// See method onToolsMotionBlur of the MainFrame class.
+// To see what it should look like, see Figure D.10 on p 282 of the book.
 public class MotionBlurDlg extends JDialog {
     JTextField	m_firstImage;
 	JButton	    m_locateOutDirectory;
@@ -57,10 +61,10 @@ protected:
 
     // This constructor came from MOTIONBLURDIALOG.CPP
     public MotionBlurDlg(JFrame pParent, boolean pModal) {
-        super(pParent, pModal)
+        super(pParent, pModal);
         //{{AFX_DATA_INIT(MotionBlurDialog)
         //}}AFX_DATA_INIT
-    }
+    } // MotionBlurDlg ctor
 
 
     // This method came from MOTIONBLURDIALOG.CPP
@@ -89,7 +93,7 @@ protected:
     // MotionBlurDialog message handlers
 
     // This method came from MOTIONBLURDIALOG.CPP
-    void OnLocatedestdir() {
+    void onLocateDestDir() {
         // TODO: Replace with JFileChooser
         // CFileDialog dlg = new CFileDialog(true, "bmp", "*.bmp");	//find a bmp file
         JFileChooser dlg = new JFileChooser();
@@ -99,10 +103,11 @@ protected:
         if (showDlgResult == JFileChooser.APPROVE_OPTION) {
             m_firstImage.setText(dlg.getSelectedFile().getName());	
         }
-    }
+    } // onLocateDestDir
+
 
     // This method came from MOTIONBLURDIALOG.CPP
-    void OnLocatedestdir2() {
+    void OnLocateDestDir2() {
         // TODO: Replace with JFileChooser
         // CFileDialog dlg = new CFileDialog(true, "bmp", "*.bmp");	//find a bmp file
         JFileChooser dlg = new JFileChooser();
@@ -112,10 +117,11 @@ protected:
         if (showDlgResult == JFileChooser.APPROVE_OPTION) {
             m_outDirectory.setText(dlg.getSelectedFile().getName());
         }
-    }
+    } // OnLocateDestDir2
+
 
     // This method came from MOTIONBLURDIALOG.CPP
-    void OnOK() {
+    void onOK() {
         String aFirstImage,aOutDir, aBlurDepth, aNumBlurFrames;
         int blurDepth, numBlurFrames;
 
@@ -137,5 +143,5 @@ protected:
         msgText = "motion blur Complete. Status: " + aStatus;
         Globals.statusPrint(msgText);	
         CDialog.OnOK();
-    }
-}
+    } // onOK
+} // class MotionBlurDlg
