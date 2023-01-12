@@ -4,21 +4,83 @@ import core.MemImage;
 
 import globals.Globals;
 
+import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
 import math.TMatrix;
 
+// This dialog is displayed  when the user selects the 
+// "Create a Morph Sequence..." menu item from the Tools menu.
+// See method onToolsMorphSequence of the MainFrame class.
+// To see what it should look like, see Figure D.11 on p 283 of the book.
 public class MorphDlg extends JDialog {
+    int m_morphType;
+    int m_numFrames;
+    String m_morph1Path;
+    String m_morph2Path;
+    String m_firstOutputPath;
 
+    // EDITTEXT        IDC_NumBlurFrames,43,116,36,13,ES_AUTOHSCROLL
+    // DDX_Control(pDX, IDC_NumBlurFrames, m_preNumFrames);
 	JTextField	m_preNumFrames;
+
+    // EDITTEXT        IDC_EDITDIRECTORY,43,80,194,14,ES_AUTOHSCROLL
+    // DDX_Control(pDX, IDC_EDITDIRECTORY, m_firstOutPath);
 	JTextField	m_firstOutPath;
+
+    // EDITTEXT        IDC_EDITFIRSTIMAGE2,43,50,194,14,ES_AUTOHSCROLL
+    // DDX_Control(pDX, IDC_EDITFIRSTIMAGE2, m_secondImage);
 	JTextField	m_secondImage;
+
+    // EDITTEXT        IDC_EDITFIRSTIMAGE,42,17,194,14,ES_AUTOHSCROLL
+    // DDX_Control(pDX, IDC_EDITFIRSTIMAGE, m_firstImage);
 	JTextField	m_firstImage;
-    
-    // These were defined in MEMIMAGE.H
+
+    // CONTROL         "2D",IDC_2D,"Button",BS_AUTORADIOBUTTON,140,117,25,10
+    JRadioButton rbn2D;
+
+    // CONTROL         "3D",IDC_3D,"Button",BS_AUTORADIOBUTTON,140,128,25,10
+    JRadioButton rbn3D;
+
+    // GROUPBOX        "Type",IDC_Type,132,104,41,37
+    JPanel pnlGroupBox;
+
+    // DEFPUSHBUTTON   "OK",IDOK,206,110,29,14
+    JButton btnOK;
+
+    // PUSHBUTTON      "Cancel",IDCANCEL,206,126,29,14
+    JButton btnCancel;
+
+    // PUSHBUTTON      "Locate",IDC_LOCATEDESTDIR,5,17,34,14
+    JButton btnLocateFirstImgToMorph;
+
+    // PUSHBUTTON      "Locate",IDC_LOCATEDESTDIR2,6,80,34,14
+    JButton btnLocateSecImgToMorph;
+
+    // PUSHBUTTON      "Locate",IDC_LOCATEDESTDIR3,6,50,34,14
+    JButton btnLocateCompletePath;
+
+    // LTEXT           "First Image to Morph",-1,43,6,81,11
+    JLabel lblFirstImg;
+
+    // LTEXT           "Second Image to Morph",-1,44,39,81,11
+    JLabel lblSecImg;
+
+    // LTEXT           "Complete pathname of first image in output sequence.",
+    //                 IDC_STATIC2,45,68,181,11
+    JLabel lblComplPath;
+
+    // LTEXT           "#Frames in Sequence",-1,43,106,73,10
+    JLabel lblNumFrames;
+
+
+    // These values were defined in MEMIMAGE.H
     public static final int REDCOLOR = 1;
     public static final int GREENCOLOR = 2;
     public static final int BLUECOLOR = 3;
@@ -27,7 +89,7 @@ public class MorphDlg extends JDialog {
     public static final int RGBCOLOR = 5;
     public static final int ONEBITMONOCHROME = 6;
 
-    // These were defined in MEMIMAGE.H
+    // These values were defined in MEMIMAGE.H
     public static final int SEQUENTIAL = 1;
     public static final int RANDOM = 0;
 
@@ -83,11 +145,11 @@ protected:
     public MorphDlg(JFrame pParent, boolean pModal) {
         super(pParent, pModal);
 
-        //{{AFX_DATA_INIT(CMorphDialog)
-        //}}AFX_DATA_INIT
-    }
+        setTitle("Create Morph Sequence");
+    } // MorphDlg ctor
 
 
+    /*
     // This method came from MORPHDIALOG.CPP
     void DoDataExchange(CDataExchange pDX) {
         CDialog.DoDataExchange(pDX);
@@ -99,56 +161,70 @@ protected:
         DDX_Control(pDX, IDC_EDITFIRSTIMAGE, m_firstImage);
         //}}AFX_DATA_MAP
     }
-
+    */
 
     /////////////////////////////////////////////////////////////////////////////
     // CMorphDialog message handlers
 
     // This method came from MORPHDIALOG.CPP
-    void OnLocatedestdir() {
+    // Called when the user clicks on the top LOCATE button
+    // Note the (x, y) coordinates for this button are (5, 17)
+    // PUSHBUTTON      "Locate",IDC_LOCATEDESTDIR,5,17,34,14
+    private void onLocateDestDir() {
         // TODO: Replace with JFileChooser
-        CFileDialog dlg = new CFileDialog(true, "bmp", "*.bmp");	//find a morph image
+        CFileDialog dlg = new CFileDialog(true, "bmp", "*.bmp");	// Find a morph image
         if (dlg.DoModal() == IDOK) {
             m_firstImage.SetWindowText(dlg.GetPathName());
         }
-    }
+    } // onLocateDestDir
 
 
     // This method came from MORPHDIALOG.CPP
-    void OnLocatedestdir2() {
+    // Called when the user clicks on the bottom locate button 
+    // Note the (x, y) coordinates for this button are are (6, 80)
+    // PUSHBUTTON      "Locate",IDC_LOCATEDESTDIR2,6,80,34,14
+    private void onLocateDestDir2() {
         // TODO: Replace with JFileChooser
-        CFileDialog dlg = new CFileDialog(true, "bmp", "*.bmp");	//find a morph image
+        CFileDialog dlg = new CFileDialog(true, "bmp", "*.bmp");	// Find a morph image
         if (dlg.DoModal() == IDOK) {
             m_firstOutPath.SetWindowText(dlg.GetPathName());
         }
-        
-    }
+    } // onLocateDestDir2
 
 
     // This method came from MORPHDIALOG.CPP
-    void OnLocatedestdir3() {
+    // Called when the user clicks on the middle Locate button
+    // Note the (x, y) coordinates for this button are (6, 50)
+    // PUSHBUTTON      "Locate",IDC_LOCATEDESTDIR3,6,50,34,14
+    private void onLocateDestDir3() {
         // TODO: Replace with JFileChooser
-        CFileDialog dlg = new CFileDialog(true, "*", "*.*");	//find a morph image
+        CFileDialog dlg = new CFileDialog(true, "*", "*.*");	// Find a morph image
         if (dlg.DoModal() == IDOK) {
             m_secondImage.SetWindowText(dlg.GetPathName());	
         }
-    }
+    } // onLocateDestDir3
 
 
     // This method came from MORPHDIALOG.CPP
-    void On2d() {
+    // Called when the user clicks on the 2D radio button
+    // CONTROL         "2D",IDC_2D,"Button",BS_AUTORADIOBUTTON,140,117,25,10
+    private void on2d() {
         m_morphType = I_TWOD;
-    }
+    } // on2d
 
 
     // This method came from MORPHDIALOG.CPP
-    void On3d() {
+    // Called when the user clicks on the 3D radio button
+    // CONTROL         "3D",IDC_3D,"Button",BS_AUTORADIOBUTTON,140,128,25,10
+    private void on3d() {
         m_morphType = I_THREED;
-    }
+    } // on3d
 
 
     // This method came from MORPHDIALOG.CPP
-    void OnOK() {
+    // Called when the user clicks on the OK button
+    // DEFPUSHBUTTON   "OK",IDOK,206,110,29,14
+    private void onOK() {
         String msgText;
         MemImage inImageA, inImageB;
         float aFraction, increment;
@@ -158,17 +234,17 @@ protected:
         String directory, fileName, prefix, suffix;
         String cNumFrames, cPathName;
 
-        aNumFrames = m_preNumFrames.getText();
+        aNumFrames  = m_preNumFrames.getText();
         m_numFrames = Integer.parseInt(aNumFrames);
 
-        firstImage = m_firstImage.getText();
+        firstImage  = m_firstImage.getText();
         secondImage = m_secondImage.getText();
-        outPath = m_firstOutPath.getText();
+        outPath     = m_firstOutPath.getText();
 
         Globals.getPathPieces(outPath, directory, fileName,
             prefix, outFrameNum, suffix);
 
-        switch(m_morphType){
+        switch(m_morphType) {
         case I_TWOD:
             inImageA = new MemImage(firstImage, 0, 0, RANDOM, 'R', RGBCOLOR);
             if(!inImageA.isValid()) {
@@ -178,7 +254,7 @@ protected:
             inImageA.adjustImageBorder(firstImage);
 
             inImageB = new MemImage(secondImage, 0, 0, RANDOM, 'R', RGBCOLOR);
-            if(!inImageB.isValid()){
+            if(!inImageB.isValid()) {
                 Globals.statusPrint("CMorphDialog: Unable to open secondImage.");
                 return;
             }
@@ -190,7 +266,7 @@ protected:
             aFraction = 0.0f;
             increment = 1.0f/(float)(m_numFrames - 1.0f);
 
-            for(i = 1; i <= m_numFrames; i++){
+            for(i = 1; i <= m_numFrames; i++) {
                 imagePath = directory + prefix + String.format("%04o", i) + suffix + ".bmp";
                 Globals.statusPrint(imagePath);
 
@@ -203,8 +279,8 @@ protected:
         case I_THREED:
             // Given two quadmeshes a and b, create a sequence of images where the
             // result mesh transitions from a to b in numFrames frames.
-            float aFraction, fractionIncrement;
-            int aStatus, aHeight, aWidth, bpp;
+            float fractionIncrement;
+            int aHeight, aWidth, bpp;
 
             String aTexPath, aXPath, aYPath, aZPath;
             String bTexPath, bXPath, bYPath, bZPath;
@@ -247,7 +323,7 @@ protected:
             Globals.constructPathName(bYPath, bTexPath, 'y');
             Globals.constructPathName(bZPath, bTexPath, 'z');
         
-            switch (bpp){
+            switch (bpp) {
             case 8:
                 bTexture = new MemImage(aTexPath, 0, 0, RANDOM, 'R', GREENCOLOR);
                 break;
@@ -279,7 +355,7 @@ protected:
             TMatrix aMatrix;
             float centroidX, centroidY, centroidZ;
 
-            for (int i = 1; i <= m_numFrames; i++) {
+            for (i = 1; i <= m_numFrames; i++) {
                 msgText = "tweenMesh. Frame " + i + "  aFraction: " + aFraction;
                 Globals.statusPrint(msgText);
                 aStatus = Globals.tweenMesh(aFraction, 
@@ -287,7 +363,7 @@ protected:
                     bTexture, bX, bY, bZ, 
                     oTexture, oX, oY, oZ);
 
-                //  Move the mesh to the center of the view screen
+                // Move the mesh to the center of the view screen
                 aStatus = Globals.getMeshCentroid(oX, oY, oZ,
                     centroidX, centroidY, centroidZ);
 
@@ -308,8 +384,12 @@ protected:
 
             Globals.statusPrint("3D morph sequence complete.");
             break;
-        }
+        } // switch
 
-        CDialog.OnOK();
-    }
-} // class ImageView
+        this.setVisible(false);
+    } // onOK
+
+    private void onCancel() {
+        this.setVisible(false);
+    } // onCancel
+} // class MorphDlg
