@@ -3,6 +3,10 @@ package dialogs;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 
+// This dialog is displayed when the user selects the 
+// "Warp Image..." menu item from the Tools menu.
+// See method onToolsWarpImage of the MainFrame class.
+// To see what it should look like, see Figure D.7 on p 280 of the book.
 public class WarpParamDlg extends JDialog {
 	public String	m_rx;
 	public String	m_sx;
@@ -48,6 +52,8 @@ protected:
 
     // This constructor came from WARPPARMDLG.CPP
     // I added the pModal parameter
+    // Called from:
+    //     MainFrame.onToolsWarpImage
     public WarpParamDlg(JFrame pParent, boolean pModal) {
         super(pParent, pModal);
 
@@ -58,7 +64,7 @@ protected:
         m_sy = "1.0";
         m_rz = "0.0";
         //}}AFX_DATA_INIT
-    }
+    } // WarpParamDlg ctor
 
 
     // This method came from WARPPARMDLG.CPP
@@ -75,8 +81,8 @@ protected:
     }
 
     // This method came from WARPPARMDLG.CPP
-    void OnOK() {
+    void onOK() {
         // TODO: Add extra validation here
         CDialog.OnOK();
-    }
-}
+    } // onOk
+} // class WarpParamDlg
