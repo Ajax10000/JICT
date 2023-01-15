@@ -18,15 +18,24 @@ import globals.Globals;
 import globals.Preference;
 import globals.VRML;
 
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 
+import javax.swing.BoxLayout;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
+
+import javax.swing.border.BevelBorder;
 
 import math.TMatrix;
 
@@ -136,6 +145,8 @@ protected:
 };
 */
 
+    private JLabel statusLabel;
+
     // 1 if client window needs erasing
     // I changed this from int to boolean
     public boolean isDirty;
@@ -231,9 +242,16 @@ protected:
     // Changed from int to boolean
     // Modified in ScenePreviewDlg.chooseModel
     public boolean changeViewPoint;
-    public SceneList mySceneList;     // Linked List containing scene description
-    public TMatrix modelMatrix;       // Contains a model transformation
-    public TMatrix viewMatrix;        // Contains viewpoint transformation
+
+    // Linked List containing scene description
+    // Read in Shape3d constructor, the one that takes 2 parameters, a String and an int
+    public SceneList mySceneList;
+
+    // Contains a model transformation
+    public TMatrix modelMatrix;
+
+    // Contains viewpoint transformation
+    public TMatrix viewMatrix;
 
     // The image window into which the scene preview display is drawn
     public ImageView previewWindowHandle;	 
@@ -264,6 +282,36 @@ protected:
 
 
     public MainFrame() {
+        
+
+        initFields();
+
+        // Initialize the gPipe object for VRML rendering
+        Globals.aGraphicPipe.initialize();
+
+        setLayout(new BorderLayout());
+
+        // Create the status bar panel and shove it down the bottom of the frame
+        JPanel statusPanel = new JPanel();
+        statusPanel.setBorder(new BevelBorder(BevelBorder.LOWERED));
+        add(statusPanel, BorderLayout.SOUTH);
+        statusPanel.setPreferredSize(new Dimension(getWidth(), 16));
+        statusPanel.setLayout(new BoxLayout(statusPanel, BoxLayout.X_AXIS));
+        JLabel statusLabel = new JLabel("");
+        statusLabel.setHorizontalAlignment(SwingConstants.LEFT);
+        statusPanel.add(statusLabel);
+
+        // Pass statusLabel to the Globals class so that Globals.statusPrint will work
+        Globals.setLblStatus(statusLabel);
+
+        JMenuBar menuBar = new JMenuBar();
+        createMenu(menuBar);
+        setJMenuBar(menuBar);
+
+        setVisible(true);
+    } // MainFrame ctor
+
+    private void initFields() {
         this.warpRotateX = 0.0f; 
         this.warpRotateY = 0.0f; 
         this.warpRotateZ = 0.0f;
@@ -306,28 +354,20 @@ protected:
         this.viewMatrix = new TMatrix();
         this.modelMatrix = new TMatrix();
         this.previewWindowHandle = null;  // The scene preview window handle
-
-        // Initialize the gPipe object for VRML rendering
-        Globals.aGraphicPipe.initialize();
-
-        JMenuBar menuBar = new JMenuBar();
-        createMenu(menuBar);
-        setJMenuBar(menuBar);
-    }
-
+    } // initFields
 
     // Called from:
     //     MainFrame constructor
     private void createMenu(JMenuBar pMenuBar) {
-        JMenu mnuFile = new JMenu("File");       // POPUP "&File"
-        JMenu mnuEdit = new JMenu("Edit");       // POPUP "&Edit"
-        JMenu mnuSearch = new JMenu("Search");   // POPUP "Search"
-        JMenu mnuTools = new JMenu("Tools");     // POPUP "Tools"
+        JMenu mnuFile    = new JMenu("File");    // POPUP "&File"
+        JMenu mnuEdit    = new JMenu("Edit");    // POPUP "&Edit"
+        JMenu mnuSearch  = new JMenu("Search");  // POPUP "Search"
+        JMenu mnuTools   = new JMenu("Tools");   // POPUP "Tools"
         JMenu mnuPreview = new JMenu("Preview"); // POPUP "Preview"
-        JMenu mnuRender = new JMenu("Render");   // POPUP "Render"
-        JMenu mnuView = new JMenu("View");       // POPUP "&View"
-        JMenu mnuWindow = new JMenu("Window");   // POPUP "&Window"
-        JMenu mnuHelp = new JMenu("Help");       // POPUP "&Help"
+        JMenu mnuRender  = new JMenu("Render");  // POPUP "Render"
+        JMenu mnuView    = new JMenu("View");    // POPUP "&View"
+        JMenu mnuWindow  = new JMenu("Window");  // POPUP "&Window"
+        JMenu mnuHelp    = new JMenu("Help");    // POPUP "&Help"
 
         createFileMenu(mnuFile);
         createEditMenu(mnuEdit);
@@ -670,7 +710,7 @@ POPUP "Tools"
         mimAbout.addActionListener(this);
 
         pHelpMenu.add(mimAbout);
-    }
+    } // createHelpMenu
 
 
     public void finalize() {
@@ -732,7 +772,6 @@ POPUP "Tools"
             onToolsTest();
             return;
         }
-
         
         // Was it a Preview menu item?
         if (sActionCmd.equals("Still")) {
@@ -767,8 +806,8 @@ POPUP "Tools"
         if (sActionCmd.equals("About ICT 2.0...")) {
 
         }
+    } // actionPerformed
 
-    }
     // ############################################################################################
     // Event handlers for Tools menu
 
@@ -846,7 +885,7 @@ POPUP "Tools"
     } // onToolsCreateTextureImage
 
 
-    // Called when the user selects the "Crease a Mesh Model..." menu item from the Tools menu.
+    // Called when the user selects the "Create a Mesh Model..." menu item from the Tools menu.
     // MENUITEM "Create a Mesh Model...",      ID_TOOLS_CREATEMESH
     // ON_COMMAND(ID_TOOLS_CREATEMESH, OnToolsCreatemesh)
     public void onToolsCreateMesh() { 
