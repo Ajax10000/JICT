@@ -275,6 +275,7 @@ public:
     //     SceneList.render
     //     MainFrame.onToolsWarpImage
     //     RenderObject.renderMeshz
+    //     Texture.createTexture
     public MemImage(int height, int width, int aBitsPerPixel) {
         //  Allocates a memory resident 8 bit image by default.
         this.valid = false;
@@ -634,7 +635,8 @@ public:
         // Create a memory DC
         newdc = CreateCompatibleDC(dc);
 
-        // Select the bitmap into the memory DC
+        // Select the bitmap into the memory DC.
+        // Save the old bitmap that SelectObject returns so that we can restore it later.
         holdBitmap = SelectObject(newdc, hBitmap);
 
         int localHeight = this.imageHeight;
@@ -657,6 +659,8 @@ public:
         }
 
         BitBlt(dc, 0, 0, localWidth, localHeight, newdc, 0, yDelta, SRCCOPY);
+
+        // Restore the old bitmap
         SelectObject(newdc, holdBitmap);
     } // display
 
@@ -678,7 +682,8 @@ public:
         // Create a memory DC
         newdc = CreateCompatibleDC(dc);
 
-        // Select the bitmap into the memory DC
+        // Select the bitmap into the memory DC.
+        // Save the old bitmap that SelectObject returns so we can restore it later.
         holdBitmap = SelectObject(newdc, hBitmap);
 
         // Clear the memory dc by drawing a filled black rectangle
@@ -699,8 +704,10 @@ public:
         // Copy the completed mask image back to the MemImage buffer
         int dwCount = this.paddedWidth * this.imageHeight;
 
-        // the bitmap is stored using a width that is a 2 byte multiple
+        // The bitmap is stored using a width that is a 2 byte multiple
         GetBitmapBits(hBitmap, dwCount, this.bytes);
+
+        // Restore the old bitmap
         SelectObject(newdc, holdBitmap);
 
         return 0;
@@ -818,8 +825,8 @@ public:
 
 
     public byte getMPixel(int x, int y, char aColor) {
-        // input x and y are assumed to be 1 relative
-        // returns the desired pixel from a color image
+        // Inputs x and y are assumed to be 1 relative
+        // Returns the desired pixel from a color image
         int addr;
         // byte *thePixel;
         // byte *myTemp = bytes;
@@ -827,7 +834,10 @@ public:
         if(this.accessMode == SEQUENTIAL) {
             y = 1;
         }
-        if ((y < 1) || (y > this.imageHeight) || (x < 1) || (x > this.imageWidth)) {
+
+        if (
+        (y < 1) || (y > this.imageHeight) || 
+        (x < 1) || (x > this.imageWidth)) {
             return -1;
         }
 
@@ -854,9 +864,9 @@ public:
     //     copy (if this.bitsPerPixel = 24)
     //     Globals.iwarpz
     //     Globals.motionBlur
-    public int getMPixelRGB(int x, int y, byte red, byte green, byte blue) {
-        //  input x and y are assumed to be 1 relative
-        //  returns the desired pixel from a color image
+    public int getMPixelRGB(int x, int y, Byte red, Byte green, Byte blue) {
+        //  Inputs x and y are assumed to be 1 relative
+        //  Returns the desired pixel from a color image
         if(this.bitsPerPixel != 24) {
             Globals.statusPrint("MemImage.getMPixelRGB: Image must be 24 bits per pixel");
             return -1;
@@ -867,12 +877,16 @@ public:
         if(this.accessMode == SEQUENTIAL) {
             y = 1;
         }
-        if ((y < 1) || (y > this.imageHeight) || (x < 1) || (x > this.imageWidth)) {
+
+        if (
+        (y < 1) || (y > this.imageHeight) || 
+        (x < 1) || (x > this.imageWidth)) {
             return -1;
         }
 
         addr = ((y - 1) * this.paddedWidth) + ((x - 1)*(this.bitsPerPixel/8));  // 3 bytes/color pixel
 
+        // Set the output parameters
         blue  = bytes[addr];
         green = bytes[addr + 1];
         red   = bytes[addr + 2];
@@ -900,7 +914,10 @@ public:
         if(this.accessMode == SEQUENTIAL) {
             y = 1;
         }
-        if ((y < 1) || (y > this.imageHeight) || (x < 1) || (x > this.imageWidth)) {
+
+        if (
+        (y < 1) || (y > this.imageHeight) || 
+        (x < 1) || (x > this.imageWidth)) {
             return -1;
         }
 
@@ -920,6 +937,8 @@ public:
     //     copy (if this.bitsPerPixel = 8)
     //     Globals.iwarpz
     //     Globals.motionBlur
+    //     Texture.createPlasma
+    //     Texture.createTexture
     public int setMPixel(int x, int y, byte value) {
         // Inputs x and y are assumed to be 1 relative
         int addr;
@@ -927,7 +946,13 @@ public:
         if(this.accessMode == SEQUENTIAL) {
             y = 1;
         }
-        if ((y < 1) || (y > this.imageHeight) || (x < 1) || (x > this.imageWidth)) {
+
+        // If setMPixel is called with coordinates that are located outside 
+        // the bounds of the associted image array, no action is taken.
+        // See p 119 of Visual Special Effects Toolkit in C++.
+        if (
+        (y < 1) || (y > this.imageHeight) || 
+        (x < 1) || (x > this.imageWidth)) {
             return -1;
         }
 
@@ -947,7 +972,10 @@ public:
         if(this.accessMode == SEQUENTIAL) {
             y = 1;
         }
-        if ((y < 1) || (y > (float)this.imageHeight) || (x < 1) || (x > (float)this.imageWidth)) {
+
+        if (
+        (y < 1) || (y > (float)this.imageHeight) || 
+        (x < 1) || (x > (float)this.imageWidth)) {
             return -1;
         }
 
@@ -1033,7 +1061,10 @@ public:
         if(this.accessMode == SEQUENTIAL) {
             y = (byte)1;
         }
-        if ((y < 1) || (y > (float)this.imageHeight) || (x < 1) || (x > (float)this.imageWidth)) {
+
+        if (
+        (y < 1) || (y > (float)this.imageHeight) || 
+        (x < 1) || (x > (float)this.imageWidth)) {
             return (byte)0;
         }
 
@@ -1081,6 +1112,7 @@ public:
     //     histogram
     //     Globals.iwarpz
     //     Globals.motionBlur
+    //     Texture.plasma
     public byte getMPixel(int x, int y) {
         // Inputs x and y are assumed to be 1 relative
         int addr;
@@ -1089,7 +1121,13 @@ public:
         if(this.accessMode == SEQUENTIAL) {
             y = 1;
         }
-        if ((y < 1) || (y > this.imageHeight) || (x < 1) || (x > this.imageWidth)) {
+
+        // If getMPixel is called with coordinates that are located outside 
+        // the bounds of the associted image array, no action is taken.
+        // See p 119 of Visual Special Effects Toolkit in C++.
+        if (
+        (y < 1) || (y > this.imageHeight) || 
+        (x < 1) || (x > this.imageWidth)) {
             return 0;
         }
 
@@ -1103,8 +1141,9 @@ public:
     // Called from:
     //     Globals.createQMeshModel
     //     Globals.iwarpz
+    //     Texture.createTexture
     public int setMPixel32(int x, int y, float aValue) {
-        //  input x and y are assumed to be 1 relative
+        // Inputs x and y are assumed to be 1 relative
         int addr;
         byte *myTemp = this.bytes;
         float *pPixel;
@@ -1112,7 +1151,10 @@ public:
         if(this.accessMode == SEQUENTIAL) {
             y = 1;
         }
-        if ((y < 1) || (y > this.imageHeight) || (x < 1) || (x > this.imageWidth)) {
+
+        if (
+        (y < 1) || (y > this.imageHeight) || 
+        (x < 1) || (x > this.imageWidth)) {
             return -1;
         }
 
@@ -1137,7 +1179,10 @@ public:
         if(this.accessMode == SEQUENTIAL) {
             y = 1;
         }
-        if ((y < 1) || (y > this.imageHeight) || (x < 1) || (x > this.imageWidth)) {
+
+        if (
+        (y < 1) || (y > this.imageHeight) || 
+        (x < 1) || (x > this.imageWidth)) {
             return -1.0f;
         }
 
@@ -1216,6 +1261,7 @@ public:
     //     saveAs8
     //     Globals.motionBlur
     //     MainFrame.onToolsWarpImage
+    //     Texture.createTexture
     public int writeBMP(String fileName) {
         String msgText;
         BITMAPFILEHEADER bf;
@@ -2451,16 +2497,12 @@ public:
     //     RenderObject.renderMeshz
     //     RenderObject.renderShape
     //     RenderObject.renderShapez
-    public int fillPolyz(int I1x, int I1y, 
-    float I1p, float I1d,
-    int I2x, int I2y, 
-    float I2p, float I2d, 
-    int I3x, int I3y, 
-    float I3p, float I3d, 
-    int I4x, int I4y, 
-    float I4p, float I4d,
+    public int fillPolyz(
+    int I1x, int I1y, float I1p, float I1d,
+    int I2x, int I2y, float I2p, float I2d, 
+    int I3x, int I3y, float I3p, float I3d, 
+    int I4x, int I4y, float I4p, float I4d,
     MemImage zBuffer) {
-
         // this	 -	output image
         // outImage	 - zBuffer	
         int xMax = I1x;
@@ -2491,7 +2533,7 @@ public:
         float oldZ, intensity, outIntensity, distance; 
         int bpp = outImage.getBitsPerPixel();
 
-        // single point
+        // Single point
         if((xMin == xMax) && (yMin == yMax)) {
             distance  = (I1d + I2d + I3d + I4d)/4.0f;
             intensity = (I1p + I2p + I3p + I4p)/4.0f;
@@ -2528,9 +2570,9 @@ public:
         int xCent = (int)(((float)xMin + ((float)xMax - (float)xMin) / 2.0f) + 0.5f);
         int yCent = (int)(((float)yMin + ((float)yMax - (float)yMin) / 2.0f) + 0.5f);
 
-        //  the intensity at the centroid is the weighted sum of the intensities at each vertex
-        //  The weights are the normalized distances between each vertex distance and the centroid
-        //  fill the triangle bounded by the centroid and each successive pair of vertices
+        // The intensity at the centroid is the weighted sum of the intensities at each vertex
+        // The weights are the normalized distances between each vertex distance and the centroid
+        // fill the triangle bounded by the centroid and each successive pair of vertices
         float totalDistance = 0.0f;
         float d1 = Globals.getDistance2d((float)xCent, (float)yCent, (float)I1x, (float)I1y);
         float d2 = Globals.getDistance2d((float)xCent, (float)yCent, (float)I2x, (float)I2y);
