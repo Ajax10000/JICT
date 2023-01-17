@@ -34,8 +34,8 @@ public class MotionPath {
     // This method came from MOTION.CPP
     private void allocate(int num) {
         if(allocated) {
-          numnodes = 0;
-          allocated = false;
+            numnodes = 0;
+            allocated = false;
         }
 
         if(num > 0) {
@@ -50,17 +50,19 @@ public class MotionPath {
     
     // This method came from MOTION.CPP
     // Called from:
-    //     SceneList.render
+    //     SceneList.preview
     //     SceneList.previewStill
-    public void getFirstLastFrame(Integer firstFrame, Integer lastFrame) {
-        firstFrame = nodes[0].nodenum;
-        lastFrame = nodes[numnodes-1].nodenum;
+    //     SceneList.render
+    public void getFirstLastFrame(Integer pIFirstFrame, Integer pILastFrame) {
+        pIFirstFrame = nodes[0].nodenum;
+        pILastFrame = nodes[numnodes-1].nodenum;
     } // getFirstLastFrame
 
 
     // This method came from MOTION.CPP
     // Called from
     //     SceneList.getViewMatrix
+    //     SceneList.preview
     //     SceneList.previewStill
     public int getNode(int frameNumber, MotionNode mn) {
         int pn = 0, nn = 0, a;
@@ -68,6 +70,7 @@ public class MotionPath {
 
         // filter the frameNumber
         Integer firstFrame = 0, lastFrame = 0;
+
         // The following method sets firstFrame and lastFrame
         getFirstLastFrame(firstFrame, lastFrame);
         if(frameNumber < firstFrame) {
@@ -134,11 +137,14 @@ public class MotionPath {
         return 0;
     } // getNode
   
+    
     // This method came from MOTION.CPP
     public int readMotion(String pathName) {
         String msgText, theText;
         String theKeyWord;
         MotionNode tempMotionNode;
+
+        // TODO: Replace ifstream with a FileStream
         ifstream filein = new ifstream(pathName, ios.in|ios.nocreate);
 
         if (filein.fail()) {
@@ -171,6 +177,7 @@ public class MotionPath {
         }
   
         filein.close();
+        // TODO: Replace ifstream with a FileStream
         ifstream filein2 = new ifstream(pathName);
         nodeCounter = 0;
         theKeyWord = getNextMotionLine(theText, lineCounter, filein2);
