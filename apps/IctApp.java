@@ -13,6 +13,9 @@ import globals.Preference;
 import javax.swing.JFileChooser;
 
 public class IctApp {
+    public CMultiDocTemplate m_pDocTemplateImage;
+    public CMultiDocTemplate m_pDocTemplateText;
+
 /*
 /////////////////////////////////////////////////////////////////////////////
 // CIctApp
@@ -44,16 +47,14 @@ CIctApp::CIctApp()
 CIctApp theApp;
  */
 
-
+    // This constructor came from ICT20.CPP
     public IctApp() {
-        CMultiDocTemplate m_pDocTemplateImage;
-        CMultiDocTemplate m_pDocTemplateText;
-
         // TODO: add construction code here,
         // Place all significant initialization in InitInstance
     } // IctApp ctor
 
 
+    // This method came from ICT20.CPP
     boolean initInstance() {
         String msgText;
 
@@ -67,7 +68,7 @@ CIctApp theApp;
         LoadStdProfileSettings();  // Load standard INI file options (including MRU)
 
         // Register the application's document templates.  Document templates
-        //  serve as the connection between documents, frame windows and views.
+        // serve as the connection between documents, frame windows and views.
 
         m_pDocTemplateImage = new CMultiDocTemplate(
             IDR_ICTTYPE,
