@@ -6,12 +6,16 @@ import core.Shape3d;
 
 import java.io.File;
 
+import javax.swing.JLabel;
+
 import math.TMatrix;
 import math.Vect;
 
 import structs.Point3d;
 
 public class Globals {
+    private static JLabel lblStatus = null;
+
     private static boolean ictdebug = false;
 
     // This variable came from ICT20.CPP
@@ -38,10 +42,19 @@ public class Globals {
     public static final int SEQUENTIAL = 1;
     public static final int RANDOM = 0;
     
+    // These values came from ICT20.H
     public static final float ZBUFFERMAXVALUE = 2.0E31f;
-
-    // This value came from ICT20.H
     public static final float F_DTR = 3.1415926f/180.0f;
+
+    // These values came from ICT20.H
+    //  Quadrilateral Mesh Model Sub-Types
+    public static final int CYLINDER   = 1;
+    public static final int SPHERE     = 2;
+    public static final int PLANAR     = 3;
+    public static final int SINE1D     = 4;
+    public static final int SINE2D     = 5;
+    public static final int CHECKER    = 6;
+    public static final int WHITENOISE = 7;
 
     // This value came from IWARP.CPP:
     public static final int I_MAXWVERTICES = 8;
@@ -52,48 +65,37 @@ public class Globals {
     public static final int I_POINTONTOP = 2;
     public static final int I_POINTONBOTTOM = 3;
 
-    public static void statusPrint(String aMessage) {
+    public static void statusPrint(String psMessage) {
         File theLog;
-        String msgText;
-        String theString;
-        theString = msgText; // why?
-        CStatusBar pStatus;
 
-        pStatus = null;
         // If the mainframe window is not open, post the message to the log file.
         // else display the message on the status bar and post it to the log file.
-        if(AfxGetApp().m_pMainWnd > 0) {
-            pStatus = (CStatusBar)AfxGetApp().m_pMainWnd.GetDescendantWindow(AFX_IDW_STATUS_BAR);
-        }
-      
+
+        // Open the log file
         theLog = fopen(ictPreference.getPath(Preference.ProcessLog), "a+");
+
+        // If we can't open the log file ...
         if (theLog == null) {
-            if(AfxGetApp().m_pMainWnd > 0) {
-                pStatus.SetPaneText(0, "statusPrint: Unable to open the ICT log file ict.log");
-                pStatus.UpdateWindow();
+            if(lblStatus != null) {
+                lblStatus.setText("statusPrint: Unable to open the ICT log file ict.log");
             }
             return;
         }
 
-        theString = aMessage;
-        int myLength = theString.length();
-        *(theString + myLength) = '\n';
-        *(theString + myLength + 1) = '\0';
-        fwrite(theString, theString.length(), 1, theLog);
+        // We were able to open the log file, so write the msg to it
+        fwrite(psMessage, psMessage.length(), 1, theLog);
         fclose(theLog);
-        //
+
         // Display the message immediately on the status bar
-        if(AfxGetApp().m_pMainWnd > 0) {
-            pStatus.SetPaneText(0, aMessage);
-            pStatus.UpdateWindow();
-        }
+        lblStatus.setText(psMessage);
     } // statusPrint
 
 
     // This method came from UTILS.CPP
     public static boolean fileExists(String psPathName) {
-        File stream;
-        if( (stream  = fopen(psPathName, "r")) == null ) {
+        File stream = fopen(psPathName, "r");
+
+        if(stream == null ) {
            return false;
         } else {
            fclose(stream);
@@ -103,6 +105,8 @@ public class Globals {
 
 
     // This method came from UTILS.CPP
+    // Called from:
+    //     Shape3d.getWorldVertex
     public static float interpolate(float desired1, float desired2, float reference1, float reference2, float referenceCurrent) {
         if(reference1 == reference2) { 
             return desired1;
@@ -136,6 +140,9 @@ public class Globals {
     
 
     // This method came from UTILS.CPP
+    // Called from:
+    //     Shape3d.addVertices
+    //     Shape3d.getBoundaryPoint
     public static float polarAtan(float run, float rise) {
         //  This arcTangent returns a result between 0 and 2Pi radians;
         float rayAngle = atan2(rise, run);
@@ -172,29 +179,29 @@ public class Globals {
     // This method came from UTILS.CPP
     // Called from:
     //     motionBlur
-    public static int getPathPieces(String firstImagePath, String directory, String fileName,
-      String prefix, Integer frameNum, String inSuffix) {
-        String ddrive, dext, aFrameNum, tempDirectory;
+    public static int getPathPieces(String firstImagePath, String psDirectory, 
+    String psFileName, String psPrefix, Integer pIFrameNum, String psInSuffix) {
+        String sDdrive, sDext, sFrameNum, sTempDirectory;
         char aDot;
         aDot = '.';
       
-       _splitpath(firstImagePath, ddrive, directory, fileName, dext);
+        // The following sets output parameter psFileName
+       _splitpath(firstImagePath, sDdrive, psDirectory, psFileName, sDext);
 
        // Assumed input:   xxxxx0000c
-       tempDirectory = ddrive + directory;
-       directory = tempDirectory;
-      
-       int aLen = fileName.length();
+       // Set output parameter psDirectory
+       sTempDirectory = sDdrive + psDirectory;
+       psDirectory = sTempDirectory;
        
-       *inSuffix = *(fileName + aLen - 1);
-       *(inSuffix + 1) = 0;
+       // Set output parameter psInSuffix (to c, assuming input xxxxx0000c)
+       psInSuffix = psFileName.substring(psFileName.length() - 1);
       
-        strncpy(aFrameNum, fileName + aLen - 5,4);
-       *(aFrameNum + 4) = 0;
-       *frameNum = Integer.parseInt(aFrameNum);
+       // Set output parameter pIFrameNum (to 0000, assuming input xxxxx0000c)
+       sFrameNum = psFileName.substring(5, 4);
+       pIFrameNum = Integer.parseInt(sFrameNum);
        
-       strncpy(prefix, fileName, aLen - 5);
-       *(prefix + aLen - 5) = 0;
+       // Set output parameter psPrefix (to xxxxx, assuming input xxxxx0000c)
+       psPrefix = psFileName.substring(0, 4);
       
         return 0;
     } // getPathPieces
@@ -203,6 +210,8 @@ public class Globals {
     // This method came from DEPTHSRT.CPP
     // Called from:
     //     getIntervals
+    //     Shape3d.divideLongestArc
+    //     Shape3d.getBoundaryPoint
     public static float getDistance2d(float x1, float y1, float x2, float y2) {
         return (float)Math.sqrt(((x1 - x2) * (x1 - x2)) + ((y1 - y2) * (y1 - y2)));
     } // getDistance2d
@@ -215,6 +224,7 @@ public class Globals {
     //     RenderObject.renderShapez
     //     RenderObject.transformAndProjectPoint2
     //     SceneList.depthSort
+    //     Shape3d.getWorldDistance
     public static float getDistance3d(float x1, float y1, float z1, float x2, float y2, float z2) {
         return (float)Math.sqrt(((x1 - x2) * (x1 - x2)) + ((y1 - y2) * (y1 - y2)) +
           ((z1 - z2) * (z1 - z2)));
@@ -340,7 +350,8 @@ public class Globals {
         // Each image is assumed to be opened for random access
         int x, y;
         byte mattePixel, inPixel, outPixel, addedPixel;
-        byte inRed, inGreen, inBlue, outRed, outGreen, outBlue;
+        byte inRed = (byte)0, inGreen = (byte)0, inBlue = (byte)0;
+        byte outRed = (byte)0, outGreen = (byte)0, outBlue = (byte)0;
         byte addedRed, addedGreen, addedBlue;
         float inWeight, outWeight;
     
@@ -445,7 +456,7 @@ public class Globals {
         String msgText;
 
         // Create the cutout image and translate the shape to coincide with the cutout.
-        // assumes the mask image is an unpacked (8 bit) mask image opened RANDOM,
+        // Assumes the mask image is an unpacked (8 bit) mask image opened RANDOM,
         // The original must be opened for sequential access.
         // cutoutName: name of cutout image and shape file without the suffix
         if(pOriginalImage.getAccessMode() != SEQUENTIAL) {
@@ -460,8 +471,8 @@ public class Globals {
 
         // A cutout version of both the mask and original
         // image is created in which the zero pixel border is removed.
-        String sCutoutRImage, sCutoutGImage, sCutoutBImage, sCutoutMImage;
-        String sCutoutRGBImage;
+        String sCutoutRImage = "", sCutoutGImage = "", sCutoutBImage = "", sCutoutMImage = "";
+        String sCutoutRGBImage = "";
 
         // Prepare pathnames for mask and cutout images
         String sCutoutDir, sMaskDir;
@@ -560,7 +571,8 @@ public class Globals {
             return 4;
         }
 
-        MemImage cutoutR, cutoutB;
+        MemImage cutoutR = new MemImage(1, 1);
+        MemImage cutoutB = new MemImage(1, 1);
         if(color) {
             cutoutR = new MemImage(iCutoutHeight, iCutoutWidth);
             if (!cutoutR.isValid()) {
@@ -676,9 +688,9 @@ public class Globals {
     //	Returns 1 if the point is     in the boundary.
     public static boolean in_boundary(MemImage anImage, int x, int y) {
         int imHeight = anImage.getHeight();
-        int imWidth = anImage.getWidth();
-        int bpp = anImage.getBitsPerPixel();
-        byte red, green, blue;
+        int imWidth  = anImage.getWidth();
+        int bpp      = anImage.getBitsPerPixel();
+        Byte red = 0, green = 0, blue = 0;
 
         if ( (x < 1) || (x > imWidth) || (y < 1) || (y > imHeight) ) {
             return false;
@@ -691,9 +703,9 @@ public class Globals {
             } else {
                 return false;
             }
-            break;
 
         case 24:
+            // The following method sets parameters red, green, and blue
             anImage.getMPixelRGB(x, y, red, green, blue);
             if (
             (red != CHROMARED) || 
@@ -703,12 +715,10 @@ public class Globals {
             } else {
                 return false;
             }
-            break;
 
         default:
             statusPrint("in_boundary: Image must have 8 or 24 bit pixels");
             return false;
-            break;
         } // switch
     } // in_boundary
 
@@ -723,7 +733,8 @@ public class Globals {
     //
     //	Returns 0 if the neighbor is not in the boundary.
     //	Returns 1 if the neighbor is     in the boundary.
-    public static boolean probe(MemImage anImage, int x, int y, int dir, Integer new_x, Integer new_y) {
+    public static boolean probe(MemImage anImage, int x, int y, int dir, 
+    Integer new_x, Integer new_y) {
         // Figure out coordinates of neighbor
         if ( (dir < 2) || (dir > 6) ) {
             ++x;
@@ -741,30 +752,31 @@ public class Globals {
             --y;
         }
 
-        // always return the new coordinates
+        // Always return the new coordinates
         new_x = x;
         new_y = y;
 
-        // determine if the new sample point is in the boundary
+        // Determine if the new sample point is in the boundary
         return (in_boundary(anImage, x, y));
     } // probe
 
 
     // This method came from BLEND.CPP
     //
-    //	neighbor(x, y, last_dir, new_x, new_y)
+    // neighbor(x, y, last_dir, new_x, new_y)
     //
-    //	Finds a neighbor of the sample at 'x, y' that is in the same
-    //	boundary.  Always follows the boundary in a clockwise direction.
-    //	'last_dir' is the direction that was used to get to 'x, y'
-    //	when it was found.  'new_x, new_y' always get the coordinates
-    //	of the neighbor.
+    // Finds a neighbor of the sample at 'x, y' that is in the same
+    // boundary.  Always follows the boundary in a clockwise direction.
+    // 'last_dir' is the direction that was used to get to 'x, y'
+    // when it was found.  'new_x, new_y' always get the coordinates
+    // of the neighbor.
     //
-    //	This procedure should only be called for a sample that has at
-    //	least one neighbor in the same boundary.
+    // This procedure should only be called for a sample that has at
+    // least one neighbor in the same boundary.
     //
-    //	Returns the direction to the neighbor.
-    public static int neighbor(MemImage anImage, int x, int y, int last_dir, Integer new_x, Integer new_y) {
+    // Returns the direction to the neighbor.
+    public static int neighbor(MemImage anImage, int x, int y, int last_dir, 
+    Integer new_x, Integer new_y) {
         int	n;
         int	new_dir;
 
@@ -833,7 +845,7 @@ public class Globals {
     //	shapeFromImage
     //
     //	Builds a shape object that describes the boundary of the first contigous 
-    //   blob of non-zero pixels it finds.  Always follows the boundary
+    //  blob of non-zero pixels it finds.  Always follows the boundary
     //	in a clockwise direction.  Uses 'start_x, start_y' as the
     //	starting point. 
     //
@@ -903,9 +915,9 @@ public class Globals {
 
             // Try next direction
             if (++dir == 8) {
-                //	starting point has no neighbors -- make the chain one vector long
+                // Starting point has no neighbors -- make the chain one vector long
                 
-                // fill in the vector -- the direction is arbitrary,
+                // Fill in the vector -- the direction is arbitrary,
                 // since the point is isolated
                 aShape.addWorldVertex((float)new_x, (float)new_y, 0.0f);
 
@@ -927,7 +939,7 @@ public class Globals {
                 aShape.addWorldVertex((float)new_x, (float)new_y, 0.0f);
             }
 
-            // maybe done with boundary
+            // Maybe done with boundary
             if ( (new_x == start_x) && (new_y == start_y) ) {
                 return 0;
             }
@@ -943,7 +955,9 @@ public class Globals {
 
 
     // This method came from MOTION.CPP
-    public static String getNextMotionLine(String theText, Integer lineNumber, ifstream *filein) {
+    // TODO: Replace parameter filein with a FileStream
+    public static String getNextMotionLine(String theText, Integer lineNumber, 
+    ifstream filein) {
         boolean aComment = true;
         int theLength = 80;
         String theKeyWord;
@@ -969,16 +983,17 @@ public class Globals {
 
 
     // This method came from MOTION.CPP
-    public static int motionBlur(String firstImagePath, String outputDir, int numFrames, int blurDepth) {
+    public static int motionBlur(String firstImagePath, String outputDir, 
+    int numFrames, int blurDepth) {
         String msgText;
         MemImage[] images = new MemImage[32]; 
         MemImage outImage;
-        String directory, fileName, prefix, inSuffix;
-        String currentPath, inPath;
-        String outPath, outSuffix;
-        byte red, green, blue;
+        String directory = "", fileName = "", prefix = "", inSuffix = "";
+        String currentPath = "", inPath;
+        String outPath = "", outSuffix;
+        byte red = (byte)0, green = (byte)0, blue = (byte)0;
         int blur, numOpenImages, bucket, redBucket, greenBucket, blueBucket;
-        int frameNum, i, j, status;
+        int frameNum = 0, i, j, status;
         Integer imHeight = 0, imWidth = 0, bpp = 0;
         int frameCounter, row, col;
 
@@ -1026,10 +1041,11 @@ public class Globals {
                     }
                 }
             } else {
-                for (j = 0; j < numOpenImages - 1; j++) {//move the image pointers
+                for (j = 0; j < numOpenImages - 1; j++) { // Move the image pointers
                     images[j] = images[j + 1];
                 }
-                                                //open new image
+
+                // Open new image
                 makePath(currentPath, directory, prefix, frameCounter + blurDepth, inSuffix);
                 switch(bpp) {
                 case 8:
@@ -1058,9 +1074,9 @@ public class Globals {
             for (row = 1; row < imHeight; row++) {
                 for (col = 1; col < imWidth; col++) {
                     bucket = 0;
-                    redBucket = 0;
+                    redBucket   = 0;
                     greenBucket = 0;
-                    blueBucket = 0;
+                    blueBucket  = 0;
 
                     for (blur = 0; blur < numOpenImages; blur++) {
                         switch (bpp) {
@@ -1070,17 +1086,16 @@ public class Globals {
 
                         case 24:
                             images[blur].getMPixelRGB(col, row, red, green, blue);
-                            redBucket += red;
+                            redBucket   += red;
                             greenBucket += green;
-                            blueBucket += blue;
+                            blueBucket  += blue;
                             break;
 
                         default:
                             statusPrint("motionBlur: image must be 8 or 24 bits per pixel");
                             return -1;
-                            break;
                         }  // switch
-                    } // end accumulation loop
+                    } // for blur
 
                     switch(bpp) {
                     case 8:
@@ -1089,19 +1104,19 @@ public class Globals {
                         break;
 
                     case 24:
-                        avgRedBucket = redBucket / numOpenImages;
+                        avgRedBucket   = redBucket / numOpenImages;
                         avgGreenBucket = greenBucket / numOpenImages;
-                        avgBlueBucket = blueBucket / numOpenImages;
+                        avgBlueBucket  = blueBucket / numOpenImages;
                         outImage.setMPixelRGB(col, row, 
                             (byte)(avgRedBucket + 0.5f),
                             (byte)(avgGreenBucket + 0.5f),
                             (byte)(avgBlueBucket + 0.5f));
                         break;
                     } // switch
-                }  //end inner loop
-            }  //end outer loop
+                } // for col
+            } // for row
 
-            //  Save the blurred image
+            // Save the blurred image
             msgText = "Saving: " + outPath;
             statusPrint(msgText);
             outImage.writeBMP(outPath);
@@ -1120,20 +1135,24 @@ public class Globals {
 
 
     public static void constructPathName(String outPath, String inPath, char lastLetter) {
-        String drive, dir, file, ext;
-        _splitpath(inPath, drive, dir, file, ext);
-        int theLength = file.length();
+        String sDrive, sDir, sFile, sExt;
+        _splitpath(inPath, sDrive, sDir, sFile, sExt);
+        int iLength = sFile.length();
 
-        if(theLength > 0) {
-            *(file + theLength - 1) = lastLetter;  // Substitute a letter
+        if(iLength > 0) {
+            char[] charArray = new char[1];
+            charArray[0] = lastLetter;
+            String sLastLetter = new String(charArray);
+            sFile.concat(sLastLetter);  // Substitute a letter
         }
 
-        _makepath(outPath, drive, dir, file, ext);
+        _makepath(outPath, sDrive, sDir, sFile, sExt);
     } // constructPathName
 
 
+    // This method performs planar texture mapping.
+    // See p 157 - 160 of Visual Special Effects Toolkit in C++.
     // This method came from IWARP.CPP
-    //	iwarpz  - zbuffered planar texture mapping
     // Called from:
     //     MainFrame.onToolsWarpImage
     public static int iwarpz(MemImage inImage, MemImage outImage, MemImage zImage,
@@ -1142,7 +1161,7 @@ public class Globals {
     float tx, float ty, float tz, 
     float vx, float vy, float vz,
     TMatrix viewMatrix,
-    float refPointX, float refPointY, float refPointZ) {
+    float pfRefPointX, float pfRefPointY, float pfRefPointZ) {
         // To use this function without a zBuffer, call with zImage = null.
         // in this case, vx, vy, and vz are ignored
         String msgText;
@@ -1158,6 +1177,7 @@ public class Globals {
         // at each of the projected vertices.
         if(ictdebug) {
             statusPrint("iwarpz input arguments");
+
             msgText = String.format("rx: %6.2f  ry: %6.2f  rz: %6.2f", rx, ry, rz);
             statusPrint(msgText);
 
@@ -1167,18 +1187,23 @@ public class Globals {
             msgText = String.format("tx: %6.2f  ty: %6.2f  tz: %6.2f", tx, ty, tz);
             statusPrint(msgText);
 
-            msgText = String.format("refx: %6.2f  refy: %6.2f  refz: %6.2f", refPointX, refPointY, refPointZ);
+            msgText = String.format("refx: %6.2f  refy: %6.2f  refz: %6.2f", 
+                pfRefPointX, pfRefPointY, pfRefPointZ);
             statusPrint(msgText);
         }
 
         //  Build the forward and inverse transformation matrices
         TMatrix forwardMatrix = new TMatrix();
+
+        // F_DTR = floating-point degree to radian conversion factor
         float XRadians = rx * F_DTR;
         float YRadians = ry * F_DTR;
         float ZRadians = rz * F_DTR;
+
         forwardMatrix.scale(sx, sy, sz);
         forwardMatrix.rotate(XRadians, YRadians, ZRadians);
         forwardMatrix.translate(tx, ty, tz);
+
         TMatrix viewModelMatrix = new TMatrix();
         viewModelMatrix.multiply(viewMatrix, forwardMatrix);
 
@@ -1208,9 +1233,9 @@ public class Globals {
 
         // iwarpz uses a reference point defined in pixel space.
         // Convert it now.
-        float intRefPointX = refPointX + halfInWidth;
-        float intRefPointY = refPointY + halfInHeight;
-        float intRefPointZ = refPointZ;
+        float intRefPointX = pfRefPointX + halfInWidth;
+        float intRefPointY = pfRefPointY + halfInHeight;
+        float intRefPointZ = pfRefPointZ;
 
         // Load a shape object with the original image boundary coordinates
         Shape3d aShape = new Shape3d(4);
@@ -1246,10 +1271,11 @@ public class Globals {
                 float anZ = aShape.currentVertex.tz;
                 inverseMatrix.transformPoint (anX, anY, anZ, xo, yo, zo);
                 // aShape.iCurrVtxIdx++;
-                incCurrentVertex();
+                aShape.incCurrentVertex();
 
                 msgText = String.format("transformed: %6.2f %6.2f %6.2f texture: %6.2f %6.2f %6.2f",
-                    anX, anY, anZ, xo + halfInWidth, yo + halfInHeight, zo);
+                    anX, anY, anZ, 
+                    xo + halfInWidth, yo + halfInHeight, zo);
                 statusPrint(msgText);
             }
 
@@ -1307,6 +1333,10 @@ public class Globals {
             dz = tZCoords[1] - tZCoords[0];
             numSteps = (int)screenXCoords[1] - (int)screenXCoords[0] + 1;
             
+            // Initialize xIncrement, yIncrement, and zIncrement
+            // xIncrement will be used to modify xIn
+            // yIncrement will be used to modify yIn
+            // zIncrement will be used to modify zIn
             if (numSteps - 1.0 > 0.0) {
                 xIncrement = dx/(float)(numSteps - 1);
                 yIncrement = dy/(float)(numSteps - 1);
@@ -1335,6 +1365,7 @@ public class Globals {
                 xIn = (x - halfInWidth) * w;
                 yIn = (y - halfInHeight)* w;
 
+                // The following method sets xOut, yOut and zOut
                 inverseMatrix.transformPoint(xIn, yIn, zIn, xOut, yOut, zOut);
 
                 if(ictdebug) {
@@ -1519,8 +1550,8 @@ public class Globals {
             if(index == numShapeVertices) {
                 theShape.initCurrentVertex();
             }
-            sx2 = theShape.currentVertex.sx;  // Can't use (currentVertex+1).x
-            sy2 = theShape.currentVertex.sy;
+            sx2 = (int)theShape.currentVertex.sx;  // Can't use (currentVertex+1).x
+            sy2 = (int)theShape.currentVertex.sy;
             
             tx2 = theShape.currentVertex.tx;
             ty2 = theShape.currentVertex.ty;	 
@@ -1631,8 +1662,9 @@ public class Globals {
                         intDistance[tempIndex] = intervalDistance(miny, maxy, y);
                         tempIndex++;
                     }
-                }
+                } // if vertFlag
             }
+
             // theShape.currentVertex++;
             theShape.iCurrVtxIdx++;
         }
@@ -1646,7 +1678,7 @@ public class Globals {
         }
 
         int minIntDist = 999999999;
-        int aCol;
+        int aCol = 0;
 
         if (numCoords == 1) {
             for(i = 0; i < tempIndex; i++) {
@@ -1654,7 +1686,7 @@ public class Globals {
                     aCol = i;
                     minIntDist = intDistance[i];
                 }
-            }
+            } // for i
 
             // Correct missed points due to roundoff
             if(minIntDist < 3) {
@@ -1671,12 +1703,13 @@ public class Globals {
                 tZCoords[1] = tZCoords[0];
                 screenXCoords[1] = screenXCoords[0];
             }
-        }
+        } // if numCoords == 1
 
         if(ictdebug) {
             statusPrint("getIntervals Found: intdist\t sx  \t tx  \t ty  \t tz");
             for(i = 0; i < numCoords; i++) {
-                msgText = String.format("\t%d\t%d\t%6.2f\t%6.2f\t%6.2f" , intDistance[i], screenXCoords[i], tXCoords[i], tYCoords[i], tZCoords[i]);
+                msgText = String.format("\t%d\t%d\t%6.2f\t%6.2f\t%6.2f", 
+                    intDistance[i], screenXCoords[i], tXCoords[i], tYCoords[i], tZCoords[i]);
                 statusPrint(msgText);
             }
         }
@@ -1688,8 +1721,9 @@ public class Globals {
     // This method came from IWARP.CPP
     // Called from:
     //     getIntervals
-    public static void insertionSort(int theItems[], float itemData1[], float itemData2[],
-    float itemData3[], int numItems) {
+    public static void insertionSort(int theItems[], 
+    float itemData1[], float itemData2[], float itemData3[], 
+    int numItems) {
         //  Sort theItems into ascending order, carrying along the three optional 
         //  itemData arrays.
         int itemTemp;
@@ -1724,8 +1758,9 @@ public class Globals {
 
 
     // This method came from IWARP.CPP
-    public static void insertionSort(int theItems[], int itemData1[], float itemData2[], float itemData3[],
-    float itemData4[], int numItems) {
+    public static void insertionSort(int theItems[], 
+    int itemData1[], float itemData2[], float itemData3[], float itemData4[], 
+    int numItems) {
         //  Sort theItems into ascending order, carrying along the four optional 
         //  itemData arrays.
         int itemTemp;
@@ -1750,14 +1785,14 @@ public class Globals {
                 } else {
                     break;
                 }
-            }
+            } // for indexTmp
 
             theItems[indexTmp]  = itemTemp;
             itemData1[indexTmp] = itemData1Temp;
             itemData2[indexTmp] = itemData2Temp;
             itemData3[indexTmp] = itemData3Temp;
             itemData4[indexTmp] = itemData4Temp;
-        }
+        } // for index
 
         return;
     } // insertionSort
@@ -1766,8 +1801,9 @@ public class Globals {
     // This method came from IWARP.CPP
     // Called from:
     //     getIntervals
-    public static int removeDuplicates(int theList[], float theItemData1[],
-    float theItemData2[], float theItemData3[], Integer listLength) {
+    public static int removeDuplicates(int theList[], 
+    float theItemData1[], float theItemData2[], float theItemData3[], 
+    Integer listLength) {
         // Remove duplicates from a list pre-sorted in ascending order.
         // listlength is 1 relative.
         if (listLength == 1) {
@@ -1786,21 +1822,22 @@ public class Globals {
                     theItemData1[index2] = theItemData1[index2 + 1];
                     theItemData2[index2] = theItemData2[index2 + 1];
                     theItemData3[index2] = theItemData3[index2 + 1];
-                }
+                } // for index2
 
                 listLength--;
                 index--;
             }
-        }
+        } // for index
 
         return 0;
     } // removeDuplicates
 
 
     // This method came from IWARP.CPP
-    public static int removeDuplicates(int theList[], int theItemData1[], float theItemData2[],
-    float theItemData3[], float theItemData4[], Integer listLength) {
-        // remove duplicates from a list pre-sorted in ascending order.
+    public static int removeDuplicates(int theList[], int theItemData1[], 
+    float theItemData2[], float theItemData3[], float theItemData4[], 
+    Integer listLength) {
+        // Remove duplicates from a list pre-sorted in ascending order.
         // listlength is 1 relative.
         if (listLength == 1) {
             return 0;
@@ -1819,12 +1856,12 @@ public class Globals {
                     theItemData2[index2] = theItemData2[index2 + 1];
                     theItemData3[index2] = theItemData3[index2 + 1];
                     theItemData4[index2] = theItemData4[index2 + 1];
-                }
+                } // for index2
 
                 listLength--;
                 index--;
             }
-        }
+        } // for index
 
         return 0;
     } // removeDuplicates
@@ -1833,8 +1870,9 @@ public class Globals {
     // This method came from IWARP.CPP
     // Called from:
     //     getIntervals
-    public static int removeSimilar(int theList[], float theItemData1[],
-    float theItemData2[], float theItemData3[], Integer listLength, int difference) {
+    public static int removeSimilar(int theList[], 
+    float theItemData1[], float theItemData2[], float theItemData3[], 
+    Integer listLength, int difference) {
         // Remove items from a list that are less then difference units apart.  
         // The list is assumed to pre-sorted in ascending order.
         // listlength is 1 relative.
@@ -1853,12 +1891,12 @@ public class Globals {
                     theItemData1[index2] = theItemData1[index2 + 1];
                     theItemData2[index2] = theItemData2[index2 + 1];
                     theItemData3[index2] = theItemData3[index2 + 1];
-                }
+                } // for index2
 
                 listLength--;
                 index--;
             }
-        }
+        } // for index
 
         return 0;
     } // removeSimilar
@@ -1872,11 +1910,13 @@ public class Globals {
     float refPointX, float refPointY, float refPointZ) {
         int outputRows = outImage.getHeight();
         int outputCols = outImage.getWidth();
-        MemImage midImage, midMaskImage;
+
+        MemImage midImage = new MemImage(1, 1);
+        MemImage midMaskImage = new MemImage(1, 1);
         int xOffset = (int)tx; // Set these for the noblend nowarp case
         int yOffset = (int)ty;
         int imXOffset, imYOffset, msXOffset, msYOffset;
-        float vx, vy, vz;
+        float vx = 0.0f, vy = 0.0f, vz = 0.0f;
 
         if(!(warpIndicator || blendIndicator)) { // Background plate
             xOffset = 0;
@@ -1884,7 +1924,7 @@ public class Globals {
         }
 
         if(warpIndicator) {
-            midImage = new MemImage(outputRows, outputCols); //open intermediate image
+            midImage = new MemImage(outputRows, outputCols); // Open intermediate image
             if (!midImage.isValid()) {
                 statusPrint("Unable to open intermediate warp image");
                 return -1;
@@ -1897,7 +1937,7 @@ public class Globals {
                 vx, vy, vz,
                 viewMatrix,
                 refPointX, refPointY, refPointZ);
-        }
+        } // if warpIndicator
 
         if(warpIndicator && blendIndicator) {
             // Open intermediate matte image
@@ -1913,10 +1953,10 @@ public class Globals {
                 vx, vy, vz,
                 viewMatrix,
                 refPointX, refPointY, refPointZ);
-        }
+        } // if warpIndicator && blendIndicator
 
         // Composite the cutout image into the output scene
-        int myStatus;
+        int myStatus = 0;
         if(blendIndicator) {
             if(!warpIndicator) {
                 myStatus = blend(inImage, maskImage, outImage, alphaScale);
@@ -1938,19 +1978,26 @@ public class Globals {
 
 
     // This method came from IWARP.CPP
+    // Called from:
+    //     SceneList.render
     public static int iRenderz(MemImage outImage, MemImage matteImage, MemImage inImage,
     MemImage zImage, MemImage zBuffer,
-    float rx, float ry, float rz, float sx, float sy, float sz,
-    float tx, float ty, float tz, float vx, float vy, float vz,
+    float rx, float ry, float rz, 
+    float sx, float sy, float sz,
+    float tx, float ty, float tz, 
+    float vx, float vy, float vz,
     TMatrix viewMatrix,
-    boolean warpIndicator, boolean blendIndicator, float alphaScale,
+    boolean warpIndicator, boolean blendIndicator, 
+    float alphaScale,
     float refPointX, float refPointY, float refPointZ) {
         int outputRows = outImage.getHeight();
         int outputCols = outImage.getWidth();
-        MemImage midImage, alphaImage;
+
+        MemImage midImage = new MemImage(1, 1);
+        MemImage alphaImage = new MemImage(1, 1);
         int xOffset = (int)tx; // Set these for the blend nowarp case
         int yOffset = (int)ty;
-        int imXOffset, imYOffset, msXOffset, msYOffset;
+        // int imXOffset, imYOffset, msXOffset, msYOffset; // these variables are not used
 
         // If matteImage (same as alpha image) is NULL, the alpha image is created
         // from the warped model image. 
@@ -1976,6 +2023,7 @@ public class Globals {
                 statusPrint("iRenderz: Unable to open intermediate warp image");
                 return -1;
             }
+
             if(forwardWarp) {
                 fwarpz(inImage, midImage, zImage, 
                     rx, ry, rz, 
@@ -1993,7 +2041,7 @@ public class Globals {
                     viewMatrix, 
                     refPointX, refPointY, refPointZ);
             }
-        }
+        } // if warpIndicator
 
         if(blendIndicator) {
             alphaImage = new MemImage(outputRows, outputCols);
@@ -2027,10 +2075,10 @@ public class Globals {
                 midImage.createAlphaImage(alphaImage);
                 alphaImage.alphaSmooth3();
             }
-        }
+        } // if blendIndicator
 
         // Composite the element into the background plate
-        int myStatus;
+        int myStatus = 0;
         if(blendIndicator) {
             // blend but no warp
             if(!warpIndicator) {
@@ -2090,7 +2138,7 @@ public class Globals {
         weight[2][2] = 0.05f;
 
     /*
-        weight[0][0] = -0.01;    //sinc function
+        weight[0][0] = -0.01;    // sinc function
         weight[0][1] = -0.01;
         weight[0][2] = -0.01;
         weight[1][0] = -0.01;
@@ -2107,26 +2155,38 @@ public class Globals {
         float z1 = 0.0f;
         float totalCells = 0.0f;
         int row, col;
-        float sum,  q00,  q10,  q20,  q01,  q11,  q21,  q02,  q12,  q22;
-        float sumr, q00r, q10r, q20r, q01r, q11r, q21r, q02r, q12r, q22r;
-        float sumg, q00g, q10g, q20g, q01g, q11g, q21g, q02g, q12g, q22g;
-        float sumb, q00b, q10b, q20b, q01b, q11b, q21b, q02b, q12b, q22b;
-        byte red, green, blue;
+        float sum;
+        float q00,  q10,  q20;
+        float q01,  q11,  q21;
+        float q02,  q12,  q22;
+        float sumr;
+        float q00r, q10r, q20r = 0.0f;
+        float q01r, q11r = 0.0f, q21r = 0.0f;
+        float q02r, q12r = 0.0f, q22r = 0.0f;
+        float sumg;
+        float q00g, q10g, q20g = 0.0f;
+        float q01g, q11g = 0.0f, q21g = 0.0f;
+        float q02g, q12g = 0.0f, q22g = 0.0f;
+        float sumb;
+        float q00b, q10b, q20b = 0.0f;
+        float q01b, q11b = 0.0f, q21b = 0.0f;
+        float q02b, q12b = 0.0f, q22b = 0.0f;
+        Byte red = (byte)0, green = (byte)0, blue = (byte)0;
 
         for (row = 2; row <= imHeight - 1; row++) {
             for (col = 2; col <= imWidth - 1; col++) {
                 switch(bpp) {
                 case 8:
                     q00 = inImage.getMPixel(col - 1, row - 1) * weight[0][0];
-                    q10 = inImage.getMPixel(col, row - 1)     * weight[1][0];
+                    q10 = inImage.getMPixel(col,     row - 1) * weight[1][0];
                     q20 = inImage.getMPixel(col + 1, row - 1) * weight[2][0];
 
                     q01 = inImage.getMPixel(col - 1, row)     * weight[0][1];
-                    q11 = inImage.getMPixel(col, row)         * weight[1][1];
+                    q11 = inImage.getMPixel(col,     row)     * weight[1][1];
                     q21 = inImage.getMPixel(col + 1, row)     * weight[2][1];
 
                     q02 = inImage.getMPixel(col - 1, row + 1) * weight[0][2];
-                    q12 = inImage.getMPixel(col, row + 1)     * weight[1][2];
+                    q12 = inImage.getMPixel(col,     row + 1) * weight[1][2];
                     q22 = inImage.getMPixel(col + 1, row + 1) * weight[2][2];
 
                     sum = q00 + q10 + q20 + q10 + q11 + q12 + q20 + q21 + q22;
@@ -2136,34 +2196,38 @@ public class Globals {
 
                 case 24:
                     inImage.getMPixelRGB(col - 1, row - 1, red, green, blue);
-                    q00r = (float) red   * weight[0][0];
-                    q00g = (float) green * weight[0][0];
-                    q00b = (float) blue  * weight[0][0];
+                    q00r = (float)red   * weight[0][0];
+                    q00g = (float)green * weight[0][0];
+                    q00b = (float)blue  * weight[0][0];
+
                     inImage.getMPixelRGB(col, row - 1, red, green, blue);
                     q10r = (float) red   * weight[1][0];
                     q10g = (float) green * weight[1][0];
                     q10b = (float) blue  * weight[1][0];
-                    q20 = inImage.getMPixel(col + 1, row - 1) * weight[2][0];
 
+                    q20 = inImage.getMPixel(col + 1, row - 1) * weight[2][0];
                     q01 = inImage.getMPixel(col - 1, row)     * weight[0][1];
-                    q11 = inImage.getMPixel(col, row)         * weight[1][1];
+                    q11 = inImage.getMPixel(col,     row)     * weight[1][1];
                     q21 = inImage.getMPixel(col + 1, row)     * weight[2][1];
 
                     q02 = inImage.getMPixel(col - 1, row + 1) * weight[0][2];
-                    q12 = inImage.getMPixel(col, row + 1)     * weight[1][2];
+                    q12 = inImage.getMPixel(col,     row + 1) * weight[1][2];
                     q22 = inImage.getMPixel(col + 1, row + 1) * weight[2][2];
 
                     sumr = q00r + q10r + q20r + q10r + q11r + q12r + q20r + q21r + q22r;
                     sumg = q00g + q10g + q20g + q10g + q11g + q12g + q20g + q21g + q22g;
                     sumb = q00b + q10b + q20b + q10b + q11b + q12b + q20b + q21b + q22b;
+
                     sumr = bound(sumr, 0.0f, 255.0f);
                     sumg = bound(sumg, 0.0f, 255.0f);
                     sumb = bound(sumb, 0.0f, 255.0f);
-                    outImage.setMPixelRGB(col, row, (byte)(sumr + 0.5f), (byte)(sumg + 0.5f), (byte)(sumb + 0.5f));
+
+                    outImage.setMPixelRGB(col, row, 
+                        (byte)(sumr + 0.5f), (byte)(sumg + 0.5f), (byte)(sumb + 0.5f));
                     break;
                 } // switch
-            }
-        }
+            } // for col
+        } // for row
 
         return 0;
     } // antiAlias
@@ -2240,8 +2304,8 @@ public class Globals {
         halfHeight -= (halfHeight - intRefPointY);
 
         // Calculate offsets that will center the warped image in the output image
-        int xOffset = int(outWidth / 2.0);
-        int yOffset = int(outHeight/ 2.0);
+        int xOffset = (int)(outWidth / 2.0);
+        int yOffset = (int)(outHeight/ 2.0);
         
         // shortcut: if no rotation or scale, just copy the image
         if(
@@ -2254,12 +2318,12 @@ public class Globals {
         }
         
         float xIn, yIn, zIn; 
-        int xOut, yOut;
+        Integer xOut = 0, yOut = 0;
         byte intensity;
 
         // Loop through the texture coordinates, projecting to the screen
         zIn = 0.0f;
-        float atx, aty, atz;
+        float atx = 0.0f, aty = 0.0f, atz = 0.0f;
         float increment = 1.0f;
     
         for (y = 1; y <= inHeight; y += increment) {
@@ -2295,7 +2359,7 @@ public class Globals {
     TMatrix viewMatrix,
     float refPointX, float refPointY, float refPointZ) {
         // The reference point is a point in the texture image's 
-        // original(i.e. initial, default) position in Cartesian space.
+        // original (i.e. initial, default) position in Cartesian space,
         // about which the image is rotated and scaled.
         // For example, the reference point 0,0,0 is the center of the 
         // texture image.
@@ -2326,7 +2390,8 @@ public class Globals {
         }
 
         // Build the forward transformation matrix
-        TMatrix forwardMatrix, viewModelMatrix;
+        TMatrix forwardMatrix = new TMatrix();
+        TMatrix viewModelMatrix = new TMatrix();
         float XRadians = rx * F_DTR;
         float YRadians = ry * F_DTR;
         float ZRadians = rz * F_DTR;
@@ -2362,18 +2427,22 @@ public class Globals {
         }
         
         float xIn, yIn, zIn; 
-        int xOut1, yOut1, xOut2, yOut2;
-        int xOut3, yOut3, xOut4, yOut4;
-        byte intensity1, intensity2, intensity3, intensity4;
+        Integer xOut1 = 0, yOut1 = 0;
+        Integer xOut2 = 0, yOut2 = 0;
+        Integer xOut3 = 0, yOut3 = 0;
+        Integer xOut4 = 0, yOut4 = 0;
+        byte intensity1 = (byte)0, intensity2 = (byte)0, intensity3 = (byte)0, intensity4 = (byte)0;
 
         // Loop through the texture coordinates, projecting to the screen
         zIn = 0.0f;
-        float atx, aty, atz;
+        Float atx = 0.0f, aty = 0.0f, atz = 0.0f;
         float increment = 0.5f;                  // oversample 2:1
         float inverseInc = 1.0f / increment;
-        float d1, d2, d3, d4;
-        byte red1, green1, blue1, red2, green2, blue2, red3, green3, blue3,
-            red4, green4, blue4;
+        float d1 = 0.0f, d2 = 0.0f, d3 = 0.0f, d4 = 0.0f;
+        byte red1 = (byte)0, green1 = (byte)0, blue1 = (byte)0;
+        byte red2 = (byte)0, green2 = (byte)0, blue2 = (byte)0;
+        byte red3 = (byte)0, green3 = (byte)0, blue3 = (byte)0;
+        byte red4 = (byte)0, green4 = (byte)0, blue4 = (byte)0;
 
         for (y = inverseInc * increment; y <= inHeight; y += increment) {
             yIn = y - halfHeight;
@@ -2422,10 +2491,12 @@ public class Globals {
                     d4 = getDistance3d(vx, vy, vz, atx, aty, atz);
                 }
             
-                outImage.fillPolyz(xOut1, yOut1, intensity1, d1, 
-                                    xOut2, yOut2, intensity2, d2, 
-                                    xOut3, yOut3, intensity3, d3, 
-                                    xOut4, yOut4, intensity4, d4, zImage);
+                outImage.fillPolyz(
+                    xOut1, yOut1, intensity1, d1, 
+                    xOut2, yOut2, intensity2, d2, 
+                    xOut3, yOut3, intensity3, d3, 
+                    xOut4, yOut4, intensity4, d4, 
+                    zImage);
             }
         }
     
@@ -2462,11 +2533,14 @@ public class Globals {
         // float *wxTemp, *wyTemp, *wzTemp; // these variables are not used
         byte[] iBuffer;
         int iBufferIdx;
-        byte *iTemp1, iTemp2, *iPrev1, *iPrev2;
+        byte *iTemp1, iTemp2;
+        int iPrev1Idx, iPrev2Idx; // indices into iBuffer
         int xTemp1, yTemp1, xTemp2, yTemp2;
-        int *xPrev1, *yPrev1, *xPrev2, *yPrev2;
+        int xPrev1Idx, yPrev1Idx; // indices into xBuffer and yBuffer, respectively
+        int xPrev2Idx, yPrev2Idx; // indices into xBuffer and yBuffer, respectively
         int dBufferIdx;
-        float dTemp1, dTemp2, *dPrev1, *dPrev2;
+        float dTemp1, dTemp2;
+        int dPrev1Idx, dPrev2Idx; // indices into dBuffer
         
         // Build the forward transformation matrix
         TMatrix forwardMatrix = new TMatrix();
@@ -2489,7 +2563,7 @@ public class Globals {
         int outHeight = outputImage.getHeight();
         int outWidth  = outputImage.getWidth();
         float halfHeight = inHeight / 2.0f;
-        float halfWidth  =  inWidth / 2.0f;
+        float halfWidth  = inWidth / 2.0f;
         
         float increment = 0.5f;
         float inverseInc = 1.0f / increment;
@@ -2533,7 +2607,8 @@ public class Globals {
 
         float row, col;
         float x1, y1, z1;
-        byte i1, red1, green1, blue1;
+        Byte i1 = (byte)0, red1 = (byte)0, blue1 = (byte)0;
+        byte green1;
         int sx1, sy1;
         float refX, refY, refZ;
     
@@ -2571,21 +2646,21 @@ public class Globals {
                     yTemp1 = sy1;
                     iTemp1 = i1;
 
-                    xPrev1 = xBuffer;
-                    yPrev1 = yBuffer;
+                    xPrev1Idx = 0;
+                    yPrev1Idx = 0;
 
-                    xPrev2 = xBuffer;
-                    yPrev2 = yBuffer;
-                    xPrev2++;
-                    yPrev2++;
+                    xPrev2Idx = 0;
+                    yPrev2Idx = 0;
+                    xPrev2Idx++;
+                    yPrev2Idx++;
 
-                    iPrev1 = iBuffer;
-                    iPrev2 = iBuffer;
-                    iPrev2++;
+                    iPrev1Idx = 0;
+                    iPrev2Idx = 0;
+                    iPrev2Idx++;
         
-                    dPrev1 = dBuffer;
-                    dPrev2 = dBuffer;
-                    dPrev2++;
+                    dPrev1Idx = 0;
+                    dPrev2Idx = 0;
+                    dPrev2Idx++;
 
                     if(zBuffer != null) {
                         dTemp1 = getDistance3d(tx, ty, tz, vx, vy, vz);
@@ -2604,33 +2679,34 @@ public class Globals {
                     //                     
                     // Render the quadrangle distances and update the intermediate zBuffer
                     outputImage.fillPolyz( 
-                                *xPrev1, *yPrev1, *iPrev1, *dPrev1,
-                                *xPrev2, *yPrev2, *iPrev2, *dPrev2,
-                                xTemp2, yTemp2, iTemp2, dTemp2,
-                                xTemp1, yTemp1, iTemp1, dTemp1, zBuffer);
+                        xBuffer[xPrev1Idx], yBuffer[yPrev1Idx], iBuffer[iPrev1Idx], dBuffer[dPrev1Idx],
+                        xBuffer[xPrev2Idx], yBuffer[yPrev2Idx], iBuffer[iPrev2Idx], dBuffer[dPrev2Idx],
+                        xTemp2,             yTemp2,             iTemp2,             dTemp2,
+                        xTemp1,             yTemp1,             iTemp1,             dTemp1, 
+                        zBuffer);
         
-                    *xPrev1 = xTemp1;
-                    *yPrev1 = yTemp1;
-                    *iPrev1 = iTemp1;
+                    xBuffer[xPrev1Idx] = xTemp1;
+                    yBuffer[yPrev1Idx] = yTemp1;
+                    iBuffer[iPrev1Idx] = iTemp1;
 
                     xTemp1 = xTemp2;
                     yTemp1 = yTemp2;
                     iTemp1 = iTemp2;
 
-                    xPrev1++;
-                    yPrev1++;
+                    xPrev1Idx++;
+                    yPrev1Idx++;
 
-                    xPrev2++;
-                    yPrev2++;
+                    xPrev2Idx++;
+                    yPrev2Idx++;
 
-                    iPrev1++;
-                    iPrev2++;
+                    iPrev1Idx++;
+                    iPrev2Idx++;
         
-                    *dPrev1 = dTemp1;
+                    dBuffer[dPrev1Idx] = dTemp1;
                     dTemp1 = dTemp2;
 
-                    dPrev1++;
-                    dPrev2++;
+                    dPrev1Idx++;
+                    dPrev2Idx++;
                 }
             }
         }
@@ -2702,8 +2778,8 @@ public class Globals {
                 angleTemp = 0.0f;
 
                 for (col = 1; col <= imWidth; col++) {
-                    x = radius * Math.cos(angleTemp * F_DTR);
-                    y = radius * Math.sin(angleTemp * F_DTR);
+                    x = radius * (float)Math.cos(angleTemp * F_DTR);
+                    y = radius * (float)Math.sin(angleTemp * F_DTR);
                     angleTemp += angularInc;
                     xImage.setMPixel32(col, row, x);
                     yImage.setMPixel32(col, row, (float)row);
@@ -2763,7 +2839,7 @@ public class Globals {
                 angleTemp = 0.0f;
 
                 for (col = 1; col <= imWidth; col++) {
-                    z = radius * Math.sin(angleTemp * F_DTR);
+                    z = radius * (float)Math.sin(angleTemp * F_DTR);
                     xImage.setMPixel32(col, row, (float)col);
                     yImage.setMPixel32(col, row, z);
                     zImage.setMPixel32(col, row, (float)row);
@@ -2785,8 +2861,8 @@ public class Globals {
                 for (col = 1; col <= imWidth; col++) {
                     xImage.setMPixel32(col, row, (float)col);
                     zImage.setMPixel32(col, row, (float)row);
-                    distance = Math.sqrt(((col - xCent) * (col - xCent)) + ((row - yCent) * (row - yCent)));           
-                    yImage.setMPixel32(col, row, radius * Math.sin(5.0f * distance  * F_DTR));
+                    distance = (float)Math.sqrt(((col - xCent) * (col - xCent)) + ((row - yCent) * (row - yCent)));           
+                    yImage.setMPixel32(col, row, radius * (float)Math.sin(5.0f * distance  * F_DTR));
                 } // for col
             } // for row
             break;
@@ -2818,7 +2894,7 @@ public class Globals {
         String outPath, xPath, yPath, zPath;
  
         _splitpath(inputImagePath, drive, dir, file, ext);
-        int theLength = strlen(file);
+        int theLength = file.length();
   
         _splitpath(destinationDir, ddrive, ddir, dfile, dext);
         _makepath(outPath, ddrive, ddir, file, ext);
@@ -2828,7 +2904,7 @@ public class Globals {
         if(!fileExists(outPath)) {
             msgText = "Copying QMesh Model Texture Image to: " + outPath;
             statusPrint(msgText);
-            CopyFile(inputImagePath, outPath, TRUE);
+            CopyFile(inputImagePath, outPath, 1);
         }
  
         constructPathName(xPath, outPath, 'x');
@@ -2992,8 +3068,10 @@ public class Globals {
         centroidX = x1/totalCells;
         centroidY = y1/totalCells;
         centroidZ = z1/totalCells;
+
         msgText = "Mesh centroid calculated: " + centroidX + " " + centroidY + " " + centroidZ;
         statusPrint(msgText);
+
         return 0;
     } // getMeshCentroid
   
@@ -3299,24 +3377,34 @@ public class Globals {
     } // indexToCoord
 
 
+    // This method smooth shades a triangle given 3 vertices (x1, y1), (x2, y2)
+    // and (x3, y3) on the triangle, and an intensity at each vertex (i1, i2, and i3).
+    // See p 173 of Visual Special Effects Toolkit in C++.
     // This method came from SHADERS.CPP
+    // Called from:
+    //     MemImage.fillPolyz
     public static int fillTrianglez(int x1, int y1, float i1, float d1,
     int x2, int y2, float i2, float d2,
     int x3, int y3, float i3, float d3,
     MemImage outImage, MemImage zImage) {
         // zImage contains the distance values.
-        //
-        // To use this function without a z-buffer, call with zImage equal to NULL
+        // To use this function without a z-buffer, call with zImage equal to NULL.
 
-        // Pixels are written to outImage only if the new distance (derived from d1,d2,d3) is 
-        // less than the corresponding distance in the zImage.
+        // Pixels are written to outImage only if the new distance (derived 
+        // from d1, d2, d3) is less than the corresponding distance in the zImage.
         //
-        // The assumption is made here that sets of points describing vertical or horizontal 
-        // lines have been handled elsewhere
+        // The assumption is made here that sets of points describing 
+        // vertical or horizontal lines have been handled elsewhere.
 
-        int midPoint, minX, minY, maxX, maxY, midX, midY, denominator;
-        float minI, maxI, midI, minD, maxD, midD;
-        float intensity, intensityStep, distance, distanceStep, id1, id2, oldZ;
+        int midPoint = 0;
+        int minX = 0, minY = 0;
+        int maxX = 0, maxY = 0;
+        int midX = 0, midY = 0;
+        int denominator;
+        float minI = 0.0f, maxI = 0.0f, midI = 0.0f;
+        float minD = 0.0f, maxD = 0.0f, midD = 0.0f;
+        float intensity, intensityStep, distance, distanceStep;
+        float id1 = 0.0f, id2 = 0.0f, oldZ;
 
         int bpp = outImage.getBitsPerPixel();
         if(zImage != null) {
@@ -3426,7 +3514,7 @@ public class Globals {
         } // switch
 
         int row, col, firstX, lastX, triangleType;
-        int ix1, ix2, ip1, ip2, nSteps;
+        int ix1 = 0, ix2 = 0, ip1 = 0, ip2 = 0, nSteps;
 
         triangleType = I_POINTONSIDE;
         if(midY == maxY) triangleType = I_POINTONTOP;
@@ -3482,7 +3570,8 @@ public class Globals {
                 } 
 
                 for (col = firstX; col <= lastX; col++) {
-                    if(zImage != null) {  //render with a Z Buffer
+                    if(zImage != null) {  
+                        // Render with a Z Buffer
                         oldZ = zImage.getMPixel32(col, row);
 
                         if(distance <= oldZ) {
@@ -3497,7 +3586,7 @@ public class Globals {
                                 (byte)intensity, (byte)intensity);
                         }
                     } else {
-                        //render without a Z Buffer
+                        // Render without a Z Buffer
                         intensity = bound(intensity, 1.0f, 255.0f);
                         if(bpp == 8)  outImage.setMPixel(col, row, (byte)intensity);
                         if(bpp == 24) outImage.setMPixelRGB(col, row, (byte)intensity,
@@ -3574,9 +3663,9 @@ public class Globals {
                 }
             }
         } else {
-            // handle pointontop, pointonbottom cases
+            // Handle pointontop, pointonbottom cases
             for(row = minY; row <= maxY; row++) {
-                // interpolate the x interval and the intensities at the interval boundary
+                // Interpolate the x interval and the intensities at the interval boundary
                 if(triangleType == I_POINTONTOP) {
                     ix1 = (int)interpolate((float)minX, (float)maxX, (float)minY, (float)maxY, (float)row);
                     ix2 = (int)interpolate((float)minX, (float)midX, (float)minY, (float)midY, (float)row);
@@ -3662,11 +3751,11 @@ public class Globals {
     //     RenderObject.renderShapez
     public static byte getLight(Point3d p1, Point3d p2, Point3d c1, Point3d c2) {
         // Input points are oriented counterclockwise from the first point
-        Point3d centroid;
-        Point3d np1;
+        Point3d centroid = new Point3d();
+        Point3d np1 = new Point3d();
         // Point3d *np2, *nc1, *nc2;  // lighting normals // these local variables are not used
         float ip1, ip2, ic1, ic2;		  // intensities at face cornerpoints
-        Point3d lightSource;
+        Point3d lightSource = new Point3d();
         
         if(false) {
             statusPrint("-----------------getLight-------------------");
@@ -3735,7 +3824,7 @@ public class Globals {
         Vect.getNormal2(np1, p1, centroid, p2);
         
         Vect.vectorNormalize(np1);
-        //
+
         //  kd     the coefficient of reflection or reflectivity of the surface material
         //         highly reflective = 1, highly absorptive = 0
         //	Ip	   the intensity of the light source
@@ -3743,12 +3832,12 @@ public class Globals {
         //  N      The surface Normal (unit vector)
         //  L      The direction of the light source (unit vector)
         //  d      the distance between the surface and the light source
-        //
         float kd = 0.65f;
         int Ip = 150;
         
         ip1 = lightModel(kd, Ip, 150, np1, lightSource, dCentroid);
         ip1 = bound(ip1, 1.0f, 255.0f);
+
         return (byte)ip1;
     } // getLight
 
@@ -3766,24 +3855,26 @@ public class Globals {
         //  N      The surface Normal (unit vector)
         //  L      The direction of the light source (unit vector)
         //  I      The intensity produced by this light model
-    
         float orientationLight = Vect.dotProduct(N,L);
         float d0 = 0.5f;
 
-        //  equation 14.4 p 279 Hearn - Baker
+        // Equation 14.4 p 279 Hearn - Baker
         float I = (kd * Ia) + ((kd * Ip) / (d + d0) * orientationLight);
         return I;
     } // lightModel
 
 
     // This method came from RENDER.CPP
-    // Called from MorphDlg
+    // Class RenderObject also has a renderMesh method, but that one takes 
+    // 3 parameters, 2 MemImages and a blendIndicator.
+    // Called from: 
+    //     MorphDlg
     public static int renderMesh(String outputImagePath, MemImage textureImage, 
     MemImage xImage, MemImage yImage, MemImage zImage, 
     TMatrix aMatrix) {
-        //  This version of renderMesh renders a mesh without the need for the
-        //  renderObject that provides the context information from the graphic
-        //  pipeline.
+        // This version of renderMesh renders a mesh without the need for the
+        // renderObject that provides the context information from the graphic
+        // pipeline.
         int[] xBuffer, yBuffer;
         int xBufferIdx, yBufferIdx; // previously named xTemp, yTemp;
         // float *wxBuffer, *wyBuffer, *wzBuffer; // these variables are not used
@@ -3791,11 +3882,14 @@ public class Globals {
         // float *wxTemp, *wyTemp, *wzTemp; // these variables are not used
         byte[] iBuffer;
         int iBufferIdx; // previously byte *iTemp;
-        byte iTemp1, iTemp2, *iPrev1, *iPrev2;
-        int xTemp1, yTemp1, xTemp2, yTemp2;
-        int *xPrev1, *yPrev1, *xPrev2, *yPrev2;
+        byte iTemp1 = 0, iTemp2;
+        int iPrev1Idx = 0, iPrev2Idx = 0; // indices into iBuffer
+        int xTemp1 = 0, yTemp1 = 0, xTemp2 = 0, yTemp2 = 0;
+        int xPrev1Idx = 0, yPrev1Idx = 0; // indices into xBuffer and yBuffer, respectively
+        int xPrev2Idx = 0, yPrev2Idx = 0; // indices into xBuffer and yBuffer, respectively
         int dBufferIdx; // previously float *dTemp;
-        float dTemp1, dTemp2, *dPrev1, *dPrev2;
+        float dTemp1 = 0, dTemp2;
+        int dPrev1Idx = 0, dPrev2Idx = 0;
         float vx, vy, vz;
 
         if (
@@ -3858,14 +3952,16 @@ public class Globals {
 
         String msgText = "renderMeshz: Viewer location: vx: " + vx + ", vy: " + vy + ", vz: " + vz;
         statusPrint(msgText);
-        xBufferIdx = 0;
-        yBufferIdx = 0;
-        iBufferIdx = 0;
-        dBufferIdx = 0;
+        xBufferIdx = 0; // index into xBuffer
+        yBufferIdx = 0; // index into yBuffer
+        iBufferIdx = 0; // index into iBuffer
+        dBufferIdx = 0; // index into dBuffer
 
         byte i1;
-        int row, col, sx1, sy1;
-        float x1,y1,z1, tx, ty, tz;
+        int row, col;
+        Integer sx1 = 0, sy1 = 0;
+        float x1, y1, z1;
+        Float tx = 0.0f, ty = 0.0f, tz = 0.0f;
         float refX, refY, refZ;
         refX = 0.0f;
         refY = 0.0f;
@@ -3878,7 +3974,8 @@ public class Globals {
                 z1 = zImage.getMPixel32(col, row);
                 i1 = textureImage.getMPixel(col, row);
 
-                // project to the screen
+                // Project to the screen
+                // The following method sets sx1, sy1, tx, ty, and tz
                 aMatrix.transformAndProjectPoint(x1, y1, z1, sx1, sy1, 
                   refX, refY, refZ, outHeight, outWidth, tx, ty, tz);
  
@@ -3892,7 +3989,7 @@ public class Globals {
                     iBuffer[iBufferIdx] = i1;
                     iBufferIdx++;
 
-                    dBufferIdx[dBufferIdx] = getDistance3d(tx, ty, tz, vx, vy, vz);
+                    dBuffer[dBufferIdx] = getDistance3d(tx, ty, tz, vx, vy, vz);
                     dBufferIdx++;
                 }
               
@@ -3901,22 +3998,22 @@ public class Globals {
                     yTemp1 = sy1;
                     iTemp1 = i1;
 
-                    xPrev1 = xBuffer;
-                    yPrev1 = yBuffer;
+                    xPrev1Idx = 0;
+                    yPrev1Idx = 0;
 
-                    xPrev2 = xBuffer;
-                    yPrev2 = yBuffer;
+                    xPrev2Idx = 0;
+                    yPrev2Idx = 0;
 
-                    xPrev2++;
-                    yPrev2++;
+                    xPrev2Idx++;
+                    yPrev2Idx++;
 
-                    iPrev1 = iBuffer;
-                    iPrev2 = iBuffer;
-                    iPrev2++;
+                    iPrev1Idx = 0;
+                    iPrev2Idx = 0;
+                    iPrev2Idx++;
 
-                    dPrev1 = dBuffer;
-                    dPrev2 = dBuffer;
-                    dPrev2++;
+                    dPrev1Idx = 0;
+                    dPrev2Idx = 0;
+                    dPrev2Idx++;
 
                     dTemp1 = getDistance3d(tx, ty, tz, vx, vy, vz);
                 }
@@ -3928,33 +4025,34 @@ public class Globals {
                     dTemp2 = getDistance3d(tx, ty, tz, vx, vy, vz);
 
                     outputImage.fillPolyz( 
-                        xPrev1, yPrev1, iPrev1, dPrev1,
-                        xPrev2, yPrev2, iPrev2, dPrev2,
+                        xBuffer[xPrev1Idx], yBuffer[yPrev1Idx], iBuffer[iPrev1Idx], dBuffer[dPrev1Idx],
+                        xBuffer[xPrev2Idx], yBuffer[yPrev2Idx], iBuffer[iPrev2Idx], dBuffer[dPrev2Idx],
                         xTemp2, yTemp2, iTemp2, dTemp2,
-                        xTemp1, yTemp1, iTemp1, dTemp1, midZImage);
+                        xTemp1, yTemp1, iTemp1, dTemp1, 
+                        midZImage);
 
-                    xPrev1 = xTemp1;
-                    yPrev1 = yTemp1;
-                    iPrev1 = iTemp1;
+                    xBuffer[xPrev1Idx] = xTemp1;
+                    yBuffer[yPrev1Idx] = yTemp1;
+                    iBuffer[iPrev1Idx] = iTemp1;
 
                     xTemp1 = xTemp2;
                     yTemp1 = yTemp2;
                     iTemp1 = iTemp2;
 
-                    xPrev1++;
-                    yPrev1++;
+                    xPrev1Idx++;
+                    yPrev1Idx++;
 
-                    xPrev2++;
-                    yPrev2++;
+                    xPrev2Idx++;
+                    yPrev2Idx++;
 
-                    iPrev1++;
-                    iPrev2++;
+                    iPrev1Idx++;
+                    iPrev2Idx++;
 
-                    dPrev1 = dTemp1;
+                    dBuffer[dPrev1Idx] = dTemp1;
                     dTemp1 = dTemp2;
                     
-                    dPrev1++;
-                    dPrev2++;
+                    dPrev1Idx++;
+                    dPrev2Idx++;
                 }
             } // for col
         } // for row
@@ -3972,11 +4070,12 @@ public class Globals {
     //     motionBlur
     //     MainFrame.onToolsWarpImage
     //     MemImage constructor that takes 6 parameters
+    //     Shape3d.shapeFromBMP
     public static int readBMPHeader(String psFileName, Integer height, Integer width, Integer bitsPerPixel) {
         BITMAPFILEHEADER bmFH;
         BITMAPINFOHEADER pbmIH;
         BITMAPINFO pbmInfo;
-        WORD PalSize = 256;
+        int PalSize = 256;
         HANDLE fp;
         int imageSize;
         String errText;
@@ -3989,7 +4088,7 @@ public class Globals {
             return 1;
         }
 
-        DWORD numBytesRead;
+        int numBytesRead;
         ReadFile(fp, bmFH, sizeof(BITMAPFILEHEADER), numBytesRead, null);
 
         if( bmFH.bfType != 0x4D42 ) {   // if type isn't "BM" ...
@@ -3999,13 +4098,13 @@ public class Globals {
             return 2;
         }
 
-        pbmIH = (BITMAPINFOHEADER)GlobalLock(GlobalAlloc( GMEM_FIXED, sizeof(BITMAPINFOHEADER) ));
+        pbmIH = (BITMAPINFOHEADER)GlobalLock(GlobalAlloc(GMEM_FIXED, sizeof(BITMAPINFOHEADER)));
 
         ReadFile(fp, pbmIH, (DWORD)sizeof(BITMAPINFOHEADER), numBytesRead, null);
 
         // Set the output parameter bitsPerPixel
         bitsPerPixel = (int)pbmIH.biBitCount;
-        if((DWORD)pbmIH.biCompression != BI_RGB) {
+        if(pbmIH.biCompression != BI_RGB) {
             errText = "Compressed image. Not supported: " + psFileName;
             statusPrint(errText);
             CloseHandle(fp);
@@ -4014,14 +4113,11 @@ public class Globals {
         pbmInfo = (BITMAPINFO)GlobalLock(GlobalAlloc( GHND, PalSize + sizeof(BITMAPINFOHEADER) ));
 
         pbmInfo.bmiHeader = *pbmIH;
-        GlobalUnlock( (HANDLE)pbmIH );
-        GlobalFree( (HANDLE)pbmIH );
 
         // Set the output parameters width and height
         width = (int) pbmInfo.bmiHeader.biWidth;
         height = (int) pbmInfo.bmiHeader.biHeight;
-        imageSize = (DWORD) pbmInfo.bmiHeader.biSizeImage;
-        GlobalFree((HANDLE)GlobalHandle(pbmInfo));
+        imageSize = pbmInfo.bmiHeader.biSizeImage;
         CloseHandle(fp);
 
         return 0;
@@ -4030,12 +4126,9 @@ public class Globals {
 
     // This method came from TWEEN.CPP
     public static int tweenMesh(float aFraction, 
-    MemImage aTexture, MemImage aX, MemImage aY, 
-    MemImage aZ,
-    MemImage bTexture, MemImage bX, MemImage bY, 
-    MemImage bZ, 
-    MemImage oTexture, MemImage oX, MemImage oY, 
-    MemImage oZ) {
+    MemImage aTexture, MemImage aX, MemImage aY, MemImage aZ,
+    MemImage bTexture, MemImage bX, MemImage bY, MemImage bZ, 
+    MemImage oTexture, MemImage oX, MemImage oY, MemImage oZ) {
         int row, col;
         float aValue, bValue, oValue;
         byte aByte, bByte, oByte;
@@ -4108,4 +4201,8 @@ public class Globals {
     public static void beep(int len1, int len2) {
         
     } // beep
+
+    public static void setLblStatus(JLabel stat) {
+        lblStatus = stat;
+    }
 } // class Globals
