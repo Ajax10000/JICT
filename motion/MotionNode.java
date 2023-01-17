@@ -1,5 +1,7 @@
 package motion;
 
+import java.util.StringTokenizer;
+
 public class MotionNode {
    public int nodenum;
    public float tx,ty,tz;
@@ -47,73 +49,75 @@ public class MotionNode {
 
    // This method came from MOTION.CPP
    public int read(String psBuffer) {
+      StringTokenizer strTok;
       String aNodeNum;
       String anrx, anry, anrz; 
       String ansx, ansy, ansz; 
       String antx, anty, antz;
       String anAlpha;
    
-      aNodeNum = strtok(psBuffer, " ");
+      strTok = new StringTokenizer(psBuffer, " ");
+      aNodeNum = strTok.nextToken(" ");
       if(aNodeNum.length() > 0)
          nodenum = Integer.parseInt(aNodeNum);
       else
          return 1;
    
-      anrx = strtok(null, " ");
+      anrx = strTok.nextToken(" ");
       if(anrx.length() > 0)
          rx = Float.parseFloat(anrx);
       else
          return 2;
    
-      anry = strtok(null, " ");
+      anry = strTok.nextToken(" ");
       if(anry.length() > 0)
          ry = Float.parseFloat(anry);
       else
          return 3;
    
-      anrz = strtok(null, " ");
+      anrz = strTok.nextToken(" ");
       if(anrz.length() > 0)
          rz = Float.parseFloat(anrz);
       else
          return 4;
    
-      ansx = strtok(null, " ");
+      ansx = strTok.nextToken(" ");
       if(ansx.length() > 0)
          sx = Float.parseFloat(ansx);
       else
          return 5;
    
-      ansy = strtok(null, " ");
+      ansy = strTok.nextToken(" ");
       if(ansy.length() > 0)
          sy = Float.parseFloat(ansy);
       else
          return 6;
    
-      ansz = strtok(null, " ");
+      ansz = strTok.nextToken(" ");
       if(ansz.length() > 0)
          sz = Float.parseFloat(ansz);
       else
          return 7;
    
-      antx = strtok(null, " ");
+      antx = strTok.nextToken(" ");
       if(antx.length() > 0)
          tx = Float.parseFloat(antx);
       else
          return 8;
    
-      anty = strtok(null, " ");
+      anty = strTok.nextToken(" ");
       if(anty.length() > 0)
          ty = Float.parseFloat(anty);
       else
          return 9;
    
-      antz = strtok(null, " ");
+      antz = strTok.nextToken(" ");
       if(antz.length() > 0)
          tz = Float.parseFloat(antz);
       else
          return 10;
    
-      anAlpha = strtok(null, " ");
+      anAlpha = strTok.nextToken(" ");
       if(anAlpha.length() > 0)
          alpha = Float.parseFloat(anAlpha);
       else
