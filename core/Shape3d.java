@@ -159,7 +159,7 @@ public:
                 CWnd theWindow = AfxGetMainWnd();
                 MainFrame theFrame = (MainFrame)theWindow;
                 SceneList aSceneList = theFrame.mySceneList;
-                aSceneList.getSceneInfo(sceneName,  effectType, colorMode, height, width); 
+                aSceneList.getSceneInfo(sceneName, effectType, colorMode, height, width); 
                 this.vertices = nullPointer;
                 this.faces = null;
                 // this.currentVertex = this.firstVertex;
@@ -213,7 +213,7 @@ public:
                 // Read the shape file (has a ".shp" extension)
                 aStatus = readShape(psFileName);
                 if (aStatus != 0) {
-                    msgText = "shape3d. ReadShape error: " + aStatus + " " + psFileName;
+                    msgText = "Shape3d. ReadShape error: " + aStatus + " " + psFileName;
                     Globals.statusPrint(msgText);
                     this.numAllocatedVertices = 0;
                 }
@@ -331,11 +331,13 @@ public:
         this.numAllocatedVertices = piNumVerts;
 
         VertexSet[] nullPointer = new VertexSet[numAllocatedVertices];
+        /* Dead code, per the compiler
         if(nullPointer == null) {
             Globals.statusPrint("Shape3d constructor 3: Unable to allocate shape object");
             this.numAllocatedVertices = 0; // signal an error
             return;
         }
+        */
 
         this.vertices = nullPointer;
         this.faces = null;
@@ -375,11 +377,13 @@ public:
         this.numAllocatedVertices = this.numVertices;
 
         VertexSet[] nullPointer = new VertexSet[this.numVertices];
+        /* Dead code, per the compiler
         if(nullPointer == null) {
             Globals.statusPrint("Shape3d constructor 4: Unable to allocate shape object");
             this.numAllocatedVertices = 0; // signal an error
             return;
         }
+        */
 
         this.vertices = nullPointer;
         this.faces = null;
@@ -422,11 +426,13 @@ public:
         this.numAllocatedVertices = this.numVertices;
 
         VertexSet[] nullPointer = new VertexSet[this.numVertices];
+        /* Dead code, per the compiler
         if(nullPointer == null) {
             Globals.statusPrint("Shape3d constructor 5: Unable to allocate shape object");
             this.numAllocatedVertices = 0; // signal an error
             return;
         }
+        */
 
         this.vertices = nullPointer;
         this.faces = null;
@@ -703,8 +709,8 @@ public:
 
     public int shapeFromBMP(String psImageFileName) {
         // Create a 4 vertex shape object from a rectangular image boundary
-        int myStatus, bitsPerPixel;
-        int height, width;
+        int myStatus;
+        Integer height = 0, width = 0, bitsPerPixel = 0;
 
         myStatus = Globals.readBMPHeader(psImageFileName, height, width, bitsPerPixel);
         if (myStatus != 0) {
@@ -717,11 +723,13 @@ public:
         this.numVertices = 4;
 
         VertexSet[] nullPointer = new VertexSet[this.numVertices];
+        /* Dead code, per the compiler
         if(nullPointer == null) {
             Globals.statusPrint("Shape3d::shapeFromBMP: Unable to allocate shape object");
             this.numAllocatedVertices = 0; //signal an error
             return -1;
         }
+        */
 
         this.vertices = nullPointer;
         this.faces = null;
@@ -800,7 +808,7 @@ public:
 
         for (int index = 1; index <= this.numVertices; index ++) {
             output = this.currentVertex.x + "," + this.currentVertex.y + "," + this.currentVertex.z + "\n";
-            fileOutput << output;
+            fileOut << output;
             // this.currentVertex++;
             incCurrentVertex();
         }
@@ -1176,7 +1184,7 @@ public:
     // Called from:
     //     getShapeFileInfo
     //     readShape
-    public String getNextLine(String psTheText, Integer piLineNumber, ifstream *filein, int piMinLineLength) {
+    public String getNextLine(String psTheText, Integer piLineNumber, ifstream filein, int piMinLineLength) {
         boolean aComment;
         int theLength = 80;
         String theKeyWord;
@@ -1192,7 +1200,9 @@ public:
             piLineNumber++;
 
             // Minimum line length <= 4 to accomodate CR/LFs from scenefile maker utility
-            if ((strncmp(psTheText, "//", 2) == 0) || (psTheText.length() <= piMinLineLength)) {
+            if (
+            (psTheText.startsWith("//")) || 
+            (psTheText.length() <= piMinLineLength)) {
                 aComment = true;
             } else {
                 aComment = false;
@@ -1208,14 +1218,13 @@ public:
     // Called from:
     //     Constructor that takes 2 parameters, a String and an int
     public void getShapePath(String psModelPath, String psShapeDir, String psShapePath) {
-        String drive, dir, file, ext;
-        _splitpath(psModelPath, drive, dir, file, ext);
+        String sDrive, sDir, sFile, sExt;
+        _splitpath(psModelPath, sDrive, sDir, sFile, sExt);
 
-        int theLength = file.length();
+        int theLength = sFile.length();
         if(theLength > 0) {
-            *(file+theLength-1) = '\0';  // inten the filename
             psShapePath = psShapeDir;
-            psShapePath.concat(file);
+            psShapePath.concat(sFile);
             psShapePath.concat(".shp");
         } else {
             Globals.statusPrint("getShapePath: Empty fileName");
@@ -1266,8 +1275,8 @@ public:
         }
 
         Float raySlope = 0f, rayYIntercept = 0f;
-        float aDistance, theX, theY;
-        int aStatus;
+        float aDistance = 0f, theX = 0f, theY = 0f;
+        int aStatus = 0;
 
         // Get the equation of the ray
         Globals.getFLineEquation(rayCentroidX, rayCentroidY, rayX2, rayY2, 
@@ -1277,7 +1286,7 @@ public:
         // on the ray centroid.  This will adjustment normalize line equation and angle calculations.
       
         Float shapeCentX = 0f, shapeCentY = 0f, shapeCentZ = 0f;
-        float translationX, translationY;		
+        // float translationX, translationY; // these variables are not used
       
         theShape.getWCentroid(shapeCentX, shapeCentY, shapeCentZ);
 
@@ -1352,7 +1361,9 @@ public:
 
             // If the intersection point lies within the current boundary line segment,
             // keep it!
-            if ((theX >= minx && theX <= maxx) && (theY >= miny && theY <= maxy)) {
+            if (
+            (theX >= minx && theX <= maxx) && 
+            (theY >= miny && theY <= maxy)) {
                 float segmentAngle = Globals.polarAtan(theX - shapeCentX, theY - shapeCentY);
                 if(Math.abs(segmentAngle - rayAngle) <= 0.01f) { //eliminate matches that are 180 degs out of phase
                     aDistance = Globals.getDistance2d(theX, theY, lastX, lastY);
@@ -1406,11 +1417,11 @@ public:
         float cx, cy, mx1, my1, mx2, my2;
         int aStatus;
         float mAngle1, mAngle2, childAngle;
-        final int counterClockwise = 0;
+        // final int counterClockwise = 0; // this variable is not used
         // final int CLOCKWISE = 1;
         final float twoPi = 2.0f*3.1415926f;
 
-        int boundaryDirection = counterClockwise;
+        // int boundaryDirection = counterClockwise; // this variable is not used
 
         child.initCurrentVertex();
         int clockWise, cclockWise;
@@ -1541,8 +1552,9 @@ public:
         // segments in a shape.  VeertexNumber is 1 relative.  If vertexNumber 
         // is zero, the total shape boundary distance is returned.
         float totalDistance = 0.0f;
-        float x1, x2, y1, y2, z1, z2;
-        float firstx, firsty, firstz;
+        float x1 = 0.0f, y1 = 0.0f, z1 = 0.0f;
+        float x2 = 0.0f, y2 = 0.0f, z2 = 0.0f;
+        float firstx = 0.0f, firsty = 0.0f, firstz = 0.0f;
         
         if(piVertexNumber == 0) {
             piVertexNumber = this.numVertices;
@@ -1598,7 +1610,7 @@ public:
         float fTotalDistance = getWorldDistance(0);
         float fDf1, fDf2; // distance fraction 1 and distance fraction 2
         float fX1, fX2, fY1, fY2, fZ1, fZ2;
-        float fFirstx, fFirsty, fFirstz;
+        float fFirstx = 0.0f, fFirsty = 0.0f, fFirstz = 0.0f;
         initCurrentVertex();
 
         for (int index = 0; index < numVertices - 1; index++) {
@@ -1653,7 +1665,7 @@ public:
         int i, j; // for loop variables
         int iNumVertsToCopy;
         float fX1, fX2, fY1, fY2, fZ1, fZ2; 
-        float fFirstX, fFirstY, fFirstZ;
+        float fFirstX = 0.0f, fFirstY = 0.0f, fFirstZ = 0.0f;
         int iCounter = 0;
         initCurrentVertex();
 
@@ -1842,20 +1854,24 @@ public:
 
         // saveJ will be used as a parameter to insertVertexAfter
         // It is set in the for j loop
-        int iSaveJ; 
+        int iSaveJ = 0; 
         float fMaxDistance = 0.0f;
         float fX1, fY1, fX2, fY2; 
-        float fX1Save, fY1Save, fX2Save, fY2Save;
-        float fFirstX, fFirstY, fDistance;
+        float fX1Save = 0.0f, fY1Save = 0.0f;
+        float fX2Save = 0.0f, fY2Save = 0.0f;
+        // float fFirstX, fFirstY; // these variables are not used
+        float fDistance;
         
         initCurrentVertex();
         for (j = 1; j < iNumVertices; j++) {
             fX1 = currentVertex.x;
             fY1 = currentVertex.y;
+            /* The following sets fFirstX and fFirstY, but these variables are not used afterwards
             if(j == 1) {
                 fFirstX = fX1;
                 fFirstY = fY1;
             }
+            */
 
             // currentVertex++;
             incCurrentVertex();
