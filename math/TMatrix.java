@@ -81,6 +81,8 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
     //     SceneList.previewStill
     public void multiply(TMatrix matrix1, TMatrix matrix2) {
         setIdentity();
+
+        // Set theMatrix = matrix1.theMatrix * matrix2.theMatrix
         matmult(theMatrix, matrix1.theMatrix, matrix2.theMatrix);
     } // multiply
     
@@ -125,10 +127,14 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
     public void scale(float sx, float sy, float sz) {
         float[][] mat = new float[4][4];
 
+        // Setup the scale matrix.
+        // See p 72 of the book Visual Special Effects Toolkit in C++.
         scMat[0][0]= sx;   scMat[1][0]= 0.0f; scMat[2][0]= 0.0f; scMat[3][0]= 0.0f;
         scMat[0][1]= 0.0f; scMat[1][1]= sy;   scMat[2][1]= 0.0f; scMat[3][1]= 0.0f;
         scMat[0][2]= 0.0f; scMat[1][2]= 0.0f; scMat[2][2]= sz;   scMat[3][2]= 0.0f;
         scMat[0][3]= 0.0f; scMat[1][3]= 0.0f; scMat[2][3]= 0.0f; scMat[3][3]= 1.0f;
+
+        // Set mat = scMat * theMatrix
         matmult(mat, scMat, theMatrix);
         matcopy(theMatrix, mat);
     } // scale
@@ -143,10 +149,14 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
     public void translate(float tx, float ty, float tz) {
         float[][] mat = new float[4][4];
         
+        // Setup the translation matrix.
+        // See p 71 of the book Visual Special Effects Toolkit in C++.
         trMat[0][0]= 1.0f; trMat[1][0]= 0.0f; trMat[2][0]= 0.0f; trMat[3][0]= tx;
         trMat[0][1]= 0.0f; trMat[1][1]= 1.0f; trMat[2][1]= 0.0f; trMat[3][1]= ty;
         trMat[0][2]= 0.0f; trMat[1][2]= 0.0f; trMat[2][2]= 1.0f; trMat[3][2]= tz;
         trMat[0][3]= 0.0f; trMat[1][3]= 0.0f; trMat[2][3]= 0.0f; trMat[3][3]= 1.0f;
+
+        // Set mat = trMat * theMatrix
         matmult(mat, trMat, theMatrix);
         matcopy(theMatrix, mat);
     } // translate
@@ -162,41 +172,55 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
         float[][] mat1 = new float[4][4];
         float[][] mat2 = new float[4][4];
     
+        // Setup x-axis rotation matrix.
+        // See p 72 of the book Visual Special Effects Toolkit in C++.
         rxMat[0][0]= 1.0f; rxMat[1][0]= 0.0f;                rxMat[2][0]= 0.0f;                rxMat[3][0]= 0.0f;
         rxMat[0][1]= 0.0f; rxMat[1][1]= (float)Math.cos(rx); rxMat[2][1]=-(float)Math.sin(rx); rxMat[3][1]= 0.0f;
         rxMat[0][2]= 0.0f; rxMat[1][2]= (float)Math.sin(rx); rxMat[2][2]= (float)Math.cos(rx); rxMat[3][2]= 0.0f;
         rxMat[0][3]= 0.0f; rxMat[1][3]= 0.0f;                rxMat[2][3]= 0.0f;                rxMat[3][3]= 1.0f;
+
+        // Set mat1 = rxMat * theMatrix
         matmult(mat1, rxMat, theMatrix);
     
+        // Setup y-axis rotation matrix.
+        // See p 72 of the book Visual Special Effects Toolkit in C++.
         ryMat[0][0]= (float)Math.cos(ry); ryMat[1][0]= 0.0f; ryMat[2][0]=(float)Math.sin(ry); ryMat[3][0]= 0.0f;
         ryMat[0][1]= 0.0f;                ryMat[1][1]= 1.0f; ryMat[2][1]= 0.0f;               ryMat[3][1]= 0.0f;
         ryMat[0][2]=-(float)Math.sin(ry); ryMat[1][2]= 0.0f; ryMat[2][2]=(float)Math.cos(ry); ryMat[3][2]= 0.0f;
         ryMat[0][3]= 0.0f;                ryMat[1][3]= 0.0f; ryMat[2][3]= 0.0f;               ryMat[3][3]= 1.0f;
+
+        // Set mat2 = ryMat * mat1 
+        //          = ryMat * rxMat * theMatrix
         matmult(mat2, ryMat, mat1);
     
+        // Setup z-axis rotation matrix.
+        // See p 72 of the book Visual Special Effects Toolkit in C++.
         rzMat[0][0]=(float)Math.cos(rz); rzMat[1][0]=-(float)Math.sin(rz); rzMat[2][0]= 0.0f; rzMat[3][0]= 0.0f;
         rzMat[0][1]=(float)Math.sin(rz); rzMat[1][1]= (float)Math.cos(rz); rzMat[2][1]= 0.0f; rzMat[3][1]= 0.0f;
         rzMat[0][2]= 0.0f;               rzMat[1][2]= 0.0f;                rzMat[2][2]= 1.0f; rzMat[3][2]= 0.0f;
         rzMat[0][3]= 0.0f;               rzMat[1][3]= 0.0f;                rzMat[2][3]= 0.0f; rzMat[3][3]= 1.0f;
+
+        // Set theMatrix = rzMat * mat2
+        //               = rzMat * ryMat * rxMat * theMatrix
         matmult(theMatrix, rzMat, mat2);
     } // rotate
     
 
     public static void matmult(float[][] result, float[][] mat1, float[][] mat2) {
-        for (int i= 0; i < 4; i++) {
-            for (int j= 0; j<4; j++) {
-                result[j][i]= 0.0f;
-                for (int k= 0; k<4; k++) {
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                result[j][i] = 0.0f;
+                for (int k = 0; k < 4; k++) {
                     result[j][i] += mat1[k][i] * mat2[j][k];  //row = row x column
-                }
-            }
-        }
+                } // for k
+            } // for j
+        } // for i
     } // matmult
     
 
     public static void matcopy(float[][] dest, float[][] source) {
-        for (int i= 0; i<4; i++) {
-            for (int j= 0; j<4; j++) {
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
                 dest[j][i] = source[j][i];
             }
         }
@@ -206,8 +230,8 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
     public void transpose() {
         float[][] mat1 = new float[4][4];
 
-        for (int i= 0; i<4; i++) {
-            for (int j= 0; j<4; j++) {
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
                 mat1[i][j] = theMatrix[j][i];
             }
         }
@@ -412,8 +436,8 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
     public void transformAndProject(Shape3d aShape, int outHeight,
     int outWidth, boolean useExternalCentroid,
     float centroidX, float centroidY, float centroidZ) {
-
         // Default behavior is to rotate the object about its own centroid.
+        // See p 66 - 68 of the book Visual Special Effects Toolkit in C++.
         // If useExternalCentroid is true then the object is rotated about
         // the point (centroidX, centroidY, centroidZ).
         Float cX = 0f, cY = 0f, cZ = 0f;	   //  The translation that moves the shape to the origin
@@ -471,7 +495,7 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
             aShape.currentVertex.sx = (aShape.currentVertex.tx) * w;
             aShape.currentVertex.sy = (aShape.currentVertex.ty) * w;
 
-            //  round the  projected coordinate
+            // Round the  projected coordinate
             //sx = (int) (aShape.currentVertex.sx + 0.5);
             //sy = (int) (aShape.currentVertex.sy + 0.5);
             sx = (int)(aShape.currentVertex.sx);
