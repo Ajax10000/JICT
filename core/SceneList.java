@@ -112,7 +112,7 @@ public class SceneList {
     public SceneList() {
         if (ictdebug) {
             String msgBuffer;
-            msgBuffer = "Constructor 1. Size of sceneList: " + sizeof(SceneList);
+            msgBuffer = "Constructor 1. Size of sceneList: " + sizeofLowerLimit();
             Globals.statusPrint(msgBuffer);
         }
 
@@ -127,8 +127,8 @@ public class SceneList {
     public void finalize() {
         if (ictdebug) {
             String msgBuffer;
-            Globals.statusPrint("sceneList destructor - deletes a scenelist object");
-            msgBuffer = "Size of sceneList: " + sizeof(SceneList);
+            Globals.statusPrint("SceneList destructor - deletes a Scenelist object");
+            msgBuffer = "Size of SceneList: " + sizeofLowerLimit();
             Globals.statusPrint(msgBuffer);
         }
 
@@ -333,7 +333,7 @@ public class SceneList {
                 }  // end scene processing
 
                 if(TheKeyWord.equalsIgnoreCase("MOTIONPATH")) {
-                    strcpy(theMotionPath, TheText + 11);
+                    theMotionPath = TheText.substring(11);
                     if(theMotionPath.length() == 0) {
                         errorText = "MotionPath file missing on Line " + lineCounter;
                         // Why is errorText not printed with Global.statusPrint?
@@ -390,7 +390,8 @@ public class SceneList {
                     return -1;
                 }
 
-                if (notFound) {
+                // notFound = TRUE (1), FALSE (0), or THREE_NUMBERS_NOT_FOUND (2)
+                if (notFound != 0) {
                     if(notFound == 1) {
                         errorText = "Unknown Keyword: " + TheKeyWord + ". Line  " + lineCounter;
                     }
@@ -640,14 +641,14 @@ public class SceneList {
                     int aLength = adjustment.length();
                     theColor = strtok(TheText + 12 + aLength + 1, BLANK);  // move forward to the RGB color
 
-                    anAdjustment.setRed(Integer.parseInt(strtok(theColor, ",")));
+                    anAdjustment.setRed(  Integer.parseInt(strtok(theColor, ",")));
                     anAdjustment.setGreen(Integer.parseInt(strtok(null, ",")));
-                    anAdjustment.setBlue(Integer.parseInt(strtok(null, ",")));
+                    anAdjustment.setBlue( Integer.parseInt(strtok(null, ",")));
                     notFound = FALSE;
                 }
 
                 if(TheKeyWord.equalsIgnoreCase("MOTIONPATH")) {
-                    strcpy(theMotionPath, TheText + 11);
+                    theMotionPath = TheText.substring(11);
 
                     if(theMotionPath.length() == 0) {
                         errorText = "MotionPath file missing on Line " + lineCounter;
@@ -660,7 +661,7 @@ public class SceneList {
                 }
 
                 if(TheKeyWord.equalsIgnoreCase("ALPHAIMAGEPATH")) {
-                    strcpy(theAlphaPath, TheText + 15);
+                    theAlphaPath = TheText.substring(15);
 
                     if(theAlphaPath.length() == 0) {
                         errorText = "Alpha Image Path file missing. Line " + lineCounter;
@@ -673,7 +674,7 @@ public class SceneList {
                 }
 
                 if(TheKeyWord.equalsIgnoreCase("FILENAME")) {
-                    strcpy(theFileName, TheText + 9);
+                    theFileName = TheText.substring(9);
 
                     if(getOutImageSizeFlag == true) {
                         int bpp, bmpStatus;
@@ -929,11 +930,13 @@ public class SceneList {
         Scene theScene = this.sceneListHead;
         theScene = theScene.nextEntry;  // Skip over the list header
 
-        ofstream fileOut(psFileName);
+        // TODO: Replace fileOut with a FileStream
+        ofstream fileOut = new ofstream(psFileName);
         if (fileOut.fail()) {
             psErrorText = "Unable to open file: " + psFileName;
             return -1;
         }
+        
         theScene.writeFile(fileOut); // Write out the scene description
         SceneElement theModel = theScene.head;
         boolean	oldCompoundMember = false;
@@ -960,7 +963,8 @@ public class SceneList {
         String sceneName, g_msgText;
         int effectType, colorMode;
         int outputRows, outputColumns;
-        int firstFrame, lastFrame, frameCounter;
+        Integer firstFrame, lastFrame;
+        int frameCounter;
         MotionNode aMotion;  // current model location, orientation if moving
         Bundle xfrm;         // create a bundle of transforms
         TMatrix viewModelMatrix;
@@ -994,6 +998,7 @@ public class SceneList {
 
         firstFrame = lastFrame = 0;
         if(effectType == SEQUENCE) {
+            // The following method sets both firstFrame and lastFrame
             theScene.sensorMotion.getFirstLastFrame(firstFrame, lastFrame);
         }
         int modelCounter;
@@ -1006,6 +1011,7 @@ public class SceneList {
             modelCounter = 0;
             eraseOldBoundary = true;
             if(effectType == SEQUENCE) {
+                // The following method sets viewMatrix
                 getViewMatrix(viewMatrix, frameCounter, theScene);
             }
 
@@ -1017,11 +1023,11 @@ public class SceneList {
                     msgText = "PreviewSequence: Creating RenderObject: " + theModel.modelName;
                     Globals.statusPrint(msgText);
                     theModel.screenObject = new RenderObject(theModel.fileName,
-                        modelType, theModel.definedRefPoint, theModel.pointOfReference);
+                        theModel.modelType, theModel.definedRefPoint, theModel.pointOfReference);
 
                     if (!theModel.screenObject.isValid()) {
                         theModel.statusIndicator = 1;  // this object could not be opened
-                        theModel.valid = 0;
+                        theModel.valid = false;
                         msgText = "PreviewSequence: Couldn't create renderObject: " + theModel.modelName;
                         Globals.statusPrint(msgText);
                         return -1;
@@ -1042,9 +1048,13 @@ public class SceneList {
 
                     // Compose the model transforms
                     if((effectType == SEQUENCE) && (theModel.modelMotion != null)) {
+                        // The following method modifies aMotion (of type MotionNode)
                         theModel.modelMotion.getNode(frameCounter, aMotion);
                     }
+
+                    // The following method modifies xfrm (of type Bundle)
                     adjustTransforms(effectType, theModel, aMotion, xfrm);
+
                     modelMatrix.scale(xfrm.sx, xfrm.sy, xfrm.sz);
                     float xRadians = xfrm.rx * F_DTR;
                     float yRadians = xfrm.ry * F_DTR;
@@ -1287,7 +1297,8 @@ public class SceneList {
         int effectType, colorMode;
         int outputRows, outputColumns;
         int firstFrame, lastFrame, frameCounter;
-        float vx, vy, vz, vrx, vry, vrz;       // Viewpoint
+        Float vx = 0.0f, vy = 0.0f, vz = 0.0f;    // Viewpoint
+        Float vrx = 0.0f, vry = 0.0f, vrz = 0.0f;       
         MotionNode aMotion;                    // Current model location and orientation if moving.
         Bundle xfrm;           // Create a bundle of transforms
         time_t time1, time2;
@@ -1302,6 +1313,8 @@ public class SceneList {
             return -1;
         }
 
+        // The following method sets vx, vy, vz, 
+        // and vrx, vry, and vrz as well
         getViewPoint(vx, vy, vz, vrx, vry, vrz);
         SceneElement theModel = theScene.head;
         SceneElement[] models = new SceneElement[MAXMODELS];
@@ -1325,6 +1338,7 @@ public class SceneList {
         }
 
         if(effectType == SEQUENCE) {
+            // The following method sets Integers firstFrame and lastFrame
             theScene.sensorMotion.getFirstLastFrame(firstFrame, lastFrame);
         }
 
@@ -1591,7 +1605,8 @@ public class SceneList {
         int theLength = sFile.length();
         int iCurrentFrameNum, iNewFrameNum;
         if(theLength > 0) {
-            iCurrentFrameNum = Integer.parseInt((sFile+theLength-4));
+            String sFrameNum = sFile.substring(theLength - 4);
+            iCurrentFrameNum = Integer.parseInt(sFrameNum);
         }
 
         iNewFrameNum = iCurrentFrameNum + piFrameCounter;
@@ -1600,29 +1615,31 @@ public class SceneList {
             Globals.statusPrint("getSequenceFileName: Frame counter exceeded 9999.");
         }
         String sPrefix, sOutFile;
-        strncpy(sPrefix, sFile, theLength - 4);
-        char colorChar = *(sFile+theLength-1);
+        sPrefix = sFile.substring(theLength - 4);
+        char colorChar = sFile.charAt(theLength - 1);
 
         sprintf(sOutFile, "%.16s%#04d%c\0", sPrefix, iNewFrameNum, colorChar);
         _makepath(psTheInputPath, sDrive, sDir, sOutFile, sExt);
     } // getSequenceFileName
 
 
-    public void getFileName(String psOutputFileName, String psPrefix, int piCounter, int piTheColor) {
-        char pcColorChar;
+    public void getFileName(String psOutputFileName, String psPrefix, 
+    int piCounter, int piTheColor) {
+        char cColorChar;
 
-        if (piTheColor == RED)   pcColorChar = 'r';
-        if (piTheColor == GREEN) pcColorChar = 'g';
-        if (piTheColor == BLUE)  pcColorChar = 'b';
-        if (piTheColor == 0)     pcColorChar = 'c';
-        sprintf(psOutputFileName, "%.16s%#04d%c.bmp\0", psPrefix, piCounter, pcColorChar);
+        if (piTheColor == RED)   cColorChar = 'r';
+        if (piTheColor == GREEN) cColorChar = 'g';
+        if (piTheColor == BLUE)  cColorChar = 'b';
+        if (piTheColor == 0)     cColorChar = 'c';
+        sprintf(psOutputFileName, "%.16s%#04d%c.bmp\0", psPrefix, piCounter, cColorChar);
     } // getFileName
 
 
     // Called from:
     //     preview
     //     previewStill
-    public void adjustTransforms(int piEffectType, SceneElement theModel, MotionNode aMotion, Bundle xfrm) {
+    public void adjustTransforms(int piEffectType, SceneElement theModel, 
+    MotionNode aMotion, Bundle xfrm) {
         // float viewX, viewY, viewZ, rotateX, rotateY, rotateZ; // these local variables are not used
 
         // Copy model transforms into a bundle object
@@ -1658,6 +1675,9 @@ public class SceneList {
     } // adjustTransforms
 
 
+    // This method sets parameter pViewMatrix.
+    // MainFrame also has a getViewMatrix method, but it takes a single parameter of 
+    // type TMatrix.
     // Called from:
     //     preview
     //     previewStill
@@ -1666,6 +1686,8 @@ public class SceneList {
         MotionNode aMotion = new MotionNode();
         pViewMatrix.setIdentity();
         float xRadians, yRadians, zRadians;
+        // Note: F_DTR is a floating point constant, 
+        // a degree to radians conversion factor
 
         if(pTheScene.sensorMotion != null) {
             pTheScene.sensorMotion.getNode(piFrameCounter, aMotion);
@@ -1727,12 +1749,13 @@ public class SceneList {
 
     // Called from:
     //     previewStill
-    public int calcCompoundModelRefPoint(SceneElement theModel, int outputRows, int outputColumns, 
+    public int calcCompoundModelRefPoint(SceneElement theModel, 
+    int outputRows, int outputColumns, 
     Float cmCentroidX, Float cmCentroidY, Float cmCentroidZ) {
         cmCentroidX = 0.0f;
         cmCentroidY = 0.0f;
         cmCentroidZ = 0.0f;
-        SceneElement saveModel;
+        // SceneElement saveModel; // this variable is not used
         float bucketX = 0f, bucketY = 0f, bucketZ = 0f;
         Float mCentroidX = 0f, mCentroidY = 0f, mCentroidZ = 0f;
         boolean prevModelIsACompoundMember = false; // changed from int to boolean
@@ -1744,7 +1767,7 @@ public class SceneList {
         // Each compound model component is transformed in order to get its centroid
         // These centroids are accumulated and averaged to obtain the centroid of the 
         // compound model.
-        saveModel = theModel;
+        // saveModel = theModel; // this variable is not used
         theModel = theModel.nextEntry;
 
         while (theModel != null) {
@@ -1815,6 +1838,8 @@ public class SceneList {
     } // calcCompoundModelRefPoint
 
 
+    // Called from:
+    //     readList
     public int addScene(String theSceneName, int theType, 
     int outImCols, int outImRows, int theColorMode, 
     Point3d rt, Point3d tr, String thePath) {
@@ -1834,6 +1859,7 @@ public class SceneList {
 
     // Called from:
     //     previewStill
+    //     readList
     public int addSceneElement(String mdName, String fName, boolean blendI,
     int theType, boolean warpI, float aScale, 
     Point3d rt, Point3d sc, Point3d tr, 
@@ -1902,9 +1928,10 @@ public class SceneList {
 
         aScene = aScene.nextEntry;
         theModel = aScene.head;
+
         while (theModel != null) {
             nextModel = theModel.nextEntry;  // Get the pointer to next model
-            delete theModel;                 // Before deleting current model
+            theModel = null;                 // Before deleting current model
             theModel = nextModel;
         }
 
@@ -1942,9 +1969,9 @@ public class SceneList {
                 found = true;
             }
             theModel = theModel.nextEntry;  // Get the pointer to next model
-        }
+        } // while
 
-        if(found == false) {
+        if(!found) {
             msgText = "setModelReferencePoint: Model Not Found: " + psModelName;
             Globals.statusPrint(msgText);
             return -1;
@@ -1954,6 +1981,7 @@ public class SceneList {
     } // setModelReferencePoint
 
 
+    // Not called from within this file
     public int setCompoundRefPoints() {
         Scene aScene = this.sceneListHead;
         SceneElement theModel;
@@ -2013,6 +2041,7 @@ public class SceneList {
 
 
     // Called from:
+    //     preview
     //     previewStill
     public int copyRefPoints() {
         // Copies reference points into a model from its corresponding
@@ -2030,14 +2059,16 @@ public class SceneList {
         theModel = aScene.head;
         while (theModel != null) {
             if((!theModel.definedRefPoint) && (theModel.modelType != COMPOUND)) {
+                // The following method sets centroidX, centroidY, and centroidZ (all of type Float)
                 theModel.screenObject.currentShape.getReferencePoint(centroidX, centroidY, centroidZ);
+
                 theModel.pointOfReference.x = centroidX; 
                 theModel.pointOfReference.y = centroidY;
                 theModel.pointOfReference.z = centroidZ;
             }
 
             theModel = theModel.nextEntry;  // Get the pointer to next model
-        }
+        } // while theModel != null
 
         return 0;
     } // copyRefPoints
@@ -2105,4 +2136,29 @@ public class SceneList {
         
         return 0;
     } // depthSort
+
+    public int sizeofLowerLimit() {
+        int mySize = 0;
+        int booleanFieldsSizeInBits = 0;
+        int booleanFieldsSize = 0;
+        int intFieldsSize = 0;
+        int floatFieldsSize = 0;
+        int referenceFieldsSize = 0;
+
+        /*
+        boolean ictdebug = false;
+        public Scene sceneListHead;
+        public Scene currentScene;
+        public MemImage backgroundPlate;
+        */
+
+        booleanFieldsSizeInBits = 0; // 6 booleans
+        booleanFieldsSize = 0; // 0 bits fit in a byte
+        intFieldsSize = 1*4; // 1 ints
+        floatFieldsSize = 0*4; // 0 floats
+        referenceFieldsSize = 3*4; // 3 references to objects
+        mySize = booleanFieldsSize + intFieldsSize + floatFieldsSize + referenceFieldsSize;
+
+        return mySize;
+    }
 } // class SceneList
