@@ -64,6 +64,7 @@ protected:
 };
 */
 
+    private MainFrame mainFrame;
     public HBITMAP hBitmap;
     public MemImage m_anImage;
     public Shape3d m_aShape;  // used during cutout image creation
@@ -86,7 +87,9 @@ protected:
     // Called from:
     //     MainFrame.onPreviewStillScene
     //     MainFrame.onPreviewSequenceScene
-    public ImageView() {
+    public ImageView(MainFrame pMainFrame) {
+        this.mainFrame = pMainFrame;
+
         firstPress = false;
         m_eraseMe = false;
         m_anImage = null;
@@ -119,8 +122,7 @@ protected:
             SetScrollSizes(MM_TEXT, CSize(1,1));
         }
     
-        MainFrame theFrame = (MainFrame)AfxGetMainWnd();
-        m_cutoutEnabled = theFrame.cutoutEnabled;
+        m_cutoutEnabled = mainFrame.cutoutEnabled;
     } // onInitialUpdate
 
     
@@ -149,10 +151,9 @@ protected:
 
     public void onDraw(CDC qdc) {
         int status;
-        MainFrame theFrame = (MainFrame)AfxGetMainWnd();
     
-        if(theFrame.previewingScene) {
-            status = theFrame.mySceneList.previewStill(m_hWnd, theFrame.modelMatrix, theFrame.viewMatrix);
+        if(mainFrame.previewingScene) {
+            status = mainFrame.mySceneList.previewStill(m_hWnd, mainFrame.modelMatrix, mainFrame.viewMatrix);
             if(status != 0) { 
                 exit;
             }
@@ -160,7 +161,7 @@ protected:
         }
 
         if(theFrame.previewingSequence) {
-            status = theFrame.mySceneList.preview(m_hWnd, theFrame.modelMatrix, theFrame.viewMatrix);
+            status = mainFrame.mySceneList.preview(m_hWnd, mainFrame.modelMatrix, mainFrame.viewMatrix);
             if(status != 0) {
                 exit;
             }
@@ -225,8 +226,8 @@ protected:
 
         CDC qdc;
         m_eraseMe = true;
-        OnUpdate();
-        OnDraw(qdc);
+        onUpdate();
+        onDraw(qdc);
         m_eraseMe = false;
 
         return true;
@@ -234,17 +235,15 @@ protected:
     
 
     public void getBitmap() {
-        HANDLE hloc;
         PBITMAPINFO pbmi;
         RGBQUAD pal = new RGBQUAD[256];
 
-        hloc = LocalAlloc(LMEM_ZEROINIT | LMEM_MOVEABLE, sizeof(BITMAPINFOHEADER) + (sizeof(RGBQUAD) * 256));
-        pbmi = LocalLock(hloc);
+        pbmi = LocalLock();
         
         for(int a = 0; a < 256; a++) {
-            pal[a].rgbRed   = (unsigned char)a;
-            pal[a].rgbGreen = (unsigned char)a;
-            pal[a].rgbBlue  = (unsigned char)a;
+            pal[a].rgbRed   = a; // previously cast as (unsigned char)
+            pal[a].rgbGreen = a; // previously cast as (unsigned char)
+            pal[a].rgbBlue  = a; // previously cast as (unsigned char)
             pal[a].rgbReserved = 0;
         }
         
@@ -256,9 +255,9 @@ protected:
         pbmi.bmiHeader.biCompression = BI_RGB;
         
         memcpy(pbmi.bmiColors, pal, sizeof(RGBQUAD) * 256);
+
         //create a bitmap data structure containing the memImage bits
-        hBitmap = CreateDIBitmap(pbmi, CBM_INIT,
-            m_anImage.getBytes(), pbmi, DIB_RGB_COLORS);
+        hBitmap = CreateDIBitmap(pbmi);
     } // getBitmap
     
 
@@ -304,8 +303,7 @@ protected:
         // Peek into the CMainFrame window object to see if 
         // the cutout enabled option has been checked.
         String msgText;
-        MainFrame theFrame = (MainFrame)AfxGetMainWnd();
-        m_cutoutEnabled = theFrame.cutoutEnabled;
+        m_cutoutEnabled = mainFrame.cutoutEnabled;
         if(m_cutoutEnabled) {
             if (firstPress == false) {
                 firstPress = true;
@@ -314,7 +312,7 @@ protected:
             }
         }
         
-        if (!m_cutoutEnabled && theFrame.imageSamplingEnabled) {
+        if (!m_cutoutEnabled && mainFrame.imageSamplingEnabled) {
             // Sample the color pixel and display the RGB values
             byte red, green, blue;
             byte theValue;
@@ -349,7 +347,7 @@ protected:
             Globals.statusPrint(msgText);
 
             // If the user wishes to remove sampled colors...do it now
-            if(theFrame.removeSampleColorsEnabled) {
+            if(mainFrame.removeSampleColorsEnabled) {
                 int redLow, redHigh, greenLow,  greenHigh;
                 int blueLow, blueHigh;
 
@@ -466,9 +464,8 @@ protected:
             LineTo((int)(x + 0.5f), (int)(y + 0.5f));
             theStatus = m_aShape.deleteLastWorldVertex();
         }
-        MainFrame theFrame = (MainFrame)AfxGetMainWnd();
         
-        if(theFrame.removeSampleColorsEnabled) {
+        if(mainFrame.removeSampleColorsEnabled) {
             //  Ask if the user wishes to save the thresholded image which they have been creating
             // int result = MessageBox("Do you wish to save the modified image?", "Save Image As", MB_YESNO|MB_ICONQUESTION);
             int result = JOptionPane.showConfirmDialog(null, 
@@ -517,44 +514,44 @@ protected:
         if((red == 0) && (green == 0) && (blue == 0)) {
             return -1;  //a background pixel was clicked on
         }
-        redLow = redHigh = red;
-        greenLow = greenHigh = green;
-        blueLow = blueHigh = blue;
+        redLow = redHigh = (int)red;
+        greenLow = greenHigh = (int)green;
+        blueLow = blueHigh = (int)blue;
       
         status = theImage.getMPixelRGB(x + 1, y + 1, red, green, blue);
         if((red != 0) && (green != 0) && (blue != 0)) {
-            if(red < redLow)  redLow  = red;
-            if(red > redHigh) redHigh = red;
+            if(red < redLow)  redLow  = (int)red;
+            if(red > redHigh) redHigh = (int)red;
 
-            if(green < greenLow)  greenLow  = green;
-            if(green > greenHigh) greenHigh = green;
+            if(green < greenLow)  greenLow  = (int)green;
+            if(green > greenHigh) greenHigh = (int)green;
 
-            if(blue < blueLow)  blueLow  = blue;
-            if(blue > blueHigh) blueHigh = blue;
+            if(blue < blueLow)  blueLow  = (int)blue;
+            if(blue > blueHigh) blueHigh = (int)blue;
         }
     
         status = theImage.getMPixelRGB(x , y + 1, red, green, blue);
         if((red != 0) && (green != 0) && (blue != 0)) {
-            if(red < redLow)  redLow  = red;
-            if(red > redHigh) redHigh = red;
+            if(red < redLow)  redLow  = (int)red;
+            if(red > redHigh) redHigh = (int)red;
 
-            if(green < greenLow)  greenLow  = green;
-            if(green > greenHigh) greenHigh = green;
+            if(green < greenLow)  greenLow  = (int)green;
+            if(green > greenHigh) greenHigh = (int)green;
 
-            if(blue < blueLow)  blueLow  = blue;
-            if(blue > blueHigh) blueHigh = blue;
+            if(blue < blueLow)  blueLow  = (int)blue;
+            if(blue > blueHigh) blueHigh = (int)blue;
         }
     
         status = theImage.getMPixelRGB(x + 1, y, red, green, blue);
         if((red != 0) && (green != 0) && (blue != 0)) {
-            if(red < redLow)  redLow  = red;
-            if(red > redHigh) redHigh = red;
+            if(red < redLow)  redLow  = (int)red;
+            if(red > redHigh) redHigh = (int)red;
 
-            if(green < greenLow)  greenLow  = green;
-            if(green > greenHigh) greenHigh = green;
+            if(green < greenLow)  greenLow  = (int)green;
+            if(green > greenHigh) greenHigh = (int)green;
 
-            if(blue < blueLow)  blueLow  = blue;
-            if(blue > blueHigh) blueHigh = blue;
+            if(blue < blueLow)  blueLow  = (int)blue;
+            if(blue > blueHigh) blueHigh = (int)blue;
         }
 
         return 0;
