@@ -26,11 +26,25 @@ import structs.Point3d;
 // extern char g_msgText[MESSAGEMAX];
 // void statusPrint(char *message);
 
+/* 
+    The SceneElement class data members correspond to the model attributes in a 
+    scene (.scn) file. The Model attributes in a scene file have the following 
+    format:
+    Model <modelName> [Blend|NoBlend] [Warp|NoWarp] AlphaScale <alpha> [Image|Shape|QuadMesh|Sequence]
+    FileName <pathName>
+    MotionPath [None|<pathName>]
+    [AlphaImagePath [None|<pathName>]]
+    AdjustColor [Target|Relative] <R> <G> <B>
+    Rotation <rx>, <ry>, <rz>
+    Scale <sx>, <sy>, <sz>
+    Translation <tx>, <ty>, <tz>
+*/
 public class SceneElement {
     public boolean ictdebug = false;
 
     // Changed from private to public as it is used by SceneList
     // Name of the Model
+    // Model <modelName>
     public  String modelName;
     
     // Motion file for the model
@@ -41,10 +55,11 @@ public class SceneElement {
     public MotionPath modelMotion;
 
     // 1 = image, 2 = shape, 3 = quadMesh, 4 = compound (see ict.h for more)
+    // Model <modelName> [Blend|NoBlend] [Warp|NoWarp] AlphaScale <alpha> [Image|Shape|QuadMesh|Sequence]
     // Changed from private to public as it is used by SceneList
     public int modelType;
 
-    // 1 if this model is a member of a compount model, 0 if not.
+    // 1 if this model is a member of a compound model, 0 if not.
     // Changed from private to public as it is used by SceneList
     // Changed from int to boolean
     public boolean compoundModelMember;
@@ -74,47 +89,56 @@ public class SceneElement {
     // Changed from private to public as it is used by SceneList
     public int statusIndicator;
 
-    // pointer to screen renderable representation
+    // Pointer to screen renderable representation
     // Changed from private to public as it is used by SceneList
     public RenderObject screenObject;
 
     // 1 = use alpha blending, 0 = no alpha blending
+    // Model <modelName> [Blend|NoBlend]
     // Changed from int to boolean
     // Changed from private to public as it is used by SceneList
     public boolean blendIndicator;
 
     // 1 = warp image, 0 = do not warp image
+    // Model <modelName> [Blend|NoBlend] [Warp|NoWarp]
     // Changed from private to public as it is used by SceneList
     // Changed from int to boolean
     public boolean warpIndicator;
 
     // Default = 1.0 (used for shadows)
+    // Model <modelName> [Blend|NoBlend] [Warp|NoWarp] AlphaScale <alpha>
     // Changed from private to public as it is used 
     // by SceneList in method adjustTransforms
     public float alphaScale;
 
     // Rotation in Angles
+    // Rotation <rx>, <ry>, <rz>
     // Changed from private to public as it is used by SceneList
     public Point3d rotation;
     
     // Scale factor. < 1 = contraction.  > 1 = expansion.
+    // Scale <sx>, <sy>, <sz>
     // Changed from private to public as it is used by SceneList
     public Point3d scale;
 
     // Translation in Pixels
+    // Translation <tx>, <ty>, <tz>
     // Changed from private to public as it is used by SceneList
     public Point3d translation;
 
     // Optional. Alpha image pathname
+    // [AlphaImagePath [None|<pathName>]]
     // Changed from private to public as it is used by SceneList
     public String alphaPath;
 
+    // AdjustColor [Target|Relative] <R> <G> <B>
     // If adjustment type is 'Relative', the RGB value is added to
     // the model's image prior to compositing
     // If the adjustment type is: 'Target' then the image colors are 'moved' to the target RGB value
     // Only set in the constructor, and otherwise not used.
     private Color colorAdjustment; 
 
+    // AdjustColor [Target|Relative] <R> <G> <B>
     // 'Relative' or 'Target'
     // Changed from private to public as it is used by SceneList
     public String adjustmentType;
@@ -125,12 +149,12 @@ public class SceneElement {
     // by SceneList in method preview
     public boolean valid;
     
-    // Point to previous Scene element
+    // Point to previous SceneElement
     // Changed from private to public as it is used 
     // by SceneList in method addSceneElement
     public SceneElement prevEntry;
 
-    // Point to next Scene element
+    // Point to next SceneElement
     // Changed from private to public as it is used
     // by SceneList in method addSceneElement
     public SceneElement nextEntry;
@@ -287,6 +311,7 @@ public class SceneElement {
 
     // Called from:
     //     SceneList.writeList
+    // TODO: Replace ofstream with a FileStream
     void writeFile(ofstream fileout) {
         // Creates the model portion of a scene file
         String sBlendArray, sWarpArray, sModelTypeArray;
