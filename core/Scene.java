@@ -2,6 +2,9 @@ package core;
 
 import globals.Globals;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
+
 import motion.MotionPath;
 
 import structs.Point3d;
@@ -18,6 +21,7 @@ public class Scene {
 
     // Has motion path if moving viewpoint
     // Changed from private to public as it is used by SceneList
+    // Affects SceneList.getViewMatrix
     public MotionPath sensorMotion;
 
     // 1 = Still, 2 = sequence
@@ -142,10 +146,12 @@ public class Scene {
         }
     } // finalize
 
-
+    // Class SceneElement also has a writeFile method. 
+    // Both Scene.writeFile and SceneElement.writeFile are called from 
+    // SceneList.writeList.
     // Called from:
     //     SceneList.writeList
-    void writeFile(ofstream fileout) {
+    void writeFile(BufferedWriter fileout) {
         String sSequenceArray, sColorArray;
 
         // Creates the scene portion of a scene file
@@ -164,7 +170,11 @@ public class Scene {
             "Translation " + this.translation.x + "," + this.translation.y + "," + this.translation.z + "\n" + 
             "MotionPath "  + this.sensorPath + "\n\n";
 
-        fileout << thisObjectAsString;
+        try {
+            fileout.write(thisObjectAsString);
+        } catch(IOException ioe) {
+            // TODO: Need to return an error indicator!
+        }
     } // writeFile
 
 
