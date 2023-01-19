@@ -26,7 +26,7 @@ public class Texture {
         if(piImageType == 2) bitsPerPixel = 24;   
         if(piImageType == 3) bitsPerPixel = 32;
 
-        if( bitsPerPixel > 0) {
+        if(bitsPerPixel > 0) {
             newImage = new MemImage(piNumRows, piNumColumns, bitsPerPixel);
         } else {
             Globals.statusPrint("createTexture: Unknown imageType. Cannot open texture image");
@@ -55,8 +55,8 @@ public class Texture {
                     if(bitsPerPixel == 32) {
                         newImage.setMPixel32(col, row, (float)piForeColor);
                     }
-                }
-            }
+                } // for col
+            } // for row
             break;
 
         case CHECKERBOARD:
@@ -82,8 +82,8 @@ public class Texture {
                             checkValue = loValue;
                         }
                     }
-                }
-            }
+                } // for i
+            } // for j
             break;
 
         case HORZRAMP:
@@ -96,8 +96,8 @@ public class Texture {
                     if(bitsPerPixel == 32) {
                         newImage.setMPixel32(col, row, (float)col);
                     }
-                }
-            }
+                } // for col
+            } // for row
             break;
 
         case VERTRAMP:
@@ -110,8 +110,8 @@ public class Texture {
                     if(bitsPerPixel == 32) {
                         newImage.setMPixel32(col, row, (float)row);
                     }
-                }
-            }
+                } // for col
+            } // for row
             break;
 
         case COUNTER:
@@ -128,8 +128,8 @@ public class Texture {
 
                     iCounter++;
                     iCounter = iCounter % 256;
-                }
-            }
+                } // for col
+            } // for row
             break;
 
         case PLASMA:
