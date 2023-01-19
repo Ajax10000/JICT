@@ -12,16 +12,16 @@ public class Preference {
     private String VRMLLogPath;
     private String warpTestPath;
 
-    public static final int ProcessLog = 1;
-    public static final int SceneFileDirectory = 2;
-    public static final int ShapeFileDirectory = 3;
-    public static final int SequenceFileDirectory = 4;
-    public static final int OutputImageDirectory = 5;
-    public static final int InputImageDirectory = 6;
-    public static final int MaskImageDirectory = 7;
-    public static final int WarpTestPath = 8;
-    public static final int VRMLDirectory = 9;
-    public static final int VRMLLog = 10;
+    public static final int ProcessLog            =  1;
+    public static final int SceneFileDirectory    =  2;
+    public static final int ShapeFileDirectory    =  3;
+    public static final int SequenceFileDirectory =  4;
+    public static final int OutputImageDirectory  =  5;
+    public static final int InputImageDirectory   =  6;
+    public static final int MaskImageDirectory    =  7;
+    public static final int WarpTestPath          =  8;
+    public static final int VRMLDirectory         =  9;
+    public static final int VRMLLog               = 10;
 /*
 public:
   preference();
@@ -55,7 +55,7 @@ public:
             warpTestPath.length(), "c:\\windows\\ict20.ini");
         GetPrivateProfileString("Paths", "VRMLLogPath",",,,", VRMLLogPath,
             VRMLLogPath.length(), "c:\\windows\\ict20.ini");
-    }
+    } // Preference ctor
       
     
     // This method came from UTILS.CPP
@@ -63,34 +63,34 @@ public:
     //     MainFrame.onToolsRenderVrmlFile
     public String getPath(int pathIndicator){
         switch(pathIndicator) {
-        case  ProcessLog:
+        case ProcessLog:
             return processLogPath;
       
-        case  SceneFileDirectory:
+        case SceneFileDirectory:
             return sceneFileDir;
       
-        case  ShapeFileDirectory:
+        case ShapeFileDirectory:
             return shapeFileDir;
       
-        case  SequenceFileDirectory:
+        case SequenceFileDirectory:
             return sequenceFileDir;
       
-        case  OutputImageDirectory:
+        case OutputImageDirectory:
             return outputImageDir;
       
-        case  InputImageDirectory:
+        case InputImageDirectory:
             return inputImageDir;
       
-        case  MaskImageDirectory:
+        case MaskImageDirectory:
             return maskDir;
       
-        case  VRMLDirectory:
+        case VRMLDirectory:
             return VRMLDir;
       
-        case  WarpTestPath:
+        case WarpTestPath:
             return warpTestPath;
       
-        case  VRMLLog:
+        case VRMLLog:
             return VRMLLogPath;
       
         default:
@@ -101,34 +101,34 @@ public:
     } // getPath
 
 
-    // This constructor came from UTILS.CPP
+    // This method came from UTILS.CPP
     public void setPath(int pathIndicator, String thePath) {
         switch(pathIndicator){
-        case  ProcessLog:
+        case ProcessLog:
             processLogPath = new String(thePath);
             return;
       
-        case  SceneFileDirectory:
+        case SceneFileDirectory:
             sceneFileDir = new String(thePath);
             return;
       
-        case  ShapeFileDirectory:
+        case ShapeFileDirectory:
             shapeFileDir = new String(thePath);
             return;
       
-        case  SequenceFileDirectory:
+        case SequenceFileDirectory:
             sequenceFileDir = new String(thePath);
             return;
       
-        case  OutputImageDirectory:
+        case OutputImageDirectory:
             outputImageDir = new String(thePath);
             return;
       
-        case  InputImageDirectory:
+        case InputImageDirectory:
             inputImageDir = new String(thePath);
             return;
       
-        case  MaskImageDirectory:
+        case MaskImageDirectory:
             maskDir = new String(thePath);
             return;
       
