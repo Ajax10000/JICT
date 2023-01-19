@@ -6,6 +6,7 @@ import core.MemImage;
 import core.SceneList;
 import core.Shape3d;
 
+import dialogs.AboutDlg;
 import dialogs.ImageView;
 import dialogs.MakeTextureDlg;
 import dialogs.MorphDlg;
@@ -144,6 +145,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 };
 */
+    private IctApp ictApp;
 
     private JLabel statusLabel;
 
@@ -281,8 +283,8 @@ protected:
     public static final float F_DTR = 3.1415926f/180.0f;
 
 
-    public MainFrame() {
-        
+    public MainFrame(IctApp ictApp) {
+        this.ictApp = ictApp;
 
         initFields();
 
@@ -804,9 +806,61 @@ POPUP "Tools"
 
         // Was it a Help menu item?
         if (sActionCmd.equals("About ICT 2.0...")) {
-
+            onAppAbout();
+            return;
         }
     } // actionPerformed
+
+    // ############################################################################################
+    // Event handlers for File menu
+
+    // Called when the user selects the Open Image menu item from the File menu
+    // MENUITEM "Open Image",                  ID_FILE_OPENIMAGE
+    // ON_COMMAND(ID_FILE_OPENIMAGE, OnFileOpenimage)
+    public void onFileOpenImage() {
+        // change to the default output file directory (indicated in the ICT preference object)
+        _chdir(Globals.ictPreference.getPath(Preference.OutputImageDirectory)); 
+
+        // TODO: Replace with JFileChooser
+        // CFileDialog dlg = new CFileDialog(true, "bmp", "*.bmp");
+        JFileChooser dlg = new JFileChooser();
+        dlg.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        int showDlgResult = dlg.showDialog(null, "Select image name");
+
+        if (showDlgResult == JFileChooser.APPROVE_OPTION) {
+            // m_pDocTemplateImage.OpenDocumentFile(dlg.getSelectedFile().getName());
+        }
+    } // onFileOpenImage
+
+
+    // Called when the user selects the Open ICT Log menu item from the File menu
+    // MENUITEM "Open ICT Log",                ID_FILE_OPENICTLOG
+    // ON_COMMAND(ID_FILE_OPENICTLOG, OnFileOpenictlog)
+    public void onFileOpenIctLog() {
+        String processLogPath;
+
+        processLogPath = Globals.ictPreference.getPath(Preference.ProcessLog);
+        // m_pDocTemplateText.OpenDocumentFile(processLogPath);
+    } // onFileOpenIctLog
+
+
+    // Called when the user selects the Open Scene menu item from the File menu
+    // MENUITEM "&Open Scene...\tCtrl+O",      ID_FILE_OPEN
+    // ON_COMMAND(ID_FILE_OPEN, OnFileOpen)
+    public void onFileOpen() {
+        // Change to the default scene file directory (indicated in the ICT preference object)
+        _chdir(Globals.ictPreference.getPath(Preference.SceneFileDirectory));
+
+        // TODO: Replace with JFileChooser
+        // CFileDialog dlg = new CFileDialog(true, "scn", "*.scn");
+        JFileChooser dlg = new JFileChooser();
+        dlg.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        int showDlgResult = dlg.showDialog(null, "Select scene file");
+
+        if (showDlgResult == JFileChooser.APPROVE_OPTION) {
+            // m_pDocTemplateText.OpenDocumentFile(dlg.getSelectedFile().getName());
+        }
+    } // onFileOpen
 
     // ############################################################################################
     // Event handlers for Tools menu
@@ -937,9 +991,11 @@ POPUP "Tools"
         dlg.setFileSelectionMode(JFileChooser.FILES_ONLY);
         int showDlgResult = dlg.showDialog(this, "Select bmp file");
 
-        int aStatus, imHeight, imWidth, bitsPerPixel;
-        String centeredName;
-        MemImage alphaImage, inImage;
+        int aStatus;
+        Integer imHeight = 0, imWidth = 0, bitsPerPixel = 0;
+        String centeredName = "";
+        MemImage alphaImage = new MemImage(1, 1);
+        MemImage inImage = new MemImage(1, 1);
 
         if (showDlgResult == JFileChooser.APPROVE_OPTION) {
             aFileName = dlg.getSelectedFile().getName();
@@ -952,6 +1008,7 @@ POPUP "Tools"
                 return;
             }
 
+            // The following method sets parameters imHeight, imWidth and bitsPerPixel
             aStatus = Globals.readBMPHeader(aFileName, imHeight, imWidth, bitsPerPixel);
             if(bitsPerPixel == 8) {
                 inImage = new MemImage(aFileName, 0, 0, RANDOM, 'R', MONOCHROME);
@@ -961,7 +1018,7 @@ POPUP "Tools"
             }
 
             // Create an alpha image
-            String alphaName;
+            String alphaName = "";
             Globals.constructPathName(alphaName, aFileName, 'a');
             if(alphaName.equals(aFileName)) {
                 Globals.beep(10, 10);
@@ -983,10 +1040,13 @@ POPUP "Tools"
 
                 String shapeDir, shapeFile, shapeName;
                 shapeFile = aFileName;
-                strncpy(shapeFile + shapeFile.length() - 4, ".shp", 4);
+                int fileNameLength = shapeFile.length();
+                // Chop off the extension from the shape file name.
+                // The extension should be ".shp"
+                shapeFile = shapeFile.substring(fileNameLength - 4);
 
                 // Generate a shape file from the binary image
-                int aStatus = Globals.shapeFromImage(alphaImage, aShape);
+                aStatus = Globals.shapeFromImage(alphaImage, aShape);
 
                 if(aStatus == 0) {
                     aShape.writeShape(shapeFile);
@@ -1030,12 +1090,11 @@ POPUP "Tools"
         closeAllChildren();
         
         // Setup Output Image
-        IctApp pApp = AfxGetApp();
-        pApp.m_pDocTemplateImage.OpenDocumentFile(null);
+        ictApp.m_pDocTemplateImage.OpenDocumentFile(null);
         outView = ImageView.getView();
         outView.setCaption("Warped Image");
 
-        pApp.m_pDocTemplateImage.OpenDocumentFile(null);
+        ictApp.m_pDocTemplateImage.OpenDocumentFile(null);
         orgView = ImageView.getView();
         int inHeight, inWidth, bitsPerPixel;
         MemImage inImage;
@@ -1056,7 +1115,7 @@ POPUP "Tools"
         orgView.setCaption("Original Image");
         orgView.associateMemImage(inImage);
 
-        MDITile(MDITILE_VERTICAL);
+        // MDITile(MDITILE_VERTICAL);
 
         MemImage outImage   = new MemImage(outHeight, outWidth, bitsPerPixel);
         MemImage aliasImage = new MemImage(outHeight, outWidth, bitsPerPixel);
@@ -1239,13 +1298,12 @@ POPUP "Tools"
         previewingScene = true;
 
         // Create an imageWindow object to draw into
-        IctApp pApp = AfxGetApp();
-        ImageView preView = new ImageView();
-        pApp.m_pDocTemplateImage.OpenDocumentFile(null);
+        ImageView preView = new ImageView(this);
+        ictApp.m_pDocTemplateImage.OpenDocumentFile(null);
         preView = ImageView.getView();
         preView.setCaption("Scene Preview");
-        previewWindowHandle = preView; //save the imageView window so scene preview dialog can use it
-        MDITile(MDITILE_VERTICAL);	 //This maximizes the imageWindow
+        previewWindowHandle = preView; // Save the imageView window so scene preview dialog can use it
+        // MDITile(MDITILE_VERTICAL);	   // This maximizes the imageWindow
 
         ScenePreviewDlg dlg = new ScenePreviewDlg(this, true);
         dlg.setVisible(true);
@@ -1275,13 +1333,12 @@ POPUP "Tools"
         previewingSequence = true;
 
         // Create an imageWindow object to draw into
-        IctApp pApp = AfxGetApp();
-        ImageView preView = new ImageView();
-        pApp.m_pDocTemplateImage.OpenDocumentFile(null);
+        ImageView preView = new ImageView(this);
+        ictApp.m_pDocTemplateImage.OpenDocumentFile(null);
         preView = ImageView.getView();
         preView.setCaption("Sequence Preview");
         previewWindowHandle = preView; // Save the imageView window so scene preview dialog can use it
-        MDITile(MDITILE_VERTICAL);	   // This maximizes the imageWindow
+        // MDITile(MDITILE_VERTICAL);	   // This maximizes the imageWindow
 
         ScenePreviewDlg dlg = new ScenePreviewDlg(this, true);
         dlg.setVisible(true);
@@ -1326,13 +1383,12 @@ POPUP "Tools"
         }
 
         // Create an imageWindow object to draw into
-        IctApp pApp = AfxGetApp();
         ImageView renderView;
-        pApp.m_pDocTemplateImage.OpenDocumentFile(null);
+        ictApp.m_pDocTemplateImage.OpenDocumentFile(null);
         renderView = ImageView.getView();
         renderView.setCaption("Scene Render");
         previewWindowHandle = renderView; //save the imageView window so scene preview dialog can use it
-        MDITile(MDITILE_VERTICAL);	 //This maximizes the imageWindow
+        // MDITile(MDITILE_VERTICAL);	 //This maximizes the imageWindow
 
         getViewMatrix(viewMatrix);
         mySceneList.render(renderView, viewMatrix, depthSortingEnabled, zBufferEnabled, 
@@ -1359,14 +1415,13 @@ POPUP "Tools"
             repaint();
         }
 
-        IctApp pApp = AfxGetApp();
         ImageView renderView;
-        pApp.m_pDocTemplateImage.OpenDocumentFile(null);
+        ictApp.m_pDocTemplateImage.OpenDocumentFile(null);
         renderView = ImageView.getView();
         renderView.setCaption("Sequence Render");
         previewWindowHandle = renderView; // Save the imageView window so 
                                         // the scene preview dialog can use it
-        MDITile(MDITILE_VERTICAL);	      //Maximize the imageWindow
+        // MDITile(MDITILE_VERTICAL);	      //Maximize the imageWindow
 
         getViewMatrix(viewMatrix);
         mySceneList.render(renderView, viewMatrix, depthSortingEnabled, 
@@ -1447,10 +1502,20 @@ POPUP "Tools"
     // ############################################################################################
     // Event handlers for View menu
 
+    // ############################################################################################
+    // Called when the user clicks on the Help menu
+    // MENUITEM "&About ICT 2.0...",           ID_APP_ABOUT
+    // ON_COMMAND(ID_APP_ABOUT, OnAppAbout)
+    public void onAppAbout() {
+        AboutDlg aboutDlg = new AboutDlg(null, true);
+        aboutDlg.setVisible(true);
+    } // onAppAbout
 
     // ############################################################################################
     // Miscellaneous methods
 
+    // SceneList also has a getViewMatrix method, but it takes 3 parameters: 
+    // a TMatrix, an int, and Scene.
     // Called from:
     //     onRenderScene
     //     onRenderSequence
