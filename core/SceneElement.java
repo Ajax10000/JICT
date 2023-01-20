@@ -3,6 +3,8 @@ package core;
 import globals.Globals;
 
 import java.awt.Color;
+import java.io.BufferedWriter;
+import java.io.IOException;
 
 import motion.MotionPath;
 
@@ -309,10 +311,13 @@ public class SceneElement {
     } // finalize
 
 
+    // Class Scene also has a writeFile method. 
+    // Both Scene.writeFile and SceneElement.writeFile are called from 
+    // SceneList.writeList.
     // Called from:
     //     SceneList.writeList
     // TODO: Replace ofstream with a FileStream
-    void writeFile(ofstream fileout) {
+    void writeFile(BufferedWriter fileout) {
         // Creates the model portion of a scene file
         String sBlendArray, sWarpArray, sModelTypeArray;
         String sModelNameArray;
@@ -335,8 +340,9 @@ public class SceneElement {
         if(this.modelType == LIGHTSOURCE) sModelTypeArray = "LightSource";
 
         // Write out the sceneElement information, the reference point is optionally saved
+        String thisObjectAsString;
         if(definedRefPoint) {
-            String thisObjectAsString = "Model " + sModelNameArray + 
+            thisObjectAsString = "Model " + sModelNameArray + 
                 " " + sBlendArray + " " + sWarpArray +
                 " AlphaScale " + this.alphaScale + " " + sModelTypeArray + "\n" +
                 "FileName " + this.fileName + "\n" +
@@ -347,10 +353,8 @@ public class SceneElement {
                 "Translation " + this.translation.x + "," + this.translation.y + "," + this.translation.z + "\n" +
                 "ReferencePoint " + this.pointOfReference.x + "," + this.pointOfReference.y + 
                 "," + this.pointOfReference.z + "\n\n";
-
-            fileout << thisObjectAsString;
         } else {
-            String thisObjectAsString = "Model " + sModelNameArray + 
+            thisObjectAsString = "Model " + sModelNameArray + 
                 " " + sBlendArray + " " + sWarpArray +
                 " AlphaScale " + this.alphaScale + " " + sModelTypeArray + "\n" +
                 "FileName " + this.fileName + "\n" +
@@ -359,8 +363,12 @@ public class SceneElement {
                 "Rotation "    + this.rotation.x    + "," + this.rotation.y    + "," + this.rotation.z + "\n" +
                 "Scale "       + this.scale.x       + "," + this.scale.y       + "," + this.scale.z + "\n" +
                 "Translation " + this.translation.x + "," + this.translation.y + "," + this.translation.z + "\n\n";
-
-            fileout << thisObjectAsString;
+        }
+        
+        try {
+            fileout.write(thisObjectAsString);
+        } catch(IOException ioe) {
+            // TODO: Need to return an error indicator
         }
     } // writeFile
 
