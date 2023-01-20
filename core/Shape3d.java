@@ -5,6 +5,10 @@ import frames.MainFrame;
 import globals.Globals;
 import globals.Preference;
 
+import java.io.IOException;
+import java.io.LineNumberReader;
+import java.util.StringTokenizer;
+
 import structs.FaceSet;
 import structs.Point3d;
 import structs.VertexSet;
@@ -1184,17 +1188,26 @@ public:
     // Called from:
     //     getShapeFileInfo
     //     readShape
-    public String getNextLine(String psTheText, Integer piLineNumber, ifstream filein, int piMinLineLength) {
+    public static String getNextLine(String psTheText, Integer piLineNumber, LineNumberReader filein, int piMinLineLength) {
         boolean aComment;
         int theLength = 80;
         String theKeyWord;
+        StringTokenizer strtok;
 
         aComment = true;
         while (aComment) {
-            filein.getline(psTheText, theLength);  //ignore comments and empty lines
-            if(filein.eof()) {
+            try {
+                psTheText = filein.readLine();  // Ignore comments and empty lines
+            } catch (IOException ioe) {
+                // Assume we've reached the end of the file
                 psTheText = "EOF ";
-                theKeyWord = strtok(psTheText," ");
+                theKeyWord = "EOF";
+                return(theKeyWord);
+            }
+            if(psTheText == null) {
+                // We've reached the end of the file
+                psTheText = "EOF ";
+                theKeyWord = "EOF";
                 return(theKeyWord);
             }
             piLineNumber++;
@@ -1203,13 +1216,17 @@ public:
             if (
             (psTheText.startsWith("//")) || 
             (psTheText.length() <= piMinLineLength)) {
+                // The line started with two forward slash (/) character, indicating comment, 
+                // or the line had fewer than piMinLineLength characters.
+                // So we ignore the line. We will read the next line.
                 aComment = true;
             } else {
                 aComment = false;
             }
         } // while
 
-        theKeyWord = strtok(psTheText, " ");
+        strtok = new StringTokenizer(psTheText, " ");
+        theKeyWord = strtok.nextToken();
         return(theKeyWord);
     } // getNextLine
 
