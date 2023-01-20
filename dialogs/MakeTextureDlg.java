@@ -231,8 +231,6 @@ protected:
 
     // This method came from MAKETEXTUREDLG.CPP
     void onLocateDestDir() {
-        // TODO: Replace with JFileChooser, add a FileFilter
-        // CFileDialog dlg = new CFileDialog(true, "*", "*.*");	//find a destination directory
         JFileChooser dlg = new JFileChooser();
         dlg.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         int showDlgResult = dlg.showDialog(null, "Select destination directory");
