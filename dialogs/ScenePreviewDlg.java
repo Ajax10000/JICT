@@ -18,6 +18,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import math.MathUtils;
 
 // This dialog is displayed when the user selects the 
 // "Still" or "Sequence" menu item from the Preview menu.
@@ -390,30 +391,30 @@ protected:
         if(isChecked(IDC_chkRx)) {
             if(changingModel) {
                 m_theFrame.warpRotateX += deltaX;
-                m_theFrame.warpRotateX = Globals.fPolar(m_theFrame.warpRotateX);
+                m_theFrame.warpRotateX = MathUtils.fPolar(m_theFrame.warpRotateX);
             } else {
                 m_theFrame.viewRotateX += deltaX;
-                m_theFrame.viewRotateX = Globals.fPolar(m_theFrame.viewRotateX);
+                m_theFrame.viewRotateX = MathUtils.fPolar(m_theFrame.viewRotateX);
             }
         }
 
         if(isChecked(IDC_chkRy)) {
             if(changingModel) {
                 m_theFrame.warpRotateY += deltaY;
-                m_theFrame.warpRotateY = Globals.fPolar(m_theFrame.warpRotateY);
+                m_theFrame.warpRotateY = MathUtils.fPolar(m_theFrame.warpRotateY);
             } else {
                 m_theFrame.viewRotateY += deltaY;
-                m_theFrame.viewRotateY = Globals.fPolar(m_theFrame.viewRotateY);
+                m_theFrame.viewRotateY = MathUtils.fPolar(m_theFrame.viewRotateY);
             }
         }
 
         if(isChecked(IDC_chkRz)) {
             if(changingModel) {
                 m_theFrame.warpRotateZ += deltaZ;
-                m_theFrame.warpRotateZ = Globals.fPolar(m_theFrame.warpRotateZ);
+                m_theFrame.warpRotateZ = MathUtils.fPolar(m_theFrame.warpRotateZ);
             } else {
                 m_theFrame.viewRotateZ += deltaZ;
-                m_theFrame.viewRotateZ = Globals.fPolar(m_theFrame.viewRotateZ);
+                m_theFrame.viewRotateZ = MathUtils.fPolar(m_theFrame.viewRotateZ);
             }
         }
 
@@ -428,7 +429,7 @@ protected:
             setTextBoxesWithViewTransform();
         }
 
-        //  Build the view Matrix
+        //  Build the view matrix
         m_theFrame.viewMatrix.setIdentity();
         float xRadians = m_theFrame.viewRotateX * F_DTR;
         float yRadians = m_theFrame.viewRotateY * F_DTR;
