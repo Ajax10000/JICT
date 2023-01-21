@@ -53,7 +53,7 @@ protected:
 */
 
     // This constructor came from ICT20.CPP
-    public void IctDoc() {
+    public IctDoc() {
         // TODO: add one-time construction code here
 
     }
