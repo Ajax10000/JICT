@@ -6,6 +6,7 @@ import javax.swing.JFrame;
 // This dialog is displayed when the user double-clicks the left mouse button on an ImageView.
 // See method onLButtonDblClk of the ImageView class.
 public class NameDlg extends JDialog {
+    // DDX_Text(pDX, IDC_Name, m_Name);
     String	m_Name;
 
 /* 
@@ -48,6 +49,7 @@ protected:
     } // NameDlg ctor
 
 
+    /*
     // This method came from NAMEDLG.CPP
     void DoDataExchange(CDataExchange pDX) {
         CDialog.DoDataExchange(pDX);
@@ -57,7 +59,8 @@ protected:
         DDV_MaxChars(pDX, m_Name, 31);
         //}}AFX_DATA_MAP
     }
-
+    */
+    
 
     /////////////////////////////////////////////////////////////////////////////
     // CNameDialog message handlers
@@ -65,7 +68,5 @@ protected:
     // This method came from NAMEDLG.CPP
     void onOK() {
         // TODO: Add extra validation here
-        
-        CDialog.OnOK();
     } // onOK
 } // class NameDlg
