@@ -6,6 +6,8 @@ import core.Shape3d;
 
 import docs.ImageDoc;
 
+import fileUtils.BMPFileFilter;
+
 import frames.MainFrame;
 
 import globals.Globals;
@@ -474,10 +476,10 @@ protected:
 
             if(result == JOptionPane.YES_OPTION) {
                 String aFileName;
-                // TODO: Replace with JFileChooser, with a FileFilter
-                // CFileDialog dlg = new CFileDialog(false, "bmp", "*.bmp");
+
                 JFileChooser dlg = new JFileChooser();
                 dlg.setFileSelectionMode(JFileChooser.FILES_ONLY);
+                dlg.setFileFilter(new BMPFileFilter());
                 int showDlgResult = dlg.showDialog(null, "Select image name");
 
                 if (showDlgResult == JFileChooser.APPROVE_OPTION) {
