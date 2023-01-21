@@ -2,6 +2,8 @@ package core;
 
 import dialogs.ImageView;
 
+import fileUtils.FileUtils;
+
 import globals.Globals;
 import globals.Preference;
 
@@ -14,10 +16,13 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.LineNumberReader;
 import java.io.OutputStreamWriter;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.StringTokenizer;
 
 import javax.swing.JComboBox;
 
+import math.MathUtils;
 import math.TMatrix;
 
 import motion.MotionNode;
@@ -742,8 +747,8 @@ public class SceneList implements ISceneList {
         Float vrx = 0.0f, vry = 0.0f, vrz = 0.0f;       
         MotionNode aMotion;                    // Current model location and orientation if moving.
         Bundle xfrm;           // Create a bundle of transforms
-        time_t time1, time2;
-        time(time1);
+        Instant timeStart, timeEnd;
+        timeStart = Instant.now();
         TMatrix forwardMatrix, viewModelMatrix;
 
         getSceneInfo(sceneName, effectType, colorMode, outputRows, outputColumns);
@@ -994,7 +999,7 @@ public class SceneList implements ISceneList {
                 // Optionally anti-alias the output image
                 if(antiAliasEnabled) {
                     aliasImage = new MemImage(outputRows, outputColumns);
-                    Globals.appendFileName(outputFileName, RGBFileName, currentColor);
+                    FileUtils.appendFileName(outputFileName, RGBFileName, currentColor);
                     Globals.antiAlias(outputImage, aliasImage);
                     aliasImage.copy(outputImage, 0, 0);
                 }
@@ -1025,10 +1030,10 @@ public class SceneList implements ISceneList {
             }
         }  // End of Sequence Loop
     
-        time(time2);
-        time_t timeDiff = (int)difftime(time2, time1);
+        timeEnd = Instant.now();
+        Duration timeDiff = Duration.between(timeStart, timeEnd);
 
-        String msgText = "Scene Generation Complete.  " + timeDiff + " seconds.";
+        String msgText = "Scene Generation Complete.  " + timeDiff.toMillis() + " milliseconds.";
         Globals.statusPrint(msgText);
         return myStatus;
     } // render
@@ -1513,7 +1518,7 @@ public class SceneList implements ISceneList {
                     centroidX = theModel.screenObject.currentShape.originX;
                     centroidY = theModel.screenObject.currentShape.originY;
                     centroidZ = theModel.screenObject.currentShape.originZ;
-                    modelDistance = Globals.getDistance3d(viewX, viewY, viewZ, centroidX, centroidY, centroidZ);
+                    modelDistance = MathUtils.getDistance3d(viewX, viewY, viewZ, centroidX, centroidY, centroidZ);
                     distances[modelCounter] = modelDistance;
                     models[modelCounter] = theModel;
                     modelCounter++;
@@ -1523,7 +1528,7 @@ public class SceneList implements ISceneList {
                     centroidX = 0.0f;
                     centroidY = 0.0f;
                     centroidZ = 0.0f;
-                    modelDistance = Globals.getDistance3d(viewX, viewY, viewZ, centroidX, centroidY, centroidZ);
+                    modelDistance = MathUtils.getDistance3d(viewX, viewY, viewZ, centroidX, centroidY, centroidZ);
                     distances[modelCounter] = modelDistance;
                     models[modelCounter] = theModel;
                     modelCounter++;
