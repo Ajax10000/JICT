@@ -2,7 +2,12 @@ package dialogs;
 
 import core.MemImage;
 
+import fileUtils.BMPFileFilter;
+import fileUtils.FileUtils;
+
 import globals.Globals;
+
+import java.io.File;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -171,9 +176,14 @@ protected:
     // Note the (x, y) coordinates for this button are (5, 17)
     // PUSHBUTTON      "Locate",IDC_LOCATEDESTDIR,5,17,34,14
     private void onLocateDestDir() {
-        // TODO: Replace with JFileChooser
-        CFileDialog dlg = new CFileDialog(true, "bmp", "*.bmp");	// Find a morph image
-        if (dlg.DoModal() == IDOK) {
+        JFileChooser dlg = new JFileChooser();
+        dlg.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        dlg.setFileFilter(new BMPFileFilter());
+        int showDlgResult = dlg.showDialog(null, "Select morph image");
+
+        if (showDlgResult == JFileChooser.APPROVE_OPTION) {
+            File file = dlg.getSelectedFile();
+            String sFileName = file.getName();
             m_firstImage.SetWindowText(dlg.GetPathName());
         }
     } // onLocateDestDir
@@ -184,9 +194,14 @@ protected:
     // Note the (x, y) coordinates for this button are are (6, 80)
     // PUSHBUTTON      "Locate",IDC_LOCATEDESTDIR2,6,80,34,14
     private void onLocateDestDir2() {
-        // TODO: Replace with JFileChooser
-        CFileDialog dlg = new CFileDialog(true, "bmp", "*.bmp");	// Find a morph image
-        if (dlg.DoModal() == IDOK) {
+        JFileChooser dlg = new JFileChooser();
+        dlg.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        dlg.setFileFilter(new BMPFileFilter());
+        int showDlgResult = dlg.showDialog(null, "Select morph image");
+
+        if (showDlgResult == JFileChooser.APPROVE_OPTION) {
+            File file = dlg.getSelectedFile();
+            String sFileName = file.getName();
             m_firstOutPath.SetWindowText(dlg.GetPathName());
         }
     } // onLocateDestDir2
@@ -197,9 +212,11 @@ protected:
     // Note the (x, y) coordinates for this button are (6, 50)
     // PUSHBUTTON      "Locate",IDC_LOCATEDESTDIR3,6,50,34,14
     private void onLocateDestDir3() {
-        // TODO: Replace with JFileChooser
-        CFileDialog dlg = new CFileDialog(true, "*", "*.*");	// Find a morph image
-        if (dlg.DoModal() == IDOK) {
+        JFileChooser dlg = new JFileChooser();
+        dlg.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        int showDlgResult = dlg.showDialog(this, "Select scn file");
+
+        if (showDlgResult == JFileChooser.APPROVE_OPTION) {
             m_secondImage.SetWindowText(dlg.GetPathName());	
         }
     } // onLocateDestDir3
@@ -241,7 +258,7 @@ protected:
         secondImage = m_secondImage.getText();
         outPath     = m_firstOutPath.getText();
 
-        Globals.getPathPieces(outPath, directory, fileName,
+        FileUtils.getPathPieces(outPath, directory, fileName,
             prefix, outFrameNum, suffix);
 
         switch(m_morphType) {
@@ -289,9 +306,9 @@ protected:
             MemImage oTexture, oX, oY, oZ;
             
             aTexPath = new String(firstImage);
-            Globals.constructPathName(aXPath, aTexPath, 'x');
-            Globals.constructPathName(aYPath, aTexPath, 'y');
-            Globals.constructPathName(aZPath, aTexPath, 'z');
+            FileUtils.constructPathName(aXPath, aTexPath, 'x');
+            FileUtils.constructPathName(aYPath, aTexPath, 'y');
+            FileUtils.constructPathName(aZPath, aTexPath, 'z');
             aStatus = Globals.readBMPHeader(aTexPath, aHeight, aWidth, bpp);
             if(aStatus != 0) {
                 Globals.statusPrint("MorphDlg.onOK(): Unable to open image header.");
@@ -319,9 +336,9 @@ protected:
             aZ = new MemImage(aZPath, 0, 0, RANDOM, 'R', A32BIT);
 
             bTexPath = new String(secondImage);
-            Globals.constructPathName(bXPath, bTexPath, 'x');
-            Globals.constructPathName(bYPath, bTexPath, 'y');
-            Globals.constructPathName(bZPath, bTexPath, 'z');
+            FileUtils.constructPathName(bXPath, bTexPath, 'x');
+            FileUtils.constructPathName(bYPath, bTexPath, 'y');
+            FileUtils.constructPathName(bZPath, bTexPath, 'z');
         
             switch (bpp) {
             case 8:
