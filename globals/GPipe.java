@@ -4,6 +4,7 @@ import core.MemImage;
 
 import java.text.DecimalFormat;
 
+import math.MathUtils;
 import math.TMatrix;
 import math.Vect;
 
@@ -260,19 +261,19 @@ public:
 
         viewPenMatrix.transformAndProjectPoint1(p1, sp1, ref, outputRows, outputColumns, t1);
         if(zBufferEnabled) {
-            dPrev1 = Globals.getDistance3d(t1.x, t1.y, t1.z, viewPoint.x, viewPoint.y, viewPoint.z);
+            dPrev1 = MathUtils.getDistance3d(t1.x, t1.y, t1.z, viewPoint.x, viewPoint.y, viewPoint.z);
         }
         updateBoundingBox(p1);  //optional
 
         viewPenMatrix.transformAndProjectPoint1(p2, sp2, ref, outputRows, outputColumns, t2);
         if(zBufferEnabled) {
-            dPrev2 = Globals.getDistance3d(t2.x, t2.y, t2.z, viewPoint.x, viewPoint.y, viewPoint.z);
+            dPrev2 = MathUtils.getDistance3d(t2.x, t2.y, t2.z, viewPoint.x, viewPoint.y, viewPoint.z);
         }
         updateBoundingBox(p2);  //optional
 
         viewPenMatrix.transformAndProjectPoint1(c1, sc1, ref, outputRows, outputColumns, t3);
         if(zBufferEnabled) {
-            dCur1 = Globals.getDistance3d(t3.x, t3.y, t3.z, viewPoint.x, viewPoint.y, viewPoint.z);
+            dCur1 = MathUtils.getDistance3d(t3.x, t3.y, t3.z, viewPoint.x, viewPoint.y, viewPoint.z);
         }
         updateBoundingBox(c1);  //optional
 
@@ -281,7 +282,7 @@ public:
         if(c2 != null) {
             viewPenMatrix.transformAndProjectPoint1(c2, sc2, ref, outputRows, outputColumns, t4);
             if(zBufferEnabled) {
-                dCur2 = Globals.getDistance3d(t4.x, t4.y, t4.z, viewPoint.x, viewPoint.y, viewPoint.z);
+                dCur2 = MathUtils.getDistance3d(t4.x, t4.y, t4.z, viewPoint.x, viewPoint.y, viewPoint.z);
             }
             updateBoundingBox(c2);  //optional
         }
@@ -346,7 +347,7 @@ public:
             centroid.x = (xMax + xMin) / 2.0f;
             centroid.y = (yMax + yMin) / 2.0f;
             centroid.z = (zMax + zMin) / 2.0f;
-            float dCentroid = Globals.getDistance3d(lightSource.x, lightSource.y, lightSource.z, 
+            float dCentroid = MathUtils.getDistance3d(lightSource.x, lightSource.y, lightSource.z, 
                                             centroid.x, centroid.y, centroid.z);
             Point3d np1 = new Point3d();
 
@@ -367,7 +368,7 @@ public:
             int Ip = 160;
 
             ip1 = Globals.lightModel(kd, Ip, 150, np1, lightSource, dCentroid);
-            ip1 = Globals.bound(ip1, 1.0f, 255.0f);
+            ip1 = MathUtils.bound(ip1, 1.0f, 255.0f);
         } else {
             ip1 = 175.0f;	   // set a nominal face intensity
         }
@@ -379,13 +380,15 @@ public:
                             (int)sp1.x, (int)sp1.y, ip1, dPrev1,
                             (int)sp2.x, (int)sp2.y, ip1, dPrev2,
                             (int)sc1.x, (int)sc1.y, ip1, dCur1,
-                            (int)sc2.x, (int)sc2.y, ip1, dCur2, zBuffer);
+                            (int)sc2.x, (int)sc2.y, ip1, dCur2, 
+                            zBuffer);
             } else {
                 outputImage.fillPolyz( 
                             (int)sp1.x, (int)sp1.y, (byte)ip1, 0.0f,
                             (int)sp2.x, (int)sp2.y, (byte)ip1, 0.0f,
                             (int)sc1.x, (int)sc1.y, (byte)ip1, 0.0f,
-                            (int)sc2.x, (int)sc2.y, (byte)ip1, 0.0f, null);
+                            (int)sc2.x, (int)sc2.y, (byte)ip1, 0.0f, 
+                            null);
             }
         } else {
             if(zBufferEnabled) {
