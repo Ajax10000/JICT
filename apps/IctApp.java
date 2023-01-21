@@ -11,6 +11,7 @@ import globals.Globals;
 import globals.Preference;
 
 import java.io.File;
+import java.time.LocalDateTime;
 
 import javax.swing.JFileChooser;
 import javax.swing.SwingUtilities;
@@ -111,10 +112,7 @@ CIctApp theApp;
             }
         }
 
-
-        time_t theTime;
-        time(theTime);
-        msgText = "ICT Process Log.  " + ctime(theTime);
+        msgText = "ICT Process Log.  " + LocalDateTime.now();
         Globals.statusPrint(msgText);
 
         return true;
