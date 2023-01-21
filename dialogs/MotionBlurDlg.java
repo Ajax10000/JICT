@@ -1,5 +1,7 @@
 package dialogs;
 
+import fileUtils.BMPFileFilter; 
+
 import globals.Globals;
 
 import javax.swing.JButton;
@@ -13,11 +15,22 @@ import javax.swing.JTextField;
 // See method onToolsMotionBlur of the MainFrame class.
 // To see what it should look like, see Figure D.10 on p 282 of the book.
 public class MotionBlurDlg extends JDialog {
+    // DDX_Control(pDX, IDC_EDITFIRSTIMAGE, m_firstImage);
     JTextField	m_firstImage;
+
+    // DDX_Control(pDX, IDC_LOCATEDESTDIR2, m_locateOutDirectory);
 	JButton	    m_locateOutDirectory;
+
+    // DDX_Control(pDX, IDC_LOCATEDESTDIR, m_locateInDirectory);
 	JButton	    m_locateInDirectory;
+
+    // DDX_Control(pDX, IDC_EDITDIRECTORY, m_outDirectory);
 	JTextField	m_outDirectory;
+
+    // DDX_Control(pDX, IDC_NumBlurFrames, m_NumBlurFrames);
 	JTextField	m_NumBlurFrames;
+
+    // DDX_Control(pDX, IDC_BlurDepth, m_BlurDepth);
 	JTextField	m_BlurDepth;
 
 /*
@@ -67,6 +80,7 @@ protected:
     } // MotionBlurDlg ctor
 
 
+    /*
     // This method came from MOTIONBLURDIALOG.CPP
     void DoDataExchange(CDataExchange pDX) {
         CDialog.DoDataExchange(pDX);
@@ -79,6 +93,7 @@ protected:
         DDX_Control(pDX, IDC_BlurDepth, m_BlurDepth);
         //}}AFX_DATA_MAP
     }
+    */
 
     /*
     BEGIN_MESSAGE_MAP(MotionBlurDlg, CDialog)
@@ -94,10 +109,10 @@ protected:
 
     // This method came from MOTIONBLURDIALOG.CPP
     void onLocateDestDir() {
-        // TODO: Replace with JFileChooser
-        // CFileDialog dlg = new CFileDialog(true, "bmp", "*.bmp");	//find a bmp file
+        // Find a bmp file
         JFileChooser dlg = new JFileChooser();
         dlg.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        dlg.setFileFilter(new BMPFileFilter());
         int showDlgResult = dlg.showDialog(null, "Select bmp file");
 
         if (showDlgResult == JFileChooser.APPROVE_OPTION) {
@@ -108,10 +123,10 @@ protected:
 
     // This method came from MOTIONBLURDIALOG.CPP
     void OnLocateDestDir2() {
-        // TODO: Replace with JFileChooser
-        // CFileDialog dlg = new CFileDialog(true, "bmp", "*.bmp");	//find a bmp file
+        // Find a bmp file
         JFileChooser dlg = new JFileChooser();
         dlg.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        dlg.setFileFilter(new BMPFileFilter());
         int showDlgResult = dlg.showDialog(null, "Select bmp file");
 
         if (showDlgResult == JFileChooser.APPROVE_OPTION) {
@@ -142,6 +157,5 @@ protected:
         aStatus = Globals.motionBlur(aFirstImage, aOutDir, numBlurFrames, blurDepth);
         msgText = "motion blur Complete. Status: " + aStatus;
         Globals.statusPrint(msgText);	
-        CDialog.OnOK();
     } // onOK
 } // class MotionBlurDlg
