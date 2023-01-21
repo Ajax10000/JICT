@@ -1,5 +1,7 @@
 package dialogs;
 
+import fileUtils.BMPFileFilter;
+
 import globals.Globals;
 
 import javax.swing.JButton;
@@ -12,11 +14,18 @@ import javax.swing.JTextField;
 // This dialog is displayed when the user selects the 
 // "Create a Mesh Model..." menu item from the Tools menu.
 // See method onToolsCreateMesh of the MainFrame class.
-// To see what it should look like, see Figure D.6 on p 278 of the book.
+// To see what it should look like, see Figure D.6 on p 278 of 
+// Visual Special Effects Toolkit in C++, by Tim Wittenburg
 public class QuadMeshDlg extends JDialog {
+    // DDX_Control(pDX, IDC_COMBO1, m_QMeshType);
 	JComboBox<String>	m_QMeshType;
+
+    // DDX_Control(pDX, IDC_EDITTEXTURE, m_TextureImage);
 	JTextField	m_TextureImage;
+
+    // DDX_Control(pDX, IDC_EDITDIRECTORY, m_ModelDirectory);
 	JTextField	m_ModelDirectory;
+
 	JButton	    m_Locate;
 	JComboBox<String>	m_MeshType;
 
@@ -66,6 +75,7 @@ protected:
     } // QuadMeshDlg ctor
 
     
+    /*
     // This method came from QUADMESHDLG.CPP
     void DoDataExchange(CDataExchange pDX)
     {
@@ -77,7 +87,7 @@ protected:
         DDX_Control(pDX, IDC_EDITDIRECTORY, m_ModelDirectory);
         //}}AFX_DATA_MAP
     }
-
+    */
 
     // This method came from QUADMESHDLG.CPP
     void onOK() {
@@ -107,18 +117,15 @@ protected:
             msgText = "Models Placed in directory: " + outDirectory;
             Globals.statusPrint(msgText);
         }
-
-        // This method came from QUADMESHDLG.CPP
-        CDialog.OnOK();
     } // onOK
 
 
     // This method came from QUADMESHDLG.CPP
     void onLocateTexture() {
-        // TODO: Replace with JFileChooser
-        // CFileDialog dlg = new CFileDialog(true, "bmp", "*.bmp");	//find a bmp file
+        // Find a bmp file
         JFileChooser dlg = new JFileChooser();
         dlg.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        dlg.setFileFilter(new BMPFileFilter());
         int result = dlg.showDialog(this, "Select BMP file");
 
         if (result == JFileChooser.APPROVE_OPTION) {
@@ -129,8 +136,7 @@ protected:
 
     // This method came from QUADMESHDLG.CPP
     void onLocateDestDir() {
-        // TODO: Replace with JFileChooser
-        // CFileDialog dlg = new CFileDialog(true, "*", "*.*");	//find a destination directory
+        // Find a destination directory
         JFileChooser dlg = new JFileChooser();
         dlg.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         int result = dlg.showDialog(this, "Select directory");
