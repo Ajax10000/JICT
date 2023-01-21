@@ -8,10 +8,19 @@ import javax.swing.JFrame;
 // See method onToolsWarpImage of the MainFrame class.
 // To see what it should look like, see Figure D.7 on p 280 of the book.
 public class WarpParamDlg extends JDialog {
+    // DDX_Text(pDX, IDC_EDITx, m_rx);
 	public String	m_rx;
+
+    // DDX_Text(pDX, IDC_EDITxScale, m_sx);
 	public String	m_sx;
+
+    // DDX_Text(pDX, IDC_EDITy, m_ry);
 	public String	m_ry;
+
+    // DDX_Text(pDX, IDC_EDITyScale, m_sy);
 	public String	m_sy;
+
+    // DDX_Text(pDX, IDC_EDITz, m_rz);
 	public String	m_rz;
 
 /*
@@ -67,6 +76,7 @@ protected:
     } // WarpParamDlg ctor
 
 
+    /*
     // This method came from WARPPARMDLG.CPP
     void DoDataExchange(CDataExchange pDX) {
         CDialog.DoDataExchange(pDX);
@@ -79,10 +89,11 @@ protected:
         DDX_Text(pDX, IDC_EDITz, m_rz);
         //}}AFX_DATA_MAP
     }
+    */
+
 
     // This method came from WARPPARMDLG.CPP
     void onOK() {
         // TODO: Add extra validation here
-        CDialog.OnOK();
     } // onOk
 } // class WarpParamDlg
