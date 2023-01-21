@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.io.LineNumberReader;
 import java.util.StringTokenizer;
 
+import math.MathUtils;
+
 import structs.FaceSet;
 import structs.Point3d;
 import structs.VertexSet;
@@ -1284,7 +1286,7 @@ public:
         // A shape object is created to store the candidate intersection points.
       
         // Calculate the ray angle in degrees
-        float rayAngle = Globals.polarAtan(rayX2 - rayCentroidX, rayY2 - rayCentroidY);
+        float rayAngle = MathUtils.polarAtan(rayX2 - rayCentroidX, rayY2 - rayCentroidY);
         Shape3d tempShape = new Shape3d(TEMPVERTICES);
         if (!tempShape.isValid()) {
             Globals.statusPrint("getBoundaryPoint: Unable to create temporary shape object");
@@ -1296,7 +1298,7 @@ public:
         int aStatus = 0;
 
         // Get the equation of the ray
-        Globals.getFLineEquation(rayCentroidX, rayCentroidY, rayX2, rayY2, 
+        MathUtils.getFLineEquation(rayCentroidX, rayCentroidY, rayX2, rayY2, 
             raySlope, rayYIntercept, rayHorzFlag, rayVertFlag);
 
         // Get the centroid of the shape, and the translation which will center the shape
@@ -1331,7 +1333,7 @@ public:
             miny = Math.min(y1, y2);
             maxy = Math.max(y1, y2);
 
-            Globals.getFLineEquation(x1, y1, x2, y2, m, b, horzFlag, vertFlag);
+            MathUtils.getFLineEquation(x1, y1, x2, y2, m, b, horzFlag, vertFlag);
 
             // Calculate the point of intersection, handling all possible cases
             if (
@@ -1381,9 +1383,9 @@ public:
             if (
             (theX >= minx && theX <= maxx) && 
             (theY >= miny && theY <= maxy)) {
-                float segmentAngle = Globals.polarAtan(theX - shapeCentX, theY - shapeCentY);
+                float segmentAngle = MathUtils.polarAtan(theX - shapeCentX, theY - shapeCentY);
                 if(Math.abs(segmentAngle - rayAngle) <= 0.01f) { //eliminate matches that are 180 degs out of phase
-                    aDistance = Globals.getDistance2d(theX, theY, lastX, lastY);
+                    aDistance = MathUtils.getDistance2d(theX, theY, lastX, lastY);
                     aStatus = tempShape.addTransformedVertex(theX, theY, aDistance);
                     if(aStatus != 0) {
                         Globals.statusPrint("getBoundaryPoint: Could not add temporary intersection point");
@@ -1448,20 +1450,20 @@ public:
         for (j = 1; j <= numVertices; j++) {
             cx = child.currentVertex.x;
             cy = child.currentVertex.y;
-            childAngle = Globals.polarAtan(cx - cCentroidX, cy - cCentroidY);
+            childAngle = MathUtils.polarAtan(cx - cCentroidX, cy - cCentroidY);
 
             numMVertices = this.getNumVertices();
             this.initCurrentVertex();
             for(i = 1; i <= numMVertices; i++) {
                 mx1 = this.currentVertex.x;
                 my1 = this.currentVertex.y;
-                mAngle1 = Globals.polarAtan(mx1 - mCentroidX, my1 - mCentroidY);
+                mAngle1 = MathUtils.polarAtan(mx1 - mCentroidX, my1 - mCentroidY);
                 
                 // this.currentVertex++;
                 this.incCurrentVertex();
                 mx2 = this.currentVertex.x;
                 my2 = this.currentVertex.y;
-                mAngle2 = Globals.polarAtan(mx2 - mCentroidX, my2 - mCentroidY);
+                mAngle2 = MathUtils.polarAtan(mx2 - mCentroidX, my2 - mCentroidY);
                 if (mAngle2 > mAngle1) { 
                     cclockWise++;
                 } else {
@@ -1600,12 +1602,12 @@ public:
             x2 = currentVertex.x;
             y2 = currentVertex.y;
             z2 = currentVertex.z;
-            totalDistance += Globals.getDistance3d(x1, y1, z1, x2, y2, z2);
+            totalDistance += MathUtils.getDistance3d(x1, y1, z1, x2, y2, z2);
         }
 
         //  Optionally, add the last line segment
         if(piVertexNumber == this.numVertices) {
-            totalDistance += Globals.getDistance3d(firstx, firsty, firstz, x2, y2, z2);
+            totalDistance += MathUtils.getDistance3d(firstx, firsty, firstz, x2, y2, z2);
         }
 
         return totalDistance;
@@ -1659,9 +1661,9 @@ public:
 
             if((fDf1 <= pfDistanceFraction) && (pfDistanceFraction <= fDf2)) {
                 // Set the output parameters
-                pFX = Globals.interpolate(fX1, fX2, fDf1, fDf2, pfDistanceFraction);
-                pFY = Globals.interpolate(fY1, fY2, fDf1, fDf2, pfDistanceFraction);
-                pFZ = Globals.interpolate(fZ1, fZ2, fDf1, fDf2, pfDistanceFraction);
+                pFX = MathUtils.interpolate(fX1, fX2, fDf1, fDf2, pfDistanceFraction);
+                pFY = MathUtils.interpolate(fY1, fY2, fDf1, fDf2, pfDistanceFraction);
+                pFZ = MathUtils.interpolate(fZ1, fZ2, fDf1, fDf2, pfDistanceFraction);
                 pIVertex = index;
                 return 0;
             }
@@ -1894,7 +1896,7 @@ public:
             incCurrentVertex();
             fX2 = currentVertex.x;
             fY2 = currentVertex.y;
-            fDistance = Globals.getDistance2d(fX1, fY1, fX2, fY2);
+            fDistance = MathUtils.getDistance2d(fX1, fY1, fX2, fY2);
 
             if(fDistance > fMaxDistance) {
                 iSaveJ = j;
