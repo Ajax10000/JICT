@@ -4,6 +4,7 @@ import apps.IctApp;
 
 import core.MemImage;
 import core.SceneList;
+import core.ScnFileParser;
 import core.Shape3d;
 
 import dialogs.AboutDlg;
@@ -14,6 +15,11 @@ import dialogs.MotionBlurDlg;
 import dialogs.QuadMeshDlg;
 import dialogs.ScenePreviewDlg;
 import dialogs.WarpParamDlg;
+
+import fileUtils.BMPFileFilter;
+import fileUtils.FileUtils;
+import fileUtils.SCNFileFilter;
+import fileUtils.WRLFileFilter;
 
 import globals.Globals;
 import globals.Preference;
@@ -821,10 +827,9 @@ POPUP "Tools"
         // change to the default output file directory (indicated in the ICT preference object)
         _chdir(Globals.ictPreference.getPath(Preference.OutputImageDirectory)); 
 
-        // TODO: Replace with JFileChooser
-        // CFileDialog dlg = new CFileDialog(true, "bmp", "*.bmp");
         JFileChooser dlg = new JFileChooser();
         dlg.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        dlg.setFileFilter(new BMPFileFilter());
         int showDlgResult = dlg.showDialog(null, "Select image name");
 
         if (showDlgResult == JFileChooser.APPROVE_OPTION) {
@@ -851,10 +856,9 @@ POPUP "Tools"
         // Change to the default scene file directory (indicated in the ICT preference object)
         _chdir(Globals.ictPreference.getPath(Preference.SceneFileDirectory));
 
-        // TODO: Replace with JFileChooser
-        // CFileDialog dlg = new CFileDialog(true, "scn", "*.scn");
         JFileChooser dlg = new JFileChooser();
         dlg.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        dlg.setFileFilter(new SCNFileFilter());
         int showDlgResult = dlg.showDialog(null, "Select scene file");
 
         if (showDlgResult == JFileChooser.APPROVE_OPTION) {
@@ -887,10 +891,10 @@ POPUP "Tools"
         // Display standard Open dialog box to select a file name.
         // First, change to the default scene file directory (indicated in the ICT preference object)
         _chdir(Globals.ictPreference.getPath(Preference.SceneFileDirectory)); 
-        // TODO: Replace with JFileChooser
-        //CFileDialog dlg = new CFileDialog(true, "scn", "*.scn");
+
         JFileChooser dlg = new JFileChooser();
         dlg.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        dlg.setFileFilter(new SCNFileFilter());
         int showDlgResult = dlg.showDialog(this, "Select scn file");
 
         if (showDlgResult == JFileChooser.APPROVE_OPTION) {
@@ -900,7 +904,8 @@ POPUP "Tools"
         msgText = "Reading Scene List: " + aFileName;
         Globals.statusPrint(msgText);
 
-        myStatus = mySceneList.readList(msgText, aFileName);
+        ScnFileParser parser = new ScnFileParser(mySceneList);
+        myStatus = parser.readList(msgText, aFileName);
         Globals.statusPrint(msgText);
 
         if(myStatus != 0) {
@@ -909,6 +914,7 @@ POPUP "Tools"
         }
 
         sceneFileName = dlg.getSelectedFile().getName();  // save the file name
+
         // Load the scene information into the client object
         mySceneList.getSceneInfo(sceneName, effectType, colorMode, 
             outputRows, outputColumns);
@@ -916,7 +922,7 @@ POPUP "Tools"
             viewRotateX, viewRotateY, viewRotateZ);
         getViewMatrix(viewMatrix);
 
-        if(this.effectType == SEQUENCE || this.effectType == MORPH) {
+        if((this.effectType == SEQUENCE) || (this.effectType == MORPH)) {
             this.previewSequenceEnabled = true;
             this.previewSceneEnabled    = false;
             this.renderSceneEnabled     = false;
@@ -985,10 +991,10 @@ POPUP "Tools"
 
         closeAllChildren();
         String aFileName;
-        // TODO: Replace with JFileChooser
-        // CFileDialog dlg = new CFileDialog(true, "bmp", "*.bmp");
+
         JFileChooser dlg = new JFileChooser();
         dlg.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        dlg.setFileFilter(new BMPFileFilter());
         int showDlgResult = dlg.showDialog(this, "Select bmp file");
 
         int aStatus;
@@ -1001,7 +1007,7 @@ POPUP "Tools"
             aFileName = dlg.getSelectedFile().getName();
 
             // Center the input image by removing any chromacolor border 
-            Globals.constructPathName(centeredName, aFileName, 'q');
+            FileUtils.constructPathName(centeredName, aFileName, 'q');
             if(centeredName.equals(aFileName)) {
                 Globals.beep(10, 10);
                 Globals.statusPrint("onToolsCreateAlphaImage: Centered image name cannot equal original image name");
@@ -1019,7 +1025,7 @@ POPUP "Tools"
 
             // Create an alpha image
             String alphaName = "";
-            Globals.constructPathName(alphaName, aFileName, 'a');
+            FileUtils.constructPathName(alphaName, aFileName, 'a');
             if(alphaName.equals(aFileName)) {
                 Globals.beep(10, 10);
                 Globals.statusPrint("onToolsCreateAlphaImage: Alpha image name cannot equal original image name");
@@ -1054,7 +1060,7 @@ POPUP "Tools"
                     Globals.statusPrint(msgText);
                 }
 
-                Globals.constructPathName(alphaName, aFileName, 'a');
+                FileUtils.constructPathName(alphaName, aFileName, 'a');
                 if(alphaName.equals(aFileName)) {
                     Globals.statusPrint("Alpha Image Name cannot equal the original file name");
                     return;
@@ -1201,10 +1207,9 @@ POPUP "Tools"
         String inPath, outPath;
         _chdir(Globals.ictPreference.getPath(Preference.VRMLDirectory)); 
 
-        // TODO: Replace with JFileChooser, maybe add FileFilter
-        // CFileDialog dlg = new CFileDialog(TRUE, "wrl", "*.wrl");
         JFileChooser dlg = new JFileChooser();
         dlg.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        dlg.setFileFilter(new WRLFileFilter());
         int showDlgResult = dlg.showDialog(this, "Select WRL file");
 
         if (showDlgResult == JFileChooser.APPROVE_OPTION) {
@@ -1377,7 +1382,7 @@ POPUP "Tools"
     // ON_COMMAND(ID_RENDER_SCENE, OnRenderScene)
     public void onRenderStillScene() {
         closeAllChildren();
-        if(isDirty) {         //if the client window has been drawn on, erase it
+        if(isDirty) {         // If the client window has been drawn on, erase it
             isDirty = false;
             repaint();
         }
