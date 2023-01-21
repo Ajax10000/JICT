@@ -2,6 +2,8 @@ package core;
 
 import globals.Globals;
 
+import math.MathUtils;
+
 public class MemImage {
     boolean ictdebug = false;
     protected HANDLE fp;            // Used with memimg32.cpp
@@ -159,7 +161,7 @@ public:
             return;
         }
 
-        if((rw != 'R') && (rw != 'r') && (rw != 'W'() && (rw != 'w')) {
+        if((rw != 'R') && (rw != 'r') && (rw != 'W') && (rw != 'w')) {
             msgBuffer = "MemImage Constructor 1: rw must be R or W - " + rw;
             Globals.statusPrint(msgBuffer);
             this.valid = false;
@@ -2248,7 +2250,7 @@ public:
                 
                     float diff = 255.0f - sum;   //steepen the ramp to 0
                     sum -= (diff * 0.5f);
-                    sum = Globals.bound(sum, 0.0f, 255.0f);
+                    sum = MathUtils.bound(sum, 0.0f, 255.0f);
                     outImage.setMPixel(col, row, (byte)(sum + 0.5f));
                 }
             }
@@ -2357,7 +2359,7 @@ public:
                 
                     float diff = 255.0f - sum;   //steepen the ramp to 0
                     sum -= (diff * 0.5f);
-                    sum = Globals.bound(sum, 0.0f, 255.0f);
+                    sum = MathUtils.bound(sum, 0.0f, 255.0f);
                     outImage.setMPixel(col,row, (byte)(sum + 0.5f));
                 }
             }
@@ -2481,7 +2483,7 @@ public:
 
                     float diff = 255.0f - sum;   //steepen the ramp to 0
                     sum -= (diff * 0.5f);
-                    sum = Globals.bound(sum, 0.0f, 255.0f);
+                    sum = MathUtils.bound(sum, 0.0f, 255.0f);
                     outImage.setMPixel(col, row, (byte)(sum + 0.5f));
                 }
             }
@@ -2574,10 +2576,10 @@ public:
         // The weights are the normalized distances between each vertex distance and the centroid
         // fill the triangle bounded by the centroid and each successive pair of vertices
         float totalDistance = 0.0f;
-        float d1 = Globals.getDistance2d((float)xCent, (float)yCent, (float)I1x, (float)I1y);
-        float d2 = Globals.getDistance2d((float)xCent, (float)yCent, (float)I2x, (float)I2y);
-        float d3 = Globals.getDistance2d((float)xCent, (float)yCent, (float)I3x, (float)I3y);
-        float d4 = Globals.getDistance2d((float)xCent, (float)yCent, (float)I4x, (float)I4y);
+        float d1 = MathUtils.getDistance2d((float)xCent, (float)yCent, (float)I1x, (float)I1y);
+        float d2 = MathUtils.getDistance2d((float)xCent, (float)yCent, (float)I2x, (float)I2y);
+        float d3 = MathUtils.getDistance2d((float)xCent, (float)yCent, (float)I3x, (float)I3y);
+        float d4 = MathUtils.getDistance2d((float)xCent, (float)yCent, (float)I4x, (float)I4y);
         totalDistance = d1 + d2 + d3 + d4;
         if(totalDistance == 0.0f) {
             Globals.statusPrint("MemImage.fillPolyZ: Sum of polygon diagonals must be > 0");
