@@ -1,5 +1,7 @@
 package core;
 
+import fileUtils.FileUtils;
+
 import globals.Globals;
 
 import java.awt.Color;
@@ -385,7 +387,7 @@ public class ScnFileParser {
                                 midRed, midGreen, midBlue, 
                                 correctedImage, adjustmentType, 0);
 
-                            Globals.constructPathName(colorAdjustedPath, theFileName, 'j');     
+                            FileUtils.constructPathName(colorAdjustedPath, theFileName, 'j');     
                             msgBuffer = "sceneList.readList: Saving adjusted color image: " + colorAdjustedPath;
                             Globals.statusPrint(msgBuffer);
             
@@ -743,7 +745,7 @@ public class ScnFileParser {
                             midRed, midGreen, midBlue, 
                             correctedImage, adjustmentType, 0);
 
-                        Globals.constructPathName(colorAdjustedPath, theFileName, 'j');     
+                        FileUtils.constructPathName(colorAdjustedPath, theFileName, 'j');     
                         msgBuffer = "Saving adjusted color image: " + colorAdjustedPath;
                         Globals.statusPrint(msgBuffer);
                   
