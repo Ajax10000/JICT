@@ -4,10 +4,13 @@ import core.MemImage;
 import core.SceneElement;
 import core.Shape3d;
 
+import fileUtils.FileUtils;
+
 import java.io.File;
 
 import javax.swing.JLabel;
 
+import math.MathUtils;
 import math.TMatrix;
 import math.Vect;
 
@@ -90,146 +93,6 @@ public class Globals {
         // Display the message immediately on the status bar
         lblStatus.setText(psMessage);
     } // statusPrint
-
-
-    // This method came from UTILS.CPP
-    public static boolean fileExists(String psPathName) {
-        File stream = fopen(psPathName, "r");
-
-        if(stream == null ) {
-           return false;
-        } else {
-           fclose(stream);
-           return true;
-        }
-    } // fileExists
-
-
-    // This method came from UTILS.CPP
-    // Called from:
-    //     Shape3d.getWorldVertex
-    public static float interpolate(float desired1, float desired2, float reference1, float reference2, float referenceCurrent) {
-        if(reference1 == reference2) { 
-            return desired1;
-        }
-
-        return desired1 - (desired1 - desired2) * ((reference1 - referenceCurrent) / 
-                          (reference1 - reference2));
-    } // interpolate
-      
-        
-    // This method came from UTILS.CPP
-    // Called from:
-    //     ScenePreviewDlg.onCmdPlus
-    public static float fPolar(float angle) {
-        if(angle > 0.0f) {
-            while(angle >= 360.0f) {
-                angle -= 360.0f;
-            }
-        } else {
-            while(angle <= 0.0f) {
-                angle += 360.0f;
-            }
-        }
-
-        if(angle == 360.0f) {
-            angle = 0.0f;
-        }
-
-        return angle;
-    } // fPolar
-    
-
-    // This method came from UTILS.CPP
-    // Called from:
-    //     Shape3d.addVertices
-    //     Shape3d.getBoundaryPoint
-    public static float polarAtan(float run, float rise) {
-        //  This arcTangent returns a result between 0 and 2Pi radians;
-        float rayAngle = (float)Math.atan2(rise, run);
-        if(rayAngle < 0.0f) {
-            rayAngle = 3.1415926f + (3.1415926f + rayAngle);
-        }
-
-        return rayAngle;
-    } // polarAtan
-    
-
-    // This method came from UTILS.CPP
-    public static float bound(float value, float minValue, float maxValue) {
-        if (value < minValue) {
-            value = minValue;
-        }
-
-        if(value > maxValue) {
-            value = maxValue;
-        }
-
-        return value;
-    } // bound
-    
-
-    // This method came from UTILS.CPP
-    // Called from:
-    //     motionBlur
-    public static void makePath(String currentPath, String inPath, String prefix, int frameCounter, String inSuffix) {
-        sprintf(currentPath, "%s%.31s%#04d%s.bmp\0", inPath, prefix, frameCounter, inSuffix);
-    } // makePath
-      
-
-    // This method came from UTILS.CPP
-    // Called from:
-    //     motionBlur
-    public static int getPathPieces(String firstImagePath, String psDirectory, 
-    String psFileName, String psPrefix, Integer pIFrameNum, String psInSuffix) {
-        String sDdrive, sDext, sFrameNum, sTempDirectory;
-        char aDot;
-        aDot = '.';
-      
-        // The following sets output parameter psFileName
-       _splitpath(firstImagePath, sDdrive, psDirectory, psFileName, sDext);
-
-       // Assumed input:   xxxxx0000c
-       // Set output parameter psDirectory
-       sTempDirectory = sDdrive + psDirectory;
-       psDirectory = sTempDirectory;
-       
-       // Set output parameter psInSuffix (to c, assuming input xxxxx0000c)
-       psInSuffix = psFileName.substring(psFileName.length() - 1);
-      
-       // Set output parameter pIFrameNum (to 0000, assuming input xxxxx0000c)
-       sFrameNum = psFileName.substring(5, 4);
-       pIFrameNum = Integer.parseInt(sFrameNum);
-       
-       // Set output parameter psPrefix (to xxxxx, assuming input xxxxx0000c)
-       psPrefix = psFileName.substring(0, 4);
-      
-        return 0;
-    } // getPathPieces
-
-
-    // This method came from DEPTHSRT.CPP
-    // Called from:
-    //     getIntervals
-    //     Shape3d.divideLongestArc
-    //     Shape3d.getBoundaryPoint
-    public static float getDistance2d(float x1, float y1, float x2, float y2) {
-        return (float)Math.sqrt(((x1 - x2) * (x1 - x2)) + ((y1 - y2) * (y1 - y2)));
-    } // getDistance2d
-      
-
-    // This method came from DEPTHSRT.CPP
-    // Called from: 
-    //     iwarpz
-    //     RenderObject.renderMeshz
-    //     RenderObject.renderShapez
-    //     RenderObject.transformAndProjectPoint2
-    //     SceneList.depthSort
-    //     Shape3d.getWorldDistance
-    public static float getDistance3d(float x1, float y1, float z1, float x2, float y2, float z2) {
-        return (float)Math.sqrt(((x1 - x2) * (x1 - x2)) + ((y1 - y2) * (y1 - y2)) +
-          ((z1 - z2) * (z1 - z2)));
-    } // getDistance3d
 
 
     // This method came from DEPTHSRT.CPP
@@ -480,11 +343,11 @@ public class Globals {
         sMaskDir   = ictPreference.getPath(Preference.MaskImageDirectory);
         String sCutoutPath, sMaskPath;
     
-        appendFileName(sCutoutRImage, psCutoutName, "r");
-        appendFileName(sCutoutGImage, psCutoutName, "g");
-        appendFileName(sCutoutBImage, psCutoutName, "b");
-        appendFileName(sCutoutMImage, psCutoutName, "a");
-        appendFileName(sCutoutRGBImage, psCutoutName, "c");
+        FileUtils.appendFileName(sCutoutRImage, psCutoutName, "r");
+        FileUtils.appendFileName(sCutoutGImage, psCutoutName, "g");
+        FileUtils.appendFileName(sCutoutBImage, psCutoutName, "b");
+        FileUtils.appendFileName(sCutoutMImage, psCutoutName, "a");
+        FileUtils.appendFileName(sCutoutRGBImage, psCutoutName, "c");
         sCutoutPath = sCutoutDir + sCutoutRGBImage;
         sMaskPath   = sMaskDir + sCutoutMImage;
     
@@ -1004,7 +867,7 @@ public class Globals {
         }
 
         // The directory includes the drive letter
-        status = getPathPieces(firstImagePath, directory, fileName, prefix, 
+        status = FileUtils.getPathPieces(firstImagePath, directory, fileName, prefix, 
             frameNum, inSuffix);
         if(status != 0) {
             statusPrint("motionBlur: Check the first image pathname");
@@ -1024,7 +887,7 @@ public class Globals {
             // Open and close the appropriate images
             if(frameCounter == frameNum + blurDepth) {
                 for(i = -blurDepth; i <= blurDepth; i++) { // open the first blurDepth images
-                    makePath(currentPath, directory, prefix, frameCounter + i, inSuffix);
+                    FileUtils.makePath(currentPath, directory, prefix, frameCounter + i, inSuffix);
                     switch(bpp) {
                     case 8:
                         images[i + blurDepth] = new MemImage(currentPath, 0, 0, RANDOM, 'R', EIGHTBITMONOCHROME);
@@ -1047,7 +910,7 @@ public class Globals {
                 }
 
                 // Open new image
-                makePath(currentPath, directory, prefix, frameCounter + blurDepth, inSuffix);
+                FileUtils.makePath(currentPath, directory, prefix, frameCounter + blurDepth, inSuffix);
                 switch(bpp) {
                 case 8:
                     images[numOpenImages - 1] = new MemImage(currentPath, 0, 0, RANDOM, 'R', EIGHTBITMONOCHROME);
@@ -1069,7 +932,7 @@ public class Globals {
             float avgBucket, avgRedBucket, avgGreenBucket, avgBlueBucket;
 
             outSuffix = "b";
-            makePath(outPath, outputDir, prefix, frameCounter, outSuffix);
+            FileUtils.makePath(outPath, outputDir, prefix, frameCounter, outSuffix);
             outImage = new MemImage(imHeight, imWidth, bpp);
 
             for (row = 1; row < imHeight; row++) {
@@ -1125,30 +988,6 @@ public class Globals {
 
         return 0;
     } // motionBlur
-
-
-    // This method came from SceneList
-    // Called from:
-    //     createCutout
-    public static void appendFileName(String psOutputFileName, String psPrefix, String psSuffix) {
-        sprintf(psOutputFileName, "%.31s%s.bmp\0", psPrefix, psSuffix);
-    } // appendFileName
-
-
-    public static void constructPathName(String outPath, String inPath, char lastLetter) {
-        String sDrive, sDir, sFile, sExt;
-        _splitpath(inPath, sDrive, sDir, sFile, sExt);
-        int iLength = sFile.length();
-
-        if(iLength > 0) {
-            char[] charArray = new char[1];
-            charArray[0] = lastLetter;
-            String sLastLetter = new String(charArray);
-            sFile.concat(sLastLetter);  // Substitute a letter
-        }
-
-        _makepath(outPath, sDrive, sDir, sFile, sExt);
-    } // constructPathName
 
 
     // This method performs planar texture mapping.
@@ -1395,7 +1234,7 @@ public class Globals {
 
                 if(zImage != null) {
                     theZ = zImage.getMPixel32((int)(x + xCentOffset), (int)(y + yCentOffset));
-                    aDist = getDistance3d(xIn, yIn, zIn, vx, vy, vz);
+                    aDist = MathUtils.getDistance3d(xIn, yIn, zIn, vx, vy, vz);
 
                     // Update the zbuffer if a smaller distance and non transparent color
                     if((aDist < theZ) && ((int)intensity != CHROMAVALUE)) {
@@ -1439,60 +1278,6 @@ public class Globals {
 
         return 0;
     } // iwarpz
-
-
-    // This method came from IWARP.CPP
-    // Called from:
-    //     getIntervals
-    public static void getLineEquation(int x1, int y1, int x2, int y2, 
-    Float m, Float b, 
-    Boolean horzFlag, Boolean vertFlag) {
-        // Determine the line equation y = mx + b from 2 (integer) points on the line
-        m = 0.0f;
-        b = 0.0f;
-        horzFlag = false;
-        vertFlag = false;
-        float rise = (y2 - y1);
-        float run  = (x2 - x1);
-
-        // Set output parameters horzFlag, vertFlag, m and b
-        if (rise == 0.0f) horzFlag = true;
-        if (run == 0.0f)  vertFlag = true;
-        if (!(vertFlag || horzFlag)) {
-            m = rise / run;
-            b = (float)y2 - (m * ((float)x2));
-        }
-    } // getLineEquation
-
-
-    // This method came from IWARP.CPP
-    // Called from:
-    //     Shape3d.getBoundaryPoint
-    public static void getFLineEquation(float x1, float y1, float x2, float y2, 
-    Float m, Float b, 
-    Boolean horzFlag, Boolean vertFlag) {
-        // Determine the line equation y = mx + b from 2 (float) points on the line
-        m = 0.0f;
-        b = 0.0f;
-        horzFlag = false;
-        vertFlag = false;
-
-        float rise = (y2 - y1);
-        float run  = (x2 - x1);
-
-        // Set the output parameters horzFlag, vertFlag, m and b
-        if (rise == 0.0f) {
-            horzFlag = true;
-        }
-        if (run == 0.0f) {
-            vertFlag = true;
-        }
-
-        if (!(vertFlag || horzFlag)) {
-            m = rise / run;
-            b = y2 - (m * x2);
-        }
-    } // getFLineEquation
 
 
     // This method came from IWARP.CPP
@@ -1566,7 +1351,7 @@ public class Globals {
             maxy = Math.max(sy1, sy2);
 
             // The following method sets variables m, b, horzFlag and vertFlag
-            getLineEquation(sx1, sy1, sx2, sy2, m, b, horzFlag, vertFlag);
+            MathUtils.getLineEquation(sx1, sy1, sx2, sy2, m, b, horzFlag, vertFlag);
             theX = 0.0f;
             if(m != 0.0f) {
                 theX = ((float)y - b) / m;
@@ -1585,8 +1370,8 @@ public class Globals {
             
             if (!(horzFlag || vertFlag)) {
                 // Determine z by interpolating between screen line segment endpoints
-                totalDistance   = getDistance2d(sx1, sy1, sx2, sy2);
-                partialDistance = getDistance2d(newX,  y, sx1, sy1);
+                totalDistance   = MathUtils.getDistance2d(sx1, sy1, sx2, sy2);
+                partialDistance = MathUtils.getDistance2d(newX,  y, sx1, sy1);
                 // This is a ratio of screen coordinates
                 if(totalDistance != 0.0f) {
                     ratio = partialDistance/totalDistance; // 0 <= ratio <= 1
@@ -1610,7 +1395,7 @@ public class Globals {
                     tYCoordsIdx++;
                     tZCoordsIdx++;
                     iCurrentScreenXIdx++;
-                    intDistance[index-1] = intervalDistance(minx, maxx, (int)theX);
+                    intDistance[index-1] = MathUtils.intervalDistance(minx, maxx, (int)theX);
                     numCoords++;
                     // end if between sx1 and sx2
                 } else { 
@@ -1619,7 +1404,7 @@ public class Globals {
                     tempXCoords[tempIndex] = tx2 + (ratio * (tx1 - tx2));
                     tempYCoords[tempIndex] = ty2 + (ratio * (ty1 - ty2));	
                     tempZCoords[tempIndex] = tz2 + (ratio * (tz1 - tz2));
-                    intDistance[tempIndex] = intervalDistance(minx, maxx, (int)theX);
+                    intDistance[tempIndex] = MathUtils.intervalDistance(minx, maxx, (int)theX);
                     tempIndex++;
 
                     if(ictdebug) {
@@ -1650,7 +1435,7 @@ public class Globals {
                         tXCoordsIdx++;
                         tYCoordsIdx++;
                         tXCoordsIdx++;
-                        intDistance[index-1] = intervalDistance(miny, maxy, y);
+                        intDistance[index-1] = MathUtils.intervalDistance(miny, maxy, y);
                         numCoords++;
                         if(ictdebug) {
                             statusPrint("vertPoint");
@@ -1661,7 +1446,7 @@ public class Globals {
                         tempXCoords[tempIndex] = tx1;
                         tempYCoords[tempIndex] = ty2 + (ratio * (ty1 - ty2));	
                         tempZCoords[tempIndex] = tz2 + (ratio * (tz1 - tz2));
-                        intDistance[tempIndex] = intervalDistance(miny, maxy, y);
+                        intDistance[tempIndex] = MathUtils.intervalDistance(miny, maxy, y);
                         tempIndex++;
                     }
                 } // if vertFlag
@@ -2202,7 +1987,7 @@ public class Globals {
                     q22 = inImage.getMPixel(col + 1, row + 1) * weight[2][2];
 
                     sum = q00 + q10 + q20 + q10 + q11 + q12 + q20 + q21 + q22;
-                    sum = bound(sum, 0.0f, 255.0f);
+                    sum = MathUtils.bound(sum, 0.0f, 255.0f);
                     outImage.setMPixel(col, row, (byte)(sum + 0.5f));
                     break;
 
@@ -2230,9 +2015,9 @@ public class Globals {
                     sumg = q00g + q10g + q20g + q10g + q11g + q12g + q20g + q21g + q22g;
                     sumb = q00b + q10b + q20b + q10b + q11b + q12b + q20b + q21b + q22b;
 
-                    sumr = bound(sumr, 0.0f, 255.0f);
-                    sumg = bound(sumg, 0.0f, 255.0f);
-                    sumb = bound(sumb, 0.0f, 255.0f);
+                    sumr = MathUtils.bound(sumr, 0.0f, 255.0f);
+                    sumg = MathUtils.bound(sumg, 0.0f, 255.0f);
+                    sumb = MathUtils.bound(sumb, 0.0f, 255.0f);
 
                     outImage.setMPixelRGB(col, row, 
                         (byte)(sumr + 0.5f), (byte)(sumg + 0.5f), (byte)(sumb + 0.5f));
@@ -2480,7 +2265,7 @@ public class Globals {
                     refPointX, refPointY, refPointZ, outHeight, outWidth, 
                     atx, aty, atz);
                 if(zImage != null) {
-                    d1 = getDistance3d(vx, vy, vz, atx, aty, atz);
+                    d1 = MathUtils.getDistance3d(vx, vy, vz, atx, aty, atz);
                 }
             
                 forwardMatrix.transformAndProjectPoint(xIn, yIn, zIn, 
@@ -2488,7 +2273,7 @@ public class Globals {
                     refPointX, refPointY, refPointZ, outHeight, outWidth, 
                     atx, aty, atz);
                 if(zImage != null) {
-                    d2 = getDistance3d(vx, vy, vz, atx, aty, atz);
+                    d2 = MathUtils.getDistance3d(vx, vy, vz, atx, aty, atz);
                 }
             
                 forwardMatrix.transformAndProjectPoint(xIn, yIn - increment, zIn, 
@@ -2496,7 +2281,7 @@ public class Globals {
                     refPointX, refPointY, refPointZ, outHeight, outWidth, 
                     atx, aty, atz);
                 if(zImage != null) {
-                    d3 = getDistance3d(vx, vy, vz, atx, aty, atz);
+                    d3 = MathUtils.getDistance3d(vx, vy, vz, atx, aty, atz);
                 }
             
                 forwardMatrix.transformAndProjectPoint(xIn-increment, yIn - increment, zIn, 
@@ -2504,7 +2289,7 @@ public class Globals {
                     refPointX, refPointY, refPointZ, outHeight, outWidth, 
                     atx, aty, atz);
                 if(zImage != null) {
-                    d4 = getDistance3d(vx, vy, vz, atx, aty, atz);
+                    d4 = MathUtils.getDistance3d(vx, vy, vz, atx, aty, atz);
                 }
             
                 outImage.fillPolyz(
@@ -2653,7 +2438,7 @@ public class Globals {
                     iBuffer[iBufferIdx] = i1;
                     iBufferIdx++;
 
-                    dBuffer[dBufferIdx] = getDistance3d(tx, ty, tz, vx, vy, vz);
+                    dBuffer[dBufferIdx] = MathUtils.getDistance3d(tx, ty, tz, vx, vy, vz);
                     dBufferIdx++;
                 }
             
@@ -2679,7 +2464,7 @@ public class Globals {
                     dPrev2Idx++;
 
                     if(zBuffer != null) {
-                        dTemp1 = getDistance3d(tx, ty, tz, vx, vy, vz);
+                        dTemp1 = MathUtils.getDistance3d(tx, ty, tz, vx, vy, vz);
                     }
                 }
     
@@ -2688,7 +2473,7 @@ public class Globals {
                     yTemp2 = sy1;
                     iTemp2 = i1;
                     if(zBuffer != null) {
-                        dTemp2 = getDistance3d(tx, ty, tz, vx, vy, vz);
+                        dTemp2 = MathUtils.getDistance3d(tx, ty, tz, vx, vy, vz);
                     }
          
                     // Render the quadrangle intensities
@@ -2729,24 +2514,6 @@ public class Globals {
     
         return 0;
     } // fwarpz2
-  
-
-    // This method came from IWARP.CPP
-    // Called from:
-    //     getIntervals
-    public static int intervalDistance(int a, int b, int c) {
-        // Returns 0 if c is inside the interval (a,b).  i.e. a <= c <= b
-        // else returns distance between c and interval (a,b)
-        int b1 = a - c;
-        int b2 = c - b;
-        int b3 = Math.max(b1, b2);
-
-        if(b3 < 0) {
-            return 0;
-        } else {
-            return b3;
-        }
-    } // intervalDistance
 
 
     // This method came from QMESHMODEL.CPP
@@ -2918,15 +2685,15 @@ public class Globals {
 
         // As a matter of convenience copy the texture image to the same directory
         // in which the surface images reside, if it isn't there already.
-        if(!fileExists(outPath)) {
+        if(!FileUtils.fileExists(outPath)) {
             msgText = "Copying QMesh Model Texture Image to: " + outPath;
             statusPrint(msgText);
             CopyFile(inputImagePath, outPath, 1);
         }
  
-        constructPathName(xPath, outPath, 'x');
-        constructPathName(yPath, outPath, 'y');
-        constructPathName(zPath, outPath, 'z');
+        FileUtils.constructPathName(xPath, outPath, 'x');
+        FileUtils.constructPathName(yPath, outPath, 'y');
+        FileUtils.constructPathName(zPath, outPath, 'z');
 
         // Insure that a generated path is not the same as the texture path
         if(
@@ -3276,9 +3043,9 @@ public class Globals {
         theBlue.close();
         theRGB.close();
 
-        remove(redImage);     // to conserve disk space, remove the
-        remove(greenImage);   // input files
-        remove(blueImage);
+        FileUtils.deleteFile(redImage);     // to conserve disk space, remove the
+        FileUtils.deleteFile(greenImage);   // input files
+        FileUtils.deleteFile(blueImage);
         return 0;
     }
 
@@ -3547,13 +3314,13 @@ public class Globals {
         if(triangleType == I_POINTONSIDE) {
             for(row = minY; row <= midY; row++) {
                 // Interpolate the x interval and the intensities at the interval boundary
-                ix1 = (int)interpolate((float)minX, (float)maxX, (float)minY, (float)maxY, (float)row);
-                ix2 = (int)interpolate((float)minX, (float)midX, (float)minY, (float)midY, (float)row);
-                ip1 = (int)interpolate(       minI,        maxI, (float)minY, (float)maxY, (float)row);
-                ip2 = (int)interpolate(       minI,        midI, (float)minY, (float)midY, (float)row);
+                ix1 = (int)MathUtils.interpolate((float)minX, (float)maxX, (float)minY, (float)maxY, (float)row);
+                ix2 = (int)MathUtils.interpolate((float)minX, (float)midX, (float)minY, (float)midY, (float)row);
+                ip1 = (int)MathUtils.interpolate(       minI,        maxI, (float)minY, (float)maxY, (float)row);
+                ip2 = (int)MathUtils.interpolate(       minI,        midI, (float)minY, (float)midY, (float)row);
                 if(zImage != null) {
-                    id1 = interpolate(minD, maxD, (float)minY, (float)maxY, (float)row);
-                    id2 = interpolate(minD, midD, (float)minY, (float)midY, (float)row);
+                    id1 = MathUtils.interpolate(minD, maxD, (float)minY, (float)maxY, (float)row);
+                    id2 = MathUtils.interpolate(minD, midD, (float)minY, (float)midY, (float)row);
                 }
 
                 nSteps = Math.abs(ix2 - ix1);
@@ -3595,7 +3362,7 @@ public class Globals {
                             if(distance <= 1.0f) {
                                 distance = 1.0f;
                             }
-                            intensity = bound(intensity, 0.0f, 255.0f);
+                            intensity = MathUtils.bound(intensity, 0.0f, 255.0f);
                             zImage.setMPixel32(col, row, distance);
 
                             if(bpp == 8)  outImage.setMPixel(col, row, (byte)intensity);
@@ -3604,7 +3371,7 @@ public class Globals {
                         }
                     } else {
                         // Render without a Z Buffer
-                        intensity = bound(intensity, 1.0f, 255.0f);
+                        intensity = MathUtils.bound(intensity, 1.0f, 255.0f);
                         if(bpp == 8)  outImage.setMPixel(col, row, (byte)intensity);
                         if(bpp == 24) outImage.setMPixelRGB(col, row, (byte)intensity,
                             (byte)intensity, (byte)intensity);
@@ -3618,13 +3385,13 @@ public class Globals {
             // Handle the second half of the pointonside case
             for(row = midY; row <= maxY; row++) {
                 // Interpolate the x interval and the intensities at the interval boundary
-                ix1 = (int)interpolate((float)minX, (float)maxX, (float)minY, (float)maxY, (float)row);
-                ix2 = (int)interpolate((float)midX, (float)maxX, (float)midY, (float)maxY, (float)row);
-                ip1 = (int)interpolate(       minI,        maxI, (float)minY, (float)maxY, (float)row);
-                ip2 = (int)interpolate(       midI,        maxI, (float)midY, (float)maxY, (float)row);
+                ix1 = (int)MathUtils.interpolate((float)minX, (float)maxX, (float)minY, (float)maxY, (float)row);
+                ix2 = (int)MathUtils.interpolate((float)midX, (float)maxX, (float)midY, (float)maxY, (float)row);
+                ip1 = (int)MathUtils.interpolate(       minI,        maxI, (float)minY, (float)maxY, (float)row);
+                ip2 = (int)MathUtils.interpolate(       midI,        maxI, (float)midY, (float)maxY, (float)row);
                 if(zImage != null) {
-                    id1 = interpolate(minD, maxD, (float)minY, (float)maxY, (float)row);
-                    id2 = interpolate(midD, maxD, (float)midY, (float)maxY, (float)row);
+                    id1 = MathUtils.interpolate(minD, maxD, (float)minY, (float)maxY, (float)row);
+                    id2 = MathUtils.interpolate(midD, maxD, (float)midY, (float)maxY, (float)row);
                 }
 
                 nSteps = Math.abs(ix2 - ix1);
@@ -3663,44 +3430,44 @@ public class Globals {
                             if(distance <= 1.0f) {
                                 distance = 1.0f;
                             }
-                            intensity = bound(intensity, 0.0f, 255.0f);
+                            intensity = MathUtils.bound(intensity, 0.0f, 255.0f);
                             zImage.setMPixel32(col, row, distance);
                             if(bpp == 8)  outImage.setMPixel(col, row, (byte)intensity);
                             if(bpp == 24) outImage.setMPixelRGB(col, row, (byte)intensity,
                                 (byte)intensity, (byte)intensity);
                         }
                     } else {
-                        intensity = bound(intensity, 0.0f, 255.0f);
+                        intensity = MathUtils.bound(intensity, 0.0f, 255.0f);
                         if(bpp == 8)  outImage.setMPixel(col, row, (byte)intensity);
                         if(bpp == 24) outImage.setMPixelRGB(col, row, (byte)intensity,
                             (byte)intensity, (byte)intensity);
                     }
                     intensity += intensityStep;
                     distance  += distanceStep;
-                }
-            }
+                } // for col
+            } // for row
         } else {
             // Handle pointontop, pointonbottom cases
             for(row = minY; row <= maxY; row++) {
                 // Interpolate the x interval and the intensities at the interval boundary
                 if(triangleType == I_POINTONTOP) {
-                    ix1 = (int)interpolate((float)minX, (float)maxX, (float)minY, (float)maxY, (float)row);
-                    ix2 = (int)interpolate((float)minX, (float)midX, (float)minY, (float)midY, (float)row);
-                    ip1 = (int)interpolate(       minI,        maxI, (float)minY, (float)maxY, (float)row);
-                    ip2 = (int)interpolate(       minI,        midI, (float)minY, (float)midY, (float)row);
+                    ix1 = (int)MathUtils.interpolate((float)minX, (float)maxX, (float)minY, (float)maxY, (float)row);
+                    ix2 = (int)MathUtils.interpolate((float)minX, (float)midX, (float)minY, (float)midY, (float)row);
+                    ip1 = (int)MathUtils.interpolate(       minI,        maxI, (float)minY, (float)maxY, (float)row);
+                    ip2 = (int)MathUtils.interpolate(       minI,        midI, (float)minY, (float)midY, (float)row);
                     if(zImage != null) {
-                        id1 = interpolate(minD, maxD, (float)minY, (float)maxY, (float)row);
-                        id2 = interpolate(minD, midD, (float)minY, (float)midY, (float)row);
+                        id1 = MathUtils.interpolate(minD, maxD, (float)minY, (float)maxY, (float)row);
+                        id2 = MathUtils.interpolate(minD, midD, (float)minY, (float)midY, (float)row);
                     }
                 }
                 if(triangleType == I_POINTONBOTTOM) {
-                    ix1 = (int)interpolate((float)minX, (float)maxX, (float)minY, (float)maxY, (float)row);
-                    ix2 = (int)interpolate((float)midX, (float)maxX, (float)midY, (float)maxY, (float)row);
-                    ip1 = (int)interpolate(       minI,        maxI, (float)minY, (float)maxY, (float)row);
-                    ip2 = (int)interpolate(       midI,        maxI, (float)midY, (float)maxY, (float)row);
+                    ix1 = (int)MathUtils.interpolate((float)minX, (float)maxX, (float)minY, (float)maxY, (float)row);
+                    ix2 = (int)MathUtils.interpolate((float)midX, (float)maxX, (float)midY, (float)maxY, (float)row);
+                    ip1 = (int)MathUtils.interpolate(       minI,        maxI, (float)minY, (float)maxY, (float)row);
+                    ip2 = (int)MathUtils.interpolate(       midI,        maxI, (float)midY, (float)maxY, (float)row);
                     if(zImage != null) {
-                        id1 = interpolate(minD, maxD, (float)minY, (float)maxY, (float)row);
-                        id2 = interpolate(midD, maxD, (float)midY, (float)maxY, (float)row);
+                        id1 = MathUtils.interpolate(minD, maxD, (float)minY, (float)maxY, (float)row);
+                        id2 = MathUtils.interpolate(midD, maxD, (float)midY, (float)maxY, (float)row);
                     }
                 }
 
@@ -3740,14 +3507,14 @@ public class Globals {
                             if(distance <= 1.0f) {
                                 distance = 1.0f;
                             }
-                            intensity = bound(intensity, 0.0f, 255.0f);
+                            intensity = MathUtils.bound(intensity, 0.0f, 255.0f);
                             zImage.setMPixel32(col, row, distance);
                             if(bpp == 8)  outImage.setMPixel(col, row, (byte)intensity);
                             if(bpp == 24) outImage.setMPixelRGB(col, row, (byte)intensity,
                                 (byte)intensity, (byte)intensity);
                         }
                     } else {
-                        intensity = bound(intensity, 0.0f, 255.0f);
+                        intensity = MathUtils.bound(intensity, 0.0f, 255.0f);
                         if(bpp == 8)  outImage.setMPixel(col, row, (byte)intensity);
                         if(bpp == 24) outImage.setMPixelRGB(col, row, (byte)intensity,
                             (byte)intensity, (byte)intensity);
@@ -3755,8 +3522,8 @@ public class Globals {
 
                     intensity += intensityStep;
                     distance  += distanceStep;
-                }
-            }
+                } // for col
+            } // for row
         }
 
         return 0;
@@ -3835,7 +3602,7 @@ public class Globals {
         lightSource.y =   0.0f;
         lightSource.z = 512.0f;
         
-        float dCentroid = getDistance3d(lightSource.x, lightSource.y, lightSource.z, 
+        float dCentroid = MathUtils.getDistance3d(lightSource.x, lightSource.y, lightSource.z, 
             centroid.x, centroid.y, centroid.z);
         
         Vect.getNormal2(np1, p1, centroid, p2);
@@ -3853,7 +3620,7 @@ public class Globals {
         int Ip = 150;
         
         ip1 = lightModel(kd, Ip, 150, np1, lightSource, dCentroid);
-        ip1 = bound(ip1, 1.0f, 255.0f);
+        ip1 = MathUtils.bound(ip1, 1.0f, 255.0f);
 
         return (byte)ip1;
     } // getLight
@@ -4014,7 +3781,7 @@ public class Globals {
                     iBuffer[iBufferIdx] = i1;
                     iBufferIdx++;
 
-                    dBuffer[dBufferIdx] = getDistance3d(tx, ty, tz, vx, vy, vz);
+                    dBuffer[dBufferIdx] = MathUtils.getDistance3d(tx, ty, tz, vx, vy, vz);
                     dBufferIdx++;
                 }
               
@@ -4040,14 +3807,14 @@ public class Globals {
                     dPrev2Idx = 0;
                     dPrev2Idx++;
 
-                    dTemp1 = getDistance3d(tx, ty, tz, vx, vy, vz);
+                    dTemp1 = MathUtils.getDistance3d(tx, ty, tz, vx, vy, vz);
                 }
       
                 if ((row > 1) && (col > 1)) {
                     xTemp2 = sx1;
                     yTemp2 = sy1;
                     iTemp2 = i1;
-                    dTemp2 = getDistance3d(tx, ty, tz, vx, vy, vz);
+                    dTemp2 = MathUtils.getDistance3d(tx, ty, tz, vx, vy, vz);
 
                     outputImage.fillPolyz( 
                         xBuffer[xPrev1Idx], yBuffer[yPrev1Idx], iBuffer[iPrev1Idx], dBuffer[dPrev1Idx],
