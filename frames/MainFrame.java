@@ -32,6 +32,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 
+import java.io.File;
+
 import javax.swing.BoxLayout;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -824,12 +826,19 @@ POPUP "Tools"
     // MENUITEM "Open Image",                  ID_FILE_OPENIMAGE
     // ON_COMMAND(ID_FILE_OPENIMAGE, OnFileOpenimage)
     public void onFileOpenImage() {
-        // change to the default output file directory (indicated in the ICT preference object)
-        _chdir(Globals.ictPreference.getPath(Preference.OutputImageDirectory)); 
+        // Get the Output Image Directory
+        String sOutputImageDirectory = Globals.ictPreference.getPath(Preference.OutputImageDirectory);
+        File currDir = new File(sOutputImageDirectory);
 
         JFileChooser dlg = new JFileChooser();
+        // Change to the default output image directory (indicated in the ICT preference object)
+        dlg.setCurrentDirectory(currDir);
+        // The user can only choose a file (no directories)
         dlg.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        // The user can only choose files with the '.bmp' extension
         dlg.setFileFilter(new BMPFileFilter());
+        
+        // Allow the user to select a '.bmp' file
         int showDlgResult = dlg.showDialog(null, "Select image name");
 
         if (showDlgResult == JFileChooser.APPROVE_OPTION) {
@@ -853,12 +862,19 @@ POPUP "Tools"
     // MENUITEM "&Open Scene...\tCtrl+O",      ID_FILE_OPEN
     // ON_COMMAND(ID_FILE_OPEN, OnFileOpen)
     public void onFileOpen() {
-        // Change to the default scene file directory (indicated in the ICT preference object)
-        _chdir(Globals.ictPreference.getPath(Preference.SceneFileDirectory));
+        // Get the Scene File Directory
+        String sScnFileDirectory = Globals.ictPreference.getPath(Preference.SceneFileDirectory);
+        File currDir = new File(sScnFileDirectory);
 
         JFileChooser dlg = new JFileChooser();
+        // Change to the default scene file directory (indicated in the ICT preference object)
+        dlg.setCurrentDirectory(currDir);
+        // The user can only choose a file (no directories)
         dlg.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        // The user can only choose files with the '.scn' extension
         dlg.setFileFilter(new SCNFileFilter());
+
+        // Allow the user to choose a '.scn' file
         int showDlgResult = dlg.showDialog(null, "Select scene file");
 
         if (showDlgResult == JFileChooser.APPROVE_OPTION) {
@@ -873,7 +889,7 @@ POPUP "Tools"
     // MENUITEM "Create a Scene List...",      ID_TOOLS_CREATEASCENELIST
     // ON_COMMAND(ID_TOOLS_CREATEASCENELIST, OnToolsCreateascenelist)
     public void onToolsCreateASceneList() {
-        String aFileName;
+        String aFileName = "";
         String msgText;
         int myStatus;
         
@@ -889,12 +905,19 @@ POPUP "Tools"
         }
 
         // Display standard Open dialog box to select a file name.
-        // First, change to the default scene file directory (indicated in the ICT preference object)
-        _chdir(Globals.ictPreference.getPath(Preference.SceneFileDirectory)); 
+        // Get the Scene File Directory
+        String sSceneFileDirectory = Globals.ictPreference.getPath(Preference.SceneFileDirectory);
+        File currDir = new File(sSceneFileDirectory);
 
         JFileChooser dlg = new JFileChooser();
+        // Change to the default scene file directory (indicated in the ICT preference object)
+        dlg.setCurrentDirectory(currDir);
+        // The user can only choose a file (no directories)
         dlg.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        // The user can only choose files with the '.scn' extension
         dlg.setFileFilter(new SCNFileFilter());
+
+        // Allow the user to choose a '.scn' file
         int showDlgResult = dlg.showDialog(this, "Select scn file");
 
         if (showDlgResult == JFileChooser.APPROVE_OPTION) {
@@ -993,8 +1016,12 @@ POPUP "Tools"
         String aFileName;
 
         JFileChooser dlg = new JFileChooser();
+        // The user can only choose a file (no directories)
         dlg.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        // The user can only choose files with the '.bmp' extension
         dlg.setFileFilter(new BMPFileFilter());
+
+        // Allow the user to select a '.bmp' file
         int showDlgResult = dlg.showDialog(this, "Select bmp file");
 
         int aStatus;
@@ -1205,11 +1232,20 @@ POPUP "Tools"
     // ON_COMMAND(ID_TOOLS_RENDERVRMLFILE, OnToolsRenderVrmlFile)
     public void onToolsRenderVrmlFile() {
         String inPath, outPath;
-        _chdir(Globals.ictPreference.getPath(Preference.VRMLDirectory)); 
+
+        // Get the VRML File Directory
+        String sVRMLDirectory = Globals.ictPreference.getPath(Preference.VRMLDirectory)
+        File currDir = new File(sVRMLDirectory);
 
         JFileChooser dlg = new JFileChooser();
+        // Change to the default VRML file directory (indicated in the ICT preference object)
+        dlg.setCurrentDirectory(currDir);
+        // The user can only choose a file (no directories)
         dlg.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        // The user can only choose files with the '.scn' extension
         dlg.setFileFilter(new WRLFileFilter());
+
+        // Allow the user to choose a '.wrl' file
         int showDlgResult = dlg.showDialog(this, "Select WRL file");
 
         if (showDlgResult == JFileChooser.APPROVE_OPTION) {
