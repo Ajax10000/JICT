@@ -1,11 +1,16 @@
 package core;
 
+import fileUtils.FileUtils;
+
 import globals.Globals;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.io.File;
 
+import math.MathUtils;
 import math.TMatrix;
 import math.Vect;
 
@@ -404,7 +409,9 @@ protected:
         }
 
         int nDrawMode = GetROP2();
-        HPEN hBlackPen, hWhitePen, hPointPen;
+        // hPointPen and hBlackPen will be used as parameters to drawBox
+        HPEN hBlackPen, hPointPen;
+        // HPEN hWhitePen; This variable is not used
         SetMapMode(MM_TEXT); // Logical units=physical units = pixel
         
         currentShape.initCurrentVertex();
@@ -416,7 +423,6 @@ protected:
         // float referenceX, referenceY, referenceZ; // these variables are not used
         Color backgroundColor = graphics2D.getBackground();
 
-        hWhitePen = CreatePen(PS_SOLID, 1, backgroundColor);      
         int index;
         float ax, ay;
         int firstx, firsty, nextx, nexty;
@@ -606,7 +612,7 @@ protected:
 
     // TODO: Not a method
     int prepareCutout(Shape3d aShape, HWND HWindow, String imageFileName,
-      String cutoutName, int imageWidth, int imageHeight) {
+    String cutoutName, int imageWidth, int imageHeight) {
         // Creates a cutout image, alpha image, and shape file from
         // a boundary traced by the user
         int numVertices = aShape.getNumVertices();
@@ -655,7 +661,7 @@ protected:
         }
 
         maskImage.close();
-        remove("OneBit.bmp");
+        FileUtils.deleteFile("OneBit.bmp");
         
         Globals.statusPrint("RenderObject.prepareCutout: Removing borders from mask image...");
         MemImage originalImage = new MemImage(imageFileName, 0, 0, SEQUENTIAL, 'R', 0);
@@ -725,7 +731,7 @@ protected:
         // Create an unpacked (8 bit) mask image
         // statusPrint("maskFromShape: Unpacking Mask Image...");
         tempMaskImage.unPack(maskImage);
-        remove("OneBit.bmp");
+        FileUtils.deleteFile("OneBit.bmp");
         return 0;
     } // maskFromShape
 
@@ -741,37 +747,45 @@ protected:
     // TODO: Not a method
     // Called from:
     //     Ctor that takes 4 parameters: a String, int, boolean and Point3d
-    void assembleName(String inputName, char theSuffix, String outputName) {
-        String drive, dir, file, ext;
+    void assembleName(String psInputName, char pcSuffix, String psOutputName) {
+        String sDrive, sDir, sFile, sExt;
 
         // Break a pathname into its components, add a suffix then put it back together again
-        _splitpath(inputName, drive, dir, file, ext);
-        int theLength = file.length();
-        if(theLength > 0) {
+        _splitpath(psInputName, sDrive, sDir, sFile, sExt);
+        int iFileNameLength = sFile.length();
+        if(iFileNameLength > 0) {
             // *(file+theLength-1) = theSuffix;  // Substitute a suffix
-            file.concat(theSuffix);
+            char[] charArray = new char[1];
+            charArray[0] = pcSuffix;
+            sFile.concat(new String(charArray));
         }
 
-        _makepath(outputName, drive, dir, file, ext);
+        // Set the output parameter psOutputName
+        _makepath(psOutputName, sDrive, sDir, sFile, sExt);
     } // assembleName
 
 
+    // Draws the boundary of each quadrilateral in the mesh to produce a 
+    // wireframe view of the model.
+    // See p 172 of Visual Special Effects Toolkit in C++.
     // Called from:
     //     drawStill
-    void previewMesh(Graphics2D graphics2D, String modelName, float xOff, float yOff, 
+    void previewMesh(Graphics2D graphics2D, String modelName, 
+    float xOff, float yOff, 
     int screenHeight, int screenWidth) {
         // Create the line buffer data structure
         int[] xBuffer, yBuffer;
         int xBufferIdx, yBufferIdx;
         byte[] iBuffer;
         int iBufferIdx;
-        byte *iPrev1, *iPrev2;
+        int iPrev1Idx = 0, iPrev2Idx = 0;
       
-        byte iTemp1, iTemp2;
-        int xTemp1, yTemp1, xTemp2, yTemp2;
+        byte iTemp1 = (byte)0, iTemp2;
+        int xTemp1 = 0, yTemp1 = 0, xTemp2, yTemp2;
 
-        int *xPrev1, *yPrev1, *xPrev2, *yPrev2;
-        int sxMin, sxMax, syMin, syMax;	 //projected mesh bounding box
+        int xPrev1Idx = 0, yPrev1Idx = 0;
+        int xPrev2Idx = 0, yPrev2Idx = 0;
+        int sxMin = 0, sxMax = 0, syMin = 0, syMax = 0;	 // Projected mesh bounding box
 
         if (
         !xImage.isValid() ||
@@ -782,43 +796,47 @@ protected:
             return;
         }
 
-        // Later in a double for loop, buffer xTemp will be populated
+        // Later in a double for loop, buffer xBuffer will be populated
         xBuffer = new int[xImage.getWidth()];
+        /* Dead code, per compiler
         if (xBuffer == null) {
             Globals.statusPrint("RenderObject.previewMesh: Not enough memory for xBuffer");
             return;
         }
+        */
 
-        // Later in a double for loop, buffer yTemp will be populated
+        // Later in a double for loop, buffer yBuffer will be populated
         yBuffer = new int[yImage.getWidth()];
+        /* Dead code, per compiler 
         if (yBuffer == null) {
             Globals.statusPrint("RenderObject.previewMesh: Not enough memory for yBuffer");
             return;
         }
+        */
 
-        // Later in a double for loop, buffer iTemp will be populated
+        // Later in a double for loop, buffer iBuffer will be populated
         iBuffer = new byte[textureImage.getWidth()];
+        /* Dead code, per compiler
         if (iBuffer == null) {
             Globals.statusPrint("RenderObject.previewMesh: Not enough memory for iBuffer");
             return;
         }
+        */
 
         xBufferIdx = 0;
         yBufferIdx = 0;
         iBufferIdx = 0;
 
-        HPEN hPen;
-        SetMapMode(MM_TEXT); // Logical units = physical units = pixel
-        hPen = CreatePen(PS_SOLID, 1, Color.BLACK); // This grey pen matches the Win95 background color
-        SelectObject(hPen);
+        graphics2D.setColor(Color.BLACK);
 
-        int xOffset = (int)(xOff + 0.5f);
-        int yOffset = (int)(yOff + 0.5f);
+        // int xOffset = (int)(xOff + 0.5f); // this variable is not used
+        // int yOffset = (int)(yOff + 0.5f); // this variable is not used
 
         int imHeight = textureImage.getHeight();
         int imWidth  = textureImage.getWidth();
         int row, col;
-        float x1, y1, z1, tx, ty, tz;
+        float x1, y1, z1;
+        float tx = 0.0f, ty = 0.0f, tz = 0.0f;
         byte i1;
         Integer sx1 = 0, sy1 = 0;
         Float refX = 0f, refY = 0f, refZ = 0f;
@@ -867,19 +885,19 @@ protected:
                     xTemp1 = sx1;
                     yTemp1 = sy1;
 
-                    xPrev1 = xBuffer[0];
-                    yPrev1 = yBuffer[0];
+                    xPrev1Idx = 0;
+                    yPrev1Idx = 0;
 
-                    xPrev2 = xBuffer[0];
-                    yPrev2 = yBuffer[0];
+                    xPrev2Idx = 0;
+                    yPrev2Idx = 0;
 
-                    xPrev2++;
-                    yPrev2++;
+                    xPrev2Idx++;
+                    yPrev2Idx++;
                     iTemp1 = i1;
                     
-                    iPrev1 = iBuffer[0];
-                    iPrev2 = iBuffer[0];
-                    iPrev2++;
+                    iPrev1Idx = 0;
+                    iPrev2Idx = 0;
+                    iPrev2Idx++;
 
                     if (sx1 < sxMin) sxMin = sx1;
                     if (sx1 > sxMax) sxMax = sx1;
@@ -894,49 +912,49 @@ protected:
                     iTemp2 = i1;  
 
                     // Draw only if the texture is not transparent 
-                    if((iPrev2 != 0) && (iTemp2 != 0) && (iTemp1 != 0)) {
+                    if((iPrev2Idx != 0) && (iTemp2 != 0) && (iTemp1 != 0)) {
                           if(row == (meshIncrement + 1)) {   // draw the first row
                               graphics2D.drawLine(
-                                  xPrev1, screenHeight - (yPrev1),
-                                  xPrev2, screenHeight - (yPrev2));
+                                  xPrev1Idx, screenHeight - (yPrev1Idx),
+                                  xPrev2Idx, screenHeight - (yPrev2Idx));
                           }
                           if(col == (meshIncrement + 1)) {  // draw the first column
                               graphics2D.drawLine(
-                                  xPrev1, screenHeight - (yPrev1),
+                                  xPrev1Idx, screenHeight - (yPrev1Idx),
                                   xTemp1, screenHeight - yTemp1);
                           }
 
                           graphics2D.drawLine(
-                              xPrev2, screenHeight - (yPrev2),
+                              xPrev2Idx, screenHeight - (yPrev2Idx),
                               xTemp2, screenHeight - yTemp2);
                           graphics2D.drawLine(
                               xTemp2, screenHeight - yTemp2,
                               xTemp1, screenHeight - yTemp1);
                     }
 
-                    *xPrev1 = xTemp1;		// Advance pointers
-                    *yPrev1 = yTemp1;
-                    *iPrev1 = iTemp1;
+                    xBuffer[xPrev1Idx] = xTemp1;
+                    yBuffer[yPrev1Idx] = yTemp1;
+                    iBuffer[iPrev1Idx] = iTemp1;
 
                     xTemp1 = xTemp2;
                     yTemp1 = yTemp2;
                     iTemp1 = iTemp2;
 
-                    xPrev1++;
-                    yPrev1++;
-                    iPrev1++;
+                    xPrev1Idx++;
+                    yPrev1Idx++;
+                    iPrev1Idx++;
 
-                    xPrev2++;
-                    yPrev2++;
-                    iPrev2++;
+                    xPrev2Idx++;
+                    yPrev2Idx++;
+                    iPrev2Idx++;
 
                     if (sx1 < sxMin) sxMin = sx1;
                     if (sx1 > sxMax) sxMax = sx1;
                     if (sy1 < syMin) syMin = sy1;
                     if (sy1 > syMax) syMax = sy1;
                 }
-            }
-        }
+            } // for col
+        } // for row
 
         // Display the name in the center of the projected model
         int xText = sxMin + ((sxMax - sxMin)/2);
@@ -946,7 +964,12 @@ protected:
     } // previewMesh
 
 
-    public int renderMesh(MemImage outputImage, MemImage inputImage, boolean blendIndicator) {
+    // Renders quadrilateral mesh models.
+    // See p 172 of Visual Special Effects Toolkit in C++.
+    // Class Globals also has a renderMesh method, but that one takes 
+    // 6 parameters: a String, 4 MemImage ojbects, and a TMatrix.
+    public int renderMesh(MemImage outputImage, MemImage inputImage, 
+    boolean blendIndicator) {
         // Create the line buffer data structure
         int[] xBuffer, yBuffer;
         int xBufferIdx, yBufferIdx;
@@ -1021,7 +1044,7 @@ protected:
                 z1 = zImage.getMPixel32(col, row);
                 i1 = inputImage.getMPixel(col, row);
 
-                // project to the screen
+                // Project to the screen
                 m_matrix.transformAndProjectPoint(x1, y1, z1, sx1, sy1, 
                     refX, refY, refZ, 
                     outHeight, outWidth, 
@@ -1089,10 +1112,9 @@ protected:
 
                     iPrev1Idx++;
                     iPrev2Idx++;
-                }
-            }
-            continue;           //  this line for debugging purposes
-        }
+                } // if ((row > 1) && (col > 1))
+            } // for col
+        } // for row
 
         return 0;
     } // renderMesh
@@ -1111,11 +1133,11 @@ protected:
         // float *wxTemp, *wyTemp, *wzTemp; // these variables are not used
         byte[] iBuffer;
         int iBufferIdx; // formerly byte *iTemp;
-        byte iTemp1, iTemp2;
+        byte iTemp1 = (byte)0, iTemp2 = (byte)0;
         int iPrev1Idx = 0, iPrev2Idx = 0;
         int xTemp1 = 0, yTemp1 = 0, xTemp2 = 0, yTemp2 = 0;
         int xPrev1Idx = 0, yPrev1Idx = 0, xPrev2Idx = 0, yPrev2Idx = 0;
-        float dTemp1, dTemp2;
+        float dTemp1 = 0.0f, dTemp2 = 0.0f;
         int dPrev1Idx = 0, dPrev2Idx = 0;
 
         if (
@@ -1127,28 +1149,36 @@ protected:
         }
 
         xBuffer = new int[xImage.getWidth()];
+        /* Dead code, per compiler
         if (xBuffer == null) {
             Globals.statusPrint("RenderObject.renderMeshz: Not enough memory for xBuffer");
             return -1;
         }
+        */
 
         yBuffer = new int[yImage.getWidth()];
+        /* Dead code, per compiler
         if (yBuffer == null) {
             Globals.statusPrint("RenderObject.renderMeshz: Not enough memory for yBuffer");
             return -1;
         }
+        */
 
         dBuffer = new float[zImage.getWidth()];
+        /* Dead code, per compiler
         if (dBuffer == null) {
             Globals.statusPrint("RenderObject.renderMeshz: Not enough memory for distance Buffer");
             return -1;
         }
+        */
 
         iBuffer = new byte[inputImage.getWidth()];
+        /* Dead code, per compiler
         if (iBuffer == null) {
             Globals.statusPrint("RenderObject.renderMeshz: Not enough memory for iBuffer");
             return -1;
         }
+        */
 
         MemImage midImage = new MemImage(outputImage.getHeight(), outputImage.getWidth());
         if(!midImage.isValid()) {
@@ -1183,7 +1213,7 @@ protected:
         dBufferIdx = 0;
 
         int row, col;
-        float x1,y1,z1;
+        float x1, y1, z1;
         byte i1;
         Integer sx1 = 0, sy1 = 0;
         Float refX = 0f, refY = 0f, refZ = 0f;
@@ -1192,16 +1222,20 @@ protected:
         Point3d p1 = new Point3d();
         Point3d p2 = new Point3d();
         Point3d centroid = new Point3d(); 
-        Point3d lightSource = new Point3d();  //a lightsource location
+        Point3d lightSource = new Point3d();  // A lightsource location
         lightSource.x = 100.0f;
         lightSource.y = 255.0f;
         lightSource.z =  20.0f;
         Vect.vectorNormalize(lightSource);
-        Point3d np1, np2, nc1, nc2;
+
+        Point3d np1 = new Point3d();
+        Point3d np2 = new Point3d();
+        Point3d nc1 = new Point3d();
+        Point3d nc2 = new Point3d();;
 
         // Get the model's referencePoint
         currentShape.getReferencePoint(refX, refY, refZ);
-        float tx, ty, tz;
+        float tx = 0.0f, ty = 0.0f, tz = 0.0f;
 
         for (row = 1; row <= imHeight; row++) {
             for (col = 1; col <= imWidth; col++) {
@@ -1226,7 +1260,7 @@ protected:
                     iBuffer[iBufferIdx] = i1;
                     iBufferIdx++;
 
-                    dBuffer[dBufferIdx] = Globals.getDistance3d(tx, ty, tz, vx, vy, vz);
+                    dBuffer[dBufferIdx] = MathUtils.getDistance3d(tx, ty, tz, vx, vy, vz);
                     dBufferIdx++;
                 }
               
@@ -1252,7 +1286,7 @@ protected:
                     dPrev2Idx = 0;
                     dPrev2Idx++;
 
-                    dTemp1 = Globals.getDistance3d(tx, ty, tz, vx, vy, vz);
+                    dTemp1 = MathUtils.getDistance3d(tx, ty, tz, vx, vy, vz);
                 }
       
                 if (row > 1 && col > 1) {
@@ -1260,7 +1294,7 @@ protected:
                     yTemp2 = sy1;
                     iTemp2 = i1;
 
-                    dTemp2 = Globals.getDistance3d(tx, ty, tz, vx, vy, vz);
+                    dTemp2 = MathUtils.getDistance3d(tx, ty, tz, vx, vy, vz);
                                   
                     // Render the quadrangle intensities
                     //                     
@@ -1319,13 +1353,17 @@ protected:
                         if(p1.z < zMin) zMin = p1.z;
                         if(p2.z < zMin) zMin = p2.z;
 
+                        // Use the 3D bounding box to calculate the point centroid
                         centroid.x = (xMax + xMin) / 2.0f;
                         centroid.y = (yMax + yMin) / 2.0f;
                         centroid.z = (zMax + zMin) / 2.0f;
-                        float dCentroid = Globals.getDistance3d(
+
+                        // Get the 3-dimensional distance between points lightSource and centroid
+                        float dCentroid = MathUtils.getDistance3d(
                             lightSource.x, lightSource.y, lightSource.z, 
                             centroid.x,    centroid.y,    centroid.z);
 
+                        // Calculate the normals np1, np2, nc1 and nc2
                         Vect.getNormal2(np1, p1, centroid, p2);
                         Vect.getNormal2(np2, p2, centroid, c2);
                         Vect.getNormal2(nc1, c1, centroid, c2);
@@ -1338,20 +1376,21 @@ protected:
                         Vect.vectorNormalize(nc1);
                         Vect.vectorNormalize(nc2);
 
-                        //  kd     the coefficient of reflection or reflectivity of the surface material
-                        //         highly reflective = 1, highly absorptive = 0
-                        //	Ip	   the intensity of the light source
-                        //  Ia     the ambient intensity at the surface
-                        //  N      The surface Normal (unit vector)
-                        //  L      The direction of the light source (unit vector)
-                        //  d      the distance between the surface and the light source
+                        // kd     the coefficient of reflection or reflectivity of the surface material
+                        //        highly reflective = 1, highly absorptive = 0
+                        // Ip	  the intensity of the light source
+                        // Ia     the ambient intensity at the surface
+                        // N      The surface Normal (unit vector)
+                        // L      The direction of the light source (unit vector)
+                        // d      the distance between the surface and the light source
                         float kd = 0.95f;
                         int Ip = 200;
-                        float ip1, ip2, ic1, ic2;
+                        float ip2, ic2;
+                        // float ip1, ic1; // The value of these variables are not used
 
-                        ip1 = Globals.lightModel(kd, Ip, 100, np1, lightSource, dCentroid);
+                              Globals.lightModel(kd, Ip, 100, np1, lightSource, dCentroid);
                         ip2 = Globals.lightModel(kd, Ip, 100, np2, lightSource, dCentroid);
-                        ic1 = Globals.lightModel(kd, Ip, 100, nc1, lightSource, dCentroid);
+                              Globals.lightModel(kd, Ip, 100, nc1, lightSource, dCentroid);
                         ic2 = Globals.lightModel(kd, Ip, 100, nc2, lightSource, dCentroid);
 
                         midImage.fillPolyz( 
@@ -1361,7 +1400,7 @@ protected:
                             xTemp1,    yTemp1,    ic2, dTemp1, 
                             midZImage);
                         // end shading
-                    }	else {
+                    } else {
                         midImage.fillPolyz( 
                             xPrev1Idx, yPrev1Idx, iPrev1Idx, dPrev1Idx,
                             xPrev2Idx, yPrev2Idx, iPrev2Idx, dPrev2Idx,
@@ -1369,7 +1408,6 @@ protected:
                             xTemp1,    yTemp1,    iTemp1,    dTemp1, 
                             midZImage);
                     }
-
 
                     xPrev1Idx = xTemp1;
                     yPrev1Idx = yTemp1;
@@ -1388,13 +1426,13 @@ protected:
                     iPrev1Idx++;
                     iPrev2Idx++;
 
-                    *dPrev1 = dTemp1;
+                    dBuffer[dPrev1Idx] = dTemp1;
                     dTemp1 = dTemp2;
                     dPrev1Idx++;
                     dPrev2Idx++;
-                }
-            }
-        }
+                } // if (row > 1 && col > 1)
+            } // for col
+        } // for row
 
         //
         // Composite the rendered quad mesh into the output scene
@@ -1406,10 +1444,8 @@ protected:
         Globals.statusPrint("RenderObject.renderMeshz: Creating a matte for the rendered quad mesh");
         matte.alphaSmooth5();
 
-        int myStatus;
         float alphaScale = 1.0f;
-
-        myStatus = Globals.blendz(midImage, matte, midZImage, zBuffer, outputImage, alphaScale);
+        Globals.blendz(midImage, matte, midZImage, zBuffer, outputImage, alphaScale);
 
         return 0;
     } // renderMeshz
@@ -1418,16 +1454,16 @@ protected:
     // Called from:
     //     transformAndProject (the method which takes 3 parameters)
     //     SceneList.previewStill
-    public void transformAndProject(TMatrix aMatrix, int outHeight, int outWidth,
+    public void transformAndProject(TMatrix pTMatrix, int piOutHeight, int piOutWidth,
     boolean externalCentroid,
-    float centroidX, float centroidY, float centroidZ) {
+    float pfCentroidX, float pfCentroidY, float pfCentroidZ) {
         if((this.modelType == SHAPE) || (this.modelType == IMAGE)) {
-            aMatrix.transformAndProject(currentShape, outHeight, outWidth, 
+            pTMatrix.transformAndProject(currentShape, piOutHeight, piOutWidth, 
                 externalCentroid,
-                centroidX, centroidY, centroidZ);
+                pfCentroidX, pfCentroidY, pfCentroidZ);
         } else {
             // Copy the transformation matrix for later use
-            m_matrix.copy(aMatrix);
+            m_matrix.copy(pTMatrix);
         }
     } // transformAndProject
 
@@ -1435,28 +1471,32 @@ protected:
     // Called from:
     //     SceneList.calcCompoundModelRefPoint
     //     SceneList.previewStill
-    public void transformAndProject(TMatrix aMatrix, int outHeight, int outWidth) {
-        this.transformAndProject(aMatrix, outHeight, outWidth, 
+    public void transformAndProject(TMatrix pTMatrix, int piOutHeight, int piOutWidth) {
+        this.transformAndProject(pTMatrix, piOutHeight, piOutWidth, 
             false, 
             0.0f, 0.0f, 0.0f);
     }
 
     // TODO: Not a method
-    void transformAndProjectPoint2(TMatrix aMatrix, float x, float y, float z, 
+    void transformAndProjectPoint2(TMatrix pTMatrix, float pfX, float pfY, float pfZ, 
     Integer sx, Integer sy, 
-    float refX, float refY, float refZ, 
-    int outHeight, int outWidth) {
-
-        // Use Wein87 projection, described in Foley p 256)
+    float pfRefX, float pfRefY, float pfRefZ, 
+    int piOutHeight, int piOutWidth) {
+        // Note that parameters piOutHeight and piOutWidth are not used.
+        // Use Wein87 projection, described in the book 
+        // Computer Graphcs: Principles and Practice, 2nd ed.,
+        // by Foley, van Dam, Feiner and Hughes, p 256
         Float tx = 0.0f, ty = 0.0f, tz = 0.0f;
-        x -= refX;
-        y -= refY;
-        z -= refZ;
-        aMatrix.transformPoint(x, y, z, tx, ty, tz);
+        pfX -= pfRefX;
+        pfY -= pfRefY;
+        pfZ -= pfRefZ;
+        // The following will set parameters tx, ty and tz
+        pTMatrix.transformPoint(pfX, pfY, pfZ, tx, ty, tz);
 
-        x += refX;
-        y += refY;
-        z += refZ;
+        // Undo the previous translation by pfRefX, pfRefY and pfRefZ (why?)
+        pfX += pfRefX;
+        pfY += pfRefY;
+        pfZ += pfRefZ;
 
         // Define the Center of Projection (COP)
         Point3d COP = new Point3d();
@@ -1471,13 +1511,18 @@ protected:
         p.z = 0.0f;
 
         Point3d d = new Point3d();
+        // Calculate d = COP - p
         Vect.vectorSubtract(d, COP, p);
-        float Q = Globals.getDistance3d(COP.x, COP.y, COP.z, p.x, p.y, p.z);
-        float denom = ((p.z - tz) / (Q * d.z)) + 1.0f;
-        float xp = (tx - (tz * d.x / d.z) + (p.z * d.x / d.z)) / denom;
-        float yp = (ty - (tz * d.y / d.z) + (p.z * d.y / d.z)) / denom;
-        sx = (int)(xp + 0.5f);
-        sy = (int)(yp + 0.5f);
+
+        // Calculate Q = 3-dimensional distance between points COP and p
+        float Q = MathUtils.getDistance3d(COP.x, COP.y, COP.z, p.x, p.y, p.z);
+        float fDenom = ((p.z - tz) / (Q * d.z)) + 1.0f;
+        float fXp = (tx - (tz * d.x / d.z) + (p.z * d.x / d.z)) / fDenom;
+        float fYp = (ty - (tz * d.y / d.z) + (p.z * d.y / d.z)) / fDenom;
+
+        // Set output parameters sx and sy
+        sx = (int)(fXp + 0.5f);
+        sy = (int)(fYp + 0.5f);
     } // transformAndProjectPoint2
 
 
@@ -1515,11 +1560,12 @@ protected:
         iPt2Y = y + offset;
         graphics2D.drawLine(iPt1X, iPt1Y, iPt2X, iPt2Y);
 
-        // MoveToEx(x, y); // this doesn't actually draw anyting
+        // MoveToEx(x, y); // this doesn't actually draw anything
         SelectObject(hBlackPen);
     } // drawBox
 
 
+    // Not called from within this file
     public int renderShape(MemImage outputImage, boolean blendIndicator) {
         if(currentShape.getNumFaces() == 0) {
             Globals.statusPrint("RenderObject.renderShape: Shape has no faces - cannot be rendered");
@@ -1532,7 +1578,6 @@ protected:
         Integer sx4 = 0, sy4 = 0;
         byte I1p = 0, I2p = 0, I3p = 0, I4p = 0; 
         int index, index1, index2, index3, index4;
-        int myStatus;
 
         currentShape.initCurrentFace();
         for (index = 1; index <= currentShape.getNumFaces(); index++) {
@@ -1550,7 +1595,7 @@ protected:
 
             // Draw the face
             if (index4 > 0) {
-                myStatus = outputImage.fillPolyz(
+                outputImage.fillPolyz(
                     sx1, sy1, I1p, 0.0f, 
                     sx2, sy2, I2p, 0.0f, 
                     sx3, sy3, I3p, 0.0f, 
@@ -1567,6 +1612,7 @@ protected:
     } // renderShape
 
 
+    // Not called from within this file
     public int renderShapez(MemImage outputImage, 
     MemImage alphaImage, MemImage zBuffer, 
     float vx, float vy, float vz) {
@@ -1619,10 +1665,10 @@ protected:
                 currentShape.getTransformedVertex(index4, tx4, ty4, tz4);
 
                 // I1d, I2d, I3d, and I4d will be used later as parameters to MemImage.fillPolyz
-                I1d = Globals.getDistance3d(vx, vy, vz, tx1, ty1, tz1);
-                I2d = Globals.getDistance3d(vx, vy, vz, tx2, ty2, tz2);
-                I3d = Globals.getDistance3d(vx, vy, vz, tx3, ty3, tz3);
-                I4d = Globals.getDistance3d(vx, vy, vz, tx4, ty4, tz4);
+                I1d = MathUtils.getDistance3d(vx, vy, vz, tx1, ty1, tz1);
+                I2d = MathUtils.getDistance3d(vx, vy, vz, tx2, ty2, tz2);
+                I3d = MathUtils.getDistance3d(vx, vy, vz, tx3, ty3, tz3);
+                I4d = MathUtils.getDistance3d(vx, vy, vz, tx4, ty4, tz4);
                 p1.x = tx1; p1.y = ty1; p1.z = tz1;
                 p2.x = tx2; p2.y = ty2; p2.z = tz2;
                 p3.x = tx3; p3.y = ty3; p3.z = tz3;
