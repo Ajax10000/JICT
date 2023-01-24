@@ -323,6 +323,8 @@ public:
     //     copyAndExpand
     //     getBoundaryPoint
     //     Globals.iwarpz
+    //     Globals.tweenImage
+    //     Globals.tweenShape
     //     RenderObject ctor that takes 4 Point3d parameters
     //     RenderObject ctor that takes 4 parameters: a String, int, boolean and Point3d
     public Shape3d(int piNumVerts) {
@@ -506,17 +508,22 @@ public:
     //     Shape3d ctor that takes 2 parameters, a String and an int
     public int readShape(String psPathName) {
         String theText, theKeyWord;
-        int fileType;
+        Integer fileType;
+        StringTokenizer strtok;
 
         this.numVertices = 0; // Initialize data members
         this.numFaces = 0;
+        Integer iNumVertices = 0, iNumFaces = 0;
 
-        int myStatus = getShapeFileInfo(psPathName, fileType, this.numVertices, this.numFaces);
+        // The following method will set fileType, iNumVertices and iNumFaces
+        int myStatus = getShapeFileInfo(psPathName, fileType, iNumVertices, iNumFaces);
         if (myStatus != 0) {
             String msgText = "readShape: getShapeFileInfo could not open file: " + psPathName;
             Globals.statusPrint(msgText);
             return -1;
         }
+        this.numVertices = iNumVertices;
+        this.numFaces = iNumFaces;
 
         if (this.numVertices == 0) {
             String msgText = "readShape: shape file has 0 vertices: " + psPathName;
@@ -526,11 +533,13 @@ public:
 
         ifstream filein;
         filein.open(psPathName, ios.nocreate);
+        /* We already checked if we can open the file when in getShapeFileInfo
         if (filein.fail()) {
             String msgText = "readShape: Unable to open file: " + psPathName;
             Globals.statusPrint(msgText);
             return -2;
         }
+        */
 
         filein >> ws;
         int lineCounter = 0;
@@ -558,9 +567,10 @@ public:
                     this.iCurrVtxIdx = 0;
                     this.currentVertex = this.vertices[0];
                 } else {  //read in a vertex
-                    String xValue = strtok(theKeyWord, ",");
-                    String yValue = strtok(null, ",");
-                    String zValue = strtok(null, ",");
+                    strtok = new StringTokenizer(theKeyWord, ",");
+                    String xValue = strtok.nextToken();
+                    String yValue = strtok.nextToken();
+                    String zValue = strtok.nextToken();
 
                     if(xValue != null) currentVertex.x = Float.parseFloat(xValue);
                     if(yValue != null) currentVertex.y = Float.parseFloat(yValue);
@@ -615,10 +625,11 @@ public:
                         faces = true;
                     } else {
                         if(faces) {              // get a face
-                            String c1 = strtok(theKeyWord, ",");
-                            String c2 = strtok(null, ",");
-                            String c3 = strtok(null, ",");
-                            String c4 = strtok(null, ",");
+                            strtok = new StringTokenizer(theKeyWord, ",");
+                            String c1 = strtok.nextToken();
+                            String c2 = strtok.nextToken();
+                            String c3 = strtok.nextToken();
+                            String c4 = strtok.nextToken();
                             currentFace.i1 = -1;
                             currentFace.i2 = -1;
                             currentFace.i3 = -1;
@@ -631,9 +642,10 @@ public:
                             // currentFace++;
                             incCurrentFace();
                         } else {                 // get a vertex
-                            String xValue = strtok(theKeyWord, ",");
-                            String yValue = strtok(null, ",");
-                            String zValue = strtok(null, ",");
+                            strtok = new StringTokenizer(theKeyWord, ",");
+                            String xValue = strtok.nextToken();
+                            String yValue = strtok.nextToken();
+                            String zValue = strtok.nextToken();
 
                             if(xValue != null) currentVertex.x = Float.parseFloat(xValue);
                             if(yValue != null) currentVertex.y = Float.parseFloat(yValue);
@@ -911,7 +923,10 @@ public:
     //     divideLongestArc
     //     getBoundaryPoint
     //     insertVertexAfter
+    //     Globals.createTweenableShapes
     //     Globals.getIntervals
+    //     Globals.tweenImage
+    //     Globals.tweenShape
     //     RenderObject.drawStill
     //     RenderObject.prepareCutout
     public int getNumVertices() {
@@ -934,6 +949,8 @@ public:
     } // setNumVertices
 
 
+    // Called from:
+    //     Globals.tweenImage
     public void worldBoundingBox() {
         initCurrentVertex();
         this.maxX = currentVertex.x; 
@@ -977,6 +994,8 @@ public:
     } // transformBoundingBox
 
 
+    // Called from:
+    //     Globals.tweenImage
     public void invertY(int piScreenHeight) {
         initCurrentVertex();
 
@@ -990,6 +1009,7 @@ public:
 
     // Called from:
     //     Globals.iwarpz
+    //     Globals.tweenShape
     public int addWorldVertex(float pfX, float pfY, float pfZ) {
         if (this.numVertices == this.numAllocatedVertices) {
             Globals.statusPrint("addWorldVertex: Not enough memory to add vertex");
@@ -1128,6 +1148,7 @@ public:
 
     // Not called from within this file
     // Called from:
+    //     Globals.tweenImage
     //     RenderObject ctor that takes 4 Point3d parameters
     //     RenderObject ctor that takes 4 parameters: a String, int, boolean and Point3d
     public void translateW(float pfOffsetX, float pfOffsetY, float pfOffsetZ) {
@@ -1190,9 +1211,10 @@ public:
     // Called from:
     //     getShapeFileInfo
     //     readShape
-    public static String getNextLine(String psTheText, Integer piLineNumber, LineNumberReader filein, int piMinLineLength) {
+    public static String getNextLine(String psTheText, Integer piLineNumber, 
+    LineNumberReader filein, int piMinLineLength) {
         boolean aComment;
-        int theLength = 80;
+        // int theLength = 80; // this variable is no longer used
         String theKeyWord;
         StringTokenizer strtok;
 
@@ -1298,6 +1320,8 @@ public:
         int aStatus = 0;
 
         // Get the equation of the ray
+        // The following method will set raySlope, rayYIntercept, 
+        // rayHorzFlag and rayVertFlag
         MathUtils.getFLineEquation(rayCentroidX, rayCentroidY, rayX2, rayY2, 
             raySlope, rayYIntercept, rayHorzFlag, rayVertFlag);
 
@@ -1307,6 +1331,7 @@ public:
         Float shapeCentX = 0f, shapeCentY = 0f, shapeCentZ = 0f;
         // float translationX, translationY; // these variables are not used
       
+        // The following method will set shapeCentX, shapeCentY, and shapeCentZ
         theShape.getWCentroid(shapeCentX, shapeCentY, shapeCentZ);
 
         // Scan through the shape
@@ -1679,6 +1704,8 @@ public:
 
 
     // Not called from within this file.
+    // Called from:
+    //     Globals.tweenImage
     public int removeDuplicates() {
         // If two successive world coords are equal, remove the second one.
         int i, j; // for loop variables
@@ -1825,6 +1852,8 @@ public:
 
     // This method came from TWEEN.CPP
     // Not called from within this file.
+    // Called from:
+    //     Globals.createTweenableShapes
     public Shape3d copyAndExpand(int piNumAddedVertices) {
         // Copy a shape object, also adding enough space for numAddedVertices 
         // new vertices
@@ -1865,6 +1894,8 @@ public:
 
     // This method came from TWEEN.CPP
     // Not called from within this file.
+    // Called from:
+    //     Globals.createTweenableShapes
     public int divideLongestArc() {
         // Add a vertex to a shape object by finding the longest arc and
         // subdividing it.
