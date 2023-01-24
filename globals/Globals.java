@@ -1,12 +1,14 @@
 package globals;
 
 import core.MemImage;
+import core.RenderObject;
 import core.SceneElement;
 import core.Shape3d;
 
 import fileUtils.FileUtils;
 
 import java.io.File;
+import java.util.Random;
 
 import javax.swing.JLabel;
 
@@ -178,6 +180,7 @@ public class Globals {
 
     // This method came from BLEND.CPP
     // Called from:
+    //     tweenImage
     //     RenderObject.renderMeshz
     public static int blendz(MemImage inImage, MemImage matteImage, 
     MemImage zImage, MemImage zBuffer,
@@ -705,15 +708,18 @@ public class Globals {
 
     // This method came from BLEND.CPP
     //
-    //	shapeFromImage
+    // shapeFromImage
     //
-    //	Builds a shape object that describes the boundary of the first contigous 
-    //  blob of non-zero pixels it finds.  Always follows the boundary
-    //	in a clockwise direction.  Uses 'start_x, start_y' as the
-    //	starting point. 
+    // Builds a shape object that describes the boundary of the first contigous 
+    // blob of non-zero pixels it finds.  Always follows the boundary
+    // in a clockwise direction.  Uses 'start_x, start_y' as the
+    // starting point. 
     //
-    //	Returns 0 if successful.
-    //	Returns 1 if unsuccessful.
+    // Returns 0 if successful.
+    // Returns 1 if unsuccessful.
+    //
+    // Called from:
+    //     tweenImage
     public static int shapeFromImage(MemImage anImage, Shape3d aShape) {
         int	x, y;
         Integer	new_x, new_y;
@@ -994,6 +1000,7 @@ public class Globals {
     // See p 157 - 160 of Visual Special Effects Toolkit in C++.
     // This method came from IWARP.CPP
     // Called from:
+    //     Globals.tweenImage
     //     MainFrame.onToolsWarpImage
     public static int iwarpz(MemImage inImage, MemImage outImage, MemImage zImage,
     float rx, float ry, float rz, 
@@ -1953,21 +1960,21 @@ public class Globals {
         */
         int row, col;
         float sum;
-        float q00,  q10,  q20;
-        float q01,  q11,  q21;
-        float q02,  q12,  q22;
+        float q00, q10, q20;
+        float q01, q11, q21;
+        float q02, q12, q22;
         float sumr;
         float q00r, q10r, q20r = 0.0f;
-        float q01r, q11r = 0.0f, q21r = 0.0f;
-        float q02r, q12r = 0.0f, q22r = 0.0f;
+        float q11r = 0.0f, q21r = 0.0f;
+        float q12r = 0.0f, q22r = 0.0f;
         float sumg;
         float q00g, q10g, q20g = 0.0f;
-        float q01g, q11g = 0.0f, q21g = 0.0f;
-        float q02g, q12g = 0.0f, q22g = 0.0f;
+        float q11g = 0.0f, q21g = 0.0f;
+        float q12g = 0.0f, q22g = 0.0f;
         float sumb;
         float q00b, q10b, q20b = 0.0f;
-        float q01b, q11b = 0.0f, q21b = 0.0f;
-        float q02b, q12b = 0.0f, q22b = 0.0f;
+        float q11b = 0.0f, q21b = 0.0f;
+        float q12b = 0.0f, q22b = 0.0f;
         Byte red = (byte)0, green = (byte)0, blue = (byte)0;
 
         for (row = 2; row <= imHeight - 1; row++) {
@@ -1986,6 +1993,9 @@ public class Globals {
                     q12 = inImage.getMPixel(col,     row + 1) * weight[1][2];
                     q22 = inImage.getMPixel(col + 1, row + 1) * weight[2][2];
 
+                    // TODO: I believe the following line has a few errors.
+                    // It adds q10 twice (probably meant to use q10 once and q01 once)
+                    // It adds q20 twice (probably meant to use q20 once and q02 once)
                     sum = q00 + q10 + q20 + q10 + q11 + q12 + q20 + q21 + q22;
                     sum = MathUtils.bound(sum, 0.0f, 255.0f);
                     outImage.setMPixel(col, row, (byte)(sum + 0.5f));
@@ -2240,11 +2250,15 @@ public class Globals {
         float increment = 0.5f;                  // oversample 2:1
         float inverseInc = 1.0f / increment;
         float d1 = 0.0f, d2 = 0.0f, d3 = 0.0f, d4 = 0.0f;
-        byte red1 = (byte)0, green1 = (byte)0, blue1 = (byte)0;
-        byte red2 = (byte)0, green2 = (byte)0, blue2 = (byte)0;
-        byte red3 = (byte)0, green3 = (byte)0, blue3 = (byte)0;
-        byte red4 = (byte)0, green4 = (byte)0, blue4 = (byte)0;
-
+        byte red1  = (byte)0;
+        byte red2  = (byte)0;
+        byte red3  = (byte)0;
+        byte red4  = (byte)0;
+        byte blue1 = (byte)0;
+        byte blue2 = (byte)0;
+        byte blue3 = (byte)0;
+        byte blue4 = (byte)0;
+        
         for (y = inverseInc * increment; y <= inHeight; y += increment) {
             yIn = y - halfHeight;
         
@@ -2524,7 +2538,7 @@ public class Globals {
         int row, col; 
         float x, y, z, sizeFactor, theDimension, yValue;
  
-        float randMax = (float)RAND_MAX;
+        // float randMax = (float)RAND_MAX; //This variable is no longer used
         float xMagnitude = 2.4f;
         float yMagnitude = 1.5f;
         float zMagnitude = 5.7f;
@@ -2652,14 +2666,15 @@ public class Globals {
             break;
  
         case WHITENOISE:
-            // Seed the random-number generator with current time so that
-            // the numbers will be different every time we run.
-            srand( time( 0 ) );
+            // By default the Random class is seeded with current time
+            // the first time it is used.
+            // So the numbers will be different every time we run.
+            Random random = new Random();
  
             for (row = 1; row <= imHeight; row++) {
                 for (col = 1; col <= imWidth; col++) {
-                    xImage.setMPixel32(col, row, (float)col + ((float)rand()/randMax * xMagnitude));
-                    yImage.setMPixel32(col, row, (float)row + ((float)rand()/randMax * yMagnitude));
+                    xImage.setMPixel32(col, row, (float)col + (random.nextFloat() * xMagnitude));
+                    yImage.setMPixel32(col, row, (float)row + (random.nextFloat() * yMagnitude));
                     zImage.setMPixel32(col, row, 0.0f);
                 } // for col
             } // for row
@@ -3051,7 +3066,10 @@ public class Globals {
 
 
     // This method came from TWEEN.CPP
-    int getRowIntervals(MemImage anImage, int row, int[] intervalList, Integer numIntervals) {
+    // Called from:
+    //     tweenImage
+    public static int getRowIntervals(MemImage anImage, int row, 
+    int[] intervalList, Integer numIntervals) {
         int imWidth = anImage.getWidth();
         int bpp = anImage.getBitsPerPixel();
         int col; 
@@ -3102,7 +3120,9 @@ public class Globals {
 
 
     // This method came from TWEEN.CPP
-    int getTotalIntervalLength(int[] intervalList, int numIntervals) {
+    // Called from:
+    //     tweenImage
+    public static int getTotalIntervalLength(int[] intervalList, int numIntervals) {
         int totalLength = 0;
         int i;
 
@@ -3119,7 +3139,9 @@ public class Globals {
 
 
     // This method came from TWEEN.CPP
-    int indexToCoord(int index, int[] intervalList, int numIntervals) {
+    // Called from:
+    //     tweenImage
+    public static int indexToCoord(int index, int[] intervalList, int numIntervals) {
         // Map index into the interval list
         String msgText;
         int count, runningCount,countDelta;
@@ -3914,6 +3936,422 @@ public class Globals {
 
         return 0;
     } // readBMPHeader
+
+
+    // This method came from TWEEN.CPP
+    // Morph two rotoscoped images
+    public static int tweenImage(float aFraction, 
+    MemImage inImageA, MemImage inImageB, 
+    String imagePath, String shapePath) {
+        String msgText;
+        Shape3d inShapeA, inShapeB;
+        inShapeA = new Shape3d(8192);
+        inShapeB = new Shape3d(8192);
+
+        int mStatus;
+        int aStatus = shapeFromImage(inImageA, inShapeA);
+        if(aStatus != 0) {
+            statusPrint("tweenImage: shapeFromImage returned non-zero status. inImageA");
+            return -1;
+        }
+        
+        aStatus = shapeFromImage(inImageB, inShapeB);
+        if(aStatus != 0) {
+            statusPrint("tweenImage: shapeFromImage returned non-zero status. inImageB");
+            return -2;
+        }
+
+        int numvertsA = inShapeA.getNumVertices();
+        int numvertsB = inShapeB.getNumVertices();
+
+        Shape3d outShapeA, outShapeB;
+        Shape3d tempShapeA, tempShapeB;
+
+        outShapeA = null;
+        outShapeB = null;
+        tempShapeA = null;
+        tempShapeB = null;
+        int bpp = inImageA.getBitsPerPixel();
+
+        // Equalize the number of vertices in each shape
+        // The following method sets either outShapeA or outShapeB
+        aStatus = createTweenableShapes(inShapeA, inShapeB, 
+            outShapeA, outShapeB);
+        if(aStatus != 0) {
+            statusPrint("tweenImage: Could not create tweenable shapes.");
+            return -3;
+        }
+
+        if(outShapeA != null) {
+            tempShapeA = outShapeA;
+            tempShapeB = inShapeB;
+        } else {
+            tempShapeA = inShapeA;
+            tempShapeB = outShapeB;
+        }
+
+        numvertsA = tempShapeA.getNumVertices();
+        numvertsB = tempShapeB.getNumVertices();
+        if(numvertsA != numvertsB) {
+            statusPrint("tweenImage: tweenShape could not create the target boundary.");
+            return -3;
+        }
+
+        Shape3d outShape = null;
+
+        // outShape is the morphed boundary
+        // The following method sets outShape
+        aStatus = tweenShape(aFraction, outShape, tempShapeA, tempShapeB);
+        // Why isn't aStatus inspected to see if an error occurred?
+
+        // Round down to integer coords and
+        // remove duplicates
+        outShape.initCurrentVertex();
+        int numVertices = outShape.getNumVertices();
+        for (int i = 1; i <= numVertices; i++){
+            int temp = (int)(outShape.currentVertex.x + 0.5f);
+            outShape.currentVertex.x = (float)temp;
+
+            temp = (int)(outShape.currentVertex.y + 0.5f);
+            outShape.currentVertex.y = (float)temp;
+
+            temp = (int)(outShape.currentVertex.z + 0.5f);
+            outShape.currentVertex.z = (float)temp;
+
+            // outShape.currentVertex++;
+            outShape.incCurrentVertex();
+        }
+
+        outShape.removeDuplicates();
+    
+        inShapeA = null;
+        inShapeB = null;
+        if(outShapeA != null) outShapeA = null;
+        if(outShapeB != null) outShapeB = null;
+    
+        outShape.worldBoundingBox();  // BB (bounding box) of tweened boundary
+
+        float oMinX = outShape.minX;
+        float oMinY = outShape.minY;
+        float oMaxX = outShape.maxX;
+        float oMaxY = outShape.maxY;
+        int   numXO = (int)(oMaxX - oMinX) + 1;
+        int   numYO = (int)(oMaxY - oMinY) + 1;
+
+        // Generate a mask image from the tweened boundary.
+        outShape.invertY(numYO);
+        outShape.translateW(-1.0f, 0.0f, 0.0f);
+        MemImage maskImage = new MemImage(numYO, numXO);
+        aStatus = RenderObject.maskFromShape(outShape, maskImage);
+        if(aStatus != 0) {
+            statusPrint("tweenImage: Could not generate tweened mask image.");
+            maskImage = null;
+            outShape = null;
+            return -3;
+        }
+
+        int numXA = inImageA.getWidth();
+        int numYA = inImageA.getHeight();
+        int numXB = inImageB.getWidth();
+        int numYB = inImageB.getHeight();
+        if(
+        numXA == 0 || numYA == 0 ||
+        numXB == 0 || numYB == 0) {
+            statusPrint("tweenImage: One of the images to be tweened has no rows or columns.");
+            maskImage = null;
+            outShape = null;
+            return -4;
+        }
+      
+        int numOutX = Math.max(numXA, numXB);
+        int numOutY = Math.max(numYA, numYB);
+        float xScaleAtoO = (float)numXO / (float)numXA;
+        float yScaleAtoO = (float)numYO / (float)numYA;
+        float xScaleBtoO = (float)numXO / (float)numXB;
+        float yScaleBtoO = (float)numYO / (float)numYB;
+    
+        TMatrix aViewMatrix = new TMatrix(); // initialized to the identity matrix
+        MemImage tempImageA = new MemImage(numYO, numXO, bpp); 
+        int warpStatus = iwarpz(inImageA, tempImageA, null,
+            0.0f, 0.0f, 0.0f, 
+            xScaleAtoO, yScaleAtoO, 1.0f,
+            0.0f, 0.0f, 0.0f, 
+            0.0f, 0.0f, 0.0f,
+            aViewMatrix,
+            0.0f, 0.0f, 0.0f);
+        // why is warpStatus not inspected for an error code?
+
+        MemImage tempImageB = new MemImage(numYO, numXO, bpp); 
+        warpStatus = iwarpz(inImageB, tempImageB, null,
+            0.0f, 0.0f, 0.f, 
+            xScaleBtoO, yScaleBtoO, 1.0f,
+            0.0f, 0.0f, 0.0f, 
+            0.0f, 0.0f, 0.0f,
+            aViewMatrix,
+            0.0f, 0.0f, 0.0f);
+        // why is warpStatus not inspected for an error code?
+
+        // blend the image intensities to produce the morphed image
+        final int I_NUMALLOCATEDCOORDS = 128;
+
+        int row, col;
+        int aIntervalList[] = new int[I_NUMALLOCATEDCOORDS];
+        int bIntervalList[] = new int[I_NUMALLOCATEDCOORDS];
+        int mIntervalList[] = new int[I_NUMALLOCATEDCOORDS];
+        Integer numAIntervals = 0;
+        Integer numMIntervals = 0;
+        Integer numBIntervals = 0;
+        int totalALength, totalMLength;
+        // int aCoord, bCoord, j; // these variables are not used
+        Byte red = 0, green = 0, blue = 0;
+        float aRatio;
+    
+        // Copy the world coords to the screen portion of the shape object
+        // for use by getIntervals
+        MemImage preBlendA = new MemImage(numYO, numXO, bpp);
+
+        // int numOutIntervals; // this variable is not used
+        int inIndex, inCoord, outCoord;
+        // int minCoord, maxCoord; // these variables are not used
+        aStatus = 0;
+        mStatus = 0;
+
+        // Morph image A
+        for(row = 1; row < numYO; row++) {
+            aStatus = getRowIntervals(tempImageA, row, aIntervalList, numAIntervals);
+            if(aStatus != 0){
+                msgText = String.format( 
+                    "tweenImage: getRowIntervals error (image A) at row: %d", row);
+                statusPrint(msgText);
+                return -9;
+            }
+
+            totalALength = getTotalIntervalLength(aIntervalList, numAIntervals);
+
+            // Get mask image intervals
+            mStatus = getRowIntervals(maskImage, row, mIntervalList, numMIntervals);
+            if(mStatus != 0) {
+                msgText = String.format(
+                    "tweenImage: getRowIntervals error (mask image) at row: %d", row);
+                statusPrint(msgText);
+                return -10;
+            }
+
+            totalMLength = getTotalIntervalLength(mIntervalList, numMIntervals);
+
+            if(numMIntervals > 0 && numAIntervals > 0) {
+                aRatio = (float)totalALength / (float)totalMLength;  // corresponding index in AList
+                for(col = 1; col < totalMLength; col++) {
+                    // inverse mapping: get the source location for each morphed pixel location
+                    inIndex  = (int)(aRatio * (float)col + 0.5f);
+                    inCoord  = indexToCoord(inIndex, aIntervalList, numAIntervals);
+                    outCoord = indexToCoord(col, mIntervalList, numMIntervals);
+
+                    switch(bpp) {
+                    case 8:
+                        green = tempImageA.getMPixel(inCoord, row);
+                        preBlendA.setMPixel(outCoord, row,  green);
+                        break;
+                    case 24:
+                        tempImageA.getMPixelRGB(inCoord, row, red, green, blue);
+                        preBlendA.setMPixelRGB(outCoord, row, red, green, blue);
+                      break;
+                    } // switch
+                } // for col
+            }
+        } // for row
+        // end morph image A
+
+        // Morph image B
+        aStatus = 0;
+        int totalBLength;
+        MemImage preBlendB = new MemImage(numYO, numXO, bpp);
+        for(row = 1; row < numYO; row++) {
+            aStatus = getRowIntervals(tempImageB, row, bIntervalList, numBIntervals);
+            if(aStatus != 0) {
+                msgText = String.format("tweenImage: getRowIntervals error (image B) at row: %d", row);
+                statusPrint(msgText);
+                return -9;
+            }
+
+            totalBLength = getTotalIntervalLength(bIntervalList, numBIntervals);
+
+            // Get mask image intervals
+            mStatus = getRowIntervals(maskImage, row, mIntervalList, numMIntervals);
+            if(mStatus != 0) {
+                msgText = String.format("tweenImage: getRowIntervals error (mask image) at row: %d", row);
+                statusPrint(msgText);
+                return -10;
+            }
+
+            totalMLength = getTotalIntervalLength(mIntervalList, numMIntervals);
+
+            if(numMIntervals > 0 && numBIntervals > 0) {
+                aRatio = (float)totalBLength / (float)totalMLength;  // corresponding index in AList
+                for(col = 1; col < totalMLength; col++) {
+                    // inverse mapping:get the source location for each morphed pixel location
+                    inIndex  = (int)(aRatio * (float)col + 0.5f);
+                    inCoord  = indexToCoord(inIndex, bIntervalList, numBIntervals);
+                    outCoord = indexToCoord(col, mIntervalList, numMIntervals);
+
+                    switch(bpp) {
+                    case 8:
+                        green = tempImageB.getMPixel(inCoord, row);
+                        preBlendB.setMPixel(outCoord, row,  green);
+                        break;
+
+                    case 24:
+                        tempImageB.getMPixelRGB(inCoord, row, red, green, blue);
+                        preBlendB.setMPixelRGB(outCoord, row, red, green, blue);
+                        break;
+                    } // switch
+                } // for col
+            } else {
+
+            }
+        } // for row
+        // end morph image B
+
+        tempImageA = null;
+        tempImageB = null;
+
+        // Blend the morphants together
+        MemImage morphImage = new MemImage(numYO, numXO, bpp);
+        MemImage matteImage = new MemImage(numYO, numXO, 8);
+        preBlendA.createAlphaImage(matteImage);
+        matteImage.alphaSmooth3();
+
+        blendz(preBlendA, matteImage, null, null, morphImage, 1.0f - aFraction);
+        blendz(preBlendB, matteImage, null, null, morphImage, aFraction);
+
+        preBlendA = null;
+        preBlendB = null;
+        maskImage = null;  //the image corresponding to the tweened boundary.
+        matteImage = null;
+
+        // int xBeg, xEnd, yBeg, yEnd; // these variables are not used
+
+        // center the morphed image in an output image of constant dimensions.
+        MemImage outImage = new MemImage(numOutY, numOutX, bpp);
+      
+        int xMiddle, yMiddle, xTranslation, yTranslation;
+
+        if(aFraction == 0.0f) {
+            xMiddle = (int)(numXA / 2.0f);
+            yMiddle = (int)(numYA / 2.0f);
+            xTranslation = (int)((numOutX / 2.0f) - xMiddle);
+            yTranslation = (int)((numOutY / 2.0f) - yMiddle);
+            inImageA.copy(outImage, xTranslation, yTranslation);
+        } else if (1.0f - aFraction < 0.005f) {
+            xMiddle = (int)(numXB / 2.0f);
+            yMiddle = (int)(numYB / 2.0f);
+            xTranslation = (int)((numOutX / 2.0f) - xMiddle);
+            yTranslation = (int)((numOutY / 2.0f) - yMiddle);
+            inImageB.copy(outImage, xTranslation, yTranslation);
+        } else {
+            xMiddle = (int)(numXO / 2.0f);
+            yMiddle = (int)(numYO / 2.0f);
+            xTranslation = (int)((numOutX / 2.0f) - xMiddle);
+            yTranslation = (int)((numOutY / 2.0f) - yMiddle);
+            morphImage.copy(outImage, xTranslation, yTranslation);
+        }
+
+        outImage.writeBMP(imagePath);
+        morphImage = null;
+        outImage = null;
+        return 0;
+    } // tweenImage
+
+
+    // This method sets parameter pOutShape
+    // This method came from TWEEN.CPP
+    // Called from:
+    //     tweenImage
+    public static int tweenShape(float fraction, Shape3d pOutShape, 
+    Shape3d shape1, Shape3d shape2) {
+        // tween shape1 into shape2. 
+        // shape1 and shape2 must have the same number of vertices
+        int numverts1 = shape1.getNumVertices();
+        int numverts2 = shape2.getNumVertices();
+        if(numverts1 != numverts2) {
+            statusPrint("tweenShape: shape1 and shape2 must have the same number of vertices");
+            return -1;
+        }
+
+        Shape3d outputShape;
+        outputShape = new Shape3d(numverts1);
+        int j;
+        float x1, y1, x2, y2, outX, outY;
+
+        shape1.initCurrentVertex();
+        shape2.initCurrentVertex();
+        outputShape.initCurrentVertex();
+
+        for (j = 1; j <= numverts1; j++) {
+            x1 = (float)shape1.currentVertex.x;
+            y1 = (float)shape1.currentVertex.y;
+
+            x2 = (float)shape2.currentVertex.x;
+            y2 = (float)shape2.currentVertex.y;
+
+            outX = (fraction * x2) + (1.0f - fraction) * x1;
+            outY = (fraction * y2) + (1.0f - fraction) * y1;
+
+            outputShape.addWorldVertex(outX + 0.5f, outY + 0.5f, 0.0f);
+
+            //shape1.currentVertex++;
+            //shape2.currentVertex++;
+            shape1.incCurrentVertex();
+            shape2.incCurrentVertex();
+        } // for j
+
+        // Set the output parameter
+        pOutShape = outputShape;
+        return 0;
+    } // tweenShape
+
+
+    // This method came from TWEEN.CPP
+    // Called from:
+    //     tweenImage
+    public static int createTweenableShapes(Shape3d inShape1, Shape3d inShape2, 
+    Shape3d outShapeA, Shape3d outShapeB) {
+        int numVertices1 = inShape1.getNumVertices();
+        int numVertices2 = inShape2.getNumVertices();
+        
+        int numVerticesDiff = Math.abs(numVertices1 - numVertices2);
+        int aStatus;
+        Shape3d outShape1, outShape2;
+
+        // Add vertices to the shape having the fewer vertices
+        if(numVertices1 < numVertices2) {
+            outShape1 = inShape1.copyAndExpand(numVerticesDiff);
+            for(int i = 1; i <= numVerticesDiff; i++) {
+                aStatus = outShape1.divideLongestArc();
+                if(aStatus != 0) {
+                    statusPrint("createTweenableShapes: divideLongestArc error");
+                    return aStatus;
+                }
+
+                // Set output parameter outShapeA
+                outShapeA = outShape1;
+            } // for i
+        } else {
+            outShape2 = inShape2.copyAndExpand(numVerticesDiff);
+            for(int i = 1; i <= numVerticesDiff; i++) {
+                aStatus = outShape2.divideLongestArc();
+                if(aStatus != 0) {
+                    statusPrint("createTweenableShapes: divideLongestArc error");
+                    return aStatus;
+                }
+
+                // Set output parameter outShapeB
+                outShapeB = outShape2;
+            } // for i
+        }
+
+        return 0;
+    } // createTweenableShapes
 
 
     // This method came from TWEEN.CPP
