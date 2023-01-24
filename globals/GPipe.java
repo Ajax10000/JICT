@@ -637,7 +637,7 @@ public:
         Point3d p4 = new Point3d();
         float asAngle = 90.0f;
         float angleInc = 360.0f / NUMFACETS;
-        float yIncrement = 2.0f * radius * VP / NUMFACETS;
+        // float yIncrement = 2.0f * radius * VP / NUMFACETS; // this variable is not used
         int col, row, k;
 
         for (row = 1; row <= NUMFACETS; row++) {
@@ -804,7 +804,7 @@ public:
         p1.y = VP * height/2.0f;
         p1.z = 0.0f;
         int i;
-        String pathBuffer;
+        // String pathBuffer; // This variable is not used
         float angleInc = 360.0f / NUMFACETS;
         for (i = 1; i <= NUMFACETS; i++) {
             p2.x =  VP * bottomRadius * (float)Math.cos(tempAngle * F_DTR);
