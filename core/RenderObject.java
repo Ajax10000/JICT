@@ -15,6 +15,7 @@ import math.TMatrix;
 import math.Vect;
 
 import structs.FaceSet;
+import structs.Point2d;
 import structs.Point3d;
 import structs.VertexSet;
 
@@ -293,20 +294,19 @@ protected:
     public void drawSequence(BufferedImage pBuffImg, String modelName, 
     int screenHeight, int screenWidth, int frameCounter) {
         Graphics2D graphics2D = pBuffImg.createGraphics();
-        HPEN hBlackPen, hWhitePen;
+        Color blackColor;
         boolean highlightVertices = false;
         int iPt1X, iPt1Y;
-        int iPt2X, iPt2Y;
+        int iPt2X = 0, iPt2Y = 0;
         // float referenceX, referenceY, referenceZ; // These variables are not used
 
-        SetMapMode(MM_TEXT); // Logical units = physical units = pixel
         currentShape.initCurrentVertex();
         if(currentShape.getNumVertices() == 0) { 
             return;
         }
 
         lastShape.initCurrentVertex();
-        HGDIOBJ hOldPen = SelectObject(hWhitePen);  //save the current object
+        Color oldColor = graphics2D.getColor();
         int xOffset = screenWidth / 2;
         int yOffset = screenHeight / 2;
       
@@ -316,10 +316,10 @@ protected:
         }
 
         // Draw the new border
-        hBlackPen = CreatePen(PS_SOLID, 1, Color.BLACK);
-        SelectObject(hBlackPen);
+        blackColor = Color.BLACK;
+        graphics2D.setColor(blackColor);
 
-        Integer firstx, firsty, nextx, nexty;
+        Integer firstx = 0, firsty = 0, nextx = 0, nexty = 0;
         int index;
 
         if(currentShape.getNumFaces() == 0) {
@@ -388,7 +388,7 @@ protected:
 
         // 10, 10 refers to screen coordinates
         graphics2D.drawString(frameString, 10, 10);
-        SelectObject(hOldPen);   // reselect the previous object
+        graphics2D.setColor(oldColor);
     } // drawSequence
 
 
@@ -407,12 +407,6 @@ protected:
             previewMesh(graphics2D, psModelName, xOffset, yOffset, piScreenHeight, piScreenWidth);
             return;
         }
-
-        int nDrawMode = GetROP2();
-        // hPointPen and hBlackPen will be used as parameters to drawBox
-        HPEN hBlackPen, hPointPen;
-        // HPEN hWhitePen; This variable is not used
-        SetMapMode(MM_TEXT); // Logical units=physical units = pixel
         
         currentShape.initCurrentVertex();
         if(currentShape.getNumVertices() == 0) {
@@ -425,18 +419,17 @@ protected:
 
         int index;
         float ax, ay;
-        int firstx, firsty, nextx, nexty;
+        int firstx = 0, firsty = 0, nextx = 0, nexty = 0;
         int iPt1X, iPt1Y;
-        int iPt2X, iPt2Y;
+        int iPt2X = 0, iPt2Y = 0;
 
         currentShape.initCurrentVertex();
 
         // Draw the new border
         // ROP2 not activated when background plate is not used.
         // so models are visible on grey window background.
-        hBlackPen = CreatePen(PS_SOLID, 1, Color.BLACK);
-        SelectObject(hBlackPen);
-        hPointPen = CreatePen(PS_SOLID, 1, new Color(0, 200, 0)); // green pen
+        Color origColor = Color.BLACK;
+        Color penColor = new Color(0, 200, 0); // green pen
 
         // If the shape has no faces, the vertices describe a planar element
         // If the shape has faces, draw them
@@ -444,7 +437,7 @@ protected:
             firstx = (int)currentShape.currentVertex.sx;
             firsty = (int)(piScreenHeight - currentShape.currentVertex.sy);
             if(highlightVertices) {
-                drawBox(graphics2D, hPointPen, hBlackPen, 
+                drawBox(graphics2D, penColor, origColor, 
                     firstx + xOffset, 
                     firsty - yOffset);
             }
@@ -461,7 +454,7 @@ protected:
                 iPt1Y = iPt2Y;
 
                 if(highlightVertices) {
-                     drawBox(graphics2D, hPointPen, hBlackPen, 
+                     drawBox(graphics2D, penColor, origColor, 
                         iPt2X, iPt2Y);
                 }
             } // for
@@ -474,7 +467,7 @@ protected:
                 currentShape.getScreenVertex(currentShape.currentFace.i1, firstx, firsty);
               
                 if(highlightVertices) {
-                    drawBox(graphics2D, hPointPen, hBlackPen, 
+                    drawBox(graphics2D, penColor, origColor, 
                         firstx + xOffset, 
                         firsty - yOffset);
                 }
@@ -487,7 +480,7 @@ protected:
                 graphics2D.drawLine(iPt1X, iPt1Y, iPt2X, iPt2Y);
 
                 if(highlightVertices) {
-                    drawBox(graphics2D, hPointPen, hBlackPen, 
+                    drawBox(graphics2D, penColor, origColor, 
                         nextx + xOffset, 
                         piScreenHeight - nexty - yOffset);
                 }
@@ -500,7 +493,7 @@ protected:
                 graphics2D.drawLine(iPt1X, iPt1Y, iPt2X, iPt2Y);
 
                 if(highlightVertices) {
-                    drawBox(graphics2D, hPointPen, hBlackPen, 
+                    drawBox(graphics2D, penColor, origColor, 
                         nextx + xOffset, 
                         piScreenHeight - nexty - yOffset);
                 }
@@ -513,7 +506,7 @@ protected:
                 graphics2D.drawLine(iPt1X, iPt1Y, iPt2X, iPt2Y);
 
                 if(highlightVertices) {
-                    drawBox(graphics2D, hPointPen, hBlackPen, 
+                    drawBox(graphics2D, penColor, origColor, 
                         nextx + xOffset, 
                         piScreenHeight - nexty - yOffset);
                 }
@@ -537,8 +530,6 @@ protected:
         if(!psModelName.equals(" ")) {
             graphics2D.drawString(psModelName, (int)ax + xOffset, (int)ay - yOffset);
         }
-
-        SetROP2(nDrawMode);
     } // drawStill
 
 
@@ -618,8 +609,8 @@ protected:
         int numVertices = aShape.getNumVertices();
 
         // Variable thePoints will later be used as a parameter to MemImage.drawMask,
-        // where it will be used as a parameter to the Polygon function
-        POINT[] thePoints = new POINT[numVertices];
+        // where it will then be used as a parameter to the Polygon function
+        Point2d[] thePoints = new Point2d[numVertices];
         int thePointsIdx = 0;
 
         aShape.initCurrentVertex();
@@ -681,7 +672,9 @@ protected:
 
 
     // TODO: Not A method
-    int maskFromShape(Shape3d inShape, MemImage maskImage) {
+    // Called from:
+    //     Globals.tweenImage
+    public static int maskFromShape(Shape3d inShape, MemImage maskImage) {
         // Create a mask image from a 2D boundary.
         // The generated image is displayed on the Cmainframe window.
         // This function could be modified use a memory DC instead.
@@ -689,18 +682,20 @@ protected:
         int imageWidth  = maskImage.getWidth();
         int numVertices = inShape.getNumVertices();
         
-        CWnd theWindow = AfxGetMainWnd();
-        HWND HWindow = theWindow.m_hWnd;
+        // CWnd theWindow = AfxGetMainWnd();
+        // HWND HWindow = theWindow.m_hWnd;
 
         // Copy the shape vertices into a structure compatible with the Windows
         // drawing functions
 
         // Variable thePoints will be used later as a parameter to MemImage.drawMask, 
         // where it will then be used as a parameter to the Polygon function
-        POINT[] thePoints = new POINT[numVertices];
+        Point2d[] thePoints = new Point2d[numVertices];
         int thePointsIdx = 0;
         inShape.initCurrentVertex();
 
+        // Populate array thePoints. This array will later be used as a parameter
+        // to MemImage.drawMask, where it will be used to draw a polygon.
         for(int myIndex = 0; myIndex < numVertices; myIndex++) {
             thePoints[thePointsIdx].x = inShape.currentVertex.x;
             thePoints[thePointsIdx].y = inShape.currentVertex.y;
@@ -716,7 +711,7 @@ protected:
             return 1;
         }
 
-        HDC memoryDC = CreateCompatibleDC();
+        // HDC memoryDC = CreateCompatibleDC();
 
         // Use the Graphics2D.drawPolygon method to draw the points
         int myStatus = tempMaskImage.drawMask(thePoints, numVertices);
@@ -732,6 +727,7 @@ protected:
         // statusPrint("maskFromShape: Unpacking Mask Image...");
         tempMaskImage.unPack(maskImage);
         FileUtils.deleteFile("OneBit.bmp");
+
         return 0;
     } // maskFromShape
 
@@ -754,10 +750,9 @@ protected:
         _splitpath(psInputName, sDrive, sDir, sFile, sExt);
         int iFileNameLength = sFile.length();
         if(iFileNameLength > 0) {
-            // *(file+theLength-1) = theSuffix;  // Substitute a suffix
             char[] charArray = new char[1];
             charArray[0] = pcSuffix;
-            sFile.concat(new String(charArray));
+            sFile.concat(new String(charArray)); // Substitute a suffix
         }
 
         // Set the output parameter psOutputName
@@ -1529,12 +1524,12 @@ protected:
     // TODO: Not a method
     // Called from:
     //     drawStill
-    void drawBox(Graphics2D graphics2D, HPEN hPointPen, HPEN hBlackPen, int x, int y) {
+    void drawBox(Graphics2D graphics2D, Color pPenColor, Color pOrigColor, int x, int y) {
         //  Draw a box 2 * offset + 1 pixels wide and high around the point x,y
         int offset = 2;
         int iPt1X, iPt1Y;
         int iPt2X, iPt2Y;
-        SelectObject(hPointPen);
+        graphics2D.setColor(pPenColor);
 
         iPt1X = x - offset;
         iPt1Y = y + offset;
@@ -1561,7 +1556,7 @@ protected:
         graphics2D.drawLine(iPt1X, iPt1Y, iPt2X, iPt2Y);
 
         // MoveToEx(x, y); // this doesn't actually draw anything
-        SelectObject(hBlackPen);
+        graphics2D.setColor(pOrigColor);
     } // drawBox
 
 
