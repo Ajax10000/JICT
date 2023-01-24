@@ -4,6 +4,8 @@ import globals.Globals;
 
 import math.MathUtils;
 
+import structs.Point2d;
+
 public class MemImage {
     boolean ictdebug = false;
     protected HANDLE fp;            // Used with memimg32.cpp
@@ -274,6 +276,7 @@ public:
     // Called from: 
     //     saveAs8
     //     Globals.motionBlur
+    //     Globals.tweenImage
     //     SceneList.render
     //     MainFrame.onToolsWarpImage
     //     RenderObject.renderMeshz
@@ -298,6 +301,7 @@ public:
 
 
     // Called from:
+    //     Globals.tweenImage
     //     RenderObject.renderMeshz
     public MemImage(int height, int width) {
         this(height, width, 8);
@@ -671,7 +675,7 @@ public:
     // as this method performs graphics
     // Called from:
     //     RenderObject.prepareCutout
-    public int drawMask(POINT[] thePoints, int numVertices) {
+    public int drawMask(Point2d[] thePoints, int numVertices) {
         HBITMAP hBitmap, holdBitmap;
         HDC newdc;
 
@@ -698,7 +702,7 @@ public:
         SelectObject(newdc, hpen);
         SelectObject(newdc, GetStockObject(WHITE_BRUSH));
         SetPolyFillMode(newdc, WINDING);
-        graphics2d.drawPolygon(newdc, thePoints, numVertices);
+        graphics2D.drawPolygon(newdc, thePoints, numVertices);
 
         // Display the mask
         BitBlt(0, 0, this.imageWidth, this.imageHeight, newdc, 0, 0, SRCCOPY);
@@ -716,6 +720,8 @@ public:
     } // drawMask
 
 
+    // Called from:
+    //     Globals.tweenImage
     public int copy(MemImage outImage, int piXoffset, int piYoffset) {
         int x, y;
 
@@ -866,6 +872,8 @@ public:
     //     copy (if this.bitsPerPixel = 24)
     //     Globals.iwarpz
     //     Globals.motionBlur
+    //     Globals.tweenImage
+    //     Globals.tweenMesh
     public int getMPixelRGB(int x, int y, Byte red, Byte green, Byte blue) {
         //  Inputs x and y are assumed to be 1 relative
         //  Returns the desired pixel from a color image
@@ -903,6 +911,8 @@ public:
     //     copy8To24
     //     Globals.iwarpz
     //     Globals.motionBlur
+    //     Globals.tweenImage
+    //     Globals.tweenMesh
     public int setMPixelRGB(int x, int y, byte red, byte green, byte blue) {
         // Inputs x and y are assumed to be 1 relative
         // Returns the desired pixel from a color image
@@ -939,6 +949,8 @@ public:
     //     copy (if this.bitsPerPixel = 8)
     //     Globals.iwarpz
     //     Globals.motionBlur
+    //     Globals.tweenImage
+    //     Globals.tweenMesh
     //     Texture.createPlasma
     //     Texture.createTexture
     public int setMPixel(int x, int y, byte value) {
@@ -1114,6 +1126,8 @@ public:
     //     histogram
     //     Globals.iwarpz
     //     Globals.motionBlur
+    //     Globals.tweenImage
+    //     Globals.tweenMesh
     //     Texture.plasma
     public byte getMPixel(int x, int y) {
         // Inputs x and y are assumed to be 1 relative
@@ -1143,6 +1157,7 @@ public:
     // Called from:
     //     Globals.createQMeshModel
     //     Globals.iwarpz
+    //     Globals.tweenMesh
     //     Texture.createTexture
     public int setMPixel32(int x, int y, float aValue) {
         // Inputs x and y are assumed to be 1 relative
@@ -1171,6 +1186,7 @@ public:
 
     // Called from:
     //     Globals.iwarpz
+    //     Globals.tweenMesh
     //     RenderObject.renderMeshz
     public float getMPixel32(int x, int y) {
         // Inputs x and y are assumed to be 1 relative
@@ -1202,6 +1218,8 @@ public:
     //     printValue
     //     saveAs8
     //     scaleTo8
+    //     Globals.tweenImage
+    //     Globals.tweenMesh
     //     RenderObject.renderMeshz
     //     RenderObject.renderShapez
     public int getHeight() {
@@ -1215,6 +1233,8 @@ public:
     //     printValue
     //     saveAs8
     //     scaleTo8
+    //     Globals.tweenImage
+    //     Globals.tweenMesh
     //     RenderObject.renderMeshz
     public int getWidth() {
         return this.imageWidth;
@@ -1236,6 +1256,8 @@ public:
     //     histogram
     //     printValue
     //     saveAs8
+    //     Globals.tweenImage
+    //     Globals.tweenMesh
     public int getBitsPerPixel() {
         return this.bitsPerPixel;
     } // getBitsPerPixel
@@ -1262,6 +1284,7 @@ public:
     //     The MemImage constructor that takes 6 parameters
     //     saveAs8
     //     Globals.motionBlur
+    //     Globals.tweenImage
     //     MainFrame.onToolsWarpImage
     //     Texture.createTexture
     public int writeBMP(String fileName) {
@@ -2014,6 +2037,7 @@ public:
 
     // This method came from BLEND.CPP
     // Called from:
+    //     Globals.tweenImage
     //     RenderObject.renderMeshz
     public int createAlphaImage(MemImage outImage) {
         int x, y;
@@ -2180,6 +2204,8 @@ public:
 
 
     // This method came from IWARP.CPP
+    // Called from:
+    //     Globals.tweenImage
     public int alphaSmooth3() {
         // Each image must be the same size.
         MemImage inImage  = this;
