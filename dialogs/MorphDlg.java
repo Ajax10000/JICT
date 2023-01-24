@@ -184,7 +184,7 @@ protected:
         if (showDlgResult == JFileChooser.APPROVE_OPTION) {
             File file = dlg.getSelectedFile();
             String sFileName = file.getName();
-            m_firstImage.SetWindowText(dlg.GetPathName());
+            m_firstImage.setText(sFileName);
         }
     } // onLocateDestDir
 
@@ -202,7 +202,7 @@ protected:
         if (showDlgResult == JFileChooser.APPROVE_OPTION) {
             File file = dlg.getSelectedFile();
             String sFileName = file.getName();
-            m_firstOutPath.SetWindowText(dlg.GetPathName());
+            m_firstOutPath.setText(sFileName);
         }
     } // onLocateDestDir2
 
@@ -217,7 +217,9 @@ protected:
         int showDlgResult = dlg.showDialog(this, "Select scn file");
 
         if (showDlgResult == JFileChooser.APPROVE_OPTION) {
-            m_secondImage.SetWindowText(dlg.GetPathName());	
+            File file = dlg.getSelectedFile();
+            String sFileName = file.getName();
+            m_secondImage.setText(sFileName);	
         }
     } // onLocateDestDir3
 
