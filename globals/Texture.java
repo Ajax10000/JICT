@@ -2,6 +2,8 @@ package globals;
 
 import core.MemImage;
 
+import java.util.Random;
+
 public class Texture {
     // These values came from ICT20.H
     // Texture Types
@@ -12,7 +14,11 @@ public class Texture {
     public static int PLASMA       = 5;
     public static int COUNTER      = 6;
 
+    public static Random random = new Random();
 
+
+    // Called from:
+    //     MakeTexture.onOK
     public static int createTexture(String psTexturePath, String psOutDirectory, 
     int piTextureType, int piImageType, 
     int piForeColor, int piBackColor, // piBackColor is not used
@@ -34,7 +40,7 @@ public class Texture {
         }
 
         byte loValue    = 10;
-        byte hiValue    = 250;
+        byte hiValue    = 250; // TODO: Fix this. Range of byte is -128 to 127
         byte checkValue = loValue;
 
         final int iCellWidth = 32;
@@ -222,8 +228,6 @@ public class Texture {
     // Called from:
     //     createTexure
     public static void createPlasma(MemImage anImage, int numRows, int numColumns) {
-        srand( (unsigned)time( null ) );	   //seed the random number generator
-
         anImage.setMPixel(1,       1,     (byte)myRand(64));
         anImage.setMPixel(1,       numRows,  (byte)myRand(64));
         anImage.setMPixel(numColumns, 1,     (byte)myRand(64));
@@ -236,6 +240,8 @@ public class Texture {
     //     createPlasma
     //     plasma
     public static int myRand(int maxVal) {
-        return (int)((float)rand()/(float)RAND_MAX * maxVal);
+        // random.nextFloat returns a value between 0.0 and 1.0
+        // myRand returns a value between 0 and maxVal.
+        return (int)(random.nextFloat() * maxVal);
     } // myRand
 } // class Texture
