@@ -111,44 +111,44 @@ protected:  // control bar embedded members
 
 // Generated message map functions
 protected:
-    void warpImage ();
-    void getViewMatrix(tMatrix *viewMatrix);
-    void closeAllChildren();
+    void warpImage (); - not found in MAINFRM.H nor in MAINFRM.CPP
+    void getViewMatrix(tMatrix *viewMatrix); - implemented
+    void closeAllChildren(); - implemented
 
 	//{{AFX_MSG(CMainFrame)
-	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-	afx_msg void OnPreviewScene();
-	afx_msg void OnPreviewSequence();
-	afx_msg void OnRenderDepthsorting();
-	afx_msg void OnRenderScene();
-	afx_msg void OnRenderSequence();
-	afx_msg void OnToolsCreatealphaimage();
-	afx_msg void OnToolsCreateascenelist();
-	afx_msg void OnToolsCreatecutout();
-	afx_msg void OnToolsMorphSequence();
-	afx_msg void OnToolsWarpimage();
-	afx_msg void OnUpdateToolsCreatecutout(CCmdUI* pCmdUI);
-	afx_msg void OnUpdatePreviewScene(CCmdUI* pCmdUI);
-	afx_msg void OnUpdatePreviewSequence(CCmdUI* pCmdUI);
-	afx_msg void OnUpdateRenderScene(CCmdUI* pCmdUI);
-	afx_msg void OnUpdateRenderSequence(CCmdUI* pCmdUI);
-	afx_msg void OnUpdateRenderDepthsorting(CCmdUI* pCmdUI);
-	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
-	afx_msg void OnToolsTest();
-	afx_msg void OnRenderZbuffer();
-	afx_msg void OnUpdateRenderZbuffer(CCmdUI* pCmdUI);
-	afx_msg void OnUpdateToolsSampleimage(CCmdUI* pCmdUI);
-	afx_msg void OnToolsSampleimage();
-	afx_msg void OnToolsRemoveSampleColors();
-	afx_msg void OnUpdateToolsRemoveSampleColors(CCmdUI* pCmdUI);
-	afx_msg void OnToolsCreatemesh();
-	afx_msg void OnToolsCreatetextureimage();
-	afx_msg void OnUpdateRenderHazefog(CCmdUI* pCmdUI);
-	afx_msg void OnUpdateRenderAntialias(CCmdUI* pCmdUI);
-	afx_msg void OnToolsMotionblur();
-	afx_msg void OnRenderHazefog();
-	afx_msg void OnRenderAntialias();
-	afx_msg void OnToolsRenderVrmlFile();
+	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct); - commented out
+	afx_msg void OnPreviewScene(); - renamed to onPreviewStillScene
+	afx_msg void OnPreviewSequence(); - implemented
+	afx_msg void OnRenderDepthsorting(); - implemented
+	afx_msg void OnRenderScene(); - renamed to onRenderStillScene
+	afx_msg void OnRenderSequence(); - implemented
+	afx_msg void OnToolsCreatealphaimage(); - implemented
+	afx_msg void OnToolsCreateascenelist(); - implemented
+	afx_msg void OnToolsCreatecutout(); - implemented
+	afx_msg void OnToolsMorphSequence(); - implemented
+	afx_msg void OnToolsWarpimage(); - implemented
+	afx_msg void OnUpdateToolsCreatecutout(CCmdUI* pCmdUI); - commented out
+	afx_msg void OnUpdatePreviewScene(CCmdUI* pCmdUI); - renamed to onUpdatePreviewStillScene, then commented out
+	afx_msg void OnUpdatePreviewSequence(CCmdUI* pCmdUI); - commented out
+	afx_msg void OnUpdateRenderScene(CCmdUI* pCmdUI); - renamed to onUpdateRenderStillScene, then commented out
+	afx_msg void OnUpdateRenderSequence(CCmdUI* pCmdUI); - commented out
+	afx_msg void OnUpdateRenderDepthsorting(CCmdUI* pCmdUI); - commented out
+	afx_msg BOOL OnEraseBkgnd(CDC* pDC); - commented out
+	afx_msg void OnToolsTest(); - implemented
+	afx_msg void OnRenderZbuffer(); - implemented
+	afx_msg void OnUpdateRenderZbuffer(CCmdUI* pCmdUI); - commented out
+	afx_msg void OnUpdateToolsSampleimage(CCmdUI* pCmdUI); - commented out
+	afx_msg void OnToolsSampleimage(); - implemented
+	afx_msg void OnToolsRemoveSampleColors(); - implemented
+	afx_msg void OnUpdateToolsRemoveSampleColors(CCmdUI* pCmdUI); - commented out
+	afx_msg void OnToolsCreatemesh(); - implemented
+	afx_msg void OnToolsCreatetextureimage(); - implemented
+	afx_msg void OnUpdateRenderHazefog(CCmdUI* pCmdUI); - commented out
+	afx_msg void OnUpdateRenderAntialias(CCmdUI* pCmdUI); - commented out
+	afx_msg void OnToolsMotionblur(); - implemented
+	afx_msg void OnRenderHazefog(); - implemented
+	afx_msg void OnRenderAntialias(); - implemented
+	afx_msg void OnToolsRenderVrmlFile(); - implemented
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
@@ -163,25 +163,39 @@ protected:
 
 
     // Read in: 
-    //     ScenePreviewDlg.setTextBoxesWithModelTransform
+    //     onToolsWarpImage
+    //     ScenePreviewDlg.setTextBoxesWithModelTransform (passed as parameter to DecimalFormat.format)
+    //     ScenePreviewDlg.onCmdPlus (passed as parameters to MathUtils.fPolar and SceneList.setCurrentModelTransform)
     // Modified in: 
+    //     the constructor, when it calls initFields
+    //     onToolsWarpImage. Here they are passed as parameters to Globals.iwarpz
     //     ScenePreviewDlg.chooseModel
+    //     ScenePreviewDlg.onCmdPlus
     //     ScenePreviewDlg.onCmdReset
-    public float warpRotateX, warpRotateY, warpRotateZ;
+    //     ScenePreviewDlg.onSelChangeCmbModels
+    public Float mWarpRotateX, mWarpRotateY, mWarpRotateZ;
 
     // Read in: 
+    //     onToolsWarpImage Here they are passed as parameters to Globals.iwarpz
     //     ScenePreviewDlg.setTextBoxesWithModelTransform
     // Modified in: 
+    //     constructor, when it calls initFields
+    //     onToolsWarpImage. 
     //     ScenePreviewDlg.chooseModel
     //     ScenePreviewDlg.onCmdReset
-    public float warpScaleX, warpScaleY, warpScaleZ;
+    //     ScenePreviewDlg.onSelChangeCmbModels
+    public float mWarpScaleX, mWarpScaleY, mWarpScaleZ;
 
-    // Modified in: 
-    //     ScenePreviewDlg.chooseModel
-    //     ScenePreviewDlg.onCmdReset
     // Read in: 
-    //     ScenePreviewDlg.setTextBoxesWithModelTransform
-    public float warpTranslateX, warpTranslateY, warpTranslateZ;
+    //     ScenePreviewDlg.onCmdPlus (here they are passed as parameters to SceneList.setCurrentModelTransorm)
+    //     ScenePreviewDlg.setTextBoxesWithModelTransform (passed pas parameters to DecimalFormt.format)
+    // Modified in: 
+    //     constructor, when it calls initFields
+    //     ScenePreviewDlg.chooseModel
+    //     ScenePreviewDlg.onCmdPlus
+    //     ScenePreviewDlg.onCmdReset
+    //     ScenePreviewDlg.onSelChangeCmbModels
+    public float mWarpTranslateX, mWarpTranslateY, mWarpTranslateZ;
 
     // Read in: 
     //     ScenePreviewDlg.setTextBoxesWithViewTransform
@@ -198,8 +212,11 @@ protected:
 
     // Read in ScenePreviewDlg.onOk
     public String sceneFileName;
-    public int effectType, mode, colorMode;
-    public int outputRows, outputColumns;
+    public int effectType;
+    public int mode, colorMode;
+
+    // Initialized in the constructor when it calls initFields
+    public Integer mIOutputRows = 0, mIOutputColumns = 0;
 
     // Changed from int to boolean
     public boolean cutoutEnabled;         // Menu control variables
@@ -242,10 +259,14 @@ protected:
 
     // 1 if the scene is being previewed
     // Changed from int to boolean
+    // Initialized to false in the constructor when it calls method initFields.
+    // Modified in method onPreviewStillScene.
     public boolean previewingScene;
 
     // 1 if sequence is being previewed
     // Changed from int to boolean
+    // Initialized to false in the consstructor when it calls method initFields.
+    // Modified in method onPreviewSequenceScene.
     public boolean previewingSequence;
 
     // 1 if the ViewPoint is being previewed
@@ -261,7 +282,9 @@ protected:
     public TMatrix modelMatrix;
 
     // Contains viewpoint transformation
-    public TMatrix viewMatrix;
+    // Initialized in the constructor when it calls initFields
+    // Used in method getViewMatrix
+    public TMatrix mViewMatrix;
 
     // The image window into which the scene preview display is drawn
     public ImageView previewWindowHandle;	 
@@ -322,17 +345,17 @@ protected:
     } // MainFrame ctor
 
     private void initFields() {
-        this.warpRotateX = 0.0f; 
-        this.warpRotateY = 0.0f; 
-        this.warpRotateZ = 0.0f;
+        this.mWarpRotateX = 0.0f; 
+        this.mWarpRotateY = 0.0f; 
+        this.mWarpRotateZ = 0.0f;
 
-        this.warpTranslateX = 0.0f; 
-        this.warpTranslateY = 0.0f; 
-        this.warpTranslateZ = 0.0f;
+        this.mWarpTranslateX = 0.0f; 
+        this.mWarpTranslateY = 0.0f; 
+        this.mWarpTranslateZ = 0.0f;
 
-        this.warpScaleX = 1.0f; 
-        this.warpScaleY = 1.0f; 
-        this.warpScaleZ = 1.0f;
+        this.mWarpScaleX = 1.0f; 
+        this.mWarpScaleY = 1.0f; 
+        this.mWarpScaleZ = 1.0f;
 
         this.viewRotateX = 0.0f; 
         this.viewRotateY = 0.0f; 
@@ -357,11 +380,11 @@ protected:
         this.imageSamplingEnabled = false;
         this.previewingScene = false;
         this.previewingSequence = false;
-        this.outputRows = 250;  // Set these in case a SceneList is not read in
-        this.outputColumns = 250;
+        this.mIOutputRows = 250;  // Set these in case a SceneList is not read in
+        this.mIOutputColumns = 250;
         this.changeViewPoint = false;
         this.mySceneList = new SceneList();
-        this.viewMatrix = new TMatrix();
+        this.mViewMatrix = new TMatrix();
         this.modelMatrix = new TMatrix();
         this.previewWindowHandle = null;  // The scene preview window handle
     } // initFields
@@ -742,7 +765,26 @@ POPUP "Tools"
         String sActionCmd = ae.getActionCommand();
 
         // Was it a File menu item?
+/*
+        MENUITEM "&New Scene\tCtrl+N",          ID_FILE_NEW
+        MENUITEM "&Open Scene...\tCtrl+O",      ID_FILE_OPEN
+        MENUITEM "&Close Scene",                ID_FILE_CLOSE
+        MENUITEM "&Save Scene\tCtrl+S",         ID_FILE_SAVE
+        MENUITEM "Save Scene &As...",           ID_FILE_SAVE_AS
+        MENUITEM "Open Image",                  ID_FILE_OPENIMAGE
+        MENUITEM "Open ICT Log",                ID_FILE_OPENICTLOG
+        MENUITEM "Recent File",                 ID_FILE_MRU_FILE1, GRAYED
+        MENUITEM "E&xit",                       ID_APP_EXIT
+ */
+        // Open Image menu item from the File menu
+        // onFileOpenImage
 
+        // Open ICT Log menu item from the File menu
+        // onFileOpenIctLog
+
+        // Open Scene menu item from the File menu
+        // onFileOpen
+        
         // Was it an Edit menu item?
 
         // Was it a Tools menu item?
@@ -927,7 +969,10 @@ POPUP "Tools"
         msgText = "Reading Scene List: " + aFileName;
         Globals.statusPrint(msgText);
 
+        // Create an instance of a class that can parse .scn files
         ScnFileParser parser = new ScnFileParser(mySceneList);
+
+        // Have it parse the .scn file aFileName
         myStatus = parser.readList(msgText, aFileName);
         Globals.statusPrint(msgText);
 
@@ -939,11 +984,17 @@ POPUP "Tools"
         sceneFileName = dlg.getSelectedFile().getName();  // save the file name
 
         // Load the scene information into the client object
+        // The following method sets fields sceneName, effectType, colorMode, 
+        // outputRows and outputColumns
+        // Class SceneList stored the information after ScnFileParser parsed file aFileName
         mySceneList.getSceneInfo(sceneName, effectType, colorMode, 
-            outputRows, outputColumns);
+            mIOutputRows, mIOutputColumns);
+
+        // The following method sets fields viewTranslateX, viewTranslateY, viewTranslateZ, 
+        // viewRotateX, viewRotateY, and viewRotateZ
         mySceneList.getViewTransform(viewTranslateX, viewTranslateY, viewTranslateZ,
             viewRotateX, viewRotateY, viewRotateZ);
-        getViewMatrix(viewMatrix);
+        getViewMatrix();
 
         if((this.effectType == SEQUENCE) || (this.effectType == MORPH)) {
             this.previewSequenceEnabled = true;
@@ -1105,20 +1156,17 @@ POPUP "Tools"
     // MENUITEM "Warp Image...",               ID_TOOLS_WARPIMAGE
     // ON_COMMAND(ID_TOOLS_WARPIMAGE, OnToolsWarpimage)
     public void onToolsWarpImage() {
+        // The WarpParamDlg dialog displays 5 text boxes where the user can enter 
+        // rotation angles (in degrees) for x, y, and z-axes, and 
+        // scale factors for x and y axes.
         WarpParamDlg dlg = new WarpParamDlg(this, true);
         dlg.setVisible(true);
+    } // onToolsWarpImage
 
-        // May have to move this code to WarpParamDlg.java
-        if(dlg.DoModal() != IDOK) {
-            return;
-        }
 
-        this.warpRotateX = Float.parseFloat(dlg.m_rx);
-        this.warpRotateY = Float.parseFloat(dlg.m_ry);
-        this.warpRotateZ = Float.parseFloat(dlg.m_rz);
-        this.warpScaleX  = Float.parseFloat(dlg.m_sx);
-        this.warpScaleY  = Float.parseFloat(dlg.m_sy);
-
+    // Called from:
+    //     WarpParamDlg.onOk
+    public void onWarpParamDlgClosed() {
         ImageView orgView, outView;
         closeAllChildren();
         
@@ -1159,8 +1207,8 @@ POPUP "Tools"
         float xAngle = 0.0f, yAngle = 0.0f, zAngle = 0.0f;
 
         Globals.iwarpz(inImage, outImage, null, 
-            warpRotateX, warpRotateY, warpRotateZ,
-            warpScaleX, warpScaleY, warpScaleZ, 
+            mWarpRotateX, mWarpRotateY, mWarpRotateZ,
+            mWarpScaleX,  mWarpScaleY,  mWarpScaleZ, 
             0.0f, 0.0f, 0.0f,
             0.0f, 0.0f, 0.0f,
             dummyMatrix,
@@ -1174,10 +1222,11 @@ POPUP "Tools"
             outView.associateMemImage(outImage);
         }
 
-        xAngle += warpRotateX;
-        yAngle += warpRotateY;
-        zAngle += warpRotateZ;
-    } // onToolsWarpImage
+        // Why are these local variables being set? Their new values will not be used.
+        xAngle += mWarpRotateX;
+        yAngle += mWarpRotateY;
+        zAngle += mWarpRotateZ;
+    } // onWarpParamDlgClosed
 
 
     // Called when the user selects the "Sample Image" menu item from the Tools menu.
@@ -1234,7 +1283,7 @@ POPUP "Tools"
         String inPath, outPath;
 
         // Get the VRML File Directory
-        String sVRMLDirectory = Globals.ictPreference.getPath(Preference.VRMLDirectory)
+        String sVRMLDirectory = Globals.ictPreference.getPath(Preference.VRMLDirectory);
         File currDir = new File(sVRMLDirectory);
 
         JFileChooser dlg = new JFileChooser();
@@ -1431,8 +1480,8 @@ POPUP "Tools"
         previewWindowHandle = renderView; //save the imageView window so scene preview dialog can use it
         // MDITile(MDITILE_VERTICAL);	 //This maximizes the imageWindow
 
-        getViewMatrix(viewMatrix);
-        mySceneList.render(renderView, viewMatrix, depthSortingEnabled, zBufferEnabled, 
+        getViewMatrix();
+        mySceneList.render(renderView, mViewMatrix, depthSortingEnabled, zBufferEnabled, 
             antiAliasEnabled, hazeFogEnabled);
         renderSceneEnabled = false;
 
@@ -1464,8 +1513,8 @@ POPUP "Tools"
                                         // the scene preview dialog can use it
         // MDITile(MDITILE_VERTICAL);	      //Maximize the imageWindow
 
-        getViewMatrix(viewMatrix);
-        mySceneList.render(renderView, viewMatrix, depthSortingEnabled, 
+        getViewMatrix();
+        mySceneList.render(renderView, mViewMatrix, depthSortingEnabled, 
             zBufferEnabled, antiAliasEnabled, hazeFogEnabled);
         renderSequenceEnabled = false;
         isDirty = true;
@@ -1561,14 +1610,14 @@ POPUP "Tools"
     //     onRenderScene
     //     onRenderSequence
     //     onToolsCreateASceneList
-    public void getViewMatrix(TMatrix viewMatrix) {
-        viewMatrix.setIdentity();
+    private void getViewMatrix() {
+        mViewMatrix.setIdentity();
         float xRadians = this.viewRotateX * F_DTR;
         float yRadians = this.viewRotateY * F_DTR;
         float zRadians = this.viewRotateZ * F_DTR;
 
-        viewMatrix.rotate(-xRadians, -yRadians, -zRadians);
-        viewMatrix.translate(-viewTranslateX, -viewTranslateY, -viewTranslateZ);
+        mViewMatrix.rotate(-xRadians, -yRadians, -zRadians);
+        mViewMatrix.translate(-viewTranslateX, -viewTranslateY, -viewTranslateZ);
     } // getViewMatrix
 
 /*
