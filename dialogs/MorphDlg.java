@@ -248,10 +248,10 @@ protected:
         MemImage inImageA, inImageB;
         float aFraction, increment;
         String imagePath, shapePath;
-        int aStatus, i, outFrameNum;
+        int aStatus, i, outFrameNum = 0;
         String outPath, aNumFrames, firstImage, secondImage;
-        String directory, fileName, prefix, suffix;
-        String cNumFrames, cPathName;
+        String directory = "", fileName = "", prefix = "", suffix = "";
+        // String cNumFrames, cPathName; // These variables are not being used.
 
         aNumFrames  = m_preNumFrames.getText();
         m_numFrames = Integer.parseInt(aNumFrames);
@@ -290,7 +290,7 @@ protected:
                 Globals.statusPrint(imagePath);
 
                 shapePath = directory + prefix + String.format("%04o", i) + suffix + ".shp";
-                aStatus = tweenImage(aFraction, inImageA, inImageB, imagePath, shapePath);
+                aStatus = Globals.tweenImage(aFraction, inImageA, inImageB, imagePath, shapePath);
                 aFraction += increment;
             }
             break;
@@ -299,10 +299,10 @@ protected:
             // Given two quadmeshes a and b, create a sequence of images where the
             // result mesh transitions from a to b in numFrames frames.
             float fractionIncrement;
-            int aHeight, aWidth, bpp;
+            Integer aHeight = 0, aWidth = 0, bpp = 0;
 
-            String aTexPath, aXPath, aYPath, aZPath;
-            String bTexPath, bXPath, bYPath, bZPath;
+            String aTexPath, aXPath = "", aYPath = "", aZPath = "";
+            String bTexPath, bXPath = "", bYPath = "", bZPath = "";
             MemImage aTexture, aX, aY, aZ;
             MemImage bTexture, bX, bY, bZ; 
             MemImage oTexture, oX, oY, oZ;
@@ -330,7 +330,6 @@ protected:
             default:
                 Globals.statusPrint ("MorphDlg.onOK(): Image a must have 8 or 24 bit pixels");
                 return;
-                break;
             } // switch
 
             aX = new MemImage(aXPath, 0, 0, RANDOM, 'R', A32BIT);
@@ -354,7 +353,6 @@ protected:
             default:
                 Globals.statusPrint("MorphDlg.onOK(): Image b must have 8 or 24 bit pixels");
                 return;
-                break;
             } // switch
 
             bX = new MemImage(bXPath, 0, 0, RANDOM, 'R', A32BIT);
@@ -371,8 +369,8 @@ protected:
             aFraction = 1.0f;
             fractionIncrement = 1.0f/((float)m_numFrames - 1.0f);
             
-            TMatrix aMatrix;
-            float centroidX, centroidY, centroidZ;
+            TMatrix aMatrix = new TMatrix();
+            Float centroidX = 0f, centroidY = 0f, centroidZ = 0f;
 
             for (i = 1; i <= m_numFrames; i++) {
                 msgText = "tweenMesh. Frame " + i + "  aFraction: " + aFraction;
