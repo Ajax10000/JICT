@@ -49,6 +49,8 @@ public class ScnFileParser {
     public static final int SEQUENTIAL = 1;
     public static final int RANDOM = 0;
 
+
+    // Called from MainFrame.onToolsCreateASceneList
     public ScnFileParser(SceneList sceneList) {
         this.sceneList = sceneList;
     } // ScnFileParser ctor
@@ -116,7 +118,6 @@ public class ScnFileParser {
         // Assume no problems will occur and initialize errorText accordingly.
         errorText = "Scene file read successfully";
         
-
         definedRefPoint = false;
 
         // Start parsing the .scn file. 
@@ -615,17 +616,20 @@ public class ScnFileParser {
                     // ADJUSTCOLOR [Target|Relative] <R>, <G>, <B>
                     // where R, G, and B are RGB color values, 
                     // expressed as integers in the range from 0 to 255.
-                    String adjustment, adjustmentCopy, theColor;
+                    String adjustment, theColor;
+                    // String adjustmentCopy; // This variable is not used
+                    
                     // Skip over the word "ADJUSTCOLOR"
                     // adjustment = strtok(TheText + 12, BLANK);
                     adjustment = strtok.nextToken();
 
                     // adjustmentType should be "TARGET" or "RELATIVE"
                     adjustmentType = adjustment;
-                    int aLength = adjustment.length();
+                    // int aLength = adjustment.length(); // This variable is no longer used
                     // Skip over both the words "ADJUSTCOLOR" and 
                     // "TARGET" or "RELATIVE"
                     // theColor = strtok(TheText + 12 + aLength + 1, BLANK);  // move forward to the RGB color
+                    
                     int idx = TheText.indexOf("RELATIVE");
                     if (idx == -1) {
                         idx = TheText.indexOf("TARGET");
