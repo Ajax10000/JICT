@@ -219,6 +219,9 @@ public class SceneList implements ISceneList {
     } // getCurrentModelTransform
 
 
+    // Not called from within this file.
+    // Called from:
+    //     ScnPreviewDlg.onInitDialog
     public void showModels(JComboBox<String> theCombo) {
         Scene theScene = this.sceneListHead;
         int numItems = theCombo.getItemCount(); // Clear the present contents ofthe comboBox
@@ -298,10 +301,11 @@ public class SceneList implements ISceneList {
 
     // Called from:
     //     depthSort
-    public int getViewTransform(Float pFViewX, Float pFViewY, Float pFViewZ, 
+    public int getViewTransform(
+    Float pFViewX,   Float pFViewY,   Float pFViewZ, 
     Float pFRotateX, Float pFRotateY, Float pFRotateZ) {
         Scene theScene = this.sceneListHead;
-        theScene = theScene.nextEntry;  //Skip over the list header
+        theScene = theScene.nextEntry;  // Skip over the list header
         if (theScene == null) { 
             return -1;
         }
@@ -403,6 +407,9 @@ public class SceneList implements ISceneList {
     } // writeList
 
 
+    // Not called from within this file.
+    // Called from:
+    //     ImageView.onDraw
     public int preview(HWND theWindow, TMatrix modelMatrix, TMatrix viewMatrix) {
         String msgText;
         int myStatus = 0;
@@ -436,7 +443,7 @@ public class SceneList implements ISceneList {
 
         // Preview the scene models
         Scene theScene = this.sceneListHead;
-        theScene = theScene.nextEntry;  //Skip over the list header
+        theScene = theScene.nextEntry;  // Skip over the list header
         if(theScene == null) {
             Globals.statusPrint("sceneList.previewSequence: Scene list has no models");
             return 0;
@@ -550,6 +557,8 @@ public class SceneList implements ISceneList {
     } // preview
 
  
+    // Called from:
+    //     ImageView.onDraw
     public int previewStill(HWND theWindow, TMatrix modelMatrix, TMatrix viewMatrix) {
         int myStatus = 0;
         String sceneName;
@@ -1069,6 +1078,8 @@ public class SceneList implements ISceneList {
     } // getSequenceFileName
 
 
+    // Called from:
+    //     render
     public void getFileName(String psOutputFileName, String psPrefix, 
     int piCounter, int piTheColor) {
         char cColorChar;
@@ -1084,6 +1095,7 @@ public class SceneList implements ISceneList {
     // Called from:
     //     preview
     //     previewStill
+    //     render
     public void adjustTransforms(int piEffectType, SceneElement theModel, 
     MotionNode aMotion, Bundle xfrm) {
         // float viewX, viewY, viewZ, rotateX, rotateY, rotateZ; // these local variables are not used
@@ -1546,6 +1558,10 @@ public class SceneList implements ISceneList {
         return 0;
     } // depthSort
 
+
+    // Called from:
+    //     constructor
+    //     finalize
     public int sizeofLowerLimit() {
         int mySize = 0;
         int booleanFieldsSizeInBits = 0;
