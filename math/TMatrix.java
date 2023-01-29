@@ -53,9 +53,11 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
 
     // Called from:
     //     Gloals.iwarpz
+    //     Globals.tweenImage
     //     MainFrame.onToolsWarpImage
     //     RenderObject ctor that takes 4 Point3d parameters
     //     RenderObject ctor that takes 4 parameters: a String, int, boolean and Point3d
+    //     SceneList.calcCompoundModelRefPoint
     public TMatrix() {
         if (ictdebug) {
             String msgText = String.format("TMatrix constructor 1.  Sizeof TMatrix: %d", sizeofLowerLimit());
@@ -78,7 +80,9 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
     
     // Called from:
     //     Globals.iwarpz
+    //     SceneList.preview
     //     SceneList.previewStill
+    //     SceneList.render
     public void multiply(TMatrix matrix1, TMatrix matrix2) {
         setIdentity();
 
@@ -97,7 +101,10 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
 
     // Called from:
     //     MainFrame.getViewMatrix
+    //     SceneList.getViewMatrix
+    //     SceneList.preview
     //     SceneList.previewStill
+    //     SceneList.render
     //     ScenePreviewDlg.onCmdPlus
     public void setIdentity() {
         theMatrix[0][0]= 1.0f; theMatrix[1][0]= 0.0f; theMatrix[2][0]= 0.0f; theMatrix[3][0]= 0.0f;
@@ -123,7 +130,9 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
     // Called from:
     //     Globals.iwarpz
     //     SceneList.calcCompoundModelRefPoint
+    //     SceneList.preview
     //     SceneList.previewStill
+    //     SceneList.render
     public void scale(float sx, float sy, float sz) {
         float[][] mat = new float[4][4];
 
@@ -144,7 +153,10 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
     //     Globals.iwarpz
     //     MainFrame.getViewMatrix
     //     SceneList.calcCompoundModelRefPoint
+    //     SceneList.getViewMatrix
+    //     SceneList.preview
     //     SceneList.previewStill
+    //     SceneList.render
     //     ScenePreviewDlg.onCmdPlus
     public void translate(float tx, float ty, float tz) {
         float[][] mat = new float[4][4];
@@ -166,7 +178,10 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
     //     Globals.iwarpz
     //     MainFrame.getViewMatrix
     //     SceneList.calcCompoundModelRefPoint
+    //     SceneList.getViewMatrix
+    //     SceneList.preview
     //     SceneList.peviewStill
+    //     SceneList.render
     //     ScenePreviewDlg.onCmdPlus
     public void rotate(float rx, float ry, float rz) {
         float[][] mat1 = new float[4][4];
@@ -433,6 +448,7 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
     // Called from:
     //     Globals.iwarpz
     //     RenderObject.transformAndProject
+    //     SceneList.render
     public void transformAndProject(Shape3d aShape, int outHeight,
     int outWidth, boolean useExternalCentroid,
     float centroidX, float centroidY, float centroidZ) {
