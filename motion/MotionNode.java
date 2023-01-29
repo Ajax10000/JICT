@@ -12,7 +12,7 @@ public class MotionNode {
 
    // Called from:
    //     SceneList.getViewMatrix
-   public void MotionNode() {
+   public MotionNode() {
       clear();
    }
 
