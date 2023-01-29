@@ -146,16 +146,20 @@ protected:
     } // getScrollPos
     
 
+    // Called from:
+    //     associateMemImage
     public void onUpdate() {
         repaint();
     } // onUpdate
     
 
+    // Called from:
+    //     associateMemImage
     public void onDraw(CDC qdc) {
         int status;
     
         if(mainFrame.previewingScene) {
-            status = mainFrame.mySceneList.previewStill(m_hWnd, mainFrame.modelMatrix, mainFrame.viewMatrix);
+            status = mainFrame.mySceneList.previewStill(m_hWnd, mainFrame.modelMatrix, mainFrame.mViewMatrix);
             if(status != 0) { 
                 exit;
             }
@@ -163,7 +167,7 @@ protected:
         }
 
         if(theFrame.previewingSequence) {
-            status = mainFrame.mySceneList.preview(m_hWnd, mainFrame.modelMatrix, mainFrame.viewMatrix);
+            status = mainFrame.mySceneList.preview(m_hWnd, mainFrame.modelMatrix, mainFrame.mViewMatrix);
             if(status != 0) {
                 exit;
             }
