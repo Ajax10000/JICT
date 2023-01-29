@@ -128,6 +128,7 @@ protected:
 
     // Called from:
     //     SceneList.calcCompoundModelRefPoint
+    //     SceneList.preview
     //     SceneList.previewStill
     public RenderObject(String fileName, int aModelType, boolean userPOR, Point3d POR) {
         boolean validCurrentShape = true;
@@ -291,6 +292,8 @@ protected:
     } // finalize
 
 
+    // Called from:
+    //     SceneList.preview
     public void drawSequence(BufferedImage pBuffImg, String modelName, 
     int screenHeight, int screenWidth, int frameCounter) {
         Graphics2D graphics2D = pBuffImg.createGraphics();
@@ -734,6 +737,7 @@ protected:
 
     // Called from:
     //     SceneList.calcCompoundModelRefPoint
+    //     SceneList.preview
     //     SceneList.previewStill
     public boolean isValid() {
         return this.valid;
@@ -963,6 +967,8 @@ protected:
     // See p 172 of Visual Special Effects Toolkit in C++.
     // Class Globals also has a renderMesh method, but that one takes 
     // 6 parameters: a String, 4 MemImage ojbects, and a TMatrix.
+    // Called from:
+    //     SceneList.render
     public int renderMesh(MemImage outputImage, MemImage inputImage, 
     boolean blendIndicator) {
         // Create the line buffer data structure
@@ -1115,6 +1121,8 @@ protected:
     } // renderMesh
 
 
+    // Called from:
+    //     SceneList.render
     public int renderMeshz(MemImage outputImage, MemImage maskImage, 
     MemImage inputImage, MemImage zBuffer, float vx, float vy, float vz) {
         String msgText;
@@ -1465,6 +1473,7 @@ protected:
 
     // Called from:
     //     SceneList.calcCompoundModelRefPoint
+    //     SceneList.preview
     //     SceneList.previewStill
     public void transformAndProject(TMatrix pTMatrix, int piOutHeight, int piOutWidth) {
         this.transformAndProject(pTMatrix, piOutHeight, piOutWidth, 
@@ -1561,6 +1570,8 @@ protected:
 
 
     // Not called from within this file
+    // Called from:
+    //     SceneList.render
     public int renderShape(MemImage outputImage, boolean blendIndicator) {
         if(currentShape.getNumFaces() == 0) {
             Globals.statusPrint("RenderObject.renderShape: Shape has no faces - cannot be rendered");
@@ -1608,6 +1619,8 @@ protected:
 
 
     // Not called from within this file
+    // Called from:
+    //     SceneList.render
     public int renderShapez(MemImage outputImage, 
     MemImage alphaImage, MemImage zBuffer, 
     float vx, float vy, float vz) {
