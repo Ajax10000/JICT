@@ -49,7 +49,10 @@ public class ScenePreviewDlg extends JDialog {
 
     private JComboBox<String> cboModel;
 
+    // DDX_Text(pDX, IDC_txtXIncr, m_txtXIncr);
     private JTextField txtIncrX;
+
+    // DDX_Text(pDX, IDC_txtYIncr, m_txtYIncr);
     private JTextField txtIncrY;
     private JTextField txtIncrZ;
     private JTextField txtRotationX;
@@ -62,29 +65,95 @@ public class ScenePreviewDlg extends JDialog {
     private JTextField txtTranslationY;
     private JTextField txtTranslationZ;
 
+    // m_ckMoveViewPoint is true if the user sets the cbxMoveViewPt checkbox
+    // DDX_Check(pDX, IDC_chkMoveViewPoint, m_chkMoveViewPoint);
     boolean	m_chkMoveViewPoint;
+
+    // m_chkRx is true if the user sets the cbxRotationX checkbox
+    // DDX_Check(pDX, IDC_chkRx, m_chkRx);
 	boolean	m_chkRx;
+
+    // m_chkRy is true if the user sets the cbxRotationY checkbox
+    // DDX_Check(pDX, IDC_chkRy, m_chkRy);
 	boolean	m_chkRy;
+
+    // m_chkRz is true if the user sets the cbxRotationZ checkbox
+    // DDX_Check(pDX, IDC_chkRz, m_chkRz);
 	boolean	m_chkRz;
+
+    // m_chkSx is true if the user sets the cbxScaleX checkbox
+    // DDX_Check(pDX, IDC_chkSx, m_chkSx);
 	boolean	m_chkSx;
+
+    // m_chkSy is true if the user sets the cbxScaleY checkbox
+    // DDX_Check(pDX, IDC_chkSy, m_chkSy);
 	boolean	m_chkSy;
+
+    // m_chkSz is true if the user sets the cbxScaleZ checkbox
+    // DDX_Check(pDX, IDC_chkSz, m_chkSz);
 	boolean	m_chkSz;
+
+    // m_chkTx is true if the user sets the cbxTranslationX checkbox
+    // DDX_Check(pDX, IDC_chkTx, m_chkTx);
 	boolean	m_chkTx;
+
+    // m_chkTy is true if the user sets the cbxTranslationY checkbox
+    // DDX_Check(pDX, IDC_chkTy, m_chkTy);
 	boolean	m_chkTy;
+
+    // m_chkTz is true if the user sets the cbxTranslationZ checkbox
+    // DDX_Check(pDX, IDC_chkTz, m_chkTz);
 	boolean	m_chkTz;
 
+    // m_txtCurRx holds the value in JTextfield txtRotationX
+    // DDX_Text(pDX, IDC_txtCurRx, m_txtCurRx);
     String	m_txtCurRx;
+
+    // m_txtCurRy holds the value in JTextfield txtRotationY
+    // DDX_Text(pDX, IDC_txtCurRy, m_txtCurRy);
 	String	m_txtCurRy;
+
+    // m_txtCurRz holds the value in JTextfield txtRotationZ
+    // DDX_Text(pDX, IDC_txtCurRz, m_txtCurRz);
 	String	m_txtCurRz;
+
+    // m_txtCurSx holds the value in JTextfield txtScaleX
+    // DDX_Text(pDX, IDC_txtCurSx, m_txtCurSx);
 	String	m_txtCurSx;
+
+    // m_txtCurSy holds the value in JTextfield txtScaleY
+    // DDX_Text(pDX, IDC_txtCurSy, m_txtCurSy);
 	String	m_txtCurSy;
+
+    // m_txtCurSz holds the value in JTextfield txtScaleZ
+    // DDX_Text(pDX, IDC_txtCurSz, m_txtCurSz);
 	String	m_txtCurSz;
+
+    // m_txtCurTx holds the value in JTextfield txtTranslationX
+    // DDX_Text(pDX, IDC_txtCurTx, m_txtCurTx);
 	String	m_txtCurTx;
+
+    // m_txtCurTy holds the value in JTextfield txtTranslationY
+    // DDX_Text(pDX, IDC_txtCurTy, m_txtCurTy);
 	String	m_txtCurTy;
+
+    // m_txtCurTz holds the value in JTextfield txtTranslationZ
+    // DDX_Text(pDX, IDC_txtCurTz, m_txtCurTz);
 	String	m_txtCurTz;
+
+    // m_txtXIncr holds the value in JTextfield txtIncrX
+    // DDX_Text(pDX, IDC_txtXIncr, m_txtXIncr);
 	String	m_txtXIncr;
+
+    // m_txtYIncr holds the value in JTextfiled txtIncrY
+    // DDX_Text(pDX, IDC_txtYIncr, m_txtYIncr);
 	String	m_txtYIncr;
+
+    // m_txtZIncr holds the value in JTextfield txtIncrZ
+    // DDX_Text(pDX, IDC_txtZincr, m_txtZIncr);
 	String	m_txtZIncr;
+
+    // DDX_CBString(pDX, IDC_cmbModels, m_theModel);
 	String	m_theModel;
 
     private DecimalFormat sixDotTwo = new DecimalFormat("####.##");
@@ -173,6 +242,8 @@ protected:
     public ScenePreviewDlg(JFrame pParent, boolean pModal) {
         super(pParent, pModal);
 
+        setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+        
         // Try to make the dialog appear as it does on the bottom part of 
         // Figure D.13 on page 285 of the book
         JPanel topPnl;
@@ -239,61 +310,75 @@ protected:
         DDX_Check(pDX, IDC_chkRx, m_chkRx);
         DDX_Check(pDX, IDC_chkRy, m_chkRy);
         DDX_Check(pDX, IDC_chkRz, m_chkRz);
+
         DDX_Check(pDX, IDC_chkSx, m_chkSx);
         DDX_Check(pDX, IDC_chkSy, m_chkSy);
         DDX_Check(pDX, IDC_chkSz, m_chkSz);
+
         DDX_Check(pDX, IDC_chkTx, m_chkTx);
         DDX_Check(pDX, IDC_chkTy, m_chkTy);
         DDX_Check(pDX, IDC_chkTz, m_chkTz);
+
         DDX_Text(pDX, IDC_txtCurRx, m_txtCurRx);
         DDX_Text(pDX, IDC_txtCurRy, m_txtCurRy);
         DDX_Text(pDX, IDC_txtCurRz, m_txtCurRz);
+
         DDX_Text(pDX, IDC_txtCurSx, m_txtCurSx);
         DDX_Text(pDX, IDC_txtCurSy, m_txtCurSy);
         DDX_Text(pDX, IDC_txtCurSz, m_txtCurSz);
+
         DDX_Text(pDX, IDC_txtCurTx, m_txtCurTx);
         DDX_Text(pDX, IDC_txtCurTy, m_txtCurTy);
         DDX_Text(pDX, IDC_txtCurTz, m_txtCurTz);
+
         DDX_Text(pDX, IDC_txtXIncr, m_txtXIncr);
         DDX_Text(pDX, IDC_txtYIncr, m_txtYIncr);
         DDX_Text(pDX, IDC_txtZincr, m_txtZIncr);
+        
         DDX_CBString(pDX, IDC_cmbModels, m_theModel);
         //}}AFX_DATA_MAP
     }
     */
 
     // This method came from SCENEPREVIEWDLG.CPP
+    // ON_CBN_SELCHANGE(IDC_cmbModels, OnSelchangecmbModels)
     void onSelChangeCmbModels() {
         String selectedModel;
-        float  rx, ry, rz, sx, sy, sz, tx, ty, tz;
-        JComboBox theCombo;
-        
-        theCombo = (JComboBox)GetDlgItem(IDC_cmbModels);
-        int theChoice = theCombo.getSelectedIndex();
+        Float rx = 0f, ry = 0f, rz = 0f;
+        Float sx = 0f, sy = 0f, sz = 0f;
+        Float tx = 0f, ty = 0f, tz = 0f;
+
+        int theChoice = cboModel.getSelectedIndex();
 
         if (theChoice != -1) {
-            theCombo.GetLBText(theChoice, selectedModel);
+            selectedModel = (String)cboModel.getSelectedItem();
             m_theFrame.mySceneList.setCurrentModel(selectedModel);
+
+            // The following method sets all of the parameters
             m_theFrame.mySceneList.getCurrentModelTransform(
-                rx, ry, rz, sx, sy, sz, tx, ty, tz);
+                rx, ry, rz, 
+                sx, sy, sz, 
+                tx, ty, tz);
                 
-            m_theFrame.warpTranslateX = tx;
-            m_theFrame.warpTranslateY = ty;
-            m_theFrame.warpTranslateZ = tz;
-        
-            m_theFrame.warpScaleX = sx;
-            m_theFrame.warpScaleY = sy;
-            m_theFrame.warpScaleZ = sz;
-        
-            m_theFrame.warpRotateX  = rx;
-            m_theFrame.warpRotateY  = ry;
-            m_theFrame.warpRotateZ  = rz;
+            m_theFrame.mWarpTranslateX = tx;
+            m_theFrame.mWarpTranslateY = ty;
+            m_theFrame.mWarpTranslateZ = tz;
+
+            m_theFrame.mWarpScaleX = sx;
+            m_theFrame.mWarpScaleY = sy;
+            m_theFrame.mWarpScaleZ = sz;
+
+            m_theFrame.mWarpRotateX = rx;
+            m_theFrame.mWarpRotateY = ry;
+            m_theFrame.mWarpRotateZ = rz;
+
             setTextBoxesWithModelTransform();
         }
     } // onSelChangeCmbModels
     
 
     // This method came from SCENEPREVIEWDLG.CPP
+    // ON_BN_CLICKED(IDC_chkMoveViewPoint, OnchkMoveViewPoint)
     void onChkMoveViewPoint() {
         m_theFrame.changeViewPoint = !m_theFrame.changeViewPoint;
         if(m_theFrame.changeViewPoint == true) {
@@ -305,6 +390,8 @@ protected:
     
 
     // This method came from SCENEPREVIEWDLG.CPP
+    // Called when the user clicks on the - button
+    // ON_BN_CLICKED(IDC_cmdMinus, OncmdMinus)
     void onCmdMinus() {
         incrementScaleFactor = -1.0f;
         onCmdPlus();	
@@ -312,20 +399,21 @@ protected:
     
 
     // This method came from SCENEPREVIEWDLG.CPP
+    // Called when the user clicks on the + button
+    // ON_BN_CLICKED(IDC_cmdPlus, OncmdPlus)
     // Called from:
     //     onCmdMinus
     void onCmdPlus() {
         String theBuffer;
         boolean changingModel = (m_theFrame.changeViewPoint == false);
-        JComboBox cmbModels = (JComboBox)GetDlgItem(IDC_cmbModels);
 
         if(changingModel) {
             if((m_theFrame.effectType == SEQUENCE) || (m_theFrame.effectType == MORPH)) {
-                cmbModels.setSelectedIndex(0);    // Select the first model
+                cboModel.setSelectedIndex(0);    // Select the first model
                 chooseModel();
             } else {
                 // Make certain a model has been selected
-                if(cmbModels.getSelectedIndex() == -1 ) {
+                if(cboModel.getSelectedIndex() == -1 ) {
                     Globals.beep(100, 100);
                     Globals.statusPrint("Please select a model");
                     return;
@@ -337,81 +425,81 @@ protected:
         int bufferLength = 16;
 
         String aBuffer;
-        GetDlgItemText(IDC_txtXIncr, aBuffer, bufferLength);
+        aBuffer = txtIncrX.getText();
         float deltaX = Float.parseFloat(aBuffer) * incrementScaleFactor;
 
-        GetDlgItemText(IDC_txtYIncr, aBuffer, bufferLength);
+        aBuffer = txtIncrY.getText();
         float deltaY = Float.parseFloat(aBuffer) * incrementScaleFactor;
 
-        GetDlgItemText(IDC_txtZincr, aBuffer, bufferLength);
+        aBuffer = txtIncrZ.getText();
         float deltaZ = Float.parseFloat(aBuffer) * incrementScaleFactor;
         
-        if(isChecked(IDC_chkTx)) {
+        if(cbxTranslationX.isSelected()) {
             if(changingModel) {
-                m_theFrame.warpTranslateX += deltaX;
+                m_theFrame.mWarpTranslateX += deltaX;
             } else {
                 m_theFrame.viewTranslateX += deltaX;
             }
         }
 
-        if(isChecked(IDC_chkTy)) {
+        if(cbxTranslationY.isSelected()) {
             if(changingModel) {
-                m_theFrame.warpTranslateY += deltaY;
+                m_theFrame.mWarpTranslateY += deltaY;
             } else {
                 m_theFrame.viewTranslateY += deltaY;
             }
         }
 
-        if(isChecked(IDC_chkTz)) {
+        if(cbxTranslationZ.isSelected()) {
             if(changingModel) {
-                m_theFrame.warpTranslateZ += deltaZ;
+                m_theFrame.mWarpTranslateZ += deltaZ;
             } else {
                 m_theFrame.viewTranslateZ += deltaZ;
             }
         }
 
-        if(isChecked(IDC_chkSx)) {
+        if(cbxScaleX.isSelected()) {
             if(changingModel) {
-                m_theFrame.warpScaleX = deltaX;
+                m_theFrame.mWarpScaleX = deltaX;
             }
         }
 
-        if(isChecked(IDC_chkSy)) {
+        if(cbxScaleY.isSelected()) {
             if(changingModel) {
-                m_theFrame.warpScaleY = deltaY;
+                m_theFrame.mWarpScaleY = deltaY;
             }
         }
 
-        if(isChecked(IDC_chkSz)) {
+        if(cbxScaleZ.isSelected()) {
             if(changingModel) {
-                m_theFrame.warpScaleZ = deltaZ;
+                m_theFrame.mWarpScaleZ = deltaZ;
             }
         }
 
-        if(isChecked(IDC_chkRx)) {
+        if(cbxRotationX.isSelected()) {
             if(changingModel) {
-                m_theFrame.warpRotateX += deltaX;
-                m_theFrame.warpRotateX = MathUtils.fPolar(m_theFrame.warpRotateX);
+                m_theFrame.mWarpRotateX += deltaX;
+                m_theFrame.mWarpRotateX = MathUtils.fPolar(m_theFrame.mWarpRotateX);
             } else {
                 m_theFrame.viewRotateX += deltaX;
                 m_theFrame.viewRotateX = MathUtils.fPolar(m_theFrame.viewRotateX);
             }
         }
 
-        if(isChecked(IDC_chkRy)) {
+        if(cbxRotationY.isSelected()) {
             if(changingModel) {
-                m_theFrame.warpRotateY += deltaY;
-                m_theFrame.warpRotateY = MathUtils.fPolar(m_theFrame.warpRotateY);
+                m_theFrame.mWarpRotateY += deltaY;
+                m_theFrame.mWarpRotateY = MathUtils.fPolar(m_theFrame.mWarpRotateY);
             } else {
                 m_theFrame.viewRotateY += deltaY;
                 m_theFrame.viewRotateY = MathUtils.fPolar(m_theFrame.viewRotateY);
             }
         }
 
-        if(isChecked(IDC_chkRz)) {
+        if(cbxRotationZ.isSelected()) {
             if(changingModel) {
-                m_theFrame.warpRotateZ += deltaZ;
-                m_theFrame.warpRotateZ = MathUtils.fPolar(m_theFrame.warpRotateZ);
+                m_theFrame.mWarpRotateZ += deltaZ;
+                m_theFrame.mWarpRotateZ = MathUtils.fPolar(m_theFrame.mWarpRotateZ);
             } else {
                 m_theFrame.viewRotateZ += deltaZ;
                 m_theFrame.viewRotateZ = MathUtils.fPolar(m_theFrame.viewRotateZ);
@@ -421,21 +509,21 @@ protected:
         if(changingModel) {
             // Save the current Transform parameters
             m_theFrame.mySceneList.setCurrentModelTransform(
-                m_theFrame.warpRotateX,    m_theFrame.warpRotateY,    m_theFrame.warpRotateZ,
-                m_theFrame.warpScaleX,     m_theFrame.warpScaleY,     m_theFrame.warpScaleZ,
-                m_theFrame.warpTranslateX, m_theFrame.warpTranslateY, m_theFrame.warpTranslateZ);
+                m_theFrame.mWarpRotateX,    m_theFrame.mWarpRotateY,    m_theFrame.mWarpRotateZ,
+                m_theFrame.mWarpScaleX,     m_theFrame.mWarpScaleY,     m_theFrame.mWarpScaleZ,
+                m_theFrame.mWarpTranslateX, m_theFrame.mWarpTranslateY, m_theFrame.mWarpTranslateZ);
             setTextBoxesWithModelTransform();
         } else {
             setTextBoxesWithViewTransform();
         }
 
         //  Build the view matrix
-        m_theFrame.viewMatrix.setIdentity();
+        m_theFrame.mViewMatrix.setIdentity();
         float xRadians = m_theFrame.viewRotateX * F_DTR;
         float yRadians = m_theFrame.viewRotateY * F_DTR;
         float zRadians = m_theFrame.viewRotateZ * F_DTR;
-        m_theFrame.viewMatrix.rotate(-xRadians, -yRadians, -zRadians);
-        m_theFrame.viewMatrix.translate(-m_theFrame.viewTranslateX,
+        m_theFrame.mViewMatrix.rotate(-xRadians, -yRadians, -zRadians);
+        m_theFrame.mViewMatrix.translate(-m_theFrame.viewTranslateX,
             -m_theFrame.viewTranslateY, -m_theFrame.viewTranslateZ);
 
         //  Redraw the scene list
@@ -445,19 +533,21 @@ protected:
     
 
     // This method came from SCENEPREVIEWDLG.CPP
+    // Called when the user clicks on the Reset button
+    // ON_BN_CLICKED(IDC_cmdReset, OncmdReset)
     void onCmdReset() {
         if(m_theFrame.changeViewPoint == false) {  // If manipulating a model...
-            m_theFrame.warpTranslateX = 0.0f;
-            m_theFrame.warpTranslateY = 0.0f;
-            m_theFrame.warpTranslateZ = 0.0f;
+            m_theFrame.mWarpTranslateX = 0.0f;
+            m_theFrame.mWarpTranslateY = 0.0f;
+            m_theFrame.mWarpTranslateZ = 0.0f;
 
-            m_theFrame.warpScaleX = 1.0f;
-            m_theFrame.warpScaleY = 1.0f;
-            m_theFrame.warpScaleZ = 1.0f;
+            m_theFrame.mWarpScaleX = 1.0f;
+            m_theFrame.mWarpScaleY = 1.0f;
+            m_theFrame.mWarpScaleZ = 1.0f;
 
-            m_theFrame.warpRotateX = 0.0f;
-            m_theFrame.warpRotateY = 0.0f;
-            m_theFrame.warpRotateZ = 0.0f;
+            m_theFrame.mWarpRotateX = 0.0f;
+            m_theFrame.mWarpRotateY = 0.0f;
+            m_theFrame.mWarpRotateZ = 0.0f;
             setTextBoxesWithModelTransform();
         } else {  // If manipulating the viewPoint...
             m_theFrame.viewTranslateX = 0.0f;
@@ -473,8 +563,9 @@ protected:
     
 
     // This method came from SCENEPREVIEWDLG.CPP
+    // Called when the user clicks on the OK button in the dialog.
     void onOK() {
-        String Buffer;
+        String sBuffer = "";
 
         m_theFrame.mySceneList.setViewTransform(
             m_theFrame.viewTranslateX, m_theFrame.viewTranslateY, m_theFrame.viewTranslateZ, 
@@ -489,11 +580,10 @@ protected:
 
             switch(result) {
             case JOptionPane.YES_OPTION:
-                m_theFrame.mySceneList.writeList(Buffer, m_theFrame.sceneFileName);
+                m_theFrame.mySceneList.writeList(sBuffer, m_theFrame.sceneFileName);
             } // switch
 
             m_theFrame.repaint();
-            CDialog.OnOK();
         }
     } // onOK
     
@@ -510,34 +600,34 @@ protected:
         String aBuffer;
 
         // warpRotate
-        aBuffer = sixDotTwo.format(m_theFrame.warpRotateX);
-        SetDlgItemText(IDC_txtCurRx, aBuffer);
+        aBuffer = sixDotTwo.format(m_theFrame.mWarpRotateX);
+        txtRotationX.setText(aBuffer);
 
-        aBuffer = sixDotTwo.format(m_theFrame.warpRotateY);
-        SetDlgItemText(IDC_txtCurRy, aBuffer);
+        aBuffer = sixDotTwo.format(m_theFrame.mWarpRotateY);
+        txtRotationY.setText(aBuffer);
 
-        aBuffer = sixDotTwo.format(m_theFrame.warpRotateZ);
-        SetDlgItemText(IDC_txtCurRz, aBuffer);
+        aBuffer = sixDotTwo.format(m_theFrame.mWarpRotateZ);
+        txtRotationZ.setText(aBuffer);
         
         // warpScale
-        aBuffer = sixDotTwo.format(m_theFrame.warpScaleX);
-        SetDlgItemText(IDC_txtCurSx, aBuffer);
+        aBuffer = sixDotTwo.format(m_theFrame.mWarpScaleX);
+        txtScaleX.setText(aBuffer);
 
-        aBuffer = sixDotTwo.format(m_theFrame.warpScaleY);
-        SetDlgItemText(IDC_txtCurSy, aBuffer);
+        aBuffer = sixDotTwo.format(m_theFrame.mWarpScaleY);
+        txtScaleY.setText(aBuffer);
 
-        aBuffer = sixDotTwo.format(m_theFrame.warpScaleZ);
-        SetDlgItemText(IDC_txtCurSz, aBuffer);
+        aBuffer = sixDotTwo.format(m_theFrame.mWarpScaleZ);
+        txtScaleZ.setText(aBuffer);
         
         // warpTranslate
-        aBuffer = sixDotTwo.format(m_theFrame.warpTranslateX);
-        SetDlgItemText(IDC_txtCurTx, aBuffer);
+        aBuffer = sixDotTwo.format(m_theFrame.mWarpTranslateX);
+        txtTranslationX.setText(aBuffer);
 
-        aBuffer = sixDotTwo.format(m_theFrame.warpTranslateY);
-        SetDlgItemText(IDC_txtCurTy, aBuffer);
+        aBuffer = sixDotTwo.format(m_theFrame.mWarpTranslateY);
+        txtTranslationY.setText(aBuffer);
 
-        aBuffer = sixDotTwo.format(m_theFrame.warpTranslateZ);
-        SetDlgItemText(IDC_txtCurTz, aBuffer);
+        aBuffer = sixDotTwo.format(m_theFrame.mWarpTranslateZ);
+        txtTranslationZ.setText(aBuffer);
     } // setTextBoxesWithModelTransform
     
 
@@ -550,27 +640,27 @@ protected:
         String aBuffer;
 
         aBuffer = sixDotTwo.format(m_theFrame.viewRotateX);
-        SetDlgItemText(IDC_txtCurRx, aBuffer);
+        txtRotationX.setText(aBuffer);
 
         aBuffer = sixDotTwo.format(m_theFrame.viewRotateY);
-        SetDlgItemText(IDC_txtCurRy, aBuffer);
+        txtRotationY.setText(aBuffer);
 
         aBuffer = sixDotTwo.format(m_theFrame.viewRotateZ);
-        SetDlgItemText(IDC_txtCurRz, aBuffer);
+        txtRotationZ.setText(aBuffer);
         
         aBuffer = sixDotTwo.format(0.0f);
-        SetDlgItemText(IDC_txtCurSx, aBuffer);
-        SetDlgItemText(IDC_txtCurSy, aBuffer);
-        SetDlgItemText(IDC_txtCurSz, aBuffer);
+        txtScaleX.setText(aBuffer);
+        txtScaleY.setText(aBuffer);
+        txtScaleZ.setText(aBuffer);
         
         aBuffer = sixDotTwo.format(m_theFrame.viewTranslateX);
-        SetDlgItemText(IDC_txtCurTx, aBuffer);
+        txtTranslationX.setText(aBuffer);
 
         aBuffer = sixDotTwo.format(m_theFrame.viewTranslateY);
-        SetDlgItemText(IDC_txtCurTy, aBuffer);
+        txtTranslationY.setText(aBuffer);
 
         aBuffer = sixDotTwo.format(m_theFrame.viewTranslateZ);
-        SetDlgItemText(IDC_txtCurTz, aBuffer);
+        txtTranslationZ.setText(aBuffer);
     } // setTextBoxesWithViewTransform
     
 
@@ -582,61 +672,42 @@ protected:
         Float rx = 0f, ry = 0f, rz = 0f;
         Float sx = 0f, sy = 0f, sz = 0f;
         Float tx = 0f, ty = 0f, tz = 0f;
-        JComboBox theCombo;
-        theCombo = (JComboBox)GetDlgItem(IDC_cmbModels);
-        theCombo.GetLBText(theCombo.getSelectedIndex(), selectedModel);
-        
+
+        selectedModel = (String)cboModel.getSelectedItem();
         m_theFrame.mySceneList.setCurrentModel(selectedModel);
         m_theFrame.mySceneList.getCurrentModelTransform(rx, ry, rz, sx, sy, sz, tx, ty, tz);
-        m_theFrame.warpTranslateX = tx;
-        m_theFrame.warpTranslateY = ty;
-        m_theFrame.warpTranslateZ = tz;
+
+        m_theFrame.mWarpTranslateX = tx;
+        m_theFrame.mWarpTranslateY = ty;
+        m_theFrame.mWarpTranslateZ = tz;
         
-        m_theFrame.warpScaleX = sx;
-        m_theFrame.warpScaleY = sy;
-        m_theFrame.warpScaleZ = sz;
+        m_theFrame.mWarpScaleX = sx;
+        m_theFrame.mWarpScaleY = sy;
+        m_theFrame.mWarpScaleZ = sz;
         
-        m_theFrame.warpRotateX  = rx;
-        m_theFrame.warpRotateY  = ry;
-        m_theFrame.warpRotateZ  = rz;
+        m_theFrame.mWarpRotateX = rx;
+        m_theFrame.mWarpRotateY = ry;
+        m_theFrame.mWarpRotateZ = rz;
+
         setTextBoxesWithModelTransform();
         m_theFrame.changeViewPoint = false;
     } // chooseModel
     
 
     // This method came from SCENEPREVIEWDLG.CPP
-    boolean onInitDialog() {
-        CDialog.OnInitDialog();
-        
+    // Called before the dialog box is displayed.
+    void onInitDialog() {
         setTextBoxesWithModelTransform();
-        JComboBox cmbModels = (JComboBox)GetDlgItem(IDC_cmbModels);
-        // model names in cboBox
-        m_theFrame.mySceneList.showModels(cmbModels);  
+
+        // Place model names in cboModel
+        m_theFrame.mySceneList.showModels(cboModel);  
         m_theFrame.changeViewPoint = false;
-    
-        CRect windowRect;
-        GetUpdateRect(windowRect);
-        int dialogLeft   = 50;
-        int dialogWidth  = windowRect.right  - windowRect.left + 1;
-        int dialogHeight = windowRect.bottom - windowRect.top  + 1;
-        int dialogTop    = 320;
-        
-        // return true unless you set the focus to a control
-        return true;
     } // onInitDialog
     
 
     // This method came from SCENEPREVIEWDLG.CPP
-    // Called from:
-    //     onCmdPlus
-    boolean isChecked(int chkBoxID) {
-       JButton aChkBox = (JButton)GetDlgItem(chkBoxID);
-       return aChkBox.GetCheck();
-    } // isChecked
-    
-    
-    // This method came from SCENEPREVIEWDLG.CPP
+    // ON_WM_MOVE()
     void onMove(int x, int y) {
-        CDialog.OnMove(x, y);	
+        
     } // onMove
 } // class ScenePreviewDlg
