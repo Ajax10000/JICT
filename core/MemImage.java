@@ -142,7 +142,9 @@ public:
     //     Globals.motionBlur
     //     RenderObject ctor that takes 4 parameters: a String, int, boolean and Point3d
     //     RenderObject.prepareCutout
+    //     SceneList.preview
     //     SceneList.previewStill
+    //     SceneList.render
     //     MainFrame.onToolsWarpImage
     public MemImage(String psFileName, int imHeight, int imWidth, int imAccessMode, 
     char rw, int piColorSpec) {
@@ -303,6 +305,8 @@ public:
     // Called from:
     //     Globals.tweenImage
     //     RenderObject.renderMeshz
+    //     SceneList.preview
+    //     SceneList.render
     public MemImage(int height, int width) {
         this(height, width, 8);
     } // MemImage ctor
@@ -606,7 +610,9 @@ public:
     // TODO: Replace paramater dc with one of type Graphics2D, 
     // as this method performs graphics
     // Called from:
+    //     SceneList.preview
     //     SceneList.previewStill
+    //     SceneList.render
     public void display(HDC dc, int piOutWidth, int piOutHeight) {
         HBITMAP hBitmap, holdBitmap;
         HDC newdc;
@@ -722,6 +728,7 @@ public:
 
     // Called from:
     //     Globals.tweenImage
+    //     SceneList.render
     public int copy(MemImage outImage, int piXoffset, int piYoffset) {
         int x, y;
 
@@ -1263,6 +1270,8 @@ public:
     } // getBitsPerPixel
 
 
+    // Called from:
+    //     SceneList.preview
     public byte[] getBytes() {
         return this.bytes;
     } // getBytes
@@ -1286,6 +1295,7 @@ public:
     //     Globals.motionBlur
     //     Globals.tweenImage
     //     MainFrame.onToolsWarpImage
+    //     SceneList.render
     //     Texture.createTexture
     public int writeBMP(String fileName) {
         String msgText;
@@ -1939,6 +1949,7 @@ public:
 
     // Called from:
     //     RenderObject.renderMeshz
+    //     SceneList.render
     public void setFileName(String psFileName) {
         this.savedFileName = psFileName;
     } // setFileName
