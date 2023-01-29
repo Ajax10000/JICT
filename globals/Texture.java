@@ -2,6 +2,9 @@ package globals;
 
 import core.MemImage;
 
+import java.io.File;
+import java.nio.file.Path;
+
 import java.util.Random;
 
 public class Texture {
@@ -19,6 +22,7 @@ public class Texture {
 
     // Called from:
     //     MakeTexture.onOK
+    // This method came from TEXTURE.CPP
     public static int createTexture(String psTexturePath, String psOutDirectory, 
     int piTextureType, int piImageType, 
     int piForeColor, int piBackColor, // piBackColor is not used
@@ -40,7 +44,7 @@ public class Texture {
         }
 
         byte loValue    = 10;
-        byte hiValue    = 250; // TODO: Fix this. Range of byte is -128 to 127
+        byte hiValue    = 250; // TODO: Fix this. Range of Java byte is -128 to 127
         byte checkValue = loValue;
 
         final int iCellWidth = 32;
@@ -152,11 +156,25 @@ public class Texture {
         String sDdrive, sDdir, sDfile, sDext;
         String sOutPath;
 
-        _splitpath(psTexturePath, sDrive, sDir, sFile, sExt);
-        int theLength = sFile.length(); // the value of theLength is not used
+        // _splitpath(psTexturePath, sDrive, sDir, sFile, sExt);
+        File textureFile = new File(psTexturePath);
+        Path texturePath = textureFile.toPath();
 
-        _splitpath(psOutDirectory, sDdrive, sDdir, sDfile, sDext);
-        _makepath(sOutPath, sDdrive, sDdir, sFile, sExt);
+        File outDirectory = new File(psOutDirectory);
+        Path outPath = outDirectory.toPath();
+        //_splitpath(psOutDirectory, sDdrive, sDdir, sDfile, sDext);
+
+        // Construct sOutPath, the output path at which to write a bitmap file.
+        // It is the same as psOutDirectory, except for the file and extension.
+        // We will use sOutPath as a parameter to MemImage.writeBMP
+        String fileName = texturePath.getFileName().toString();
+        if (outDirectory.isDirectory()) {
+            // Just append the filename to the psOutDirectory
+            sOutPath = outDirectory + fileName;
+        } else {
+            sOutPath = outPath.getParent().toString() + fileName;
+        }
+        // _makepath(sOutPath, sDdrive, sDdir, sFile, sExt);
 
         String msgText = "Saving Texture Image: " + sOutPath;
         Globals.statusPrint(msgText);
@@ -170,6 +188,7 @@ public class Texture {
 
     // Called from:
     //     createPlasma
+    // This method came from TEXTURE.CPP
     public static void plasma(MemImage anImage, int x, int y, int x1, int y1) {
         /* unsigned */int a, b, c, d, e, f, g, i, j;
         int w, h;
@@ -227,6 +246,7 @@ public class Texture {
 
     // Called from:
     //     createTexure
+    // This method came from TEXTURE.CPP
     public static void createPlasma(MemImage anImage, int numRows, int numColumns) {
         anImage.setMPixel(1,       1,     (byte)myRand(64));
         anImage.setMPixel(1,       numRows,  (byte)myRand(64));
@@ -239,6 +259,7 @@ public class Texture {
     // Called from:
     //     createPlasma
     //     plasma
+    // This method came from TEXTURE.CPP
     public static int myRand(int maxVal) {
         // random.nextFloat returns a value between 0.0 and 1.0
         // myRand returns a value between 0 and maxVal.
