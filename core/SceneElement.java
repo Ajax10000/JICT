@@ -42,36 +42,36 @@ import structs.Point3d;
     Translation <tx>, <ty>, <tz>
 */
 public class SceneElement {
-    public boolean ictdebug = false;
+    public boolean bIctDebug = false;
 
     // Changed from private to public as it is used by SceneList
     // Name of the Model
     // Model <modelName>
-    public  String modelName;
+    public  String msModelName;
     
     // Motion file for the model
-    private String modelMotionPath;
+    private String msModelMotionPath;
     
     // Contains motion path if moving model
     // Changed from private to public as it is used by SceneList
-    public MotionPath modelMotion;
+    public MotionPath mModelMotion;
 
     // 1 = image, 2 = shape, 3 = quadMesh, 4 = compound (see ict.h for more)
     // Model <modelName> [Blend|NoBlend] [Warp|NoWarp] AlphaScale <alpha> [Image|Shape|QuadMesh|Sequence]
     // Changed from private to public as it is used by SceneList
-    public int modelType;
+    public int miModelType;
 
     // 1 if this model is a member of a compound model, 0 if not.
     // Changed from private to public as it is used by SceneList
     // Changed from int to boolean
-    public boolean compoundModelMember;
+    public boolean mbCompoundModelMember;
 
     // TRUE if the reference point is user defined.
     // (the centroid is used by default) if defaultRepoint3d is FALSE, then
     // it is specified in the next data member.
     // Changed from int to boolean
     // Changed from private to public as it is used by SceneList
-    public boolean definedRefPoint;	  
+    public boolean mbDefinedRefPoint;	  
 
     // The model's point of reference. Default is the model's centroid.
     // This is the point about which the model is transformed. i.e. its origin.
@@ -81,15 +81,15 @@ public class SceneElement {
 
     // Path Name of image
     // Changed from private to public as it is used by SceneList
-    public String fileName;
+    public String msFileName;
 
     // Path Name of an optional color adjusted image
     // Changed from private to public as it is used by SceneList
-    public String colorAdjustedPath;
+    public String msColorAdjustedPath;
 
     // 1 indicates bad file name ==> object ignored
     // Changed from private to public as it is used by SceneList
-    public int statusIndicator;
+    public int miStatusIndicator;
 
     // Pointer to screen renderable representation
     // Changed from private to public as it is used by SceneList
@@ -99,19 +99,19 @@ public class SceneElement {
     // Model <modelName> [Blend|NoBlend]
     // Changed from int to boolean
     // Changed from private to public as it is used by SceneList
-    public boolean blendIndicator;
+    public boolean mbBlendIndicator;
 
     // 1 = warp image, 0 = do not warp image
     // Model <modelName> [Blend|NoBlend] [Warp|NoWarp]
     // Changed from private to public as it is used by SceneList
     // Changed from int to boolean
-    public boolean warpIndicator;
+    public boolean mbWarpIndicator;
 
     // Default = 1.0 (used for shadows)
     // Model <modelName> [Blend|NoBlend] [Warp|NoWarp] AlphaScale <alpha>
     // Changed from private to public as it is used 
     // by SceneList in method adjustTransforms
-    public float alphaScale;
+    public float mfAlphaScale;
 
     // Rotation in Angles
     // Rotation <rx>, <ry>, <rz>
@@ -131,25 +131,25 @@ public class SceneElement {
     // Optional. Alpha image pathname
     // [AlphaImagePath [None|<pathName>]]
     // Changed from private to public as it is used by SceneList
-    public String alphaPath;
+    public String msAlphaPath;
 
     // AdjustColor [Target|Relative] <R> <G> <B>
     // If adjustment type is 'Relative', the RGB value is added to
     // the model's image prior to compositing
     // If the adjustment type is: 'Target' then the image colors are 'moved' to the target RGB value
     // Only set in the constructor, and otherwise not used.
-    private Color colorAdjustment; 
+    private Color mAdjustmentColor; 
 
     // AdjustColor [Target|Relative] <R> <G> <B>
     // 'Relative' or 'Target'
     // Changed from private to public as it is used by SceneList
-    public String adjustmentType;
+    public String msAdjustmentType;
 
     // 1 if constructor successful
     // Changed from int to boolean
     // Changed fromprivate to public as it is used
     // by SceneList in method preview
-    public boolean valid;
+    public boolean mbValid;
     
     // Point to previous SceneElement
     // Changed from private to public as it is used 
@@ -163,101 +163,92 @@ public class SceneElement {
   // friend class sceneList;
 
     // Model Types
-    public static final int IMAGE        = 1;
-    public static final int SHAPE        = 2;
-    public static final int QUADMESH     = 3;
-    public static final int COMPOUND     = 4;
-    public static final int LIGHTSOURCE  = 5;
+    public static final int I_IMAGE        = 1;
+    public static final int I_SHAPE        = 2;
+    public static final int I_QUADMESH     = 3;
+    public static final int I_COMPOUND     = 4;
+    public static final int I_LIGHTSOURCE  = 5;
 
 
     // Called from:
     //     SceneList.addSceneElement
-    public SceneElement(String mName, String fName, boolean blendI,
-    int theType, boolean warpI, float aScale, 
-    Point3d rt, Point3d sc, Point3d tr, 
-    String theMotionPath, String theAlphaPath,
-    boolean compoundMMember, Color anAdjustment, 
-    String adjType, String colorAdjPath,
-    boolean definedRefPt, Point3d refPoint) {
+    public SceneElement(String psmName, String psfName, boolean pbBlendI,
+    int piType, boolean pbWarpI, float pfScale, 
+    Point3d pRtPt, Point3d pScPt, Point3d pTrPt, 
+    String psMotionPath, String psAlphaPath,
+    boolean pbCompoundMMember, Color pAdjustmentColor, 
+    String psAdjType, String psColorAdjPath,
+    boolean pbDefinedRefPt, Point3d pRefPoint) {
 
-        this.statusIndicator = 0;
-        this.modelName = mName;
-        this.fileName = fName;
-        this.blendIndicator = blendI;
-        this.modelType = theType;
-        this.warpIndicator = warpI;
-        this.alphaScale = aScale;
-        this.adjustmentType = adjType;
-        this.colorAdjustedPath = colorAdjPath;
-        this.colorAdjustment = new Color(anAdjustment.getRed(), anAdjustment.getGreen(), anAdjustment.getBlue());
-        this.rotation = new Point3d();
-        this.pointOfReference = new Point3d();
+        this.miStatusIndicator = 0;
+        this.msModelName = psmName;
+        this.msFileName = psfName;
+        this.mbBlendIndicator = pbBlendI;
+        this.miModelType = piType;
+        this.mbWarpIndicator = pbWarpI;
+        this.mfAlphaScale = pfScale;
+        this.msAdjustmentType = psAdjType;
+        this.msColorAdjustedPath = psColorAdjPath;
+        this.mAdjustmentColor = new Color(pAdjustmentColor.getRed(), pAdjustmentColor.getGreen(), pAdjustmentColor.getBlue());
 
-        this.definedRefPoint = definedRefPt;
-        if (this.definedRefPoint) {
-            this.pointOfReference.x = refPoint.x;
-            this.pointOfReference.y = refPoint.y;
-            this.pointOfReference.z = refPoint.z;
+        this.pointOfReference = new Point3d(); // Constructor sets x, y and z members to 0.0f
+        this.mbDefinedRefPoint = pbDefinedRefPt;
+        if (this.mbDefinedRefPoint) {
+            this.pointOfReference.x = pRefPoint.x;
+            this.pointOfReference.y = pRefPoint.y;
+            this.pointOfReference.z = pRefPoint.z;
         }
 
-        if(rt != null) {				 //accomodate the case where NULL is passed in
-            rotation.x = rt.x;
-            rotation.y = rt.y;
-            rotation.z = rt.z;
-        } else {
-            rotation.x = 0.0f;
-            rotation.y = 0.0f;
-            rotation.z = 0.0f;
+        rotation = new Point3d(); // Constructor sets x, y and z members to 0.0f
+        if(pRtPt != null) { 
+            rotation.x = pRtPt.x;
+            rotation.y = pRtPt.y;
+            rotation.z = pRtPt.z;
         }
 
-        scale = new Point3d();
-        if(sc != null) {
-            scale.x = sc.x;
-            scale.y = sc.y;
-            scale.z = sc.z;
-        } else {
-            scale.x = 0.0f;
-            scale.y = 0.0f;
-            scale.z = 0.0f;
+        scale = new Point3d(); // Constructor sets x, y and z members to 0.0f
+        if(pScPt != null) {
+            scale.x = pScPt.x;
+            scale.y = pScPt.y;
+            scale.z = pScPt.z;
         }
 
-        translation = new Point3d();
-        if(tr != null) {
-            translation.x = tr.x;
-            translation.y = tr.y;
-            translation.z = tr.z;
-        } else {
-            translation.x = 0.0f;
-            translation.y = 0.0f;
-            translation.z = 0.0f;
+        translation = new Point3d(); // Constructor sets x, y and z members to 0.0f
+        if(pTrPt != null) {
+            translation.x = pTrPt.x;
+            translation.y = pTrPt.y;
+            translation.z = pTrPt.z;
         }
     
         this.screenObject = null;
 
         // Handle moving models
-        this.valid = true;
-        this.modelMotionPath = theMotionPath;
-        this.modelMotion = null;
+        this.mbValid = true;
+        this.msModelMotionPath = psMotionPath;
+        this.mModelMotion = null;
 
-        if(modelMotionPath.length() > 1 && !modelMotionPath.equalsIgnoreCase("NONE")) {
+        if(
+        (msModelMotionPath.length() > 1) && 
+        !msModelMotionPath.equalsIgnoreCase("NONE")) {
             // The model is moving
-            this.modelMotion = new MotionPath();
-            int myStatus = this.modelMotion.readMotion(modelMotionPath);
-            if (myStatus != 0) {  // if the motion file could not be read,
+            this.mModelMotion = new MotionPath();
+            int iStatus = this.mModelMotion.readMotion(msModelMotionPath);
+            if (iStatus != 0) {  // if the motion file could not be read,
                 Globals.statusPrint("SceneList.ReadList: Moving Model has invalid motion file");
-                this.modelMotion = null;
-                this.valid = false;
+                this.mModelMotion = null;
+                this.mbValid = false;
             }
         }
 
-        this.alphaPath = theAlphaPath;
-        this.compoundModelMember = compoundMMember;
+        this.msAlphaPath = psAlphaPath;
+        this.mbCompoundModelMember = pbCompoundMMember;
         this.prevEntry = null;
         this.nextEntry = null;
-        if (ictdebug) {
-            String msgBuffer;
-            msgBuffer = "Constructor. Size of sceneElement: " + sizeLowerLimit();
-            Globals.statusPrint(msgBuffer);
+
+        if (bIctDebug) {
+            String sMsgBuffer;
+            sMsgBuffer = "Constructor. Size of sceneElement: " + sizeLowerLimit();
+            Globals.statusPrint(sMsgBuffer);
         }
     } // SceneElement ctor
 
@@ -272,12 +263,12 @@ public class SceneElement {
     // I added this method
     public String toString() {
         String thisObject = "\n"
-        + "Model: " + modelName	+ "modelType: " + modelType + "\n"
+        + "Model: " + msModelName	+ "modelType: " + miModelType + "\n"
         + " Centroid: " + pointOfReference.x + ", " + pointOfReference.y + ", " + pointOfReference.z + "\n"
-        + " Blend: " + blendIndicator +
-        " Warp: " + warpIndicator +
-        " aScale: " + alphaScale +
-        " File: " + fileName + " Motion: " + modelMotionPath + "\n" +
+        + " Blend: " + mbBlendIndicator +
+        " Warp: " + mbWarpIndicator +
+        " aScale: " + mfAlphaScale +
+        " File: " + msFileName + " Motion: " + msModelMotionPath + "\n" +
         " R S T: " +
         rotation.x    + " " + rotation.y    + " " + rotation.z    + " " +
         scale.x       + " " + scale.y       + " " + scale.z       + " " +
@@ -291,7 +282,7 @@ public class SceneElement {
     // Called from:
     //     SceneList.addSceneElement
     public boolean isValid() {
-        return this.valid;
+        return this.mbValid;
     }  // isValid
 
 
@@ -305,7 +296,7 @@ public class SceneElement {
 
 
     public void finalize() {
-        if (ictdebug) {
+        if (bIctDebug) {
             Globals.statusPrint("sceneElement Destructor");
         }
     } // finalize
@@ -316,7 +307,6 @@ public class SceneElement {
     // SceneList.writeList.
     // Called from:
     //     SceneList.writeList
-    // TODO: Replace ofstream with a FileStream
     void writeFile(BufferedWriter fileout) {
         // Creates the model portion of a scene file
         String sBlendArray, sWarpArray, sModelTypeArray;
@@ -325,29 +315,29 @@ public class SceneElement {
         sWarpArray = "Warp";
 
         // If the model name is blank, write out a . character
-        sModelNameArray = this.modelName;
-        if(this.modelName.equals(" ")) {
+        sModelNameArray = this.msModelName;
+        if(this.msModelName.equals(" ")) {
             sModelNameArray = ".";
         }
 
         sModelTypeArray = "Image";
-        if(!this.blendIndicator) sBlendArray = "NoBlend";
-        if(!this.warpIndicator) sWarpArray = "NoWarp";
-        if(this.modelType == IMAGE) sModelTypeArray = "Image";
-        if(this.modelType == SHAPE) sModelTypeArray = "Shape";
-        if(this.modelType == QUADMESH) sModelTypeArray = "QuadMesh";
-        if(this.modelType == COMPOUND) sModelTypeArray = "Compound";
-        if(this.modelType == LIGHTSOURCE) sModelTypeArray = "LightSource";
+        if(!this.mbBlendIndicator) sBlendArray = "NoBlend";
+        if(!this.mbWarpIndicator) sWarpArray = "NoWarp";
+        if(this.miModelType == I_IMAGE) sModelTypeArray = "Image";
+        if(this.miModelType == I_SHAPE) sModelTypeArray = "Shape";
+        if(this.miModelType == I_QUADMESH) sModelTypeArray = "QuadMesh";
+        if(this.miModelType == I_COMPOUND) sModelTypeArray = "Compound";
+        if(this.miModelType == I_LIGHTSOURCE) sModelTypeArray = "LightSource";
 
         // Write out the sceneElement information, the reference point is optionally saved
         String thisObjectAsString;
-        if(definedRefPoint) {
+        if(mbDefinedRefPoint) {
             thisObjectAsString = "Model " + sModelNameArray + 
                 " " + sBlendArray + " " + sWarpArray +
-                " AlphaScale " + this.alphaScale + " " + sModelTypeArray + "\n" +
-                "FileName " + this.fileName + "\n" +
-                "MotionPath " + this.modelMotionPath + "\n" +
-                "AlphaImagePath " + this.alphaPath + "\n" +
+                " AlphaScale " + this.mfAlphaScale + " " + sModelTypeArray + "\n" +
+                "FileName " + this.msFileName + "\n" +
+                "MotionPath " + this.msModelMotionPath + "\n" +
+                "AlphaImagePath " + this.msAlphaPath + "\n" +
                 "Rotation "    + this.rotation.x    + "," + this.rotation.y    + "," + this.rotation.z + "\n" +
                 "Scale "       + this.scale.x       + "," + this.scale.y       + "," + this.scale.z + "\n" +
                 "Translation " + this.translation.x + "," + this.translation.y + "," + this.translation.z + "\n" +
@@ -356,10 +346,10 @@ public class SceneElement {
         } else {
             thisObjectAsString = "Model " + sModelNameArray + 
                 " " + sBlendArray + " " + sWarpArray +
-                " AlphaScale " + this.alphaScale + " " + sModelTypeArray + "\n" +
-                "FileName " + this.fileName + "\n" +
-                "MotionPath " + this.modelMotionPath + "\n" +
-                "AlphaImagePath " + this.alphaPath + "\n" +
+                " AlphaScale " + this.mfAlphaScale + " " + sModelTypeArray + "\n" +
+                "FileName " + this.msFileName + "\n" +
+                "MotionPath " + this.msModelMotionPath + "\n" +
+                "AlphaImagePath " + this.msAlphaPath + "\n" +
                 "Rotation "    + this.rotation.x    + "," + this.rotation.y    + "," + this.rotation.z + "\n" +
                 "Scale "       + this.scale.x       + "," + this.scale.y       + "," + this.scale.z + "\n" +
                 "Translation " + this.translation.x + "," + this.translation.y + "," + this.translation.z + "\n\n";
