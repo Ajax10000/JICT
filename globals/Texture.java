@@ -10,12 +10,13 @@ import java.util.Random;
 public class Texture {
     // These values came from ICT20.H
     // Texture Types
-    public static int CONSTANT     = 1;
-    public static int CHECKERBOARD = 2;
-    public static int HORZRAMP     = 3;
-    public static int VERTRAMP     = 4;
-    public static int PLASMA       = 5;
-    public static int COUNTER      = 6;
+    // These constants are used in method createTexture
+    public static final int I_CONSTANT     = 1;
+    public static final int I_CHECKERBOARD = 2;
+    public static final int I_HORZRAMP     = 3;
+    public static final int I_VERTRAMP     = 4;
+    public static final int I_PLASMA       = 5;
+    public static final int I_COUNTER      = 6;
 
     public static Random random = new Random();
 
@@ -28,16 +29,16 @@ public class Texture {
     int piForeColor, int piBackColor, // piBackColor is not used
     int piNumRows, int piNumColumns) { 
 
-        int row, col; 
+        int iRow, iCol; 
         MemImage newImage;
-        int bitsPerPixel = 0;
+        int iBitsPerPixel = 0;
 
-        if(piImageType == 1) bitsPerPixel = 8;   
-        if(piImageType == 2) bitsPerPixel = 24;   
-        if(piImageType == 3) bitsPerPixel = 32;
+        if(piImageType == 1) iBitsPerPixel = 8;   
+        if(piImageType == 2) iBitsPerPixel = 24;   
+        if(piImageType == 3) iBitsPerPixel = 32;
 
-        if(bitsPerPixel > 0) {
-            newImage = new MemImage(piNumRows, piNumColumns, bitsPerPixel);
+        if(iBitsPerPixel > 0) {
+            newImage = new MemImage(piNumRows, piNumColumns, iBitsPerPixel);
         } else {
             Globals.statusPrint("createTexture: Unknown imageType. Cannot open texture image");
             return -1;
@@ -55,21 +56,21 @@ public class Texture {
         int iCounter;
 
         switch(piTextureType) {
-        case CONSTANT:
-            for (row = 1; row <= piNumRows; row++) {
-                for (col = 1; col <= piNumColumns; col++) {
-                    if(bitsPerPixel == 8) {
-                        newImage.setMPixel(col, row, (byte)piForeColor);
+        case I_CONSTANT:
+            for (iRow = 1; iRow <= piNumRows; iRow++) {
+                for (iCol = 1; iCol <= piNumColumns; iCol++) {
+                    if(iBitsPerPixel == 8) {
+                        newImage.setMPixel(iCol, iRow, (byte)piForeColor);
                     }
 
-                    if(bitsPerPixel == 32) {
-                        newImage.setMPixel32(col, row, (float)piForeColor);
+                    if(iBitsPerPixel == 32) {
+                        newImage.setMPixel32(iCol, iRow, (float)piForeColor);
                     }
-                } // for col
-            } // for row
+                } // for iCol
+            } // for iRow
             break;
 
-        case CHECKERBOARD:
+        case I_CHECKERBOARD:
             for(j = 1; j <= piNumRows; j++) {
                 iRowCounter++;
                 if(iRowCounter == iCellHeight) {
@@ -96,53 +97,53 @@ public class Texture {
             } // for j
             break;
 
-        case HORZRAMP:
-            for (row = 1; row <= piNumRows; row++) {
-                for (col = 1; col <= piNumColumns; col++) {
-                    if(bitsPerPixel == 8) {
-                        newImage.setMPixel(col, row, (byte)col);
+        case I_HORZRAMP:
+            for (iRow = 1; iRow <= piNumRows; iRow++) {
+                for (iCol = 1; iCol <= piNumColumns; iCol++) {
+                    if(iBitsPerPixel == 8) {
+                        newImage.setMPixel(iCol, iRow, (byte)iCol);
                     }
 
-                    if(bitsPerPixel == 32) {
-                        newImage.setMPixel32(col, row, (float)col);
+                    if(iBitsPerPixel == 32) {
+                        newImage.setMPixel32(iCol, iRow, (float)iCol);
                     }
-                } // for col
-            } // for row
+                } // for iCol
+            } // for iRow
             break;
 
-        case VERTRAMP:
-            for (row = 1; row <= piNumRows; row++) {
-                for (col = 1; col <= piNumColumns; col++) {
-                    if(bitsPerPixel == 8) {
-                        newImage.setMPixel(col, row, (byte)row);
+        case I_VERTRAMP:
+            for (iRow = 1; iRow <= piNumRows; iRow++) {
+                for (iCol = 1; iCol <= piNumColumns; iCol++) {
+                    if(iBitsPerPixel == 8) {
+                        newImage.setMPixel(iCol, iRow, (byte)iRow);
                     }
 
-                    if(bitsPerPixel == 32) {
-                        newImage.setMPixel32(col, row, (float)row);
+                    if(iBitsPerPixel == 32) {
+                        newImage.setMPixel32(iCol, iRow, (float)iRow);
                     }
-                } // for col
-            } // for row
+                } // for iCol
+            } // for iRow
             break;
 
-        case COUNTER:
+        case I_COUNTER:
             iCounter = 0;
-            for (row = 1; row <= piNumRows; row++) {
-                for (col = 1; col <= piNumColumns; col++) {
-                    if(bitsPerPixel == 8) {
-                        newImage.setMPixel(col, row, (byte)iCounter);
+            for (iRow = 1; iRow <= piNumRows; iRow++) {
+                for (iCol = 1; iCol <= piNumColumns; iCol++) {
+                    if(iBitsPerPixel == 8) {
+                        newImage.setMPixel(iCol, iRow, (byte)iCounter);
                     }
 
-                    if(bitsPerPixel == 32) {
-                        newImage.setMPixel32(col, row, (float)row);
+                    if(iBitsPerPixel == 32) {
+                        newImage.setMPixel32(iCol, iRow, (float)iRow);
                     }
 
                     iCounter++;
                     iCounter = iCounter % 256;
-                } // for col
-            } // for row
+                } // for iCol
+            } // for iRow
             break;
 
-        case PLASMA:
+        case I_PLASMA:
             createPlasma(newImage, piNumRows, piNumColumns);
             break;
 
@@ -247,12 +248,13 @@ public class Texture {
     // Called from:
     //     createTexure
     // This method came from TEXTURE.CPP
-    public static void createPlasma(MemImage anImage, int numRows, int numColumns) {
-        anImage.setMPixel(1,       1,     (byte)myRand(64));
-        anImage.setMPixel(1,       numRows,  (byte)myRand(64));
-        anImage.setMPixel(numColumns, 1,     (byte)myRand(64));
-        anImage.setMPixel(numColumns, numRows, (byte)myRand(64));
-        plasma(anImage, 1, 1, numColumns, numRows);
+    public static void createPlasma(MemImage pImage, int piNumRows, int piNumColumns) {
+        pImage.setMPixel(         1,      1,  (byte)myRand(64));
+        pImage.setMPixel(         1, piNumRows, (byte)myRand(64));
+        pImage.setMPixel(piNumColumns,       1, (byte)myRand(64));
+        pImage.setMPixel(piNumColumns,  piNumRows, (byte)myRand(64));
+
+        plasma(pImage, 1, 1, piNumColumns, piNumRows);
     } // createPlasma
 
 
@@ -260,9 +262,9 @@ public class Texture {
     //     createPlasma
     //     plasma
     // This method came from TEXTURE.CPP
-    public static int myRand(int maxVal) {
+    public static int myRand(int piMaxVal) {
         // random.nextFloat returns a value between 0.0 and 1.0
         // myRand returns a value between 0 and maxVal.
-        return (int)(random.nextFloat() * maxVal);
+        return (int)(random.nextFloat() * piMaxVal);
     } // myRand
 } // class Texture
