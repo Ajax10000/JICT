@@ -13,6 +13,10 @@ So far my strategy has been:
 -   Converted uses of MessageBox to JOptionPane.
 -   Converted uses of mathematical functions (mostly cos, sin, sqrt and abs) to usage of the Math class in Java.
 
+*   Converted uses of strlen(varName) to varName.length()
+
+## Converting Data Types
+
 My strategy for handling data types has been:
 
 -   int's that are being used as booleans were changed to boolean
@@ -25,6 +29,8 @@ My strategy for handling data types has been:
 -   character pointers became Strings
 -   character arrays became Strings
 -   instances of RBQUAD became instances of java.awt.Color
+-   float variables that were passed as parameters to methods that changed their values were changed to Float
+-   int variables that were passed as parameters to methods that changed their values were changed to Integer
 
 In subclasses of CDialog:
 
@@ -41,7 +47,7 @@ The menu for ICT was defined in ICT20.RC. Of course, to implement the menu in Ja
 -   Handling object parameters to methods has been easy. In C++, the object type is often followed by an asterisk, indicating it is a pointer to an object of that type. In converting, I just removed the '\*'.
 -   For integer and float parameters that are being modified in a method (so that the new value is seen by the calling method), I substitued Integer and Float parameters.
 
-I was able to convert many of the sprintf statements to simple String concatenations in Java. I believe others will be converted using String.format and DecimalFormat.
+I was able to convert many of the sprintf statements to simple String concatenations in Java. I believe others will be converted using String.format and DecimalFormat.format.
 
 There are still a lot of conversion to be done. Some changes I have planned are:
 
@@ -53,5 +59,17 @@ There are still a lot of conversion to be done. Some changes I have planned are:
 *   Usage of the RGB function will be changed to usage of the java.awt.Color class.
 
 -   The message handlers will have to be converted to event handlers.
+
+Other methods
+
+-   Usage of the C function atof (ascii to float) was changed to either Float.parseFloat (to convert the string to a float) or Float.valueOf (to convert the string to a Float).
+
+## MDI
+
+Even though Java Swing has some support for the Multiple Document Interface (MDI) via the JDesktopPane and JInternalFrame classes, I decided not to make JICT use the MDI interface. The MDI paradigm is no longer popular and I believe that with today's larger monitors users would find MDI frustrating to use.
+
+## BMP Files
+
+ICT can manipulate BMP files. However Java has support for several image files, which I want to support. So MemImage will have to be rewritten completely to support BMP and other image formats.
 
 I started the conversion on Dec. 21, 2022, so I'm still the early stages of converting.
