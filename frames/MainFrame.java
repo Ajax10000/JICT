@@ -1055,7 +1055,7 @@ POPUP "Tools"
     // MENUITEM "Create Alpha Image...",       ID_TOOLS_CREATEALPHAIMAGE
     // ON_COMMAND(ID_TOOLS_CREATEALPHAIMAGE, OnToolsCreatealphaimage)
     public void onToolsCreateAlphaImage() {
-        String msgText;
+        String sMsgText;
 
         Globals.statusPrint("Creating an Alpha-Channel Image");
         if(isDirty) {         // If the client window has been drawn on, erase it
@@ -1064,7 +1064,7 @@ POPUP "Tools"
         }
 
         closeAllChildren();
-        String aFileName;
+        String sFileName;
 
         JFileChooser dlg = new JFileChooser();
         // The user can only choose a file (no directories)
@@ -1073,38 +1073,38 @@ POPUP "Tools"
         dlg.setFileFilter(new BMPFileFilter());
 
         // Allow the user to select a '.bmp' file
-        int showDlgResult = dlg.showDialog(this, "Select bmp file");
+        int iShowDlgResult = dlg.showDialog(this, "Select bmp file");
 
-        int aStatus;
+        int iStatus;
         Integer imHeight = 0, imWidth = 0, bitsPerPixel = 0;
         String centeredName = "";
         MemImage alphaImage = new MemImage(1, 1);
         MemImage inImage = new MemImage(1, 1);
 
-        if (showDlgResult == JFileChooser.APPROVE_OPTION) {
-            aFileName = dlg.getSelectedFile().getName();
+        if (iShowDlgResult == JFileChooser.APPROVE_OPTION) {
+            sFileName = dlg.getSelectedFile().getName();
 
             // Center the input image by removing any chromacolor border 
-            FileUtils.constructPathName(centeredName, aFileName, 'q');
-            if(centeredName.equals(aFileName)) {
+            FileUtils.constructPathName(centeredName, sFileName, 'q');
+            if(centeredName.equals(sFileName)) {
                 Globals.beep(10, 10);
                 Globals.statusPrint("onToolsCreateAlphaImage: Centered image name cannot equal original image name");
                 return;
             }
 
             // The following method sets parameters imHeight, imWidth and bitsPerPixel
-            aStatus = Globals.readBMPHeader(aFileName, imHeight, imWidth, bitsPerPixel);
+            iStatus = Globals.readBMPHeader(sFileName, imHeight, imWidth, bitsPerPixel);
             if(bitsPerPixel == 8) {
-                inImage = new MemImage(aFileName, 0, 0, RANDOM, 'R', MONOCHROME);
+                inImage = new MemImage(sFileName, 0, 0, RANDOM, 'R', MONOCHROME);
             }
             if(bitsPerPixel == 24) {
-                inImage = new MemImage(aFileName, 0, 0, RANDOM, 'R', RGBCOLOR);
+                inImage = new MemImage(sFileName, 0, 0, RANDOM, 'R', RGBCOLOR);
             }
 
             // Create an alpha image
-            String alphaName = "";
-            FileUtils.constructPathName(alphaName, aFileName, 'a');
-            if(alphaName.equals(aFileName)) {
+            String sAlphaName = "";
+            FileUtils.constructPathName(sAlphaName, sFileName, 'a');
+            if(sAlphaName.equals(sFileName)) {
                 Globals.beep(10, 10);
                 Globals.statusPrint("onToolsCreateAlphaImage: Alpha image name cannot equal original image name");
                 return;
@@ -1122,31 +1122,32 @@ POPUP "Tools"
                     return;
                 }
 
-                String shapeDir, shapeFile, shapeName;
-                shapeFile = aFileName;
-                int fileNameLength = shapeFile.length();
+                String sShapeFile;
+                // String shapeDir, shapeName;
+                sShapeFile = sFileName;
+                int fileNameLength = sShapeFile.length();
                 // Chop off the extension from the shape file name.
                 // The extension should be ".shp"
-                shapeFile = shapeFile.substring(fileNameLength - 4);
+                sShapeFile = sShapeFile.substring(fileNameLength - 4);
 
                 // Generate a shape file from the binary image
-                aStatus = Globals.shapeFromImage(alphaImage, aShape);
+                iStatus = Globals.shapeFromImage(alphaImage, aShape);
 
-                if(aStatus == 0) {
-                    aShape.writeShape(shapeFile);
-                    msgText = "Saved a shape file: " + shapeFile + "  numVertices: " + aShape.getNumVertices();
-                    Globals.statusPrint(msgText);
+                if(iStatus == 0) {
+                    aShape.writeShape(sShapeFile);
+                    sMsgText = "Saved a shape file: " + sShapeFile + "  numVertices: " + aShape.getNumVertices();
+                    Globals.statusPrint(sMsgText);
                 }
 
-                FileUtils.constructPathName(alphaName, aFileName, 'a');
-                if(alphaName.equals(aFileName)) {
+                FileUtils.constructPathName(sAlphaName, sFileName, 'a');
+                if(sAlphaName.equals(sFileName)) {
                     Globals.statusPrint("Alpha Image Name cannot equal the original file name");
                     return;
                 }
 
-                alphaImage.writeBMP(alphaName);
-                msgText = "Saved an alpha image: " + alphaName;
-                Globals.statusPrint(msgText);
+                alphaImage.writeBMP(sAlphaName);
+                sMsgText = "Saved an alpha image: " + sAlphaName;
+                Globals.statusPrint(sMsgText);
             }
         }
     } // onToolsCreateAlphaImage
@@ -1171,15 +1172,17 @@ POPUP "Tools"
         closeAllChildren();
         
         // Setup Output Image
-        ictApp.m_pDocTemplateImage.OpenDocumentFile(null);
+        //ictApp.m_pDocTemplateImage.OpenDocumentFile(null);
         outView = ImageView.getView();
         outView.setCaption("Warped Image");
 
-        ictApp.m_pDocTemplateImage.OpenDocumentFile(null);
+        //ictApp.m_pDocTemplateImage.OpenDocumentFile(null);
         orgView = ImageView.getView();
-        int inHeight, inWidth, bitsPerPixel;
-        MemImage inImage;
-        int aStatus = Globals.readBMPHeader(Globals.ictPreference.getPath(Preference.WarpTestPath), inHeight, inWidth, bitsPerPixel);
+        Integer inHeight = 0, inWidth = 0, bitsPerPixel = 0;
+        MemImage inImage = new MemImage(0, 0);
+
+        // The following method sets parameters inHeight, inWidth, and bitsPerPixel
+        int iStatus = Globals.readBMPHeader(Globals.ictPreference.getPath(Preference.WarpTestPath), inHeight, inWidth, bitsPerPixel);
         if(bitsPerPixel == 8) {
             inImage = new MemImage(Globals.ictPreference.getPath(Preference.WarpTestPath), 0, 0, RANDOM, 'R', MONOCHROME);
         }
@@ -1200,11 +1203,11 @@ POPUP "Tools"
 
         MemImage outImage   = new MemImage(outHeight, outWidth, bitsPerPixel);
         MemImage aliasImage = new MemImage(outHeight, outWidth, bitsPerPixel);
-        int xOffset, yOffset;
+        // int xOffset, yOffset;
         TMatrix dummyMatrix = new TMatrix();
 
         // Translate test image to center of output image
-        float xAngle = 0.0f, yAngle = 0.0f, zAngle = 0.0f;
+        // float xAngle = 0.0f, yAngle = 0.0f, zAngle = 0.0f;
 
         Globals.iwarpz(inImage, outImage, null, 
             mWarpRotateX, mWarpRotateY, mWarpRotateZ,
@@ -1221,11 +1224,6 @@ POPUP "Tools"
         } else {
             outView.associateMemImage(outImage);
         }
-
-        // Why are these local variables being set? Their new values will not be used.
-        xAngle += mWarpRotateX;
-        yAngle += mWarpRotateY;
-        zAngle += mWarpRotateZ;
     } // onWarpParamDlgClosed
 
 
@@ -1389,7 +1387,7 @@ POPUP "Tools"
 
         // Create an imageWindow object to draw into
         ImageView preView = new ImageView(this);
-        ictApp.m_pDocTemplateImage.OpenDocumentFile(null);
+        // ictApp.m_pDocTemplateImage.OpenDocumentFile(null);
         preView = ImageView.getView();
         preView.setCaption("Scene Preview");
         previewWindowHandle = preView; // Save the imageView window so scene preview dialog can use it
@@ -1424,7 +1422,7 @@ POPUP "Tools"
 
         // Create an imageWindow object to draw into
         ImageView preView = new ImageView(this);
-        ictApp.m_pDocTemplateImage.OpenDocumentFile(null);
+        // ictApp.m_pDocTemplateImage.OpenDocumentFile(null);
         preView = ImageView.getView();
         preView.setCaption("Sequence Preview");
         previewWindowHandle = preView; // Save the imageView window so scene preview dialog can use it
@@ -1451,11 +1449,14 @@ POPUP "Tools"
     //     onPreviewSequenceScene
     //     onToolsCreateASceneList
     public void closeAllChildren() {
+        return;
+        /*
         CMDIChildWnd activeChildWindow = MDIGetActive(); // returns NULL if no child exists
         while(activeChildWindow != null) {
             activeChildWindow.SendMessage(WM_CLOSE);
             activeChildWindow = MDIGetActive();
         } 
+        */
     } // closeAllChildren
 
 
@@ -1474,7 +1475,7 @@ POPUP "Tools"
 
         // Create an imageWindow object to draw into
         ImageView renderView;
-        ictApp.m_pDocTemplateImage.OpenDocumentFile(null);
+        //ictApp.m_pDocTemplateImage.OpenDocumentFile(null);
         renderView = ImageView.getView();
         renderView.setCaption("Scene Render");
         previewWindowHandle = renderView; //save the imageView window so scene preview dialog can use it
@@ -1506,7 +1507,7 @@ POPUP "Tools"
         }
 
         ImageView renderView;
-        ictApp.m_pDocTemplateImage.OpenDocumentFile(null);
+        //ictApp.m_pDocTemplateImage.OpenDocumentFile(null);
         renderView = ImageView.getView();
         renderView.setCaption("Sequence Render");
         previewWindowHandle = renderView; // Save the imageView window so 
