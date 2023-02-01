@@ -499,9 +499,9 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
             aShape.incCurrentVertex();
         }
 
-        aShape.originX = mintX + (maxtX - mintX)/2.0f;
-        aShape.originY = mintY + (maxtY - mintY)/2.0f;
-        aShape.originZ = mintZ + (maxtZ - mintZ)/2.0f;
+        aShape.mfOriginX = mintX + (maxtX - mintX)/2.0f;
+        aShape.mfOriginY = mintY + (maxtY - mintY)/2.0f;
+        aShape.mfOriginZ = mintZ + (maxtZ - mintZ)/2.0f;
 
         // Project to the screen
         aShape.initCurrentVertex();
