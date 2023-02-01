@@ -1529,9 +1529,9 @@ public class SceneList implements ISceneList {
                 modelCounter++;
             } else {
                 if(theModel.miModelType == IMAGE || theModel.miModelType == SHAPE) {
-                    centroidX = theModel.screenObject.currentShape.originX;
-                    centroidY = theModel.screenObject.currentShape.originY;
-                    centroidZ = theModel.screenObject.currentShape.originZ;
+                    centroidX = theModel.screenObject.currentShape.mfOriginX;
+                    centroidY = theModel.screenObject.currentShape.mfOriginY;
+                    centroidZ = theModel.screenObject.currentShape.mfOriginZ;
                     modelDistance = MathUtils.getDistance3d(viewX, viewY, viewZ, centroidX, centroidY, centroidZ);
                     distances[modelCounter] = modelDistance;
                     models[modelCounter] = theModel;
