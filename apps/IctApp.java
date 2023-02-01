@@ -18,8 +18,8 @@ import javax.swing.SwingUtilities;
 
 public class IctApp {
     private MainFrame mainFrame;
-    public CMultiDocTemplate m_pDocTemplateImage;
-    public CMultiDocTemplate m_pDocTemplateText;
+    //public CMultiDocTemplate m_pDocTemplateImage;
+    //public CMultiDocTemplate m_pDocTemplateText;
 
 /*
 /////////////////////////////////////////////////////////////////////////////
@@ -119,7 +119,7 @@ CIctApp theApp;
     } // initInstance
 
 
-    public void main(String[] args) {
+    public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 new IctApp(args);
