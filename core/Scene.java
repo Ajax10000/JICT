@@ -10,35 +10,35 @@ import motion.MotionPath;
 import structs.Point3d;
 
 public class Scene {
-    boolean ictdebug = false;
+    boolean bIctDebug = false;
 
     // Name of the Scene
     // Changed from private to public as it is used by SceneList
-    public String sceneName;
+    public String msSceneName;
 
     // Viewpoint Path file for a sequence
-    private String sensorPath;
+    private String msSensorPath;
 
     // Has motion path if moving viewpoint
     // Changed from private to public as it is used by SceneList
     // Affects SceneList.getViewMatrix
-    public MotionPath sensorMotion;
+    public MotionPath mSensorMotion;
 
     // 1 = Still, 2 = sequence
     // Changed from private to public as it is used by SceneList
-    public int sequenceType;
+    public int miSequenceType;
 
     // 1 = Black and White, 2 = RGB Color
     // Changed from private to public as it is used by SceneList
-    public int colorMode;
+    public int miColorMode;
 
     // Number of rows (y) in output image
     // Changed from private to public as it is used by SceneList
-    public int outputRows;
+    public int miOutputRows;
 
     // Number of columns(X) in output image
     // Changed from private to public as it is used by SceneList
-    public int outputColumns;
+    public int miOutputColumns;
 
     // viewPoint Angles
     // Changed from private to public as it is used by SceneList
@@ -47,7 +47,7 @@ public class Scene {
     //     SceneList.getViewTransform
     // Written to in:
     //     SceneList.setViewTransform
-    public Point3d rotation;
+    public Point3d mRotationPt;
 
     // viewPoint location relative to (0,0,0)
     // Changed from private to public as it is used by SceneList
@@ -56,95 +56,98 @@ public class Scene {
     //     SceneList.getViewTransform
     // Written to in:
     //     SceneList.setViewTransform
-    public Point3d translation;
+    public Point3d mTranslationPt;
 
-    // point to last Scene element
+    // points to last Scene element
     // Changed from private to public as it is used 
     // by SceneList in method addSceneElement
-    public SceneElement tail;
+    public SceneElement mTail;
 
-    // point to first Scene element
+    // points to first Scene element
     // Changed from private to public as it is accessed by SceneList
-    public SceneElement head;
+    public SceneElement mHead;
     
-    // point to current scene element
+    // points to current scene element
     // Changed from private to public as it is accessed by SceneList
     // Set in SceneList.setCurrentModel
-    public SceneElement currentSceneElement; 
+    public SceneElement mCurrentSceneElement; 
 
     // Changed from private to public as it is accessed by SceneList
-    public Scene prevEntry;
+    public Scene mPrevEntry;
 
     // Changed from private to public as it is accessed by SceneList
-    public Scene nextEntry;
+    public Scene mNextEntry;
 
     // 1 if constructor successful
     // I changed this from int to boolean
-    private boolean valid;  
+    private boolean mbIsValid;  
     // friend class sceneList;
 
 
     // Called from:
+    //     SceneList constructor
     //     SceneList.addScene
-    public Scene(String sName, int seqType, int numOutCols, int numOutRows,
-    int aColorMode, Point3d rt, Point3d tr, String sensorpth) {
-        if (ictdebug) {
-            String msgBuffer = "Constructor. Size of scene: " + sizeLowerLimit();
-            Globals.statusPrint(msgBuffer);
+    public Scene(String psName, int piSeqType, int piNumOutCols, int piNumOutRows,
+    int piColorMode, Point3d pRtPt, Point3d pTrPt, String psSensorpth) {
+        if (bIctDebug) {
+            String sMsgBuffer = "Constructor. Size of scene: " + sizeLowerLimit();
+            Globals.statusPrint(sMsgBuffer);
         }
     
-        valid = true;
-        this.sceneName = sName;
-        this.sequenceType = seqType;
-        this.outputColumns = numOutCols;
-        this.outputRows = numOutRows;
-        this.colorMode = aColorMode;
+        mbIsValid = true;
+        this.msSceneName = psName;
+        this.miSequenceType = piSeqType;
+        this.miOutputColumns = piNumOutCols;
+        this.miOutputRows = piNumOutRows;
+        this.miColorMode = piColorMode;
   
-        this.rotation = new Point3d();
-        this.rotation.x = rt.x;
-        this.rotation.y = rt.y;
-        this.rotation.z = rt.z;
+        this.mRotationPt = new Point3d();
+        this.mRotationPt.x = pRtPt.x;
+        this.mRotationPt.y = pRtPt.y;
+        this.mRotationPt.z = pRtPt.z;
     
-        this.translation = new Point3d();
-        this.translation.x = tr.x;
-        this.translation.y = tr.y;
-        this.translation.z = tr.z;
+        this.mTranslationPt = new Point3d();
+        this.mTranslationPt.x = pTrPt.x;
+        this.mTranslationPt.y = pTrPt.y;
+        this.mTranslationPt.z = pTrPt.z;
     
-        this.sensorPath = sensorpth;
-        this.sensorMotion = null;
+        this.msSensorPath = psSensorpth;
+        this.mSensorMotion = null;
+
         if(
-        this.sensorPath.length() > 1 && 
-        !this.sensorPath.equalsIgnoreCase("NONE")) {
+        this.msSensorPath.length() > 1 && 
+        !this.msSensorPath.equalsIgnoreCase("NONE")) {
             // The view point is moving
-            this.sensorMotion = new MotionPath();
-            int myStatus = this.sensorMotion.readMotion(sensorPath);
-            if (myStatus != 0) {  // if the motion file could not be read,
+            this.mSensorMotion = new MotionPath();
+            int iStatus = this.mSensorMotion.readMotion(msSensorPath);
+            if (iStatus != 0) {  // if the motion file could not be read,
                 Globals.statusPrint("Scene: Moving View Point has invalid motion file");
-                this.sensorMotion = null;
-                this.valid = false;
+                this.mSensorMotion = null;
+                this.mbIsValid = false;
             }
         }
 
-        this.currentSceneElement = null;
-        this.tail = null;
-        this.head = null;
-        this.prevEntry = null;
-        this.nextEntry = null;
+        this.mCurrentSceneElement = null;
+        this.mTail = null;
+        this.mHead = null;
+        this.mPrevEntry = null;
+        this.mNextEntry = null;
     } // Scene ctor
 
 
     // Called from:
     //     SceneList.addScene
     boolean isValid() {
-        return this.valid;
+        return this.mbIsValid;
     } // isValid
 
 
     public void finalize() {
-        if (ictdebug) {
+        if (bIctDebug) {
             Globals.statusPrint("Scene Destructor");
         }
     } // finalize
+
 
     // Class SceneElement also has a writeFile method. 
     // Both Scene.writeFile and SceneElement.writeFile are called from 
@@ -157,18 +160,18 @@ public class Scene {
         // Creates the scene portion of a scene file
         sSequenceArray = "Sequence";
         sColorArray = "Color";
-        if(this.sequenceType == 1) {
+        if(this.miSequenceType == 1) {
             sSequenceArray = "Still";
         }
-        if(this.colorMode == 1) {
+        if(this.miColorMode == 1) {
             sColorArray = "Monochrome";
         }
         
-        String thisObjectAsString = "scene " + this.sceneName + " " + sSequenceArray + " " 
-            + this.outputRows + "," + this.outputColumns + " " + sColorArray + "\n" +
-            "Rotation "    + this.rotation.x    + "," + this.rotation.y    + "," + this.rotation.z + "\n" +
-            "Translation " + this.translation.x + "," + this.translation.y + "," + this.translation.z + "\n" + 
-            "MotionPath "  + this.sensorPath + "\n\n";
+        String thisObjectAsString = "scene " + this.msSceneName + " " + sSequenceArray + " " 
+            + this.miOutputRows + "," + this.miOutputColumns + " " + sColorArray + "\n" +
+            "Rotation "    + this.mRotationPt.x    + "," + this.mRotationPt.y    + "," + this.mRotationPt.z + "\n" +
+            "Translation " + this.mTranslationPt.x + "," + this.mTranslationPt.y + "," + this.mTranslationPt.z + "\n" + 
+            "MotionPath "  + this.msSensorPath + "\n\n";
 
         try {
             fileout.write(thisObjectAsString);
@@ -188,19 +191,20 @@ public class Scene {
 
     // I added this method
     public String toString() {
-        String thisObject = "\n" + "SceneName: " + this.sceneName
-            + " SeqType: " + this.sequenceType
+        String thisObject = "\n" + "SceneName: " + this.msSceneName
+            + " SeqType: " + this.miSequenceType
             + " ViewPoint Rotation, Translation:" + "\n" +
-            this.rotation.x    + " " + this.rotation.y    + " " + this.rotation.z +" " +
-            this.translation.x + " " + this.translation.y + " " + this.translation.z + "\n"
-            + "SensorPath: " + this.sensorPath
-            + " Head: " + this.head
-            + " Tail: " + this.tail
-            + " Prev " + this.prevEntry
-            + " Next " + this.nextEntry; 
+            this.mRotationPt.x    + " " + this.mRotationPt.y    + " " + this.mRotationPt.z +" " +
+            this.mTranslationPt.x + " " + this.mTranslationPt.y + " " + this.mTranslationPt.z + "\n"
+            + "SensorPath: " + this.msSensorPath
+            + " Head: " + this.mHead
+            + " Tail: " + this.mTail
+            + " Prev " + this.mPrevEntry
+            + " Next " + this.mNextEntry; 
 
         return thisObject;
     } // toString
+
 
     public int sizeLowerLimit() {
         int mySize = 0;
@@ -235,5 +239,5 @@ public class Scene {
         mySize = booleanFieldsSize + intFieldsSize + referenceFieldsSize;
 
         return mySize;
-    }
+    } // sizeLowerLimit
 } // class Scene
