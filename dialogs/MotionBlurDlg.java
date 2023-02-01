@@ -17,6 +17,7 @@ import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
@@ -361,33 +362,56 @@ protected:
     // This method came from MOTIONBLURDIALOG.CPP
     // Called when the user clicks on the OK button
     void onOK() {
-        String aFirstImage, aOutDir, aBlurDepth, aNumBlurFrames;
-        int blurDepth, numBlurFrames;
+        String sFirstImage, sOutDir, sBlurDepth, sNumBlurFrames;
+        int iBlurDepth = 0, iNumBlurFrames = 0;
+        Integer parsedValue = 0;
 
-        aFirstImage = m_firstImage.getText();
-        aOutDir = m_outDirectory.getText();
+        sFirstImage = m_firstImage.getText();
+        sOutDir = m_outDirectory.getText();
 
-        aNumBlurFrames = m_NumBlurFrames.getText();
-        numBlurFrames = Integer.parseInt(aNumBlurFrames);
+        sNumBlurFrames = m_NumBlurFrames.getText();
+        // iNumBlurFrames = Integer.parseInt(sNumBlurFrames);
+        if (getIntegerValue(sNumBlurFrames, parsedValue) == null) {
+            iNumBlurFrames = parsedValue.intValue();
+        } else {
+            JOptionPane.showMessageDialog(this, "# Frames to blur value entered is not a valid number.");
+            m_NumBlurFrames.requestFocus();
+            return;
+        }
 
-        aBlurDepth = m_BlurDepth.getText();
-        blurDepth = Integer.parseInt(aBlurDepth);
-        
-        String msgText = "numBlurFrames " + numBlurFrames + " blurDepth " + blurDepth;
+        sBlurDepth = m_BlurDepth.getText();
+        // iBlurDepth = Integer.parseInt(sBlurDepth);
+        if (getIntegerValue(sBlurDepth, parsedValue) == null) {
+            iBlurDepth = parsedValue.intValue();
+        } else {
+            JOptionPane.showMessageDialog(this, "Blur depth value entered is not a valid number.");
+            m_BlurDepth.requestFocus();
+            return;
+        }
+
+        String sMsgText = "numBlurFrames " + iNumBlurFrames + " blurDepth " + iBlurDepth;
         // TODO: In future, uncomment the following line
-        //Globals.statusPrint(msgText);
+        //Globals.statusPrint(sMsgText);
 
         // Blur a sequence of images
         int iStatus = 0;
         // TODO: In future, uncomment the following line
-        //iStatus = Globals.motionBlur(aFirstImage, aOutDir, numBlurFrames, blurDepth);
+        iStatus = Globals.motionBlur(sFirstImage, sOutDir, iNumBlurFrames, iBlurDepth);
 
-        msgText = "motion blur Complete. Status: " + iStatus;
+        sMsgText = "motion blur Complete. Status: " + iStatus;
         // TODO: In future, uncomment the following line
-        //Globals.statusPrint(msgText);
+        //Globals.statusPrint(sMsgText);
     } // onOK
 
 
+    private NumberFormatException getIntegerValue(String psIntAsString, Integer pIValue) {
+        try {
+            pIValue = Integer.parseInt(psIntAsString);
+        } catch (NumberFormatException nfe) {
+            return nfe;
+        }
+        return null;
+    }
     // Called when the user clicks on the Cancel button
     public void onCancel() {
         dispose();
