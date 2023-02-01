@@ -381,8 +381,8 @@ protected:
 
         // Display the model's name
         float ax, ay;
-        ax = currentShape.averageX() + currentShape.minX;
-        ay = screenHeight - (currentShape.averageY() + currentShape.minY);
+        ax = currentShape.averageX() + currentShape.mfMinX;
+        ay = screenHeight - (currentShape.averageY() + currentShape.mfMinY);
         graphics2D.setColor(Color.RED); // red
         graphics2D.drawString(modelName, (int)ax + xOffset, (int)ay - yOffset);
 
@@ -526,8 +526,8 @@ protected:
         } // if
 
         // Display the model's name
-        ax = currentShape.averageX() + currentShape.minX;
-        ay = piScreenHeight - (currentShape.averageY() + currentShape.minY);
+        ax = currentShape.averageX() + currentShape.mfMinX;
+        ay = piScreenHeight - (currentShape.averageY() + currentShape.mfMinY);
         graphics2D.setColor(Color.RED);   // red pen
         graphics2D.setBackground(backgroundColor); 
         if(!psModelName.equals(" ")) {
