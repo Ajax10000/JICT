@@ -128,33 +128,34 @@ public class Globals {
 
 
     // This method came from BLEND.CPP
-    public static int blend(MemImage inImage, MemImage maskImage, MemImage outImage, float alphaScale) {
+    public static int blend(MemImage pInImage, MemImage pMaskImage, MemImage pOutImage, 
+    float pfAlphaScale) {
         // Blend over the common area in input and mask images
-        int inputRows  = inImage.getHeight();
-        int inputCols  = inImage.getWidth();
-        int maskRows   = maskImage.getHeight();
-        int maskCols   = maskImage.getWidth();
-        int commonRows = Math.min(inputRows, maskRows);
-        int commonCols = Math.min(inputCols, maskCols);
+        int iInputRows  = pInImage.getHeight();
+        int iInputCols  = pInImage.getWidth();
+        int iMaskRows   = pMaskImage.getHeight();
+        int iMaskCols   = pMaskImage.getWidth();
+        int iCommonRows = Math.min(iInputRows, iMaskRows);
+        int iCommonCols = Math.min(iInputCols, iMaskCols);
 
         // Each MemImage is assumed to be opened for random access
-        int x, y;
+        int ix, iy;
         byte maskPixel, inPixel, outPixel, addedPixel;
-        float inWeight, outWeight;
+        float fInWeight, fOutWeight;
 
-        for(y = 1; y <= commonRows; y++) {
-            for(x = 1; x <= commonCols; x++) {
-                maskPixel = maskImage.getMPixel(x, y);
-                inPixel   = inImage.getMPixel(x, y);
+        for(iy = 1; iy <= iCommonRows; iy++) {
+            for(ix = 1; ix <= iCommonCols; ix++) {
+                maskPixel = pMaskImage.getMPixel(ix, iy);
+                inPixel   = pInImage.getMPixel(ix, iy);
                 if(maskPixel > 0 && inPixel > 0) {
-                    outPixel = outImage.getMPixel(x, y);
-                    inWeight = (float)maskPixel / 255.0f * alphaScale;
-                    outWeight = 1.0f - inWeight;
+                    outPixel = pOutImage.getMPixel(ix, iy);
+                    fInWeight = (float)maskPixel / 255.0f * pfAlphaScale;
+                    fOutWeight = 1.0f - fInWeight;
 
-                    if(alphaScale > 0.0f) {
-                        addedPixel = (byte)((inWeight * (float)inPixel) + (outWeight * (float)outPixel) + 0.5f);
+                    if(pfAlphaScale > 0.0f) {
+                        addedPixel = (byte)((fInWeight * (float)inPixel) + (fOutWeight * (float)outPixel) + 0.5f);
                     } else {
-                        addedPixel = (byte)((float)outPixel + (inWeight * (float)inPixel) + 0.5f);
+                        addedPixel = (byte)((float)outPixel + (fInWeight * (float)inPixel) + 0.5f);
                         // Make certain shadows won't produce negative values
                         if (addedPixel > outPixel) {
                             addedPixel = outPixel;
@@ -165,14 +166,14 @@ public class Globals {
                         addedPixel = (byte)1;
                     }
 
-                    if (alphaScale == 0.0f) {
+                    if (pfAlphaScale == 0.0f) {
                         addedPixel = (byte)0;
                     }
 
-                    outImage.setMPixel(x, y, addedPixel);
+                    pOutImage.setMPixel(ix, iy, addedPixel);
                 }
-            } // for x
-        } // for y
+            } // for ix
+        } // for iy
 
         return 0;
     } // blend
@@ -182,65 +183,65 @@ public class Globals {
     // Called from:
     //     tweenImage
     //     RenderObject.renderMeshz
-    public static int blendz(MemImage inImage, MemImage matteImage, 
-    MemImage zImage, MemImage zBuffer,
-    MemImage outImage,
-    float alphaScale) {
-        // zImage is the rendered model's zBuffer image
-        // zBuffer is the effect frame's zBuffer image
+    public static int blendz(MemImage pInImage, MemImage pMatteImage, 
+    MemImage pZImage, MemImage pZBuffer,
+    MemImage pOutImage,
+    float pfAlphaScale) {
+        // pZImage is the rendered model's zBuffer image
+        // pZBuffer is the effect frame's zBuffer image
         // Both of these need to be considered in a zBuffer render operation since each zBuffered
         // model contributes to the rendered effect frame's zBuffer
         //
         // Blend over the common area in input and matte images
-        int inputRows  = inImage.getHeight();
-        int inputCols  = inImage.getWidth();
-        int matteRows  = matteImage.getHeight();
-        int matteCols  = matteImage.getWidth();
-        int commonRows = Math.min(inputRows, matteRows);
-        int commonCols = Math.min(inputCols, matteCols);
+        int iInputRows  = pInImage.getHeight();
+        int iInputCols  = pInImage.getWidth();
+        int iMatteRows  = pMatteImage.getHeight();
+        int iMatteCols  = pMatteImage.getWidth();
+        int iCommonRows = Math.min(iInputRows, iMatteRows);
+        int iCommonCols = Math.min(iInputCols, iMatteCols);
 
-        int bpp = inImage.getBitsPerPixel();
-        int outBPP =  outImage.getBitsPerPixel();
-        if(outBPP != bpp) {
-            String msgText = "blendz: inImage bpp: " + bpp + " must match outImage bpp: " + outBPP;
-            statusPrint(msgText);
+        int iBpp = pInImage.getBitsPerPixel();
+        int iOutBPP = pOutImage.getBitsPerPixel();
+        if(iOutBPP != iBpp) {
+            String sMsgText = "blendz: inImage bpp: " + iBpp + " must match outImage bpp: " + iOutBPP;
+            statusPrint(sMsgText);
             return -1;
         }
 
-        int matteBPP = matteImage.getBitsPerPixel();
-        if(matteBPP != 8) {
+        int iMatteBPP = pMatteImage.getBitsPerPixel();
+        if(iMatteBPP != 8) {
             statusPrint("blendz: Matte image must be 8 bits per pixel");
             return -2;
         }
 
         // Each image is assumed to be opened for random access
-        int x, y;
+        int ix, iy;
         byte mattePixel, inPixel, outPixel, addedPixel;
         byte inRed = (byte)0, inGreen = (byte)0, inBlue = (byte)0;
         byte outRed = (byte)0, outGreen = (byte)0, outBlue = (byte)0;
         byte addedRed, addedGreen, addedBlue;
-        float inWeight, outWeight;
+        float fInWeight, fOutWeight;
     
         boolean usingZBuffer = false;
-        if((zImage != null) && (zBuffer != null)) {
+        if((pZImage != null) && (pZBuffer != null)) {
             usingZBuffer = true;
         }
     
-        for(y = 1; y <= commonRows; y++) {
-            for(x = 1; x <= commonCols; x++) {
-                mattePixel = matteImage.getMPixel(x, y);
-                switch(bpp) {  // Optionally blend in color or monochrome
+        for(iy = 1; iy <= iCommonRows; iy++) {
+            for(ix = 1; ix <= iCommonCols; ix++) {
+                mattePixel = pMatteImage.getMPixel(ix, iy);
+                switch(iBpp) {  // Optionally blend in color or monochrome
                 case 8:
-                    inPixel = inImage.getMPixel(x, y);
+                    inPixel = pInImage.getMPixel(ix, iy);
                     if((mattePixel > CHROMAVALUE) && (inPixel > CHROMAVALUE)) {
-                        outPixel = outImage.getMPixel(x, y );
-                        inWeight = (float)mattePixel / 255.0f * alphaScale;
-                        outWeight = 1.0f - inWeight;
+                        outPixel = pOutImage.getMPixel(ix, iy );
+                        fInWeight = (float)mattePixel / 255.0f * pfAlphaScale;
+                        fOutWeight = 1.0f - fInWeight;
 
-                        if(alphaScale > 0.0f) {
-                            addedPixel = (byte)((inWeight * (float)inPixel) + (outWeight *(float)outPixel) + 0.5f);
+                        if(pfAlphaScale > 0.0f) {
+                            addedPixel = (byte)((fInWeight * (float)inPixel) + (fOutWeight *(float)outPixel) + 0.5f);
                         } else {
-                            addedPixel = (byte)((float)outPixel + (inWeight *(float)inPixel) + 0.5f);
+                            addedPixel = (byte)((float)outPixel + (fInWeight *(float)inPixel) + 0.5f);
                             // Make certain shadows won't produce negative intensities
                             if (addedPixel > outPixel) {
                                 addedPixel = outPixel;
@@ -250,36 +251,36 @@ public class Globals {
                         if (addedPixel < 1) {
                             addedPixel = (byte)1;
                         }
-                        if (alphaScale == 0.0f) {
+                        if (pfAlphaScale == 0.0f) {
                             addedPixel = (byte)0;
                         }
 
                         if(usingZBuffer) {
-                            if(zImage.getMPixel32(x, y) < zBuffer.getMPixel32(x, y)) { 
-                                zBuffer.setMPixel32(x, y, zImage.getMPixel32(x, y));
-                                outImage.setMPixel(x, y, addedPixel);
+                            if(pZImage.getMPixel32(ix, iy) < pZBuffer.getMPixel32(ix, iy)) { 
+                                pZBuffer.setMPixel32(ix, iy, pZImage.getMPixel32(ix, iy));
+                                pOutImage.setMPixel(ix, iy, addedPixel);
                             }
                         } else {
-                            outImage.setMPixel(x, y, addedPixel);
+                            pOutImage.setMPixel(ix, iy, addedPixel);
                         }
                     } // end if non-zero values
                     break;
         
                 case 24:                           // RGB Blend with Z-Buffer
-                    inImage.getMPixelRGB(x, y, inRed, inGreen, inBlue);
+                    pInImage.getMPixelRGB(ix, iy, inRed, inGreen, inBlue);
                     if((mattePixel > CHROMAVALUE) && (inGreen > CHROMAVALUE)) {
-                        outPixel = (byte)outImage.getMPixelRGB(x, y, outRed, outGreen, outBlue);
-                        inWeight = (float)mattePixel / 255.0f * alphaScale;
-                        outWeight = 1.0f - inWeight;
+                        outPixel = (byte)pOutImage.getMPixelRGB(ix, iy, outRed, outGreen, outBlue);
+                        fInWeight  = (float)mattePixel / 255.0f * pfAlphaScale;
+                        fOutWeight = 1.0f - fInWeight;
 
-                        if(alphaScale > 0.0f) {
-                            addedRed   = (byte)((inWeight * (float)inRed)   + (outWeight *(float)outRed)   + 0.5f);
-                            addedGreen = (byte)((inWeight * (float)inGreen) + (outWeight *(float)outGreen) + 0.5f);
-                            addedBlue  = (byte)((inWeight * (float)inBlue)  + (outWeight *(float)outBlue)  + 0.5f);
+                        if(pfAlphaScale > 0.0f) {
+                            addedRed   = (byte)((fInWeight * (float)inRed)   + (fOutWeight *(float)outRed)   + 0.5f);
+                            addedGreen = (byte)((fInWeight * (float)inGreen) + (fOutWeight *(float)outGreen) + 0.5f);
+                            addedBlue  = (byte)((fInWeight * (float)inBlue)  + (fOutWeight *(float)outBlue)  + 0.5f);
                         } else {  // shadow
-                            addedRed   = (byte)((float)outRed   + (inWeight *(float)inRed)   + 0.5f);
-                            addedGreen = (byte)((float)outGreen + (inWeight *(float)inGreen) + 0.5f);
-                            addedBlue  = (byte)((float)outBlue  + (inWeight *(float)inBlue)  + 0.5f);
+                            addedRed   = (byte)((float)outRed   + (fInWeight *(float)inRed)   + 0.5f);
+                            addedGreen = (byte)((float)outGreen + (fInWeight *(float)inGreen) + 0.5f);
+                            addedBlue  = (byte)((float)outBlue  + (fInWeight *(float)inBlue)  + 0.5f);
 
                             // Make certain shadows won't produce negative intensities
                             if (addedRed > outRed)     addedRed = outRed;
@@ -290,25 +291,25 @@ public class Globals {
                         if (addedRed < 1)   addedRed   = (byte)1;
                         if (addedGreen < 1) addedGreen = (byte)1;
                         if (addedBlue < 1)  addedBlue  = (byte)1;
-                        if (alphaScale == 0.0f) {
+                        if (pfAlphaScale == 0.0f) {
                             addedRed   = (byte)0;
                             addedGreen = (byte)0;
                             addedBlue  = (byte)0;
                         }
 
                         if(usingZBuffer) {
-                            if(zImage.getMPixel32(x, y) < zBuffer.getMPixel32(x, y)) { 
-                                zBuffer.setMPixel32(x, y, zImage.getMPixel32(x, y));
-                                outImage.setMPixelRGB(x, y, addedRed, addedGreen, addedBlue);
+                            if(pZImage.getMPixel32(ix, iy) < pZBuffer.getMPixel32(ix, iy)) { 
+                                pZBuffer.setMPixel32(ix, iy, pZImage.getMPixel32(ix, iy));
+                                pOutImage.setMPixelRGB(ix, iy, addedRed, addedGreen, addedBlue);
                             }
                         } else {
-                            outImage.setMPixelRGB(x, y, addedRed, addedGreen, addedBlue);
+                            pOutImage.setMPixelRGB(ix, iy, addedRed, addedGreen, addedBlue);
                         }
                     } // end if non zero values
                     break;
                 } // switch
-            } // for x
-        } // for y
+            } // for ix
+        } // for iy
 
         return 0;
     } // blendz
@@ -318,8 +319,8 @@ public class Globals {
     // Called from:
     //     RenderObject.prepareCutout
     public static int createCutout(MemImage pOriginalImage, MemImage pMaskImage,
-    String psCutoutName, Shape3d aShape) {
-        String msgText;
+    String psCutoutName, Shape3d pShape) {
+        String sMsgText;
 
         // Create the cutout image and translate the shape to coincide with the cutout.
         // Assumes the mask image is an unpacked (8 bit) mask image opened RANDOM,
@@ -346,10 +347,10 @@ public class Globals {
         sMaskDir   = ictPreference.getPath(Preference.MaskImageDirectory);
         String sCutoutPath, sMaskPath;
     
-        FileUtils.appendFileName(sCutoutRImage, psCutoutName, "r");
-        FileUtils.appendFileName(sCutoutGImage, psCutoutName, "g");
-        FileUtils.appendFileName(sCutoutBImage, psCutoutName, "b");
-        FileUtils.appendFileName(sCutoutMImage, psCutoutName, "a");
+        FileUtils.appendFileName(sCutoutRImage,   psCutoutName, "r");
+        FileUtils.appendFileName(sCutoutGImage,   psCutoutName, "g");
+        FileUtils.appendFileName(sCutoutBImage,   psCutoutName, "b");
+        FileUtils.appendFileName(sCutoutMImage,   psCutoutName, "a");
         FileUtils.appendFileName(sCutoutRGBImage, psCutoutName, "c");
         sCutoutPath = sCutoutDir + sCutoutRGBImage;
         sMaskPath   = sMaskDir + sCutoutMImage;
@@ -357,14 +358,14 @@ public class Globals {
         int iMaskHeight, iMaskWidth;
         iMaskHeight = pMaskImage.getHeight();
         iMaskWidth  = pMaskImage.getWidth();
-        int y, minX, maxX, minY, maxY;
+        int iy, iMinX, iMaxX, iMinY, iMaxY;
     
-        if ((aShape != null) && (aShape.getNumVertices() > 0)) {
-            aShape.worldBoundingBox();
-            minY = (int)aShape.minY;
-            maxY = (int)aShape.maxY;
-            minX = (int)aShape.minX;
-            maxX = (int)aShape.maxX;
+        if ((pShape != null) && (pShape.getNumVertices() > 0)) {
+            pShape.worldBoundingBox();
+            iMinY = (int)pShape.mfMinY;
+            iMaxY = (int)pShape.mfMaxY;
+            iMinX = (int)pShape.mfMinX;
+            iMaxX = (int)pShape.mfMaxX;
         } else {
             statusPrint("createCutout: Shape object not supplied or has 0 vertices");
             return -1;
@@ -373,47 +374,47 @@ public class Globals {
         // Calculate the size of the new images.
         // Use the shape and enlarge by 1 pixel on each side to account for
         // round off error in the centroid calculation.
-        int newMinY = minY - 1;
-        if (newMinY < 1) {
-            newMinY = 1;
+        int iNewMinY = iMinY - 1;
+        if (iNewMinY < 1) {
+            iNewMinY = 1;
         }
 
-        int newMaxY = maxY + 1;
-        if (newMaxY > iMaskHeight) {
-            newMaxY = iMaskHeight;
+        int iNewMaxY = iMaxY + 1;
+        if (iNewMaxY > iMaskHeight) {
+            iNewMaxY = iMaskHeight;
         }
 
-        int newMinX = minX - 1;
-        if (newMinX < 1) {
-            newMinX = 1;
+        int iNewMinX = iMinX - 1;
+        if (iNewMinX < 1) {
+            iNewMinX = 1;
         }
 
-        int newMaxX = maxX + 1;
-        if (newMaxX > iMaskWidth) {
-            newMaxX = iMaskWidth;
+        int iNewMaxX = iMaxX + 1;
+        if (iNewMaxX > iMaskWidth) {
+            iNewMaxX = iMaskWidth;
         }
 
         // Translate the boundary so it is centered within the cutout image
-        int iCutoutHeight = newMaxY - newMinY + 1;
-        int iCutoutWidth  = newMaxX - newMinX + 1;
-        int dx = -(minX - 3);  // screen coords are 0 relative,
-        int dy = -(minY - 2);  // memImage coords are 1 relative
-        aShape.translateW(dx, dy, 0L);
+        int iCutoutHeight = iNewMaxY - iNewMinY + 1;
+        int iCutoutWidth  = iNewMaxX - iNewMinX + 1;
+        int iDx = -(iMinX - 3);  // screen coords are 0 relative,
+        int iDy = -(iMinY - 2);  // memImage coords are 1 relative
+        pShape.translateW(iDx, iDy, 0.0f);
 
         // Create the shape file name and write out the translated shape file
         String sShapeDir;
         String sShapeName;
-        sShapeDir = ictPreference.getPath(Preference.ShapeFileDirectory);
+        sShapeDir  = ictPreference.getPath(Preference.ShapeFileDirectory);
         sShapeName = sShapeDir + psCutoutName + ".shp";
 
-        msgText = "createCutout: Saving shape file: " + sShapeName;
-        statusPrint(msgText);
+        sMsgText = "createCutout: Saving shape file: " + sShapeName;
+        statusPrint(sMsgText);
 
-        aShape.invertY(iCutoutHeight);
-        int myStatus = aShape.writeShape(sShapeName);
-        if(myStatus != 0) {
-            msgText = "createCutout: Unable to save the shape file. " + myStatus;
-            statusPrint(msgText);
+        pShape.invertY(iCutoutHeight);
+        int iStatus = pShape.writeShape(sShapeName);
+        if(iStatus != 0) {
+            sMsgText = "createCutout: Unable to save the shape file. " + iStatus;
+            statusPrint(sMsgText);
             return -1;
         }
 
@@ -423,89 +424,89 @@ public class Globals {
             color = true;
         }
 
-        MemImage cutoutM = new MemImage(iCutoutHeight, iCutoutWidth);
-        if (!cutoutM.isValid()) {
-            msgText = "createCutout: Unable to open cutout alpha image: " + sCutoutMImage;
-            statusPrint(msgText);
+        MemImage cutoutMImg = new MemImage(iCutoutHeight, iCutoutWidth);
+        if (!cutoutMImg.isValid()) {
+            sMsgText = "createCutout: Unable to open cutout alpha image: " + sCutoutMImage;
+            statusPrint(sMsgText);
             return 3;
         }
     
-        MemImage cutoutG = new MemImage(iCutoutHeight, iCutoutWidth);
-        if (!cutoutG.isValid()) {
-            msgText = "createCutout: Unable to open cutout g image: " + sCutoutGImage;
-            statusPrint(msgText);
+        MemImage cutoutGImg = new MemImage(iCutoutHeight, iCutoutWidth);
+        if (!cutoutGImg.isValid()) {
+            sMsgText = "createCutout: Unable to open cutout g image: " + sCutoutGImage;
+            statusPrint(sMsgText);
             return 4;
         }
 
-        MemImage cutoutR = new MemImage(1, 1);
-        MemImage cutoutB = new MemImage(1, 1);
+        MemImage cutoutRImg = new MemImage(1, 1);
+        MemImage cutoutBImg = new MemImage(1, 1);
         if(color) {
-            cutoutR = new MemImage(iCutoutHeight, iCutoutWidth);
-            if (!cutoutR.isValid()) {
-                msgText = "createCutout: Unable to open cutout r image: " + sCutoutRImage;
-                statusPrint(msgText);
+            cutoutRImg = new MemImage(iCutoutHeight, iCutoutWidth);
+            if (!cutoutRImg.isValid()) {
+                sMsgText = "createCutout: Unable to open cutout r image: " + sCutoutRImage;
+                statusPrint(sMsgText);
                 return 5;
             }
 
-            cutoutB = new MemImage(iCutoutHeight, iCutoutWidth);
-            if (!cutoutB.isValid()) {
-                msgText = "createCutout: Unable to open cutout b image: " + sCutoutBImage;
-                statusPrint(msgText);
+            cutoutBImg = new MemImage(iCutoutHeight, iCutoutWidth);
+            if (!cutoutBImg.isValid()) {
+                sMsgText = "createCutout: Unable to open cutout b image: " + sCutoutBImage;
+                statusPrint(sMsgText);
                 return 6;
             }
         }
     
-        for(y = 1; y < iMaskHeight - newMaxY; y++) {
+        for(iy = 1; iy < iMaskHeight - iNewMaxY; iy++) {
             pOriginalImage.readNextRow();
         }
 
         int iyCounter = 1;
-        for (y = iMaskHeight - newMaxY; y <= iMaskHeight - newMinY; y++) {
+        for (iy = iMaskHeight - iNewMaxY; iy <= iMaskHeight - iNewMinY; iy++) {
             pOriginalImage.readNextRow();
             int ixCounter = 0;
 
-            for(int x = newMinX ;x <= newMaxX; x++) {
+            for(int ix = iNewMinX; ix <= iNewMaxX; ix++) {
                 ixCounter++;
-                byte theMaskValue = pMaskImage.getMPixel(x, y);
+                byte theMaskValue = pMaskImage.getMPixel(ix, iy);
 
                 if(theMaskValue > 0) {
-                    cutoutM.setMPixel(ixCounter, iyCounter, theMaskValue);
+                    cutoutMImg.setMPixel(ixCounter, iyCounter, theMaskValue);
                     if(!color) {
-                        cutoutG.setMPixel(ixCounter, iyCounter, pOriginalImage.getMPixel(x, 1));
+                        cutoutGImg.setMPixel(ixCounter, iyCounter, pOriginalImage.getMPixel(ix, 1));
                     }
             
                     if(color) {
-                        cutoutR.setMPixel(ixCounter, iyCounter, pOriginalImage.getMPixel(x, 1, 'R'));
-                        cutoutG.setMPixel(ixCounter, iyCounter, pOriginalImage.getMPixel(x, 1, 'G'));
-                        cutoutB.setMPixel(ixCounter, iyCounter, pOriginalImage.getMPixel(x, 1, 'B'));
+                        cutoutRImg.setMPixel(ixCounter, iyCounter, pOriginalImage.getMPixel(ix, 1, 'R'));
+                        cutoutGImg.setMPixel(ixCounter, iyCounter, pOriginalImage.getMPixel(ix, 1, 'G'));
+                        cutoutBImg.setMPixel(ixCounter, iyCounter, pOriginalImage.getMPixel(ix, 1, 'B'));
                     }
                 } else {
-                    cutoutM.setMPixel(ixCounter, iyCounter, (byte)0);
-                    cutoutG.setMPixel(ixCounter, iyCounter, (byte)0);
+                    cutoutMImg.setMPixel(ixCounter, iyCounter, (byte)0);
+                    cutoutGImg.setMPixel(ixCounter, iyCounter, (byte)0);
                     if(color) {
-                        cutoutR.setMPixel(ixCounter, iyCounter, (byte)0);
-                        cutoutB.setMPixel(ixCounter, iyCounter, (byte)0);
+                        cutoutRImg.setMPixel(ixCounter, iyCounter, (byte)0);
+                        cutoutBImg.setMPixel(ixCounter, iyCounter, (byte)0);
                     }
                 }
-            } // for x
+            } // for ix
 
             iyCounter++;
-        } // for y
+        } // for iy
 
         // Smooth the mask
         statusPrint("createCutout: Smoothing the cutout mask");
-        cutoutM.alphaSmooth5();
+        cutoutMImg.alphaSmooth5();
     
-        cutoutG.writeBMP(sCutoutGImage);
-        msgText = "createCutout: Saving alpha image: " + sMaskPath;
-        statusPrint(msgText);
-        cutoutM.writeBMP(sMaskPath);
+        cutoutGImg.writeBMP(sCutoutGImage);
+        sMsgText = "createCutout: Saving alpha image: " + sMaskPath;
+        statusPrint(sMsgText);
+        cutoutMImg.writeBMP(sMaskPath);
     
         if(color) {
-            cutoutR.writeBMP(sCutoutRImage);
-            cutoutB.writeBMP(sCutoutBImage);
-            msgText = "createCutout: Saving color cutout image: " + sCutoutPath;
-            statusPrint(msgText);
+            cutoutRImg.writeBMP(sCutoutRImage);
+            cutoutBImg.writeBMP(sCutoutBImage);
+            sMsgText = "createCutout: Saving color cutout image: " + sCutoutPath;
+            statusPrint(sMsgText);
             makeRGBimage(sCutoutRImage, sCutoutGImage, sCutoutBImage, sCutoutPath);
         }
 
@@ -552,19 +553,22 @@ public class Globals {
     //
     // Returns 0 if the point is not in the boundary.
     // Returns 1 if the point is     in the boundary.
-    public static boolean in_boundary(MemImage anImage, int x, int y) {
-        int imHeight = anImage.getHeight();
-        int imWidth  = anImage.getWidth();
-        int bpp      = anImage.getBitsPerPixel();
+    // 
+    // Called from:
+    //     probe
+    public static boolean in_boundary(MemImage pImage, int piX, int piY) {
+        int imHeight = pImage.getHeight();
+        int imWidth  = pImage.getWidth();
+        int iBpp     = pImage.getBitsPerPixel();
         Byte red = 0, green = 0, blue = 0;
 
-        if ((x < 1) || (x > imWidth) || (y < 1) || (y > imHeight)) {
+        if ((piX < 1) || (piX > imWidth) || (piY < 1) || (piY > imHeight)) {
             return false;
         }
 
-        switch(bpp) {
+        switch(iBpp) {
         case 8:
-            if (anImage.getMPixel(x, y) != CHROMAVALUE) {
+            if (pImage.getMPixel(piX, piY) != CHROMAVALUE) {
                 return true;
             } else {
                 return false;
@@ -572,7 +576,7 @@ public class Globals {
 
         case 24:
             // The following method sets parameters red, green, and blue
-            anImage.getMPixelRGB(x, y, red, green, blue);
+            pImage.getMPixelRGB(piX, piY, red, green, blue);
             if (
             (red != CHROMARED) || 
             (green != CHROMAGREEN) ||
@@ -599,31 +603,31 @@ public class Globals {
     //
     // Returns 0 if the neighbor is not in the boundary.
     // Returns 1 if the neighbor is     in the boundary.
-    public static boolean probe(MemImage anImage, int x, int y, int dir, 
-    Integer new_x, Integer new_y) {
+    public static boolean probe(MemImage pImage, int piX, int piY, int piDir, 
+    Integer pINewX, Integer pINewY) {
         // Figure out coordinates of neighbor
-        if ( (dir < 2) || (dir > 6) ) {
-            ++x;
+        if ((piDir < 2) || (piDir > 6)) {
+            ++piX;
         }
 
-        if ( (dir > 2) && (dir < 6) ) {
-            --x;
+        if ((piDir > 2) && (piDir < 6)) {
+            --piX;
         }
 
-        if ( (dir > 0) && (dir < 4) ) {
-            ++y;
+        if ((piDir > 0) && (piDir < 4)) {
+            ++piY;
         }
 
-        if (dir > 4) {
-            --y;
+        if (piDir > 4) {
+            --piY;
         }
 
         // Always return the new coordinates
-        new_x = x;
-        new_y = y;
+        pINewX = piX;
+        pINewY = piY;
 
         // Determine if the new sample point is in the boundary
-        return (in_boundary(anImage, x, y));
+        return (in_boundary(pImage, piX, piY));
     } // probe
 
 
@@ -1100,10 +1104,10 @@ public class Globals {
         }
 
         aShape.screenBoundingBox();
-        float minY = aShape.minY;
-        float maxY = aShape.maxY;
-        float minX = aShape.minX;
-        float maxX = aShape.maxX;
+        float minY = aShape.mfMinY;
+        float maxY = aShape.mfMaxY;
+        float minX = aShape.mfMinX;
+        float maxX = aShape.mfMaxX;
         
         aShape.transformBoundingBox();
 
@@ -1460,7 +1464,7 @@ public class Globals {
             }
 
             // theShape.currentVertex++;
-            theShape.iCurrVtxIdx++;
+            theShape.miCurrVtxIdx++;
         }
 
         // Sort the found x coordinates in ascending order
@@ -1906,6 +1910,7 @@ public class Globals {
     // This method came from IWARP.CPP
     // Called from:
     //     MainFrame.onToolsWarpImage
+    //     SceneList.render
     public static int antiAlias(MemImage inImage, MemImage outImage) {
         // Each image must be the same size.
         if(
@@ -2348,7 +2353,7 @@ public class Globals {
         // float *wxTemp, *wyTemp, *wzTemp; // these variables are not used
         byte[] iBuffer;
         int iBufferIdx;
-        byte *iTemp1, iTemp2;
+        byte iTemp1, iTemp2;
         int iPrev1Idx, iPrev2Idx; // indices into iBuffer
         int xTemp1, yTemp1, xTemp2, yTemp2;
         int xPrev1Idx, yPrev1Idx; // indices into xBuffer and yBuffer, respectively
@@ -2935,6 +2940,8 @@ public class Globals {
 
 
     // This method came from MEMIMG32.CPP
+    // Called from:
+    //     SceneList.render
     public static int makeRGBimage(String redImage, String greenImage, String blueImage, String outFileName) {
         String msgBuffer;
 
@@ -3895,6 +3902,7 @@ public class Globals {
         String errText;
 
         fp = null;
+        // With the OPEN_EXISTING parameter, we open the existing file psFileName
         fp = CreateFile(psFileName, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
         if(fp == null) {
             errText = "readBMPHeader: Can't open " + psFileName;
@@ -4031,10 +4039,10 @@ public class Globals {
     
         outShape.worldBoundingBox();  // BB (bounding box) of tweened boundary
 
-        float oMinX = outShape.minX;
-        float oMinY = outShape.minY;
-        float oMaxX = outShape.maxX;
-        float oMaxY = outShape.maxY;
+        float oMinX = outShape.mfMinX;
+        float oMinY = outShape.mfMinY;
+        float oMaxX = outShape.mfMaxX;
+        float oMaxY = outShape.mfMaxY;
         int   numXO = (int)(oMaxX - oMinX) + 1;
         int   numYO = (int)(oMaxY - oMinY) + 1;
 
