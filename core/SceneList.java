@@ -67,38 +67,38 @@ extern preference *ictPreference;  // declare a global preference object
 */
 
 public class SceneList implements ISceneList {
-    boolean ictdebug = false;
+    boolean bIctDebug = false;
     public Scene sceneListHead;       // Points to the head of the list
     public Scene currentScene;        // Points to the current Scene
     public MemImage backgroundPlate;  // An optional background plate image
 
-    // This value came from ICT20.H
+    // This was originally defined in ICT20.H
     public static final float F_DTR = 3.1415926f/180.0f;
 
-    // These were defined in SCENELST.H
+    // These were originally defined in SCENELST.H
     public static final int RED   = 1;
     public static final int GREEN = 2;
     public static final int BLUE  = 3;
     
-    // These were defined in SCENELST.H
+    // These were originally defined in SCENELST.H
     public static final int MONOCHROME = 1;
     public static final int COLOR      = 2;
 
     // Effect Types
-    // These were defined in ICT20.H
+    // These were originally defined in ICT20.H
     public static final int STILL    = 1;
     public static final int SEQUENCE = 2;
     public static final int MORPH    = 3;
 
     // Model Types
-    // These were defined in ICT20.H
-    public static final int IMAGE       = 1;
-    public static final int SHAPE       = 2;
-    public static final int QUADMESH    = 3;
-    public static final int COMPOUND    = 4;
-    public static final int LIGHTSOURCE = 5;
+    // These were originally defined in ICT20.H
+    public static final int I_IMAGE       = 1;
+    public static final int I_SHAPE       = 2;
+    public static final int I_QUADMESH    = 3;
+    public static final int I_COMPOUND    = 4;
+    public static final int I_LIGHTSOURCE = 5; // not used in this file
 
-    // These were defined in MEMIMAGE.H
+    // These were originally defined in MEMIMAGE.H
     public static final int REDCOLOR = 1;
     public static final int GREENCOLOR = 2;
     public static final int BLUECOLOR = 3;
@@ -107,14 +107,14 @@ public class SceneList implements ISceneList {
     public static final int RGBCOLOR = 5;
     public static final int ONEBITMONOCHROME = 6;
 
-    // These were defined in MEMIMAGE.H
+    // These were originally defined in MEMIMAGE.H
     public static final int SEQUENTIAL = 1;
     public static final int RANDOM = 0;
 
-    // This was defined in ICT20.H
+    // This was originally defined in ICT20.H
     public static final float ZBUFFERMAXVALUE = 2.0E31f;
 
-    // This was defined in SCENELST.H
+    // This was originally defined in SCENELST.H
     // Size of model array for depth sorting
     // Increase if > MAXMODELS are to be used in a scene
     public static final int MAXMODELS = 256;
@@ -122,7 +122,7 @@ public class SceneList implements ISceneList {
     private static final int THREE_NUMBERS_NOT_FOUND = 2;
 
     public SceneList() {
-        if (ictdebug) {
+        if (bIctDebug) {
             String msgBuffer;
             msgBuffer = "Constructor 1. Size of sceneList: " + sizeofLowerLimit();
             Globals.statusPrint(msgBuffer);
@@ -137,11 +137,11 @@ public class SceneList implements ISceneList {
 
 
     public void finalize() {
-        if (ictdebug) {
-            String msgBuffer;
+        if (bIctDebug) {
+            String sMsgBuffer;
             Globals.statusPrint("SceneList destructor - deletes a Scenelist object");
-            msgBuffer = "Size of SceneList: " + sizeofLowerLimit();
-            Globals.statusPrint(msgBuffer);
+            sMsgBuffer = "Size of SceneList: " + sizeofLowerLimit();
+            Globals.statusPrint(sMsgBuffer);
         }
 
         clear();  // Clear the list of models
@@ -153,12 +153,12 @@ public class SceneList implements ISceneList {
     public SceneElement setCurrentModel(String desiredModel) {
         Scene theScene = this.sceneListHead;
         SceneElement aModel;
-        theScene = theScene.nextEntry; // Point to the scene Node
+        theScene = theScene.mNextEntry; // Point to the scene Node
 
-        aModel = theScene.head;
+        aModel = theScene.mHead;
         while (aModel != null) {
             if(aModel.msModelName.equals(desiredModel)) {
-                theScene.currentSceneElement = aModel;  // Indicate scene's current model
+                theScene.mCurrentSceneElement = aModel;  // Indicate scene's current model
                 return(aModel);
             }
 
@@ -176,8 +176,8 @@ public class SceneList implements ISceneList {
     float tx, float ty, float tz) {
         Scene theScene = this.sceneListHead;
         SceneElement currentModel;
-        theScene = theScene.nextEntry; // Point to the scene Node
-        currentModel = theScene.currentSceneElement;
+        theScene = theScene.mNextEntry; // Point to the scene Node
+        currentModel = theScene.mCurrentSceneElement;
 
         currentModel.rotation.x = rx;
         currentModel.rotation.y = ry;
@@ -201,8 +201,8 @@ public class SceneList implements ISceneList {
     Float tx, Float ty, Float tz) {
         Scene theScene = this.sceneListHead;
         SceneElement currentModel;
-        theScene = theScene.nextEntry; // Point to the scene Node
-        currentModel = theScene.currentSceneElement;
+        theScene = theScene.mNextEntry; // Point to the scene Node
+        currentModel = theScene.mCurrentSceneElement;
 
         // Set the output parameters
         rx = currentModel.rotation.x;
@@ -230,9 +230,9 @@ public class SceneList implements ISceneList {
             theCombo.removeAllItems();
         }
 
-        theScene = theScene.nextEntry;  //Skip over the list header
+        theScene = theScene.mNextEntry;  //Skip over the list header
         theCombo.removeAllItems();
-        SceneElement theModel = theScene.head;
+        SceneElement theModel = theScene.mHead;
         while (theModel != null) {
             if(!theModel.msFileName.equalsIgnoreCase("Output Image Rectangle")) {     //don't show the output image rectangle model
                 theCombo.addItem(theModel.msModelName);
@@ -246,18 +246,18 @@ public class SceneList implements ISceneList {
     //     MainFrame.onToolsCreateASceneList
     public int listLength() {
         Scene theScene = this.sceneListHead;
-        theScene = theScene.nextEntry;  // Skip over the list header
+        theScene = theScene.mNextEntry;  // Skip over the list header
         if(theScene == null) {
             return(0);
         }
-        int theLength = 0;
+        int iLength = 0;
 
-        SceneElement theModel = theScene.head;
+        SceneElement theModel = theScene.mHead;
         while (theModel != null) {
-            theLength++;
+            iLength++;
             theModel = theModel.nextEntry;
         }
-        return(theLength);
+        return(iLength);
     } // listLength
 
 
@@ -268,17 +268,17 @@ public class SceneList implements ISceneList {
     public int getSceneInfo(String psName, 
     Integer pIType, Integer pICMode, Integer pIOutRows, Integer piOutCols) {
         Scene theScene = this.sceneListHead;
-        theScene = theScene.nextEntry;  // Skip over the list header
+        theScene = theScene.mNextEntry;  // Skip over the list header
         if (theScene == null) {
             return -1;
         }
 
         // Set the output parameters
-        psName    = theScene.sceneName;
-        pIType    = theScene.sequenceType;
-        pICMode   = theScene.colorMode;
-        pIOutRows = theScene.outputRows;
-        piOutCols = theScene.outputColumns;
+        psName    = theScene.msSceneName;
+        pIType    = theScene.miSequenceType;
+        pICMode   = theScene.miColorMode;
+        pIOutRows = theScene.miOutputRows;
+        piOutCols = theScene.miOutputColumns;
 
         return 0;
     } // getSceneInfo
@@ -288,13 +288,13 @@ public class SceneList implements ISceneList {
     //     readList
     public int setSceneOutImageSize(int piOutRows, int piOutCols) {
         Scene theScene = this.sceneListHead;
-        theScene = theScene.nextEntry;  // Skip over the list header
+        theScene = theScene.mNextEntry;  // Skip over the list header
         if (theScene == null) {
             return -1;
         }
 
-        theScene.outputRows    = piOutRows;
-        theScene.outputColumns = piOutCols;
+        theScene.miOutputRows    = piOutRows;
+        theScene.miOutputColumns = piOutCols;
         return 0;
     } // setSceneOutImageSize
 
@@ -305,20 +305,20 @@ public class SceneList implements ISceneList {
     Float pFViewX,   Float pFViewY,   Float pFViewZ, 
     Float pFRotateX, Float pFRotateY, Float pFRotateZ) {
         Scene theScene = this.sceneListHead;
-        theScene = theScene.nextEntry;  // Skip over the list header
+        theScene = theScene.mNextEntry;  // Skip over the list header
         if (theScene == null) { 
             return -1;
         }
 
         // Assume the default viewer location is centered in the output frame
         // Set the output parameters
-        pFViewX = theScene.translation.x;
-        pFViewY = theScene.translation.y;
-        pFViewZ = theScene.translation.z;
+        pFViewX = theScene.mTranslationPt.x;
+        pFViewY = theScene.mTranslationPt.y;
+        pFViewZ = theScene.mTranslationPt.z;
 
-        pFRotateX = theScene.rotation.x;
-        pFRotateY = theScene.rotation.y;
-        pFRotateZ = theScene.rotation.z;
+        pFRotateX = theScene.mRotationPt.x;
+        pFRotateY = theScene.mRotationPt.y;
+        pFRotateZ = theScene.mRotationPt.z;
 
         return 0;
     } // getViewTransform
@@ -329,18 +329,18 @@ public class SceneList implements ISceneList {
     public int setViewTransform(float pfViewX, float pfViewY, float pfViewZ,
     float pfRotateX, float pfRotateY, float pfRotateZ) {
         Scene theScene = sceneListHead;
-        theScene = theScene.nextEntry;  //Skip over the list header
+        theScene = theScene.mNextEntry;  //Skip over the list header
         if (theScene == null) { 
             return -1;
         }
 
-        theScene.translation.x = pfViewX;
-        theScene.translation.y = pfViewY;
-        theScene.translation.z = pfViewZ;
+        theScene.mTranslationPt.x = pfViewX;
+        theScene.mTranslationPt.y = pfViewY;
+        theScene.mTranslationPt.z = pfViewZ;
         
-        theScene.rotation.x = pfRotateX;
-        theScene.rotation.y = pfRotateY;
-        theScene.rotation.z = pfRotateZ;
+        theScene.mRotationPt.x = pfRotateX;
+        theScene.mRotationPt.y = pfRotateY;
+        theScene.mRotationPt.z = pfRotateZ;
 
         return 0;
     } // setViewTransform
@@ -351,7 +351,7 @@ public class SceneList implements ISceneList {
     public int getViewPoint(Float viewX, Float viewY, Float viewZ,
     Float rotateX, Float rotateY, Float rotateZ) {
         Scene theScene = this.sceneListHead;
-        theScene = theScene.nextEntry;  // Skip over the list header
+        theScene = theScene.mNextEntry;  // Skip over the list header
         if (theScene == null) { 
             return -1;
         }
@@ -361,15 +361,15 @@ public class SceneList implements ISceneList {
         // and translated 512 units along the positive z axis.
         // Add to this location any viewpoint translation and rotation 
         // the user specified.
-        viewX =   0.0f + theScene.translation.x;
-        viewY =   0.0f + theScene.translation.y;
-        viewZ = 512.0f + theScene.translation.z;
+        viewX =   0.0f + theScene.mTranslationPt.x;
+        viewY =   0.0f + theScene.mTranslationPt.y;
+        viewZ = 512.0f + theScene.mTranslationPt.z;
 
         // Since the default viewer rotations are (0,0,0), just output
         // whatever the user specified in the scene file.
-        rotateX = 0.0f + theScene.rotation.x;
-        rotateY = 0.0f + theScene.rotation.y;
-        rotateZ = 0.0f + theScene.rotation.z;
+        rotateX = 0.0f + theScene.mRotationPt.x;
+        rotateY = 0.0f + theScene.mRotationPt.y;
+        rotateZ = 0.0f + theScene.mRotationPt.z;
 
         return 0;
     } // getViewPoint
@@ -380,13 +380,13 @@ public class SceneList implements ISceneList {
     //     ScenePreviewDlg.onOK
     public int writeList(String psErrorText, String psFileName) {
         Scene theScene = this.sceneListHead;
-        theScene = theScene.nextEntry;  // Skip over the list header
+        theScene = theScene.mNextEntry;  // Skip over the list header
 
         File sceneFile = new File(psFileName);
         BufferedWriter fileOut = new BufferedWriter(new OutputStreamWriter(sceneFile));
         
         theScene.writeFile(fileOut); // Write out the scene description
-        SceneElement theModel = theScene.head;
+        SceneElement theModel = theScene.mHead;
         boolean	oldCompoundMember = false;
 
         while (
@@ -443,7 +443,7 @@ public class SceneList implements ISceneList {
 
         // Preview the scene models
         Scene theScene = this.sceneListHead;
-        theScene = theScene.nextEntry;  // Skip over the list header
+        theScene = theScene.mNextEntry;  // Skip over the list header
         if(theScene == null) {
             Globals.statusPrint("sceneList.previewSequence: Scene list has no models");
             return 0;
@@ -452,7 +452,7 @@ public class SceneList implements ISceneList {
         firstFrame = lastFrame = 0;
         if(effectType == SEQUENCE) {
             // The following method sets both firstFrame and lastFrame
-            theScene.sensorMotion.getFirstLastFrame(firstFrame, lastFrame);
+            theScene.mSensorMotion.getFirstLastFrame(firstFrame, lastFrame);
         }
         int modelCounter;
         boolean eraseOldBoundary; // variable is set, but not read
@@ -460,7 +460,7 @@ public class SceneList implements ISceneList {
         for(frameCounter = firstFrame; frameCounter <= lastFrame; frameCounter++) {
             // Clear the memoryDC by drawing a filled white rectangle
             FillRect(memoryDC, myRect, GetStockObject(WHITE_BRUSH));
-            SceneElement theModel = theScene.head;
+            SceneElement theModel = theScene.mHead;
             modelCounter = 0;
             eraseOldBoundary = true;
             if(effectType == SEQUENCE) {
@@ -585,7 +585,7 @@ public class SceneList implements ISceneList {
 
         // Preview the scene models
         theScene = this.sceneListHead;
-        theScene = theScene.nextEntry;  // Skip over the list header
+        theScene = theScene.mNextEntry;  // Skip over the list header
         if(theScene == null) {
             Globals.statusPrint("sceneList::previewStill: Scene list has no models");
             return 0;
@@ -593,12 +593,12 @@ public class SceneList implements ISceneList {
 
         firstFrame = lastFrame = 0;
         if(effectType == SEQUENCE) {
-            theScene.sensorMotion.getFirstLastFrame(firstFrame, lastFrame);
+            theScene.mSensorMotion.getFirstLastFrame(firstFrame, lastFrame);
         }
         eraseOldBoundary = false;
 
         for(frameCounter = firstFrame; frameCounter <= lastFrame; frameCounter++) {
-            theModel = theScene.head;  // Point to the first model
+            theModel = theScene.mHead;  // Point to the first model
             if(effectType == SEQUENCE) {
                 getViewMatrix(viewMatrix, frameCounter, theScene);
             }
@@ -611,7 +611,7 @@ public class SceneList implements ISceneList {
                     theModel.miStatusIndicator = 0;
                     theModel.screenObject = new RenderObject(theModel.msFileName,
                         theModel.miModelType, theModel.mbDefinedRefPoint, theModel.pointOfReference);
-                    if(theModel.miModelType == COMPOUND) {	// Initialize a compound model centroid
+                    if(theModel.miModelType == I_COMPOUND) {	// Initialize a compound model centroid
                         theModel.pointOfReference.x = 0.0f;
                         theModel.pointOfReference.y = 0.0f;
                         theModel.pointOfReference.z = 0.0f;
@@ -630,7 +630,7 @@ public class SceneList implements ISceneList {
                 // Setup the scene's background plate if needed
                 if(modelCounter == 1 && 
                 theModel.mbWarpIndicator == false &&
-                theModel.mbBlendIndicator == false && theModel.miModelType != COMPOUND) {
+                theModel.mbBlendIndicator == false && theModel.miModelType != I_COMPOUND) {
                     if(backgroundPlate == null) {
                         backgroundPlate = new MemImage(theModel.msFileName, 0, 0, RANDOM, 'R', GREENCOLOR);
                     }
@@ -645,7 +645,7 @@ public class SceneList implements ISceneList {
                         theModel.mModelMotion.getNode(frameCounter, aMotion);
                     }
                 
-                    if(theModel.miModelType == COMPOUND) {
+                    if(theModel.miModelType == I_COMPOUND) {
                         adjustTransforms(effectType, theModel, aMotion, cxfrm);
                         cModelMatrix.scale(cxfrm.sx, cxfrm.sy, cxfrm.sz);
                         float xRadians = cxfrm.rx * F_DTR;
@@ -674,7 +674,7 @@ public class SceneList implements ISceneList {
                     }
 
                     // If this model is compound, calculate the compound model reference Point
-                    if(theModel.miModelType == COMPOUND) {
+                    if(theModel.miModelType == I_COMPOUND) {
                         saveModel = theModel;
                         calcCompoundModelRefPoint(theModel, outputRows, outputColumns, cmCentroidx, cmCentroidy, cmCentroidz);
                         theModel = saveModel;
@@ -682,14 +682,14 @@ public class SceneList implements ISceneList {
 
                     //  Transform the points
                     if(theModel.msFileName.equalsIgnoreCase("Output Image Rectangle") && 
-                    theModel.miModelType != COMPOUND &&	     
+                    theModel.miModelType != I_COMPOUND &&	     
                     theModel.mbCompoundModelMember == false) {    
                         theModel.screenObject.transformAndProject(viewModelMatrix, outputRows, outputColumns);
                     }
 
                     if(
                     theModel.msFileName.equalsIgnoreCase("Output Image Rectangle") && 
-                    theModel.miModelType != COMPOUND &&
+                    theModel.miModelType != I_COMPOUND &&
                     theModel.mbCompoundModelMember) {   
                         theModel.screenObject.transformAndProject(viewModelMatrix,
                             outputRows, outputColumns, theModel.mbCompoundModelMember, cmCentroidx, cmCentroidy, cmCentroidz);
@@ -700,7 +700,7 @@ public class SceneList implements ISceneList {
                     // If this is a background plate, blt it to the screen
                     if(
                     modelCounter == 1 && 
-                    theModel.miModelType != COMPOUND && 
+                    theModel.miModelType != I_COMPOUND && 
                     theModel.mbWarpIndicator == false &&
                     theModel.mbBlendIndicator == false) {
                         HDC theDC = GetDC(theWindow);
@@ -709,7 +709,7 @@ public class SceneList implements ISceneList {
                         eraseOldBoundary = false;
                     } else {
                         // Draw the model boundary
-                        if(theModel.miModelType != COMPOUND) {
+                        if(theModel.miModelType != I_COMPOUND) {
                             theModel.screenObject.drawStill(theWindow, theModel.msModelName, outputRows, outputColumns);
                         }
                     }
@@ -722,7 +722,7 @@ public class SceneList implements ISceneList {
                     // a model that displays the output image rectangle
                     Color aColor;
                     myStatus = addSceneElement(" ", "Output Image Rectangle",  
-                        false, SHAPE, false, 
+                        false, I_SHAPE, false, 
                         1.0f, null, null, null, 
                         "None", "Default", 
                         false, aColor, "None", "None", 
@@ -764,7 +764,7 @@ public class SceneList implements ISceneList {
 
         getSceneInfo(sceneName, effectType, colorMode, outputRows, outputColumns);
         Scene theScene = this.sceneListHead;
-        theScene = theScene.nextEntry;        // Skip over the list header
+        theScene = theScene.mNextEntry;        // Skip over the list header
         if(theScene == null) {
             Globals.statusPrint("sceneList::render: Scene list has no models");
             return -1;
@@ -773,7 +773,7 @@ public class SceneList implements ISceneList {
         // The following method sets vx, vy, vz, 
         // and vrx, vry, and vrz as well
         getViewPoint(vx, vy, vz, vrx, vry, vrz);
-        SceneElement theModel = theScene.head;
+        SceneElement theModel = theScene.mHead;
         SceneElement[] models = new SceneElement[MAXMODELS];
         float[] distances = new float[MAXMODELS];
         Integer numModels; 
@@ -796,7 +796,7 @@ public class SceneList implements ISceneList {
 
         if(effectType == SEQUENCE) {
             // The following method sets Integers firstFrame and lastFrame
-            theScene.sensorMotion.getFirstLastFrame(firstFrame, lastFrame);
+            theScene.mSensorMotion.getFirstLastFrame(firstFrame, lastFrame);
         }
 
         MemImage alphaImage, zImage;
@@ -867,7 +867,7 @@ public class SceneList implements ISceneList {
                         }
 
                         // Open the model's image if appropriate
-                        if(theModel.miModelType != SHAPE) {
+                        if(theModel.miModelType != I_SHAPE) {
                             inputImage = new MemImage(theInputPath, 0, 0, RANDOM, 'R', theColor);
                             if (!inputImage.isValid()) {
                                 msgText = "sceneList.Render: Can't open image: " + theModel.msFileName;
@@ -883,7 +883,7 @@ public class SceneList implements ISceneList {
                             // function iRenderz will create the alphaImage from the warped image.
                             String alphaName;
                             alphaImage = null;
-                            if(theModel.miModelType == IMAGE) {
+                            if(theModel.miModelType == I_IMAGE) {
                                 if(!theModel.msAlphaPath.equalsIgnoreCase("NONE")) {
                                     alphaName = theModel.msAlphaPath;
                                     alphaImage = new MemImage(alphaName, 0, 0, RANDOM, 'R', EIGHTBITMONOCHROME);
@@ -917,7 +917,7 @@ public class SceneList implements ISceneList {
                         // Properly render the model, based on model type and other options
                         if(zBufferEnabled) {
                             switch(theModel.miModelType) {
-                            case IMAGE:
+                            case I_IMAGE:
                             // case SEQUENCE: //this was causing a duplicate case error (duplicate with SHAPE)
                                 myStatus = Globals.iRenderz(outputImage, alphaImage, inputImage,
                                     zImage, zBuffer,
@@ -930,7 +930,7 @@ public class SceneList implements ISceneList {
                                     theModel.pointOfReference.z);
                                 break;
 
-                            case QUADMESH:
+                            case I_QUADMESH:
                                 // Render the mesh.  The result is a zImage, and a temporary output image
                                 // The rendered mesh is then blended into the final image using the scene ZBuffer and alpha options
                                 myStatus = 0;	//this line for debugging
@@ -938,7 +938,7 @@ public class SceneList implements ISceneList {
                                     zBuffer, vx, vy, vz);
                                 break;
 
-                            case SHAPE:
+                            case I_SHAPE:
                                 // Build the transformation matrix
                                 float XRadians = xfrm.rx * F_DTR;
                                 float YRadians = xfrm.ry * F_DTR;
@@ -960,7 +960,7 @@ public class SceneList implements ISceneList {
                             }
                         } else {            //no zbuffer
                             switch(theModel.miModelType) {
-                            case IMAGE:
+                            case I_IMAGE:
                             // case SEQUENCE: // this was causing a duplicate case error (duplicate with SHAPE)
                                 myStatus = Globals.iRenderz(outputImage, alphaImage, inputImage,
                                     zImage,  zBuffer,
@@ -975,12 +975,12 @@ public class SceneList implements ISceneList {
                                     theModel.pointOfReference.z);
                                 break;
     
-                            case QUADMESH:
+                            case I_QUADMESH:
                                 myStatus = theModel.screenObject.renderMesh(outputImage, inputImage,
                                     theModel.mbBlendIndicator);
                                 break;
 
-                            case SHAPE:
+                            case I_SHAPE:
                                 myStatus = theModel.screenObject.renderShape(outputImage,
                                     theModel.mbBlendIndicator);
                                 break;
@@ -999,7 +999,7 @@ public class SceneList implements ISceneList {
 
                 // One color channel of the scene is complete! Save it in the proper location
                 String outputDir, outputPath;
-                getFileName(outputFileName, theScene.sceneName, frameCounter, theColor);
+                getFileName(outputFileName, theScene.msSceneName, frameCounter, theColor);
                 outputDir = Globals.ictPreference.getPath(Preference.OutputImageDirectory);
                 outputPath = outputDir + outputFileName;
 
@@ -1030,7 +1030,7 @@ public class SceneList implements ISceneList {
             myStatus = 0;
             if(colorMode == COLOR) {
                 // Prepare a pathname to the default output image location
-                getFileName(RGBFileName, theScene.sceneName, frameCounter, 0);
+                getFileName(RGBFileName, theScene.msSceneName, frameCounter, 0);
                 String RGBPath, RGBDir;
                 RGBDir = Globals.ictPreference.getPath(Preference.OutputImageDirectory);
                 RGBPath = RGBDir + RGBFileName;
@@ -1149,22 +1149,22 @@ public class SceneList implements ISceneList {
         // Note: F_DTR is a floating point constant, 
         // a degree to radians conversion factor
 
-        if(pTheScene.sensorMotion != null) {
-            pTheScene.sensorMotion.getNode(piFrameCounter, aMotion);
+        if(pTheScene.mSensorMotion != null) {
+            pTheScene.mSensorMotion.getNode(piFrameCounter, aMotion);
             xRadians = aMotion.rx * F_DTR;
             yRadians = aMotion.ry * F_DTR;
             zRadians = aMotion.rz * F_DTR;
         } else {
-            xRadians = pTheScene.rotation.x * F_DTR;
-            yRadians = pTheScene.rotation.y * F_DTR;
-            zRadians = pTheScene.rotation.z * F_DTR;
+            xRadians = pTheScene.mRotationPt.x * F_DTR;
+            yRadians = pTheScene.mRotationPt.y * F_DTR;
+            zRadians = pTheScene.mRotationPt.z * F_DTR;
         }
 
         pViewMatrix.rotate(-xRadians, -yRadians, -zRadians);
-        if(pTheScene.sensorMotion != null) {
+        if(pTheScene.mSensorMotion != null) {
             pViewMatrix.translate(-aMotion.tx, -aMotion.ty, -aMotion.tz);
         } else {
-            pViewMatrix.translate(-pTheScene.translation.x, -pTheScene.translation.y, -pTheScene.translation.z);
+            pViewMatrix.translate(-pTheScene.mTranslationPt.x, -pTheScene.mTranslationPt.y, -pTheScene.mTranslationPt.z);
         }
     } // getViewMatrix
 
@@ -1272,8 +1272,8 @@ public class SceneList implements ISceneList {
             status = 1;
         }
 
-        sceneListHead.nextEntry = newScene;
-        newScene.prevEntry = this.sceneListHead;
+        sceneListHead.mNextEntry = newScene;
+        newScene.mPrevEntry = this.sceneListHead;
         this.currentScene = newScene;  // Make the new scene the Current scene
         return status;
     } // addScene
@@ -1290,7 +1290,7 @@ public class SceneList implements ISceneList {
     String adjustmentType, String colorAdjustedPath,
     boolean definedRefPt, Point3d refPoint) {
         Scene aScene = currentScene;  //Add an element to the current scene
-        SceneElement aModel = aScene.head;
+        SceneElement aModel = aScene.mHead;
         int myStatus = 0;
 
         SceneElement theModel = new SceneElement(mdName, fName, blendI, 
@@ -1305,12 +1305,12 @@ public class SceneList implements ISceneList {
             return 1;
         }
 
-        if(aScene.head == null) {
-            aScene.head = theModel;
+        if(aScene.mHead == null) {
+            aScene.mHead = theModel;
             theModel.prevEntry = null;
             theModel.nextEntry = null;
         } else {
-            aModel = aScene.head;  // Find the last element
+            aModel = aScene.mHead;  // Find the last element
             while (aModel.nextEntry != null) {
                 aModel = aModel.nextEntry;
             }
@@ -1318,7 +1318,7 @@ public class SceneList implements ISceneList {
             theModel.prevEntry = aModel;
         }
 
-        aScene.tail = theModel;
+        aScene.mTail = theModel;
         return myStatus;
     } // addSceneElement
 
@@ -1328,12 +1328,12 @@ public class SceneList implements ISceneList {
         Scene currentScene;
         SceneElement model;
 
-        currentScene = aScene.nextEntry;
+        currentScene = aScene.mNextEntry;
         while (currentScene != null) {
             currentScene.display(); // Scene Display
-            model = currentScene.head;
+            model = currentScene.mHead;
             model.display();  // Model Display
-            currentScene = currentScene.nextEntry;
+            currentScene = currentScene.mNextEntry;
         }
     } // display
 
@@ -1344,12 +1344,12 @@ public class SceneList implements ISceneList {
         Scene aScene = this.sceneListHead;
         SceneElement theModel, nextModel;
 
-        if(aScene.nextEntry == null) {
+        if(aScene.mNextEntry == null) {
             return; // Don't clear an empty list
         }
 
-        aScene = aScene.nextEntry;
-        theModel = aScene.head;
+        aScene = aScene.mNextEntry;
+        theModel = aScene.mHead;
 
         while (theModel != null) {
             nextModel = theModel.nextEntry;  // Get the pointer to next model
@@ -1358,7 +1358,7 @@ public class SceneList implements ISceneList {
         }
 
         aScene = this.sceneListHead;
-        aScene.nextEntry = null;
+        aScene.mNextEntry = null;
 
         // Reset the background plate
         if(backgroundPlate != null) {
@@ -1375,13 +1375,13 @@ public class SceneList implements ISceneList {
         SceneElement theModel;
         String msgText;
 
-        if(aScene.nextEntry == null) {
+        if(aScene.mNextEntry == null) {
             Globals.statusPrint("setModelReferencePoint: sceneList has no scene object.");
             return -2; 
         }
 
-        aScene = aScene.nextEntry;
-        theModel = aScene.head;
+        aScene = aScene.mNextEntry;
+        theModel = aScene.mHead;
         boolean found = false;
 
         while (theModel != null) {
@@ -1412,19 +1412,19 @@ public class SceneList implements ISceneList {
         float bucketX = 0.0f, bucketY = 0.0f, bucketZ = 0.0f;
         float centroidX, centroidY, centroidZ;
 
-        if(aScene.nextEntry == null) {
+        if(aScene.mNextEntry == null) {
             Globals.statusPrint("setCompoundRefPoints: sceneList has no scene object.");
             return -2; 
         }
 
-        aScene = aScene.nextEntry;
-        theModel = aScene.head;
+        aScene = aScene.mNextEntry;
+        theModel = aScene.mHead;
         // int found = FALSE; // this variable is not used
         int modelCounter = 0;
         boolean prevModelIsACompoundMember = false;
 
         while (theModel != null) {
-            if(theModel.miModelType == COMPOUND) {
+            if(theModel.miModelType == I_COMPOUND) {
                 modelName = theModel.msModelName;
                 bucketX = 0.0f;
                 bucketY = 0.0f;
@@ -1473,15 +1473,15 @@ public class SceneList implements ISceneList {
         SceneElement theModel;
         Float centroidX = 0.0f, centroidY = 0.0f, centroidZ = 0.0f;
 
-        if(aScene.nextEntry == null) {
+        if(aScene.mNextEntry == null) {
             Globals.statusPrint("copyRefPoints: sceneList has no scene object.");
             return -2; 
         }
 
-        aScene = aScene.nextEntry;
-        theModel = aScene.head;
+        aScene = aScene.mNextEntry;
+        theModel = aScene.mHead;
         while (theModel != null) {
-            if((!theModel.mbDefinedRefPoint) && (theModel.miModelType != COMPOUND)) {
+            if((!theModel.mbDefinedRefPoint) && (theModel.miModelType != I_COMPOUND)) {
                 // The following method sets centroidX, centroidY, and centroidZ (all of type Float)
                 theModel.screenObject.currentShape.getReferencePoint(centroidX, centroidY, centroidZ);
 
@@ -1511,12 +1511,12 @@ public class SceneList implements ISceneList {
 
         // Preview the Scene Models
         Scene theScene = this.sceneListHead;
-        theScene = theScene.nextEntry;  // Skip over the list header
+        theScene = theScene.mNextEntry;  // Skip over the list header
         if(theScene == null) {
             return -1;
         }
 
-        SceneElement theModel = theScene.head;
+        SceneElement theModel = theScene.mHead;
         int modelCounter = 0;
 
         while (theModel != null) {
@@ -1528,7 +1528,7 @@ public class SceneList implements ISceneList {
                 models[modelCounter] = theModel;
                 modelCounter++;
             } else {
-                if(theModel.miModelType == IMAGE || theModel.miModelType == SHAPE) {
+                if(theModel.miModelType == I_IMAGE || theModel.miModelType == I_SHAPE) {
                     centroidX = theModel.screenObject.currentShape.mfOriginX;
                     centroidY = theModel.screenObject.currentShape.mfOriginY;
                     centroidZ = theModel.screenObject.currentShape.mfOriginZ;
@@ -1538,7 +1538,7 @@ public class SceneList implements ISceneList {
                     modelCounter++;
                 }
 
-                if(theModel.miModelType == QUADMESH) {
+                if(theModel.miModelType == I_QUADMESH) {
                     centroidX = 0.0f;
                     centroidY = 0.0f;
                     centroidZ = 0.0f;
