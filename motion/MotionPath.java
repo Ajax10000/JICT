@@ -4,11 +4,11 @@ import globals.Globals;
 
 public class MotionPath {
 
-  private boolean allocated;
+  private boolean mbAllocated;
   // private void allocate(int);
 
-  public int numnodes;
-  public MotionNode[] nodes;
+  public int miNumNodes;
+  public MotionNode[] mNodes;
   // public int read(char *);
   // public int readMotion(char *);
   // public int write(char *);
@@ -19,9 +19,9 @@ public class MotionPath {
 
     // This constructor came from MOTION.CPP
     public MotionPath() {
-        allocated = false;
-        nodes = null;
-        numnodes = 0;
+        mbAllocated = false;
+        mNodes = null;
+        miNumNodes = 0;
     } // MotionPath ctor
 
     // This destructor came from MOTION.CPP
@@ -32,17 +32,17 @@ public class MotionPath {
     } // finalize
 
     // This method came from MOTION.CPP
-    private void allocate(int num) {
-        if(allocated) {
-            numnodes = 0;
-            allocated = false;
+    private void allocate(int piNum) {
+        if(mbAllocated) {
+            miNumNodes = 0;
+            mbAllocated = false;
         }
 
-        if(num > 0) {
-            nodes = new MotionNode[num];
-            if(nodes != null) {
-                numnodes = num;
-                allocated = true;
+        if(piNum > 0) {
+            mNodes = new MotionNode[piNum];
+            if(mNodes != null) {
+                miNumNodes = piNum;
+                mbAllocated = true;
             }
         }
     } // allocate
@@ -54,8 +54,8 @@ public class MotionPath {
     //     SceneList.previewStill
     //     SceneList.render
     public void getFirstLastFrame(Integer pIFirstFrame, Integer pILastFrame) {
-        pIFirstFrame = nodes[0].nodenum;
-        pILastFrame = nodes[numnodes-1].nodenum;
+        pIFirstFrame = mNodes[0].nodenum;
+        pILastFrame = mNodes[miNumNodes - 1].nodenum;
     } // getFirstLastFrame
 
 
@@ -64,130 +64,137 @@ public class MotionPath {
     //     SceneList.getViewMatrix
     //     SceneList.preview
     //     SceneList.previewStill
-    public int getNode(int frameNumber, MotionNode mn) {
-        int pn = 0, nn = 0, a;
-        float dist, mult, diff;
+    //     SceneList.render
+    public int getNode(int piFrameNumber, MotionNode pMtnNode) {
+        int iPrevNode = 0, iNextNode = 0, i;
+        float fDist, fMult, fDiff;
 
         // filter the frameNumber
         Integer firstFrame = 0, lastFrame = 0;
 
         // The following method sets firstFrame and lastFrame
         getFirstLastFrame(firstFrame, lastFrame);
-        if(frameNumber < firstFrame) {
-            frameNumber = firstFrame;
+        if(piFrameNumber < firstFrame) {
+            piFrameNumber = firstFrame;
         }
-        if(frameNumber > lastFrame) {
-            frameNumber = lastFrame;
+        if(piFrameNumber > lastFrame) {
+            piFrameNumber = lastFrame;
         }
       
-        for(a = 0; a < numnodes; a++) {
-            if(nodes[a].nodenum == frameNumber) {
-                mn.copy(nodes[a]);
+        for(i = 0; i < miNumNodes; i++) {
+            if(mNodes[i].nodenum == piFrameNumber) {
+                pMtnNode.copy(mNodes[i]);
                 return 0;
             }
         }
 
-        a = 0;
-        while(a < (numnodes - 1)) {
-            pn = nodes[a].nodenum;
-            nn = nodes[a + 1].nodenum;
-            if(pn < frameNumber && nn > frameNumber) break;
-            a++;
+        i = 0;
+        while(i < (miNumNodes - 1)) {
+            iPrevNode = mNodes[i].nodenum;
+            iNextNode = mNodes[i + 1].nodenum;
+            if(iPrevNode < piFrameNumber && iNextNode > piFrameNumber) break;
+            i++;
         } // while
 
-        if(a == (numnodes-1)) {
-            mn.clear();
+        if(i == (miNumNodes - 1)) {
+            pMtnNode.clear();
             return -1;
         }
 
-        diff = nn - pn;
-        mult = (float)(frameNumber - pn) / diff;
+        fDiff = iNextNode - iPrevNode;
+        fMult = (float)(piFrameNumber - iPrevNode) / fDiff;
       
-        dist = nodes[a + 1].sx - nodes[a].sx;
-        mn.sx = nodes[a].sx + dist * mult;
+        // Process scale point
+        fDist = mNodes[i + 1].sx - mNodes[i].sx;
+        pMtnNode.sx = mNodes[i].sx + fDist * fMult;
       
-        dist = nodes[a + 1].sy - nodes[a].sy;
-        mn.sy = nodes[a].sy + dist * mult;
+        fDist = mNodes[i + 1].sy - mNodes[i].sy;
+        pMtnNode.sy = mNodes[i].sy + fDist * fMult;
       
-        dist = nodes[a + 1].sz - nodes[a].sz;
-        mn.sz = nodes[a].sz + dist * mult;
+        fDist = mNodes[i + 1].sz - mNodes[i].sz;
+        pMtnNode.sz = mNodes[i].sz + fDist * fMult;
       
-        dist = nodes[a + 1].rx - nodes[a].rx;
-        mn.rx = nodes[a].rx + dist * mult;
+        // Process rotation point
+        fDist = mNodes[i + 1].rx - mNodes[i].rx;
+        pMtnNode.rx = mNodes[i].rx + fDist * fMult;
       
-        dist = nodes[a + 1].ry - nodes[a].ry;
-        mn.ry = nodes[a].ry + dist * mult;
+        fDist = mNodes[i + 1].ry - mNodes[i].ry;
+        pMtnNode.ry = mNodes[i].ry + fDist * fMult;
       
-        dist = nodes[a + 1].rz - nodes[a].rz;
-        mn.rz = nodes[a].rz + dist * mult;
+        fDist = mNodes[i + 1].rz - mNodes[i].rz;
+        pMtnNode.rz = mNodes[i].rz + fDist * fMult;
       
-        dist = nodes[a + 1].tx - nodes[a].tx;
-        mn.tx = nodes[a].tx + dist * mult;
+        // Process translation point
+        fDist = mNodes[i + 1].tx - mNodes[i].tx;
+        pMtnNode.tx = mNodes[i].tx + fDist * fMult;
       
-        dist = nodes[a + 1].ty - nodes[a].ty;
-        mn.ty = nodes[a].ty + dist * mult;
+        fDist = mNodes[i + 1].ty - mNodes[i].ty;
+        pMtnNode.ty = mNodes[i].ty + fDist * fMult;
       
-        dist = nodes[a + 1].tz - nodes[a].tz;
-        mn.tz = nodes[a].tz + dist * mult;
+        fDist = mNodes[i + 1].tz - mNodes[i].tz;
+        pMtnNode.tz = mNodes[i].tz + fDist * fMult;
       
-        dist = nodes[a + 1].alpha - nodes[a].alpha;
-        mn.alpha = nodes[a].alpha + dist * mult;
-        mn.nodenum = frameNumber;
+        // Process alpha
+        fDist = mNodes[i + 1].alpha - mNodes[i].alpha;
+        pMtnNode.alpha = mNodes[i].alpha + fDist * fMult;
+        pMtnNode.nodenum = piFrameNumber;
 
         return 0;
     } // getNode
   
     
     // This method came from MOTION.CPP
-    public int readMotion(String pathName) {
-        String msgText, theText;
-        String theKeyWord;
+    // Called from:
+    //     SceneElement ctor
+    public int readMotion(String psPathName) {
+        String sMsgText, sText;
+        String sKeyWord;
         MotionNode tempMotionNode;
 
         // TODO: Replace ifstream with a FileStream
-        ifstream filein = new ifstream(pathName, ios.in|ios.nocreate);
+        ifstream filein = new ifstream(psPathName, ios.in|ios.nocreate);
 
         if (filein.fail()) {
-            msgText = "readMotion: Unable to open file: " + pathName;
-            Globals.statusPrint(msgText) ;
+            sMsgText = "readMotion: Unable to open file: " + psPathName;
+            Globals.statusPrint(sMsgText) ;
             return -1;
         }
         filein >> ws;
-        int lineCounter = 0;
-        int nodeCounter = 0;
-        int myStatus = 0;
+        Integer iLineCounter = 0;
+        int iNodeCounter = 0;
+        int iStatus = 0;
   
-        theKeyWord = getNextMotionLine(theText, lineCounter, filein);
-        while(!theKeyWord.equalsIgnoreCase("EOF")) {
-            myStatus = tempMotionNode.read(theKeyWord);
-            if(myStatus != 0) {
-                msgText = "Cannot Read: " + pathName + "  Line: " + lineCounter;
-                Globals.statusPrint(msgText);
-                return myStatus;
+        sKeyWord = Globals.getNextMotionLine(sText, iLineCounter, filein);
+        while(!sKeyWord.equalsIgnoreCase("EOF")) {
+            iStatus = tempMotionNode.read(sKeyWord);
+            if(iStatus != 0) {
+                sMsgText = "Cannot Read: " + psPathName + "  Line: " + iLineCounter;
+                Globals.statusPrint(sMsgText);
+                return iStatus;
             }
 
-            nodeCounter++;
-            theKeyWord = getNextMotionLine(theText, lineCounter, filein);
+            iNodeCounter++;
+            sKeyWord = Globals.getNextMotionLine(sText, iLineCounter, filein);
         }
 
-        allocate(nodeCounter);
-        if(!allocated) {
+        allocate(iNodeCounter);
+        if(!mbAllocated) {
             dprintf(("motion.read: Cannot allocate memory.\n"));
             return -1;
         }
   
         filein.close();
         // TODO: Replace ifstream with a FileStream
-        ifstream filein2 = new ifstream(pathName);
-        nodeCounter = 0;
-        theKeyWord = getNextMotionLine(theText, lineCounter, filein2);
-        while(!theKeyWord.equalsIgnoreCase("EOF")) {
-            myStatus = nodes[nodeCounter].read(theKeyWord);
-            nodeCounter++;
-            theKeyWord = getNextMotionLine(theText, lineCounter, filein2);
+        ifstream filein2 = new ifstream(psPathName);
+        iNodeCounter = 0;
+        sKeyWord = Globals.getNextMotionLine(sText, iLineCounter, filein2);
+        while(!sKeyWord.equalsIgnoreCase("EOF")) {
+            iStatus = nodes[iNodeCounter].read(sKeyWord);
+            iNodeCounter++;
+            sKeyWord = Globals.getNextMotionLine(sText, iLineCounter, filein2);
         }
 
         filein2.close();
-        return myStatus;
+        return iStatus;
     } // readMotion
 } // class MotionPath
