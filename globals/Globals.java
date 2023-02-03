@@ -180,6 +180,9 @@ public class Globals {
   
 
     // This method came from BLEND.CPP
+    // This method implements an alpha scale factor which can be used to create 
+    // fadein and fadeout effects. See p 95 - 96 of the book 
+    // Visual Special Effects Toolkit in C++, by Tim Wittenburg
     // Called from:
     //     tweenImage
     //     RenderObject.renderMeshz
@@ -829,6 +832,8 @@ public class Globals {
 
     // This method came from MOTION.CPP
     // TODO: Replace parameter filein with a FileStream
+    // Called from:
+    //     MotionPath.readMotion
     public static String getNextMotionLine(String theText, Integer lineNumber, 
     ifstream filein) {
         boolean aComment = true;
@@ -3069,7 +3074,7 @@ public class Globals {
         FileUtils.deleteFile(greenImage);   // input files
         FileUtils.deleteFile(blueImage);
         return 0;
-    }
+    } // makeRGBimage
 
 
     // This method came from TWEEN.CPP
@@ -3085,6 +3090,7 @@ public class Globals {
         byte aValue, red, green, blue;
         
         for(col = 1; col <= imWidth; col++) {
+            // Set aValue
             switch(bpp) {
             case 8:
                 aValue = anImage.getMPixel(col, row);
@@ -3114,7 +3120,7 @@ public class Globals {
                 counter++;
                 intervalStatus = 0;
             }
-        }
+        } // for col
 
         if(intervalStatus == 1) {                            // catch end of line
             intervalList[counter] = imWidth;
@@ -3893,6 +3899,9 @@ public class Globals {
     //     MemImage constructor that takes 6 parameters
     //     Shape3d.shapeFromBMP
     public static int readBMPHeader(String psFileName, Integer height, Integer width, Integer bitsPerPixel) {
+        // TODO: Rewrite this.
+        return 0;
+        /*
         BITMAPFILEHEADER bmFH;
         BITMAPINFOHEADER pbmIH;
         BITMAPINFO pbmInfo;
@@ -3943,6 +3952,7 @@ public class Globals {
         CloseHandle(fp);
 
         return 0;
+        */
     } // readBMPHeader
 
 
