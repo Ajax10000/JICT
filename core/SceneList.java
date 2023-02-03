@@ -162,7 +162,7 @@ public class SceneList implements ISceneList {
                 return(aModel);
             }
 
-            aModel = aModel.nextEntry;  // point to the next model
+            aModel = aModel.mNextEntry;  // point to the next model
         }
 
         return null;  // Model not found
@@ -179,17 +179,17 @@ public class SceneList implements ISceneList {
         theScene = theScene.mNextEntry; // Point to the scene Node
         currentModel = theScene.mCurrentSceneElement;
 
-        currentModel.rotation.x = rx;
-        currentModel.rotation.y = ry;
-        currentModel.rotation.z = rz;
+        currentModel.mRotation.x = rx;
+        currentModel.mRotation.y = ry;
+        currentModel.mRotation.z = rz;
 
-        currentModel.scale.x = sx;
-        currentModel.scale.y = sy;
-        currentModel.scale.z = sz;
+        currentModel.mScale.x = sx;
+        currentModel.mScale.y = sy;
+        currentModel.mScale.z = sz;
         
-        currentModel.translation.x = tx;
-        currentModel.translation.y = ty;
-        currentModel.translation.z = tz;
+        currentModel.mTranslation.x = tx;
+        currentModel.mTranslation.y = ty;
+        currentModel.mTranslation.z = tz;
     } // setCurrentModelTransform
 
 
@@ -205,17 +205,17 @@ public class SceneList implements ISceneList {
         currentModel = theScene.mCurrentSceneElement;
 
         // Set the output parameters
-        rx = currentModel.rotation.x;
-        ry = currentModel.rotation.y;
-        rz = currentModel.rotation.z;
+        rx = currentModel.mRotation.x;
+        ry = currentModel.mRotation.y;
+        rz = currentModel.mRotation.z;
 
-        sx = currentModel.scale.x;
-        sy = currentModel.scale.y;
-        sz = currentModel.scale.z;
+        sx = currentModel.mScale.x;
+        sy = currentModel.mScale.y;
+        sz = currentModel.mScale.z;
 
-        tx = currentModel.translation.x;
-        ty = currentModel.translation.y;
-        tz = currentModel.translation.z;
+        tx = currentModel.mTranslation.x;
+        ty = currentModel.mTranslation.y;
+        tz = currentModel.mTranslation.z;
     } // getCurrentModelTransform
 
 
@@ -237,7 +237,7 @@ public class SceneList implements ISceneList {
             if(!theModel.msFileName.equalsIgnoreCase("Output Image Rectangle")) {     //don't show the output image rectangle model
                 theCombo.addItem(theModel.msModelName);
             }
-            theModel = theModel.nextEntry;
+            theModel = theModel.mNextEntry;
         }
     } // showModels
 
@@ -255,7 +255,7 @@ public class SceneList implements ISceneList {
         SceneElement theModel = theScene.mHead;
         while (theModel != null) {
             iLength++;
-            theModel = theModel.nextEntry;
+            theModel = theModel.mNextEntry;
         }
         return(iLength);
     } // listLength
@@ -399,7 +399,7 @@ public class SceneList implements ISceneList {
             
             theModel.writeFile(fileOut); // Write out each model description
             oldCompoundMember = theModel.mbCompoundModelMember;
-            theModel = theModel.nextEntry;
+            theModel = theModel.mNextEntry;
         }
         
         fileOut.close();
@@ -471,14 +471,14 @@ public class SceneList implements ISceneList {
             while (theModel != null) {
                 // If the renderObject has not been created, create it
                 modelCounter++;
-                if(theModel.screenObject == null) {
+                if(theModel.mScreenRdrObject == null) {
                     theModel.miStatusIndicator = 0;
                     msgText = "PreviewSequence: Creating RenderObject: " + theModel.msModelName;
                     Globals.statusPrint(msgText);
-                    theModel.screenObject = new RenderObject(theModel.msFileName,
+                    theModel.mScreenRdrObject = new RenderObject(theModel.msFileName,
                         theModel.miModelType, theModel.mbDefinedRefPoint, theModel.pointOfReference);
 
-                    if (!theModel.screenObject.isValid()) {
+                    if (!theModel.mScreenRdrObject.isValid()) {
                         theModel.miStatusIndicator = 1;  // this object could not be opened
                         theModel.mbValid = false;
                         msgText = "PreviewSequence: Couldn't create renderObject: " + theModel.msModelName;
@@ -522,7 +522,7 @@ public class SceneList implements ISceneList {
                     viewModelMatrix.multiply(viewMatrix, modelMatrix);
 
                     // Apply the matrix
-                    theModel.screenObject.transformAndProject(viewModelMatrix, outputRows, outputColumns);
+                    theModel.mScreenRdrObject.transformAndProject(viewModelMatrix, outputRows, outputColumns);
 
                     // If this is a background plate, copy it to the screen
                     if(
@@ -535,12 +535,12 @@ public class SceneList implements ISceneList {
                         eraseOldBoundary = false;
                     } else {
                         // Draw the object
-                        theModel.screenObject.drawSequence(memoryDC, theModel.msModelName, 
+                        theModel.mScreenRdrObject.drawSequence(memoryDC, theModel.msModelName, 
                             outputRows, outputColumns, frameCounter);
                     }
                 } // end if valid screen object
 
-                theModel = theModel.nextEntry;
+                theModel = theModel.mNextEntry;
                 BitBlt(dc, 0, 0, outputColumns, outputRows, memoryDC, 0, 0, SRCCOPY);
             }  // end of single frame 
 
@@ -607,9 +607,9 @@ public class SceneList implements ISceneList {
             while (theModel != null) {
                 // If the renderObject has not been created, create it
                 modelCounter++;
-                if(theModel.screenObject == null) {
+                if(theModel.mScreenRdrObject == null) {
                     theModel.miStatusIndicator = 0;
-                    theModel.screenObject = new RenderObject(theModel.msFileName,
+                    theModel.mScreenRdrObject = new RenderObject(theModel.msFileName,
                         theModel.miModelType, theModel.mbDefinedRefPoint, theModel.pointOfReference);
                     if(theModel.miModelType == I_COMPOUND) {	// Initialize a compound model centroid
                         theModel.pointOfReference.x = 0.0f;
@@ -618,7 +618,7 @@ public class SceneList implements ISceneList {
                     }
 
                     firstTime = true;  // This variable used to create the output image rectangle
-                    if (!theModel.screenObject.isValid()) {
+                    if (!theModel.mScreenRdrObject.isValid()) {
                         theModel.miStatusIndicator = 1;  // This object could not be opened
                         String msgText = "previewStill: Could not create renderObject: " + theModel.msModelName;
                         Globals.statusPrint(msgText);
@@ -684,14 +684,14 @@ public class SceneList implements ISceneList {
                     if(theModel.msFileName.equalsIgnoreCase("Output Image Rectangle") && 
                     theModel.miModelType != I_COMPOUND &&	     
                     theModel.mbCompoundModelMember == false) {    
-                        theModel.screenObject.transformAndProject(viewModelMatrix, outputRows, outputColumns);
+                        theModel.mScreenRdrObject.transformAndProject(viewModelMatrix, outputRows, outputColumns);
                     }
 
                     if(
                     theModel.msFileName.equalsIgnoreCase("Output Image Rectangle") && 
                     theModel.miModelType != I_COMPOUND &&
                     theModel.mbCompoundModelMember) {   
-                        theModel.screenObject.transformAndProject(viewModelMatrix,
+                        theModel.mScreenRdrObject.transformAndProject(viewModelMatrix,
                             outputRows, outputColumns, theModel.mbCompoundModelMember, cmCentroidx, cmCentroidy, cmCentroidz);
                     }
 
@@ -710,13 +710,13 @@ public class SceneList implements ISceneList {
                     } else {
                         // Draw the model boundary
                         if(theModel.miModelType != I_COMPOUND) {
-                            theModel.screenObject.drawStill(theWindow, theModel.msModelName, outputRows, outputColumns);
+                            theModel.mScreenRdrObject.drawStill(theWindow, theModel.msModelName, outputRows, outputColumns);
                         }
                     }
                 } // end if valid screen object
 
                 saveModel = theModel;
-                theModel = theModel.nextEntry;
+                theModel = theModel.mNextEntry;
                 if((theModel == null) && (firstTime == true)) {
                     // This is the last model.  If the first time through this loop, add
                     // a model that displays the output image rectangle
@@ -727,13 +727,13 @@ public class SceneList implements ISceneList {
                         "None", "Default", 
                         false, aColor, "None", "None", 
                         false, null);
-                    theModel = saveModel.nextEntry;
+                    theModel = saveModel.mNextEntry;
                     if(theModel != null) {
-                        theModel.screenObject = new RenderObject(theModel.msFileName,
+                        theModel.mScreenRdrObject = new RenderObject(theModel.msFileName,
                             theModel.miModelType, theModel.mbDefinedRefPoint, theModel.pointOfReference);
                     }
                 
-                    theModel = theModel.nextEntry;
+                    theModel = theModel.mNextEntry;
                 }
             }
         }  // frame
@@ -834,7 +834,7 @@ public class SceneList implements ISceneList {
                         // determine the warp coefficients.
                         // This approach imposes the reasonable requirement that the user preview
                         // the scene before rendering it.
-                        if(theModel.screenObject == null) {
+                        if(theModel.mScreenRdrObject == null) {
                             String msgText;
                             msgText = "sceneList::render: RenderObject not defined. Skipping model: " +
                                 theModel.msModelName;
@@ -934,7 +934,7 @@ public class SceneList implements ISceneList {
                                 // Render the mesh.  The result is a zImage, and a temporary output image
                                 // The rendered mesh is then blended into the final image using the scene ZBuffer and alpha options
                                 myStatus = 0;	//this line for debugging
-                                myStatus = theModel.screenObject.renderMeshz(outputImage, alphaImage, inputImage,
+                                myStatus = theModel.mScreenRdrObject.renderMeshz(outputImage, alphaImage, inputImage,
                                     zBuffer, vx, vy, vz);
                                 break;
 
@@ -948,13 +948,13 @@ public class SceneList implements ISceneList {
                                 forwardMatrix.rotate(XRadians, YRadians, ZRadians);
                                 forwardMatrix.translate(xfrm.tx, xfrm.ty, xfrm.tz);
                                 viewModelMatrix.multiply(viewMatrix, forwardMatrix);
-                                viewModelMatrix.transformAndProject(theModel.screenObject.currentShape,
+                                viewModelMatrix.transformAndProject(theModel.mScreenRdrObject.currentShape,
                                     outputRows, outputColumns, true, 		   
                                     theModel.pointOfReference.x,
                                     theModel.pointOfReference.y,
                                     theModel.pointOfReference.z);
 
-                                myStatus = theModel.screenObject.renderShapez(outputImage, alphaImage,
+                                myStatus = theModel.mScreenRdrObject.renderShapez(outputImage, alphaImage,
                                     zBuffer, vx, vy, vz);
                                 break;
                             }
@@ -976,12 +976,12 @@ public class SceneList implements ISceneList {
                                 break;
     
                             case I_QUADMESH:
-                                myStatus = theModel.screenObject.renderMesh(outputImage, inputImage,
+                                myStatus = theModel.mScreenRdrObject.renderMesh(outputImage, inputImage,
                                     theModel.mbBlendIndicator);
                                 break;
 
                             case I_SHAPE:
-                                myStatus = theModel.screenObject.renderShape(outputImage,
+                                myStatus = theModel.mScreenRdrObject.renderShape(outputImage,
                                     theModel.mbBlendIndicator);
                                 break;
                             } // end switch
@@ -1105,31 +1105,31 @@ public class SceneList implements ISceneList {
         // Copy model transforms into a bundle object
         if((piEffectType == SEQUENCE) && (theModel.mModelMotion != null)) {
             // Set output parameter xfrm
-            xfrm.rx = aMotion.rx;
-            xfrm.ry = aMotion.ry;
-            xfrm.rz = aMotion.rz;
+            xfrm.rx = aMotion.mfRx;
+            xfrm.ry = aMotion.mfRy;
+            xfrm.rz = aMotion.mfRz;
 
-            xfrm.sx = aMotion.sx;
-            xfrm.sy = aMotion.sy;
-            xfrm.sz = aMotion.sz;
+            xfrm.sx = aMotion.mfSx;
+            xfrm.sy = aMotion.mfSy;
+            xfrm.sz = aMotion.mfSz;
 
-            xfrm.tx = aMotion.tx;
-            xfrm.ty = aMotion.ty;
-            xfrm.tz = aMotion.tz;
+            xfrm.tx = aMotion.mfTx;
+            xfrm.ty = aMotion.mfTy;
+            xfrm.tz = aMotion.mfTz;
             xfrm.alpha = aMotion.alpha;
         } else {
             // Set output parameter xfrm
-            xfrm.rx = theModel.rotation.x;
-            xfrm.ry = theModel.rotation.y;
-            xfrm.rz = theModel.rotation.z;
+            xfrm.rx = theModel.mRotation.x;
+            xfrm.ry = theModel.mRotation.y;
+            xfrm.rz = theModel.mRotation.z;
 
-            xfrm.sx = theModel.scale.x;
-            xfrm.sy = theModel.scale.y;
-            xfrm.sz = theModel.scale.z;
+            xfrm.sx = theModel.mScale.x;
+            xfrm.sy = theModel.mScale.y;
+            xfrm.sz = theModel.mScale.z;
 
-            xfrm.tx = theModel.translation.x;
-            xfrm.ty = theModel.translation.y;
-            xfrm.tz = theModel.translation.z;
+            xfrm.tx = theModel.mTranslation.x;
+            xfrm.ty = theModel.mTranslation.y;
+            xfrm.tz = theModel.mTranslation.z;
             xfrm.alpha = theModel.mfAlphaScale;
         }
     } // adjustTransforms
@@ -1138,6 +1138,7 @@ public class SceneList implements ISceneList {
     // This method sets parameter pViewMatrix.
     // MainFrame also has a getViewMatrix method, but it takes a single parameter of 
     // type TMatrix.
+    //
     // Called from:
     //     preview
     //     previewStill
@@ -1151,9 +1152,9 @@ public class SceneList implements ISceneList {
 
         if(pTheScene.mSensorMotion != null) {
             pTheScene.mSensorMotion.getNode(piFrameCounter, aMotion);
-            xRadians = aMotion.rx * F_DTR;
-            yRadians = aMotion.ry * F_DTR;
-            zRadians = aMotion.rz * F_DTR;
+            xRadians = aMotion.mfRx * F_DTR;
+            yRadians = aMotion.mfRy * F_DTR;
+            zRadians = aMotion.mfRz * F_DTR;
         } else {
             xRadians = pTheScene.mRotationPt.x * F_DTR;
             yRadians = pTheScene.mRotationPt.y * F_DTR;
@@ -1162,7 +1163,7 @@ public class SceneList implements ISceneList {
 
         pViewMatrix.rotate(-xRadians, -yRadians, -zRadians);
         if(pTheScene.mSensorMotion != null) {
-            pViewMatrix.translate(-aMotion.tx, -aMotion.ty, -aMotion.tz);
+            pViewMatrix.translate(-aMotion.mfTx, -aMotion.mfTy, -aMotion.mfTz);
         } else {
             pViewMatrix.translate(-pTheScene.mTranslationPt.x, -pTheScene.mTranslationPt.y, -pTheScene.mTranslationPt.z);
         }
@@ -1190,24 +1191,24 @@ public class SceneList implements ISceneList {
         // These centroids are accumulated and averaged to obtain the centroid of the 
         // compound model.
         // saveModel = theModel; // this variable is not used
-        theModel = theModel.nextEntry;
+        theModel = theModel.mNextEntry;
 
         while (theModel != null) {
             // Build the model's transformation matrix
-            modelMatrix.scale(theModel.scale.x, theModel.scale.y, theModel.scale.z);
-            float xRadians = theModel.rotation.x * F_DTR;
-            float yRadians = theModel.rotation.y * F_DTR;
-            float zRadians = theModel.rotation.z * F_DTR;
+            modelMatrix.scale(theModel.mScale.x, theModel.mScale.y, theModel.mScale.z);
+            float xRadians = theModel.mRotation.x * F_DTR;
+            float yRadians = theModel.mRotation.y * F_DTR;
+            float zRadians = theModel.mRotation.z * F_DTR;
             modelMatrix.rotate(xRadians, yRadians, zRadians);
-            modelMatrix.translate(theModel.translation.x, theModel.translation.y, theModel.translation.z);
+            modelMatrix.translate(theModel.mTranslation.x, theModel.mTranslation.y, theModel.mTranslation.z);
 
             // If the model's RenderObject has not been created, create it.
-            if(theModel.screenObject == null) {
+            if(theModel.mScreenRdrObject == null) {
                 theModel.miStatusIndicator = 0;
-                theModel.screenObject = new RenderObject(theModel.msFileName,
+                theModel.mScreenRdrObject = new RenderObject(theModel.msFileName,
                     theModel.miModelType, theModel.mbDefinedRefPoint, theModel.pointOfReference);
 
-                if (!theModel.screenObject.isValid()) {
+                if (!theModel.mScreenRdrObject.isValid()) {
                     theModel.miStatusIndicator = 1;  // this object could not be opened
                     String msgText = "calcCompoundModelRefPoint: Could not create renderObject: " + theModel.msModelName;
                     Globals.statusPrint(msgText);
@@ -1218,8 +1219,8 @@ public class SceneList implements ISceneList {
             // Transform the model and get its transformed centroid
             if(theModel.mbCompoundModelMember) {
                 // Transform the individual model
-                theModel.screenObject.transformAndProject(modelMatrix, outputRows, outputColumns);
-                theModel.screenObject.currentShape.getTCentroid(mCentroidX, mCentroidY, mCentroidZ);
+                theModel.mScreenRdrObject.transformAndProject(modelMatrix, outputRows, outputColumns);
+                theModel.mScreenRdrObject.currentShape.getTCentroid(mCentroidX, mCentroidY, mCentroidZ);
       
                 String msgText;
                 msgText = "calcCmModelRefPoint. model: " + theModel.msModelName;
@@ -1244,7 +1245,7 @@ public class SceneList implements ISceneList {
             }
 
             prevModelIsACompoundMember = theModel.mbCompoundModelMember;
-            theModel = theModel.nextEntry;  // Get the pointer to next model
+            theModel = theModel.mNextEntry;  // Get the pointer to next model
         } // while
 
         // Handle the case where a compound model is the last model in the
@@ -1307,15 +1308,15 @@ public class SceneList implements ISceneList {
 
         if(aScene.mHead == null) {
             aScene.mHead = theModel;
-            theModel.prevEntry = null;
-            theModel.nextEntry = null;
+            theModel.mPrevEntry = null;
+            theModel.mNextEntry = null;
         } else {
             aModel = aScene.mHead;  // Find the last element
-            while (aModel.nextEntry != null) {
-                aModel = aModel.nextEntry;
+            while (aModel.mNextEntry != null) {
+                aModel = aModel.mNextEntry;
             }
-            aModel.nextEntry = theModel;
-            theModel.prevEntry = aModel;
+            aModel.mNextEntry = theModel;
+            theModel.mNextEntry = aModel;
         }
 
         aScene.mTail = theModel;
@@ -1352,7 +1353,7 @@ public class SceneList implements ISceneList {
         theModel = aScene.mHead;
 
         while (theModel != null) {
-            nextModel = theModel.nextEntry;  // Get the pointer to next model
+            nextModel = theModel.mNextEntry;  // Get the pointer to next model
             theModel = null;                 // Before deleting current model
             theModel = nextModel;
         }
@@ -1391,7 +1392,7 @@ public class SceneList implements ISceneList {
                 theModel.pointOfReference.z = pfCentroidZ;
                 found = true;
             }
-            theModel = theModel.nextEntry;  // Get the pointer to next model
+            theModel = theModel.mNextEntry;  // Get the pointer to next model
         } // while
 
         if(!found) {
@@ -1447,7 +1448,7 @@ public class SceneList implements ISceneList {
             }
 
             prevModelIsACompoundMember = theModel.mbCompoundModelMember;
-            theModel = theModel.nextEntry;  // Get the pointer to next model
+            theModel = theModel.mNextEntry;  // Get the pointer to next model
         } 
 
         // Handle the case where a compound model is the last model in the
@@ -1483,14 +1484,14 @@ public class SceneList implements ISceneList {
         while (theModel != null) {
             if((!theModel.mbDefinedRefPoint) && (theModel.miModelType != I_COMPOUND)) {
                 // The following method sets centroidX, centroidY, and centroidZ (all of type Float)
-                theModel.screenObject.currentShape.getReferencePoint(centroidX, centroidY, centroidZ);
+                theModel.mScreenRdrObject.currentShape.getReferencePoint(centroidX, centroidY, centroidZ);
 
                 theModel.pointOfReference.x = centroidX; 
                 theModel.pointOfReference.y = centroidY;
                 theModel.pointOfReference.z = centroidZ;
             }
 
-            theModel = theModel.nextEntry;  // Get the pointer to next model
+            theModel = theModel.mNextEntry;  // Get the pointer to next model
         } // while theModel != null
 
         return 0;
@@ -1529,9 +1530,9 @@ public class SceneList implements ISceneList {
                 modelCounter++;
             } else {
                 if(theModel.miModelType == I_IMAGE || theModel.miModelType == I_SHAPE) {
-                    centroidX = theModel.screenObject.currentShape.mfOriginX;
-                    centroidY = theModel.screenObject.currentShape.mfOriginY;
-                    centroidZ = theModel.screenObject.currentShape.mfOriginZ;
+                    centroidX = theModel.mScreenRdrObject.currentShape.mfOriginX;
+                    centroidY = theModel.mScreenRdrObject.currentShape.mfOriginY;
+                    centroidZ = theModel.mScreenRdrObject.currentShape.mfOriginZ;
                     modelDistance = MathUtils.getDistance3d(viewX, viewY, viewZ, centroidX, centroidY, centroidZ);
                     distances[modelCounter] = modelDistance;
                     models[modelCounter] = theModel;
@@ -1549,7 +1550,7 @@ public class SceneList implements ISceneList {
                 }
             }
             
-            theModel = theModel.nextEntry;
+            theModel = theModel.mNextEntry;
         }
 
         numModels = modelCounter;
