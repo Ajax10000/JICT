@@ -2,12 +2,45 @@ package motion;
 
 import java.util.StringTokenizer;
 
+// A MotionNode object represents a single keyframe in a motion path.
+// See p 131 of Visual Special Effects Toolkit in C++
 public class MotionNode {
-   public int nodenum;
-   public float tx, ty, tz;
-   public float rx, ry, rz;
-   public float sx, sy, sz;
-   public float alpha;
+   // Populated in methods copy, clear, read
+   // Set in:
+   //     MotionPath.getNode
+   // Used in:
+   //     SceneList.adjustTransforms
+   public int miNodeNum;
+
+   // Populated in methods copy, clear, read
+   // Set in:
+   //     MotionPath.getNode
+   // Used in:
+   //     SceneList.adjustTransforms
+   //     SceneList.getViewMatrix
+   public float mfTx, mfTy, mfTz;
+
+   // Populated in methods copy, clear, read
+   // Set in:
+   //     MotionPath.getNode
+   // Used in:
+   //     SceneList.adjustTransforms
+   //     SceneList.getViewMatrix
+   public float mfRx, mfRy, mfRz;
+
+   // Populated in methods copy, clear, read
+   // Set in:
+   //     MotionPath.getNode
+   // Used in:
+   //     SceneList.adjustTransforms
+   public float mfSx, mfSy, mfSz;
+
+   // Populated in methods copy, clear, read
+   // Set in:
+   //     MotionPath.getNode
+   // Used in:
+   //     SceneList.adjustTransforms
+   public float mfAlpha;
 
 
    // Called from:
@@ -17,47 +50,56 @@ public class MotionNode {
    }
 
 
-   // This method came from MOTION.CPP
+   // This method originally came from MOTION.CPP
+   // 
+   // Called from:
+   //     MotionPath.getNode
    public void copy(MotionNode mn) {
-      this.nodenum = mn.nodenum;
+      this.miNodeNum = mn.miNodeNum;
 
-      this.tx = mn.tx;
-      this.ty = mn.ty;
-      this.tz = mn.tz;
+      this.mfTx = mn.mfTx;
+      this.mfTy = mn.mfTy;
+      this.mfTz = mn.mfTz;
 
-      this.rx = mn.rx;
-      this.ry = mn.ry;
-      this.rz = mn.rz;
+      this.mfRx = mn.mfRx;
+      this.mfRy = mn.mfRy;
+      this.mfRz = mn.mfRz;
 
-      this.sx = mn.sx;
-      this.sy = mn.sy;
-      this.sz = mn.sz;
+      this.mfSx = mn.mfSx;
+      this.mfSy = mn.mfSy;
+      this.mfSz = mn.mfSz;
 
-      this.alpha = mn.alpha;
+      this.mfAlpha = mn.mfAlpha;
    } // copy
   
 
-   // This method came from MOTION.CPP
+   // This method originally came from MOTION.CPP
+   //
+   // Called from:
+   //     MotionPath.getNode
    public void clear() {
-      nodenum = 0;
+      miNodeNum = 0;
 
-      tx = 0.0f;  
-      ty = 0.0f;  
-      tz = 0.0f;
+      mfTx = 0.0f;  
+      mfTy = 0.0f;  
+      mfTz = 0.0f;
 
-      rx = 0.0f;  
-      ry = 0.0f;  
-      rz = 0.0f;
+      mfRx = 0.0f;  
+      mfRy = 0.0f;  
+      mfRz = 0.0f;
 
-      sx = 0.0f;  
-      sy = 0.0f;  
-      sz = 0.0f;
+      mfSx = 0.0f;  
+      mfSy = 0.0f;  
+      mfSz = 0.0f;
 
-      alpha = 0.0f;
+      mfAlpha = 0.0f;
    } // clear
 
 
-   // This method came from MOTION.CPP
+   // This method originally came from MOTION.CPP
+   //
+   // Called from:
+   //     MotionPath.readMotion
    public int read(String psBuffer) {
       StringTokenizer strTok;
       String aNodeNum;
@@ -69,77 +111,77 @@ public class MotionNode {
       strTok = new StringTokenizer(psBuffer, " ");
       aNodeNum = strTok.nextToken(" ");
       if(aNodeNum.length() > 0) {
-         nodenum = Integer.parseInt(aNodeNum);
+         miNodeNum = Integer.parseInt(aNodeNum);
       } else {
          return 1;
       }
    
       anrx = strTok.nextToken(" ");
       if(anrx.length() > 0) {
-         rx = Float.parseFloat(anrx);
+         mfRx = Float.parseFloat(anrx);
       } else {
          return 2;
       }
    
       anry = strTok.nextToken(" ");
       if(anry.length() > 0) {
-         ry = Float.parseFloat(anry);
+         mfRy = Float.parseFloat(anry);
       } else {
          return 3;
       }
    
       anrz = strTok.nextToken(" ");
       if(anrz.length() > 0) {
-         rz = Float.parseFloat(anrz);
+         mfRz = Float.parseFloat(anrz);
       } else {
          return 4;
       }
    
       ansx = strTok.nextToken(" ");
       if(ansx.length() > 0) {
-         sx = Float.parseFloat(ansx);
+         mfSx = Float.parseFloat(ansx);
       } else {
          return 5;
       }
    
       ansy = strTok.nextToken(" ");
       if(ansy.length() > 0) {
-         sy = Float.parseFloat(ansy);
+         mfSy = Float.parseFloat(ansy);
       } else {
          return 6;
       }
    
       ansz = strTok.nextToken(" ");
       if(ansz.length() > 0) {
-         sz = Float.parseFloat(ansz);
+         mfSz = Float.parseFloat(ansz);
       } else {
          return 7;
       }
    
       antx = strTok.nextToken(" ");
       if(antx.length() > 0) {
-         tx = Float.parseFloat(antx);
+         mfTx = Float.parseFloat(antx);
       } else {
          return 8;
       }
    
       anty = strTok.nextToken(" ");
       if(anty.length() > 0) {
-         ty = Float.parseFloat(anty);
+         mfTy = Float.parseFloat(anty);
       } else {
          return 9;
       }
    
       antz = strTok.nextToken(" ");
       if(antz.length() > 0) {
-         tz = Float.parseFloat(antz);
+         mfTz = Float.parseFloat(antz);
       } else {
          return 10;
       }
    
       anAlpha = strTok.nextToken(" ");
       if(anAlpha.length() > 0) {
-         alpha = Float.parseFloat(anAlpha);
+         mfAlpha = Float.parseFloat(anAlpha);
       } else {
          return 11;
       }
