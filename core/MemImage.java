@@ -68,73 +68,73 @@ public class MemImage {
     public static final float ZBUFFERMAXVALUE = 2.0E31f;
 /*
 protected:
-  void allocate(int height, int widthInPixels);
+  void allocate(int height, int widthInPixels); - implemented
 */
 
 /*
 public:
-  memImage (int height, int width, int bitsPerPixel=8);
-  memImage (memImage *);
+  memImage (int height, int width, int bitsPerPixel=8); - implemented
+  memImage (memImage *); - implemented
   memImage (char *fileName, int imLength, int imWidth,
-            int imAccessMode, char rw, int colorSpec);
-  int readNextRow();
-  int writeNextRow();
-  void clear();
-  void init32(float aValue);
-  void display(HDC dc, int outWidth, int outHeight);
-  void close();
-  int saveAs8(char *OutImagePathName);
-  int scaleTo8(memImage *scaledImage);
-  int histogram();
+            int imAccessMode, char rw, int colorSpec); - implemented
+  int readNextRow(); - implemented
+  int writeNextRow(); - implemented
+  void clear(); - implemented
+  void init32(float aValue); - implemented
+  void display(HDC dc, int outWidth, int outHeight); - implemented
+  void close(); - implemented
+  int saveAs8(char *OutImagePathName); - implemented
+  int scaleTo8(memImage *scaledImage); - iimplemented
+  int histogram(); - implemented
 
-  HBITMAP getBmp();
-  int getHeight();
-  int getWidth();
-  int getAccessMode();
-  int getColorSpec();
-  int getBitsPerPixel();
-  unsigned int getImageSizeInBytes();
-  BYTE  *getBytes();
-  int isValid();
-  int alphaSmooth3();
-  int alphaSmooth5();
-  int alphaSmooth7();
-  int createAlphaImage(memImage *outImage);
-  int copy(memImage *outImage, int xoffset, int yoffset);
-  int fastCopy(memImage *outImage, int xOffset, int yOffset);
-  int copy8To24(memImage *outImage);
+  HBITMAP getBmp(); ---- NOT IMPLEMENTED ----
+  int getHeight(); - implemented
+  int getWidth(); - implemented 
+  int getAccessMode(); - implemented
+  int getColorSpec(); - implemented
+  int getBitsPerPixel(); - implemented
+  unsigned int getImageSizeInBytes(); - implemented
+  BYTE  *getBytes(); - implemented
+  int isValid(); - implemented
+  int alphaSmooth3(); - implemented
+  int alphaSmooth5(); - implemented
+  int alphaSmooth7(); - implemented
+  int createAlphaImage(memImage *outImage); - implemented
+  int copy(memImage *outImage, int xoffset, int yoffset); - implemented
+  int fastCopy(memImage *outImage, int xOffset, int yOffset); - implemented
+  int copy8To24(memImage *outImage); - implemented
 
-  int drawMask(HDC dc, POINT far *thePoints, int numVertices);
-  int unPack(memImage *unpackedImage);
-  BYTE getMPixel(int x, int y);
-  BYTE getAverageMPixel (int x, int y);
-  BYTE getMPixel(int x, int y, char aColor);  
-  float getMPixel32 (int x, int y);
-  int setMPixel32 (int x, int y, float aValue);
-  int setMPixel(int x, int y, BYTE value);
-  int setMPixelA (float x, float y, BYTE value);
-  BYTE getMPixelA (float x, float y);
-  int getMPixelRGB(int x, int y, BYTE *red, BYTE *green, BYTE *blue);
-  int setMPixelRGB(int x, int y, BYTE red, BYTE green, BYTE blue);
-  int clearRGB(BYTE red, BYTE green, BYTE blue);
+  int drawMask(HDC dc, POINT far *thePoints, int numVertices); - implemented
+  int unPack(memImage *unpackedImage); - implemented
+  BYTE getMPixel(int x, int y); - implemented
+  BYTE getAverageMPixel (int x, int y); ---- NOT IMPLEMENTED ----
+  BYTE getMPixel(int x, int y, char aColor);  - implemented
+  float getMPixel32 (int x, int y); - implemented
+  int setMPixel32 (int x, int y, float aValue); - implemented
+  int setMPixel(int x, int y, BYTE value); - implemented
+  int setMPixelA (float x, float y, BYTE value); - implemented
+  BYTE getMPixelA (float x, float y); - implemented
+  int getMPixelRGB(int x, int y, BYTE *red, BYTE *green, BYTE *blue); - implemented
+  int setMPixelRGB(int x, int y, BYTE red, BYTE green, BYTE blue); - implemented
+  int clearRGB(BYTE red, BYTE green, BYTE blue); - implemented
   int clearRGBRange(BYTE redLow, BYTE redHigh, BYTE greenLow, BYTE greenHigh, 
-                      BYTE blueLow, BYTE blueHigh);
-  int writeBMP(char *fileName);
-  int readBMP(char *fileName, int theColor);
+                      BYTE blueLow, BYTE blueHigh); - implemented
+  int writeBMP(char *fileName); - implemented
+  int readBMP(char *fileName, int theColor); - implemented
   int fillPolyz(int I1x, int I1y, float I1p, float I1d, 
                        int I2x, int I2y, float I2p, float I2d, 
                        int I3x, int I3y, float I3p, float I3d, 
                        int I4x, int I4y, float I4p, float I4d,
-                       memImage *zBuffer);
+                       memImage *zBuffer); - implemented
   int adjustColor(BYTE desiredRed, BYTE desiredGreen, BYTE desiredBlue,
    BYTE *midRed, BYTE *midGreen, BYTE *midBlue, memImage *outImagechar,
-   char *adjustmentType, int inputImageColor);
-  int adjustImageBorder(char *outPath);
-  int printValue(int x, int y);
-  void setFileName(char *fileName);
-  int clearRectangle(int startX, int startY, int endX, int endY);
-  int getBoundingBox(int *xBeg, int *xEnd, int *yBeg, int *yEnd);
- virtual ~memImage();
+   char *adjustmentType, int inputImageColor); - implemented
+  int adjustImageBorder(char *outPath); - implemented
+  int printValue(int x, int y); - implemented
+  void setFileName(char *fileName); - implemented
+  int clearRectangle(int startX, int startY, int endX, int endY); - implemented
+  int getBoundingBox(int *xBeg, int *xEnd, int *yBeg, int *yEnd); - implemented
+ virtual ~memImage(); - implemented (as finalize)
  */
 
 
@@ -487,36 +487,42 @@ public:
     } // clearRGBRange
 
 
+    // This method will initialize a MemImage with a given floating-point value.
+    // See p 104 of the book Visual Special Effects Toolkit in C++, 
+    // by Tim Wittenburg.
     // Called from:
     //     RenderObject.renderMeshz
     //     SceneList.render
-    public void init32(float aValue) {
+    public void init32(float pfValue) {
         //  Initialize a 32 bit image by setting each pixel to a designated value
-        int x, y;
-        float *myTemp;
-        myTemp = (float *)bytes;
+        int ix, iy;
+        float *fTemp;
+        fTemp = (float *)bytes;
 
         // Don't need paddedWidth here because each row
         // is by definition a multiple of 4 bytes
-        int rows = this.imageHeight;
-        int cols = this.imageWidth;  
+        int iRows = this.imageHeight;
+        // int iCols = this.imageWidth;  // not used
                                 
         if (this.accessMode == SEQUENTIAL) {
-            rows = 1;
+            iRows = 1;
         }
 
-        for (y = 1; y <= rows; y++) {
-            for (x = 1; x <= this.imageWidth; x++) {
-                *myTemp = aValue;
-                myTemp++;
-            } // for x
-        } // for y
+        for (iy = 1; iy <= iRows; iy++) {
+            for (ix = 1; ix <= this.imageWidth; ix++) {
+                *fTemp = pfValue;
+                fTemp++;
+            } // for ix
+        } // for iy
     } // init32
 
 
+    // This method scales a 32-bit image to 8-bit pixel resolution in such a way that 
+    // the 32-bit values can be viewed on the screen. See p 104 of the book 
+    // Visual Special Effects Toolkit in C++, by Tim Wittenburg.
     // Called from:
     //     saveAs8
-    public int scaleTo8(MemImage scaledImage) {
+    public int scaleTo8(MemImage pScaledImage) {
         // Scale a 32 bit memimage to 8 bits and copy it to the memImage passed in.
         // This version scales to the maximum dynamic range permitted by 8 bits of resolution
         // Consequently, depending on the range of values in the 32 bit image, contrast stretching
@@ -524,84 +530,85 @@ public:
         //
         // Scaling is performed in such a way as to eliminate the effects of the default 
         // max ZBuffer value
-        String msgText;
+        String sMsgText;
         boolean IGNOREMAXVALUE = true;
 
-        if((scaledImage.bitsPerPixel != 8) || (this.bitsPerPixel != 32)) {
+        if((pScaledImage.bitsPerPixel != 8) || (this.bitsPerPixel != 32)) {
             Globals.statusPrint("MemImage.scaleTo8: Bits per pixel mismatch");
             return 1;
         }
         
-        if((scaledImage.getHeight() != getHeight()) || (scaledImage.getWidth() != getWidth())) {
+        if((pScaledImage.getHeight() != getHeight()) || (pScaledImage.getWidth() != getWidth())) {
             Globals.statusPrint("MemImage.scaleTo8: Image sizes must be equal");
             return 2;
         }
 
-        int x, y, rows;
-        float myTemp, actMax, actMin, desMax, desMin, sFactor;
-        myTemp = (float *)this.bytes;
+        int ix, iy, iRows;
+        float fTemp, fActMax, fActMin;
+        float fDesMax, fDesMin, fsFactor;
+        fTemp = (float *)this.bytes;
 
         // Don't need paddedWidth here because each row width
         // is by definition a multiple of 4 bytes
-        rows = this.imageHeight;
-        desMin = 1.0f;
-        desMax = 255.0f;
+        iRows = this.imageHeight;
+        fDesMin = 1.0f;
+        fDesMax = 255.0f;
         if (this.accessMode == SEQUENTIAL) {
-            rows = 1;
+            iRows = 1;
         }
         
-        actMax = actMin = *myTemp;
+        fActMax = fActMin = *fTemp;
         if(IGNOREMAXVALUE) {
-            actMax = 0.0f;
+            fActMax = 0.0f;
         }
 
         // Determine the image min and max values
-        for (y = 1; y <= rows; y++) {
-            for (x = 1; x <= this.imageWidth; x++) {
-                if(*myTemp < actMin) {
-                    actMin = *myTemp;
+        for (iy = 1; iy <= iRows; iy++) {
+            for (ix = 1; ix <= this.imageWidth; ix++) {
+                if(*fTemp < fActMin) {
+                    fActMin = *fTemp;
                 }
                 if(IGNOREMAXVALUE) {
-                    if((*myTemp > actMax) && (*(myTemp) != ZBUFFERMAXVALUE)) {
-                        actMax = *myTemp;
+                    if((*fTemp > fActMax) && (*(fTemp) != ZBUFFERMAXVALUE)) {
+                        fActMax = *fTemp;
                     }
                 } else {
-                    if(*myTemp > actMax) { 
-                        actMax = *myTemp;
+                    if(*fTemp > fActMax) { 
+                        fActMax = *fTemp;
                     }
                 }
 
-                myTemp++;
-            } // for x
-        } // for y
+                fTemp++;
+            } // for ix
+        } // for iy
         
-        msgText = "MemImage.scaleTo8: actual Max: " + actMax + " Min: " + actMin;
-        Globals.statusPrint(msgText);
+        sMsgText = "MemImage.scaleTo8: actual Max: " + fActMax + " Min: " + fActMin;
+        Globals.statusPrint(sMsgText);
 
-        sFactor = (desMax - desMin) / (actMax - actMin);
-        myTemp = (float *)this.bytes;
+        fsFactor = (fDesMax - fDesMin) / (fActMax - fActMin);
+        fTemp = (float *)this.bytes;
         byte scaledValue;
         float desValue, actValue;
 
         // Scale the image
-        for (y = 1; y <= rows; y++) {
-            for (x = 1; x <= this.imageWidth; x++) {
-                actValue = *myTemp;
+        for (iy = 1; iy <= iRows; iy++) {
+            for (ix = 1; ix <= this.imageWidth; ix++) {
+                actValue = *fTemp;
                 if(IGNOREMAXVALUE) {
                     if(actValue != ZBUFFERMAXVALUE) {
-                        desValue = ((actValue - actMin) * sFactor) + desMin;
+                        desValue = ((actValue - fActMin) * fsFactor) + fDesMin;
                         scaledValue = (byte)(desValue + 0.5f);
-                        scaledImage.setMPixel(x, y, scaledValue);
+                        pScaledImage.setMPixel(ix, iy, scaledValue);
                     }
                 } else {
-                    desValue = ((actValue - actMin) * sFactor) + desMin;
+                    desValue = ((actValue - fActMin) * fsFactor) + fDesMin;
                     scaledValue = (byte)(desValue + 0.5f);
-                    scaledImage.setMPixel(x, y, scaledValue);
+                    pScaledImage.setMPixel(ix, iy, scaledValue);
                 }
                 
-                myTemp++;
-            }
-        }
+                fTemp++;
+            } // for x
+        } // for y
 
         return 0;
     } // scaleTo8
@@ -614,6 +621,9 @@ public:
     //     SceneList.previewStill
     //     SceneList.render
     public void display(HDC dc, int piOutWidth, int piOutHeight) {
+        // TODO: Rewrite this
+        return;
+        /*
         HBITMAP hBitmap, holdBitmap;
         HDC newdc;
         HANDLE hloc;
@@ -674,6 +684,7 @@ public:
 
         // Restore the old bitmap
         SelectObject(newdc, holdBitmap);
+        */
     } // display
 
 
@@ -682,6 +693,10 @@ public:
     // Called from:
     //     RenderObject.prepareCutout
     public int drawMask(Point2d[] thePoints, int numVertices) {
+        // TODO: Rewrite this
+        return 0;
+        
+        /*
         HBITMAP hBitmap, holdBitmap;
         HDC newdc;
 
@@ -723,6 +738,7 @@ public:
         SelectObject(newdc, holdBitmap);
 
         return 0;
+        */
     } // drawMask
 
 
@@ -1128,6 +1144,9 @@ public:
 
     // Called from:
     //     adjustColor
+    //     alphaSmooth3
+    //     alphaSmooth5
+    //     alphaSmooth7
     //     copy (if this.bitsPerPixel = 8)
     //     copy8To24
     //     histogram
@@ -1289,6 +1308,8 @@ public:
     } // isValid
 
 
+    // Method writeBMP writes a MemImage object into the file whose name is passed
+    // as a parameter. See p 103 of Visual Special Effects Toolkit in C++.
     // Called from:
     //     The MemImage constructor that takes 6 parameters
     //     saveAs8
@@ -1298,6 +1319,10 @@ public:
     //     SceneList.render
     //     Texture.createTexture
     public int writeBMP(String fileName) {
+        // TODO: Rewrite this
+        return 0;
+
+        /*
         String msgText;
         BITMAPFILEHEADER bf;
         BITMAPINFOHEADER bi;
@@ -1402,18 +1427,24 @@ public:
         }
 
         return 0;
+        */
     } // writeBMP
 
 
+    // This method reads a Windows .bmp image file into a MemImage object.
+    // See p 103 of the book Visual Special Effects Toolkit in C++.
     // Called from:
     //     The MemImage constructor that takes 6 parameters
     public int readBMP(String psFileName, int piColorSpec) {
+        // TODO: Rewrite this
+        return 0;
+        /*
         BITMAPFILEHEADER bmFH;
         BITMAPINFOHEADER pbmIH;
         BITMAPINFO pbmInfo;
         WORD PalSize = 256;
         int x,y,index,pad24,pad8;
-        /* unsigned */int bmWidth, bmHeight, bmImgSize, bmScanWidth, bmScanWidth8;
+        int bmWidth, bmHeight, bmImgSize, bmScanWidth, bmScanWidth8; // originally unsigned
         String msgText;
 
         this.valid = true;
@@ -1545,9 +1576,13 @@ public:
         // button.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 
         return 0;
+        */
     } // readBMP
 
 
+    // Called from:
+    //     Globals.createCutout
+    //     Globals.makeRGBimage
     public int readNextRow() {
         boolean myStatus;
         int numBytesRead;
@@ -1560,6 +1595,11 @@ public:
         }
     } // readNextRow
 
+
+    // Called from:
+    //     Globals.makeRGBimage
+    //     RenderObject.maskFromShape
+    //     RenderObject.prepareCutout
     public void close() {
         CloseHandle(this.fp);
         this.fp = 0;
@@ -1567,6 +1607,8 @@ public:
 
 
     // Changed return value from int to boolean
+    // Called from:
+    //     Globals.makeRGBimage
     public boolean writeNextRow() {
         boolean myStatus;
         int numBytesWritten;
@@ -1586,27 +1628,27 @@ public:
     //     readBMP
     //     writeBMP
     int mapColorSpecToBitsPerPixel(int piColorSpec) {
-        int bpp = -1;
+        int iBpp = -1;
 
         if(
         piColorSpec == REDCOLOR ||
         piColorSpec == GREENCOLOR ||
         piColorSpec == BLUECOLOR ||
         piColorSpec == EIGHTBITMONOCHROME ) {
-            bpp = 8;
+            iBpp = 8;
         }
 
         if(piColorSpec == RGBCOLOR ) {
-            bpp = 24;
+            iBpp = 24;
         }
         if(piColorSpec == ONEBITMONOCHROME ) {
-            bpp = 1;
+            iBpp = 1;
         }
         if(piColorSpec == A32BIT ) {
-            bpp = 32;
+            iBpp = 32;
         }
 
-        return bpp;
+        return iBpp;
     } // mapColorSpecToBitsPerPixel
 
 
@@ -1615,14 +1657,14 @@ public:
     //     The MemImage constructor that takes 6 parameters
     //     The MemImage constructor that takes 3 parameters
     int mapBitsPerPixelToColorSpec(int piBitsPerPixel) {
-        int colorSpec = EIGHTBITMONOCHROME;
+        int iColorSpec = EIGHTBITMONOCHROME;
 
-        if(piBitsPerPixel ==  1) colorSpec = ONEBITMONOCHROME;
-        if(piBitsPerPixel ==  8) colorSpec = EIGHTBITMONOCHROME;
-        if(piBitsPerPixel == 24) colorSpec = RGBCOLOR;
-        if(piBitsPerPixel == 32) colorSpec = A32BIT;
+        if(piBitsPerPixel ==  1) iColorSpec = ONEBITMONOCHROME;
+        if(piBitsPerPixel ==  8) iColorSpec = EIGHTBITMONOCHROME;
+        if(piBitsPerPixel == 24) iColorSpec = RGBCOLOR;
+        if(piBitsPerPixel == 32) iColorSpec = A32BIT;
 
-        return colorSpec;
+        return iColorSpec;
     } // mapBitsPerPixelToColorSpec
 
 
@@ -1633,33 +1675,33 @@ public:
 
     // Called from:
     //     Globals.iwarpz
-    public int saveAs8(String outImagePathName) {
+    public int saveAs8(String psOutImagePathName) {
         //  A utility to save a 32 bit image in a viewable 8 bit form
-        String msgText;
-        int bpp = getBitsPerPixel();
+        String sMsgText;
+        int iBpp = getBitsPerPixel();
 
-        if(bpp != 32) {
-            msgText = "MemImage.saveAs8: Input image must be 32 bits per pixel. " + outImagePathName;
-            Globals.statusPrint(msgText);
+        if(iBpp != 32) {
+            sMsgText = "MemImage.saveAs8: Input image must be 32 bits per pixel. " + psOutImagePathName;
+            Globals.statusPrint(sMsgText);
             return -1;
         }
 
-        int outputRows = getHeight();
-        int outputCols = getWidth();
-        MemImage testImage = new MemImage(outputRows, outputCols, 8);
+        int iOutputRows = getHeight();
+        int iOutputCols = getWidth();
+        MemImage testImage = new MemImage(iOutputRows, iOutputCols, 8);
         if (!testImage.isValid()) {
-            msgText = "MemImage.saveAs8: Unable to create intermediate image. " + outImagePathName;
-            Globals.statusPrint(msgText);
+            sMsgText = "MemImage.saveAs8: Unable to create intermediate image. " + psOutImagePathName;
+            Globals.statusPrint(sMsgText);
             return -1;
         }
 
         scaleTo8(testImage);
-        msgText = "MemImage.saveAs8: Saving " + outImagePathName;
-        Globals.statusPrint(msgText);
+        sMsgText = "MemImage.saveAs8: Saving " + psOutImagePathName;
+        Globals.statusPrint(sMsgText);
 
-        testImage.writeBMP(outImagePathName);
-        msgText = "MemImage.saveAs8: Histogram of " + outImagePathName;
-        Globals.statusPrint(msgText);
+        testImage.writeBMP(psOutImagePathName);
+        sMsgText = "MemImage.saveAs8: Histogram of " + psOutImagePathName;
+        Globals.statusPrint(sMsgText);
         testImage.histogram();
 
         return 0;
@@ -1669,7 +1711,7 @@ public:
     // Called from:
     //     saveAs8
     public int histogram() {
-        String msgBuffer;
+        String sMsgBuffer;
 
         if(getBitsPerPixel() != 8) {
             Globals.statusPrint("MemImage.histogram: Only 8 bit pixel images are supported");
@@ -1677,191 +1719,206 @@ public:
         }
 
         int[] histogArray = new int[256];
-        int numRows = getHeight();
-        int numCols = getWidth();
+        int iNumRows = getHeight();
+        int iNumCols = getWidth();
         int i, j;
-        int thePixel;
+        int iPixel;
 
         for (i = 0; i <= 255; i++) {
             histogArray[i] = 0;
-        }
+        } // for i
 
-        for (i = 1; i <= numRows; i++) {
-            for (j = 1; j <= numCols; j++) {
-                thePixel = (int)getMPixel(j, i);
-                histogArray[thePixel]++;
+        for (i = 1; i <= iNumRows; i++) {
+            for (j = 1; j <= iNumCols; j++) {
+                iPixel = (int)getMPixel(j, i);
+                histogArray[iPixel]++;
             } // for j
         } // for i
 
         // Display the histogram to the ict log
-        msgBuffer = "MemImage.histogram: Histogram of " + savedFileName;
-        Globals.statusPrint(msgBuffer);
-        for(i = 0; i <= 240; i+=16) {
-            msgBuffer = String.format("%3d: %6d %6d %6d %6d %6d %6d %6d %6d %6d %6d %6d %6d %6d %6d %6d %6d",
+        sMsgBuffer = "MemImage.histogram: Histogram of " + savedFileName;
+        Globals.statusPrint(sMsgBuffer);
+        for(i = 0; i <= 240; i += 16) {
+            sMsgBuffer = String.format("%3d: %6d %6d %6d %6d %6d %6d %6d %6d %6d %6d %6d %6d %6d %6d %6d %6d",
                 i, 
                 histogArray[i+ 0], histogArray[i+ 1], histogArray[i+ 2], histogArray[i+ 3], 
                 histogArray[i+ 4], histogArray[i+ 5], histogArray[i+ 6], histogArray[i+ 7], 
                 histogArray[i+ 8], histogArray[i+ 9], histogArray[i+10], histogArray[i+11], 
                 histogArray[i+12], histogArray[i+13], histogArray[i+14], histogArray[i+15]);
-            Globals.statusPrint(msgBuffer);
+            Globals.statusPrint(sMsgBuffer);
         } // for i
 
         return 0;
     } // histogram
     
 
-    // Sets midRed, midGreen and midBlue
-    public int adjustColor(int desiredRed, int desiredGreen, int desiredBlue,
-    byte midRed, byte midGreen, byte midBlue, MemImage outImage, 
-    String adjustmentType, int inputImageColor) {
+    // Sets pMidRed, pMidGreen and pMidBlue
+    public int adjustColor(int piDesiredRed, int piDesiredGreen, int piDesiredBlue,
+    Byte pMidRed, Byte pMidGreen, Byte pMidBlue, MemImage pOutImage, 
+    String psAdjustmentType, int piInputImageColor) {
         // Calculate the average color in the image excluding zeros
         // Compute the color difference vector between the average color and the desired color
         // Create a new image by adjusting each color by the difference vector, clipping outliers
-        float redBucket, greenBucket, blueBucket;
-        float avgRed, avgGreen, avgBlue;
-        int bpp = getBitsPerPixel();
-        if((bpp != 24) && (bpp != 8)) {
+        float fRedBucket, fGreenBucket, fBlueBucket;
+        float fAvgRed, fAvgGreen, fAvgBlue;
+        int iBpp = getBitsPerPixel();
+        if((iBpp != 24) && (iBpp != 8)) {
             Globals.statusPrint("MemImage.adjustColor: Input image must be 8 or 24 bits per pixel");
             return -1;
         }
-        int numRows = getHeight();
-        int numCols = getWidth();
-        int row, col;
-        byte red, green, blue;
-        redBucket   = 0.0f;
-        greenBucket = 0.0f;
-        blueBucket  = 0.0f;
-        int totalPixels = 0;
-        int newRed, newGreen, newBlue;
+
+        int iNumRows = getHeight();
+        int iNumCols = getWidth();
+        int iRow, iCol;
+        Byte red = (byte)0, green = (byte)0, blue = (byte)0;
+        fRedBucket   = 0.0f;
+        fGreenBucket = 0.0f;
+        fBlueBucket  = 0.0f;
+        int iTotalPixels = 0;
+        int iNewRed, iNewGreen, iNewBlue;
         int aValue, newValue;
 
-        if(adjustmentType.equalsIgnoreCase("Target")) {
-            for(row = 1; row <= numRows; row++) {
-                for(col = 1; col <= numCols; col++) {
-                    switch(bpp) {
+        if(psAdjustmentType.equalsIgnoreCase("Target")) {
+            for(iRow = 1; iRow <= iNumRows; iRow++) {
+                for(iCol = 1; iCol <= iNumCols; iCol++) {
+                    switch(iBpp) {
                     case 24:
-                        getMPixelRGB(col, row, red, green, blue);
+                        // The following sets parameters red, green, and blue to the colors
+                        // stored at (row, col), as mapped to field bytes
+                        getMPixelRGB(iCol, iRow, red, green, blue);
                         if (red != 0 || green != 0 || blue != 0) {
-                            redBucket += (red);
-                            greenBucket += (green);
-                            blueBucket += (blue);
-                            totalPixels++;
+                            fRedBucket += (red);
+                            fGreenBucket += (green);
+                            fBlueBucket += (blue);
+                            iTotalPixels++;
                         }
                         break;
 
                     case 8:
-                        aValue = getMPixel(col, row);
+                        aValue = getMPixel(iCol, iRow);
                         if (aValue != 0) {
-                            greenBucket += (aValue);
-                            totalPixels++;
+                            fGreenBucket += (aValue);
+                            iTotalPixels++;
                         }
                         break;
                     } // switch
                 } // for col
             } // for row
 
-            if(totalPixels == 0) {
+            if(iTotalPixels == 0) {
                 Globals.statusPrint("MemImage.adjustColor: Cannot adjust image color. No non-zero pixels!");
                 return -1;
             }
 
-            redBucket   /= (float)totalPixels;
-            greenBucket /= (float)totalPixels;
-            blueBucket  /= (float)totalPixels;
-            midRed   = (byte)(redBucket   + 0.5f);
-            midGreen = (byte)(greenBucket + 0.5f);
-            midBlue  = (byte)(blueBucket  + 0.5f);
+            fRedBucket   /= (float)iTotalPixels;
+            fGreenBucket /= (float)iTotalPixels;
+            fBlueBucket  /= (float)iTotalPixels;
+            pMidRed   = (byte)(fRedBucket   + 0.5f);
+            pMidGreen = (byte)(fGreenBucket + 0.5f);
+            pMidBlue  = (byte)(fBlueBucket  + 0.5f);
 
-            //  calculate the color difference vector
-            switch(bpp) {
+            // Calculate the color difference vector
+            switch(iBpp) {
             case 24:
-                avgRed   = (float)desiredRed   - redBucket;
-                avgGreen = (float)desiredGreen - greenBucket;
-                avgBlue  = (float)desiredBlue  - blueBucket;
+                fAvgRed   = (float)piDesiredRed   - fRedBucket;
+                fAvgGreen = (float)piDesiredGreen - fGreenBucket;
+                fAvgBlue  = (float)piDesiredBlue  - fBlueBucket;
                 break;
 
             case 8:
-                if(inputImageColor == REDCOLOR)   avgGreen = (float)desiredRed   - greenBucket;
-                if(inputImageColor == GREENCOLOR) avgGreen = (float)desiredGreen - greenBucket;
-                if(inputImageColor == BLUECOLOR)  avgGreen = (float)desiredBlue  - greenBucket;
+                if(piInputImageColor == REDCOLOR) {
+                    fAvgGreen = (float)piDesiredRed   - fGreenBucket;
+                }  
+                if(piInputImageColor == GREENCOLOR) {
+                    fAvgGreen = (float)piDesiredGreen - fGreenBucket;
+                }
+                if(piInputImageColor == BLUECOLOR) {
+                    fAvgGreen = (float)piDesiredBlue  - fGreenBucket;
+                }
                 break;
             } // switch
         } 
 
-        if(adjustmentType.equalsIgnoreCase("Relative")) {
-            switch(bpp) {
+        if(psAdjustmentType.equalsIgnoreCase("Relative")) {
+            switch(iBpp) {
             case 24:
-                avgRed   = (float)desiredRed;
-                avgGreen = (float)desiredGreen;
-                avgBlue  = (float)desiredBlue;
+                fAvgRed   = (float)piDesiredRed;
+                fAvgGreen = (float)piDesiredGreen;
+                fAvgBlue  = (float)piDesiredBlue;
                 break;
 
             case 8:
-                if (inputImageColor == REDCOLOR)   avgGreen = desiredRed;
-                if (inputImageColor == GREENCOLOR) avgGreen = desiredGreen;
-                if (inputImageColor == BLUECOLOR)  avgGreen = desiredBlue;
+                if (piInputImageColor == REDCOLOR) {
+                    fAvgGreen = piDesiredRed;
+                }
+                if (piInputImageColor == GREENCOLOR) {
+                    fAvgGreen = piDesiredGreen;
+                }
+                if (piInputImageColor == BLUECOLOR) {
+                    fAvgGreen = piDesiredBlue;
+                }
                 break;
             } // switch
         } // if(strcmpi(adjustmentType, "Relative") == 0)
 
-        for(row = 1; row <= numRows; row++) {
-            for(col = 1; col <= numCols; col++) {
-                switch(bpp) {
+        for(iRow = 1; iRow <= iNumRows; iRow++) {
+            for(iCol = 1; iCol <= iNumCols; iCol++) {
+                switch(iBpp) {
                 case 24:
-                    getMPixelRGB(col, row, red, green, blue);
+                    getMPixelRGB(iCol, iRow, red, green, blue);
                     if ((red != 0) || (green != 0) || (blue != 0)) {
-                        newRed   = (int)(red + avgRed);
-                        newGreen = (int)(green + avgGreen);
-                        newBlue  = (int)(blue + avgBlue);
+                        iNewRed   = (int)(red + fAvgRed);
+                        iNewGreen = (int)(green + fAvgGreen);
+                        iNewBlue  = (int)(blue + fAvgBlue);
 
-                        if (newRed < 1)     newRed   = 1;
-                        if (newRed > 255)   newRed   = 255;
-                        if (newGreen < 1)   newGreen = 1;
-                        if (newGreen > 255) newGreen = 255;
-                        if (newBlue < 1)    newBlue  = 1;
-                        if (newBlue > 255)  newBlue  = 255;
+                        if (iNewRed < 1)     iNewRed   = 1;
+                        if (iNewRed > 255)   iNewRed   = 255;
+                        if (iNewGreen < 1)   iNewGreen = 1;
+                        if (iNewGreen > 255) iNewGreen = 255;
+                        if (iNewBlue < 1)    iNewBlue  = 1;
+                        if (iNewBlue > 255)  iNewBlue  = 255;
 
-                        outImage.setMPixelRGB(col, row, 
-                            (byte)newRed, (byte)newGreen, (byte)newBlue);
+                        pOutImage.setMPixelRGB(iCol, iRow, 
+                            (byte)iNewRed, (byte)iNewGreen, (byte)iNewBlue);
                     }
                     break;
 
                 case 8:
-                    aValue = getMPixel(col, row);
+                    aValue = getMPixel(iCol, iRow);
                     if (aValue != 0) {
-                        newValue = aValue + (int)avgGreen;
+                        newValue = aValue + (int)fAvgGreen;
                         if (newValue < 1) {
                             newValue = 1;
                         }
                         if (newValue > 255) {
                             newValue = 255;
                         }
-                        outImage.setMPixel(col, row, (byte)newValue);
+                        pOutImage.setMPixel(iCol, iRow, (byte)newValue);
                     }
                     break;
                 } // switch
             } // for col
         } // for row
 
-        if(adjustmentType.equalsIgnoreCase("Delta")) {
-            for(row = 1; row <= numRows; row++) {
-                for(col = 1; col <= numCols; col++) {
-                    switch(bpp) {
+        if(psAdjustmentType.equalsIgnoreCase("Delta")) {
+            for(iRow = 1; iRow <= iNumRows; iRow++) {
+                for(iCol = 1; iCol <= iNumCols; iCol++) {
+                    switch(iBpp) {
                     case 24:
-                        getMPixelRGB(col, row, red, green, blue);
+                        getMPixelRGB(iCol, iRow, red, green, blue);
                         if ((red != 0) || (green != 0) || (blue != 0)) {
-                            newRed   = red   + desiredRed;
-                            newGreen = green + desiredGreen;
-                            newBlue  = blue  + desiredBlue;
-                            outImage.setMPixelRGB(col, row, (byte)newRed, (byte)newGreen, (byte)newBlue);
+                            iNewRed   = red   + piDesiredRed;
+                            iNewGreen = green + piDesiredGreen;
+                            iNewBlue  = blue  + piDesiredBlue;
+                            pOutImage.setMPixelRGB(iCol, iRow, (byte)iNewRed, (byte)iNewGreen, (byte)iNewBlue);
                         }
                         break;
 
                     case 8:
-                        aValue = getMPixel(col, row);
+                        aValue = getMPixel(iCol, iRow);
                         if (aValue != 0) {
-                            newGreen = aValue + desiredGreen;
-                            outImage.setMPixel(col, row, (byte)newGreen);
+                            iNewGreen = aValue + piDesiredGreen;
+                            pOutImage.setMPixel(iCol, iRow, (byte)iNewGreen);
                         }
                         break;
                     } // switch
@@ -1874,71 +1931,71 @@ public:
     
 
     public int printValue(int x, int y) {
-        String msgBuffer;
-        int bpp = getBitsPerPixel();
+        String sMsgBuffer;
+        int iBpp = getBitsPerPixel();
 
-        if((bpp != 8) && (bpp != 32)) {
+        if((iBpp != 8) && (iBpp != 32)) {
             Globals.statusPrint("MemImage.printValue: Only 8 or 32 bit images are supported");
             return -1;
         }
 
         if((x > getWidth()) || (y > getHeight())) {
-            msgBuffer = "MemImage.printValue: Either x or y are > image bounds. x: " + x + "  y: " + y;
-            Globals.statusPrint(msgBuffer);
+            sMsgBuffer = "MemImage.printValue: Either x or y are > image bounds. x: " + x + "  y: " + y;
+            Globals.statusPrint(sMsgBuffer);
             return -1;
         }
 
         byte[] lineBuffer   = new byte[32];
         float[] fLineBuffer = new float[32];
 
-        msgBuffer = "MemImage.printValue: Display of " + savedFileName;
-        Globals.statusPrint(msgBuffer);
-        msgBuffer = String.format("   %6d %6d %6d %6d %6d %6d %6d %6d %6d %6d %6d %6d",
+        sMsgBuffer = "MemImage.printValue: Display of " + savedFileName;
+        Globals.statusPrint(sMsgBuffer);
+        sMsgBuffer = String.format("   %6d %6d %6d %6d %6d %6d %6d %6d %6d %6d %6d %6d",
                 x,     x + 1, x +  2, x +  3, 
                 x + 4, x + 5, x +  6, x +  7, 
                 x + 8, x + 9, x + 10, x + 11);
-        Globals.statusPrint(msgBuffer);
+        Globals.statusPrint(sMsgBuffer);
 
-        int i,j;
-        int numRows = 10;
-        int numCols = 12;
-        if ((y + numRows) > getHeight()) {
-            numRows = getHeight() - y;
+        int i, j;
+        int iNumRows = 10;
+        int iNumCols = 12;
+        if ((y + iNumRows) > getHeight()) {
+            iNumRows = getHeight() - y;
         }
 
-        if ((x + numCols) > getWidth()) {
-            numCols = getWidth() - x;
+        if ((x + iNumCols) > getWidth()) {
+            iNumCols = getWidth() - x;
         }
 
-        for (i = y; i <= y + numRows; i++) {
+        for (i = y; i <= y + iNumRows; i++) {
             // display the image row to the ict log
-            switch(bpp) {
+            switch(iBpp) {
             case 8:
-                for(j = 0; j <= numCols; j++) {
+                for(j = 0; j <= iNumCols; j++) {
                     lineBuffer[j] = getMPixel(x + j, i);
                 }
 
-                msgBuffer = String.format("%3d: %4d %4d %4d %4d %4d %4d %4d %4d %4d %4d %4d %4d",
+                sMsgBuffer = String.format("%3d: %4d %4d %4d %4d %4d %4d %4d %4d %4d %4d %4d %4d",
                     i, 
                     lineBuffer[0], lineBuffer[1], lineBuffer[2],
                     lineBuffer[3], lineBuffer[4], lineBuffer[5], 
                     lineBuffer[6], lineBuffer[7], lineBuffer[8], 
                     lineBuffer[9], lineBuffer[10], lineBuffer[11]);
-                Globals.statusPrint(msgBuffer);
+                Globals.statusPrint(sMsgBuffer);
                 break;
 
             case 32:
-                for(j = 0; j <= numCols; j++) {
+                for(j = 0; j <= iNumCols; j++) {
                     fLineBuffer[j] = getMPixel32(x + j, i);
                 }
 
-                msgBuffer = String.format("%3d: %6g %6g %6g %6g %6g %6g %6g %6g %6g %6g %6g %6g",
+                sMsgBuffer = String.format("%3d: %6g %6g %6g %6g %6g %6g %6g %6g %6g %6g %6g %6g",
                     i, 
-                    fLineBuffer[0], fLineBuffer[1], fLineBuffer[2],
-                    fLineBuffer[3], fLineBuffer[4], fLineBuffer[5], 
-                    fLineBuffer[6], fLineBuffer[7], fLineBuffer[8], 
+                    fLineBuffer[0], fLineBuffer[ 1], fLineBuffer[ 2],
+                    fLineBuffer[3], fLineBuffer[ 4], fLineBuffer[ 5], 
+                    fLineBuffer[6], fLineBuffer[ 7], fLineBuffer[ 8], 
                     fLineBuffer[9], fLineBuffer[10], fLineBuffer[11]);
-                Globals.statusPrint(msgBuffer);
+                Globals.statusPrint(sMsgBuffer);
                 break;
             } // switch
         } // for i
@@ -1955,29 +2012,28 @@ public:
     } // setFileName
 
 
-    public int clearRectangle(int startX, int startY, int endX, int endY) {
-        int pixelDepth = getBitsPerPixel();
-        int row, col;
+    public int clearRectangle(int piStartX, int piStartY, int piEndX, int piEndY) {
+        int iPixelDepth = getBitsPerPixel();
+        int iRow, iCol;
 
-        for (row = startY; row <= endY; row++) {
-            for (col = startX; col <= endX; col++) {
-                switch (pixelDepth) {
+        for (iRow = piStartY; iRow <= piEndY; iRow++) {
+            for (iCol = piStartX; iCol <= piEndX; iCol++) {
+                switch (iPixelDepth) {
                 case 8:
-                    setMPixel(col, row, (byte)0);
+                    setMPixel(iCol, iRow, (byte)0);
                     break;
 
                 case 24:
-                    setMPixelRGB(col, row, (byte)0, (byte)0, (byte)0);
+                    setMPixelRGB(iCol, iRow, (byte)0, (byte)0, (byte)0);
                     break;
 
                 case 32:
-                    setMPixel32(col, row, 0.0f);
+                    setMPixel32(iCol, iRow, 0.0f);
                     break;
 
                 default:
                     Globals.statusPrint("MemImage.clearRectangle: Unsupported pixel depth");
                     return -1;
-                    break;
                 } // switch
             } // for col
         } // for row
@@ -2050,23 +2106,26 @@ public:
     // Called from:
     //     Globals.tweenImage
     //     RenderObject.renderMeshz
-    public int createAlphaImage(MemImage outImage) {
-        int x, y;
-        byte thePixel, aRed, aGreen, aBlue;
-        if(outImage.bitsPerPixel != 8) {
+    public int createAlphaImage(MemImage pOutImage) {
+        int ix, iy;
+        byte thePixel;
+        Byte aRed = (byte)0, aGreen = (byte)0, aBlue = (byte)0;
+
+        if(pOutImage.bitsPerPixel != 8) {
             Globals.statusPrint("MemImage.createAlphaImage: Output image must be 8 bits per pixel");
             return -1;
         }
 
-        for (y = 1; y <= imageHeight; y++) {
-            for (x = 1; x < imageWidth; x++) {
+        for (iy = 1; iy <= imageHeight; iy++) {
+            for (ix = 1; ix < imageWidth; ix++) {
                 switch(bitsPerPixel) {
                 case 8:
-                    thePixel = getMPixel(x, y);
+                    thePixel = getMPixel(ix, iy);
                     break;
 
                 case 24:
-                    getMPixelRGB(x, y, aRed, aGreen, aBlue);
+                    // The following method sets parameters aRed, aGreen and aBlue
+                    getMPixelRGB(ix, iy, aRed, aGreen, aBlue);
                     thePixel = CHROMAVALUE;
                     if(
                     aRed != CHROMAVALUE || 
@@ -2078,10 +2137,10 @@ public:
                 } // switch
 
                 if(thePixel != CHROMAVALUE) {
-                    outImage.setMPixel(x, y ,(BYTE)255);
+                    pOutImage.setMPixel(ix, iy, (byte)255);
                 }
-            }
-        }
+            } // for ix
+        } // for iy
 
         return 0;
     } // createAlphaImage
@@ -2236,10 +2295,12 @@ public:
         (inImage.getBitsPerPixel() == 8)) {
             // do nothing?
         } else {
-            Globals.statusPrint("MemImage.alphaSmooth3: Images must have 8 or 24 bit pixels.");
+            Globals.statusPrint("MemImage.alphaSmooth3: Images must have 8 bit pixels.");
             return -2;
         }
+
         int bpp = inImage.getBitsPerPixel();
+        /* Not used
         float[][] weight = new float[5][5];
         weight[0][0] = 0.05f;    // impulse function
         weight[0][1] = 0.05f;
@@ -2252,46 +2313,51 @@ public:
         weight[2][0] = 0.05f;
         weight[2][1] = 0.05f;
         weight[2][2] = 0.05f;
+        */
 
         int imHeight = inImage.getHeight();
         int imWidth  = inImage.getWidth();
-        float x1 = 0.0f;
-        float y1 = 0.0f;
-        float z1 = 0.0f;
-        float totalCells = 0.0f;
+        //float x1 = 0.0f; // not used
+        //float y1 = 0.0f; // not used
+        //float z1 = 0.0f; // not used
+        //float totalCells = 0.0f; // not used
         int row, col;
-        float sum, q00,q10,q20;
-        float      q01,q11,q21;
-        float      q02,q12,q22;
+        float sum;
+        float q00, q10, q20;
+        float q01, q11, q21;
+        float q02, q12, q22;
         float factor = 1.0f/9.0f;
 
         for (row = 2; row <= imHeight - 1; row++) {
             for (col = 2; col <= imWidth - 1; col++) {
                 q11 = inImage.getMPixel(col, row);
                 if(q11 != 0) {
+                    // Calculate average color of 3x3 cell centered about row, col
                     q00 = inImage.getMPixel(col - 1, row - 1);
                     q10 = inImage.getMPixel(col    , row - 1);
                     q20 = inImage.getMPixel(col + 1, row - 1);
 
                     q01 = inImage.getMPixel(col - 1, row);
-                    q11 = inImage.getMPixel(col    , row);
+                    // q11 is calculated outside if stmt
                     q21 = inImage.getMPixel(col + 1, row);
 
                     q02 = inImage.getMPixel(col - 1, row + 1);
                     q12 = inImage.getMPixel(col    , row + 1);
                     q22 = inImage.getMPixel(col + 1, row + 1);
 
+                    // Note that the sum below is the sum of 9 values,
+                    // one for each cell in a 3x3 cell
                     sum = (q00 + q10 + q20
                         + q01 + q11 + q21 
                         + q02 + q12 + q22) * factor; 
                 
-                    float diff = 255.0f - sum;   //steepen the ramp to 0
+                    float diff = 255.0f - sum;   // steepen the ramp
                     sum -= (diff * 0.5f);
                     sum = MathUtils.bound(sum, 0.0f, 255.0f);
                     outImage.setMPixel(col, row, (byte)(sum + 0.5f));
-                }
-            }
-        }
+                } // if
+            } // for col
+        } // for row
 
         return 0;
     } // alphaSmooth3
@@ -2322,11 +2388,12 @@ public:
         (inImage.getBitsPerPixel() == 8)) {
             // do nothing?
         } else {
-            Globals.statusPrint("MemImage.alphaSmooth5: Images must have 8 or 24 bit pixels.");
+            Globals.statusPrint("MemImage.alphaSmooth5: Images must have 8 bit pixels.");
             return -2;
         }
 
         int bpp = inImage.getBitsPerPixel();
+        /* Not used
         float[][] weight = new float[5][5];
         weight[0][0] = 0.05f;    // impulse function
         weight[0][1] = 0.05f;
@@ -2339,25 +2406,28 @@ public:
         weight[2][0] = 0.05f;
         weight[2][1] = 0.05f;
         weight[2][2] = 0.05f;
+        */
 
         int imHeight = inImage.getHeight();
         int imWidth  = inImage.getWidth();
-        float x1 = 0.0f;
-        float y1 = 0.0f;
-        float z1 = 0.0f;
-        float totalCells = 0.0f;
+        //float x1 = 0.0f; // not used
+        //float y1 = 0.0f; // not used
+        //float z1 = 0.0f; // not used
+        //float totalCells = 0.0f; // not used
         int row, col;
-        float sum, q00,q10,q20, q30, q40;
-        float      q01,q11,q21, q31, q41;
-        float      q02,q12,q22, q32, q42;
-        float      q03,q13,q23, q33, q43;
-        float      q04,q14,q24, q34, q44;
+        float sum;
+        float q00, q10, q20, q30, q40;
+        float q01, q11, q21, q31, q41;
+        float q02, q12, q22, q32, q42;
+        float q03, q13, q23, q33, q43;
+        float q04, q14, q24, q34, q44;
         float factor = 1.0f/25.0f;
 
         for (row = 3; row <= imHeight - 2; row++) {
             for (col = 3; col <= imWidth - 2; col++) {
                 q22 = inImage.getMPixel(col, row);
                 if(q22 != 0) {
+                    // Calculate average color of 5x5 cell centered about row, col
                     q00 = inImage.getMPixel(col - 2, row - 2);
                     q10 = inImage.getMPixel(col - 1, row - 2);
                     q20 = inImage.getMPixel(col    , row - 2);
@@ -2372,7 +2442,7 @@ public:
 
                     q02 = inImage.getMPixel(col - 2, row);
                     q12 = inImage.getMPixel(col - 1, row);
-
+                    // q22 is calculated outside if stmt
                     q32 = inImage.getMPixel(col + 1, row);
                     q42 = inImage.getMPixel(col + 2, row);
 
@@ -2388,19 +2458,21 @@ public:
                     q34 = inImage.getMPixel(col + 1, row + 2);
                     q44 = inImage.getMPixel(col + 2, row + 2);
 
+                    // Note that the sum below is the sum of 25 values,
+                    // one for each cell in a 5x5 cell
                     sum = (q00 + q10 + q20 + q30 + q40
                         + q01 + q11 + q21 + q31 + q41 
                         + q02 + q12 + q22 + q32 + q42 
                         + q03 + q13 + q23 + q33 + q43 
                         + q04 + q14 + q24 + q34 + q44) * factor; 
                 
-                    float diff = 255.0f - sum;   //steepen the ramp to 0
+                    float diff = 255.0f - sum;   // steepen the ramp
                     sum -= (diff * 0.5f);
                     sum = MathUtils.bound(sum, 0.0f, 255.0f);
-                    outImage.setMPixel(col,row, (byte)(sum + 0.5f));
-                }
-            }
-        }
+                    outImage.setMPixel(col, row, (byte)(sum + 0.5f));
+                } // if
+            } // for col
+        } // for row
 
         return 0;
     } // alphaSmooth5
@@ -2427,17 +2499,17 @@ public:
         (inImage.getBitsPerPixel() == 8)) {
             // do nothing?
         } else {
-            Globals.statusPrint("MemImage.alphaSmooth7: Images must have 8 or 24 bit pixels.");
+            Globals.statusPrint("MemImage.alphaSmooth7: Images must have 8 bit pixels.");
             return -2;
         }
-        int bpp = inImage.getBitsPerPixel();
 
+        int bpp = inImage.getBitsPerPixel();
         int imHeight = inImage.getHeight();
         int imWidth  = inImage.getWidth();
-        float x1 = 0.0f;
-        float y1 = 0.0f;
-        float z1 = 0.0f;
-        float totalCells = 0.0f;
+        //float x1 = 0.0f; // not used
+        //float y1 = 0.0f; // not used
+        //float z1 = 0.0f; // not used
+        //float totalCells = 0.0f; // not used
         int row, col;
         float sum;
         float q00, q10, q20, q30, q40, q50, q60;
@@ -2453,6 +2525,7 @@ public:
             for (col = 4; col <= imWidth - 3; col++) {
                 q33 = inImage.getMPixel(col, row);
                 if(q33 != 0) {
+                    // Calculate average color of 7x7 cell centered about row, col
                     q00 = inImage.getMPixel(col - 3, row - 3);
                     q10 = inImage.getMPixel(col - 2, row - 3);
                     q20 = inImage.getMPixel(col - 1, row - 3);
@@ -2480,7 +2553,7 @@ public:
                     q03 = inImage.getMPixel(col - 3, row );
                     q13 = inImage.getMPixel(col - 2, row );
                     q23 = inImage.getMPixel(col - 1, row );
-
+                    // q33 is calculated outside if stmt
                     q43 = inImage.getMPixel(col + 1, row );
                     q53 = inImage.getMPixel(col + 2, row );
                     q63 = inImage.getMPixel(col + 3, row );
@@ -2509,6 +2582,8 @@ public:
                     q56 = inImage.getMPixel(col + 2, row + 3);
                     q66 = inImage.getMPixel(col + 3, row + 3);
 
+                    // Note that the sum below is the sum of 49 values,
+                    // one for each cell in a 7x7 cell
                     sum = (q00 + q10 + q20 + q30 + q40 + q50 + q60
                         + q01 + q11 + q21 + q31 + q41 + q51 + q61 
                         + q02 + q12 + q22 + q32 + q42 + q52 + q62 
@@ -2518,13 +2593,13 @@ public:
                         + q06 + q16 + q26 + q36 + q46 + q56 + q66)
                         * factor; 
 
-                    float diff = 255.0f - sum;   //steepen the ramp to 0
+                    float diff = 255.0f - sum;   // steepen the ramp
                     sum -= (diff * 0.5f);
                     sum = MathUtils.bound(sum, 0.0f, 255.0f);
                     outImage.setMPixel(col, row, (byte)(sum + 0.5f));
-                }
-            }
-        }
+                } // if
+            } // for col
+        } // for row
 
         return 0;
     } // alphaSmooth7
