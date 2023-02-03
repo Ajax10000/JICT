@@ -93,7 +93,7 @@ public class SceneElement {
 
     // Pointer to screen renderable representation
     // Changed from private to public as it is used by SceneList
-    public RenderObject screenObject;
+    public RenderObject mScreenRdrObject;
 
     // 1 = use alpha blending, 0 = no alpha blending
     // Model <modelName> [Blend|NoBlend]
@@ -116,17 +116,17 @@ public class SceneElement {
     // Rotation in Angles
     // Rotation <rx>, <ry>, <rz>
     // Changed from private to public as it is used by SceneList
-    public Point3d rotation;
+    public Point3d mRotation;
     
     // Scale factor. < 1 = contraction.  > 1 = expansion.
     // Scale <sx>, <sy>, <sz>
     // Changed from private to public as it is used by SceneList
-    public Point3d scale;
+    public Point3d mScale;
 
     // Translation in Pixels
     // Translation <tx>, <ty>, <tz>
     // Changed from private to public as it is used by SceneList
-    public Point3d translation;
+    public Point3d mTranslation;
 
     // Optional. Alpha image pathname
     // [AlphaImagePath [None|<pathName>]]
@@ -154,15 +154,16 @@ public class SceneElement {
     // Point to previous SceneElement
     // Changed from private to public as it is used 
     // by SceneList in method addSceneElement
-    public SceneElement prevEntry;
+    public SceneElement mPrevEntry;
 
     // Point to next SceneElement
     // Changed from private to public as it is used
     // by SceneList in method addSceneElement
-    public SceneElement nextEntry;
+    public SceneElement mNextEntry;
   // friend class sceneList;
 
     // Model Types
+    // These were originally defined in ICT20.H
     public static final int I_IMAGE        = 1;
     public static final int I_SHAPE        = 2;
     public static final int I_QUADMESH     = 3;
@@ -170,6 +171,7 @@ public class SceneElement {
     public static final int I_LIGHTSOURCE  = 5;
 
 
+    // This constructor originally came from MODEL.CPP
     // Called from:
     //     SceneList.addSceneElement
     public SceneElement(String psmName, String psfName, boolean pbBlendI,
@@ -199,28 +201,28 @@ public class SceneElement {
             this.pointOfReference.z = pRefPoint.z;
         }
 
-        rotation = new Point3d(); // Constructor sets x, y and z members to 0.0f
+        mRotation = new Point3d(); // Constructor sets x, y and z members to 0.0f
         if(pRtPt != null) { 
-            rotation.x = pRtPt.x;
-            rotation.y = pRtPt.y;
-            rotation.z = pRtPt.z;
+            mRotation.x = pRtPt.x;
+            mRotation.y = pRtPt.y;
+            mRotation.z = pRtPt.z;
         }
 
-        scale = new Point3d(); // Constructor sets x, y and z members to 0.0f
+        mScale = new Point3d(); // Constructor sets x, y and z members to 0.0f
         if(pScPt != null) {
-            scale.x = pScPt.x;
-            scale.y = pScPt.y;
-            scale.z = pScPt.z;
+            mScale.x = pScPt.x;
+            mScale.y = pScPt.y;
+            mScale.z = pScPt.z;
         }
 
-        translation = new Point3d(); // Constructor sets x, y and z members to 0.0f
+        mTranslation = new Point3d(); // Constructor sets x, y and z members to 0.0f
         if(pTrPt != null) {
-            translation.x = pTrPt.x;
-            translation.y = pTrPt.y;
-            translation.z = pTrPt.z;
+            mTranslation.x = pTrPt.x;
+            mTranslation.y = pTrPt.y;
+            mTranslation.z = pTrPt.z;
         }
     
-        this.screenObject = null;
+        this.mScreenRdrObject = null;
 
         // Handle moving models
         this.mbValid = true;
@@ -242,8 +244,8 @@ public class SceneElement {
 
         this.msAlphaPath = psAlphaPath;
         this.mbCompoundModelMember = pbCompoundMMember;
-        this.prevEntry = null;
-        this.nextEntry = null;
+        this.mPrevEntry = null;
+        this.mNextEntry = null;
 
         if (bIctDebug) {
             String sMsgBuffer;
@@ -253,7 +255,9 @@ public class SceneElement {
     } // SceneElement ctor
 
 
+    // This method originally came from SCENELST.H
     // Called from:
+    //     fShowList
     //     SceneList.display
     public void display() {
         System.out.println(toString());
@@ -270,15 +274,16 @@ public class SceneElement {
         " aScale: " + mfAlphaScale +
         " File: " + msFileName + " Motion: " + msModelMotionPath + "\n" +
         " R S T: " +
-        rotation.x    + " " + rotation.y    + " " + rotation.z    + " " +
-        scale.x       + " " + scale.y       + " " + scale.z       + " " +
-        translation.x + " " + translation.y + " " + translation.z + "\n"
-        + " prev " + prevEntry + " next " + nextEntry;
+        mRotation.x    + " " + mRotation.y    + " " + mRotation.z    + " " +
+        mScale.x       + " " + mScale.y       + " " + mScale.z       + " " +
+        mTranslation.x + " " + mTranslation.y + " " + mTranslation.z + "\n"
+        + " prev " + mPrevEntry + " next " + mNextEntry;
 
         return thisObject;
     } // toString
 
 
+    // This method originally came from MODEL.CPP
     // Called from:
     //     SceneList.addSceneElement
     public boolean isValid() {
@@ -290,11 +295,12 @@ public class SceneElement {
         SceneElement next = this;     // the list in the forward direction.
         while (next != null) {
             next.display();
-            next = next.nextEntry;
+            next = next.mNextEntry;
         } // while
     } // fshowlist
 
 
+    // This method (destructor) originally came from MODEL.CPP
     public void finalize() {
         if (bIctDebug) {
             Globals.statusPrint("sceneElement Destructor");
@@ -302,6 +308,7 @@ public class SceneElement {
     } // finalize
 
 
+    // This method originally came from MODEL.CPP
     // Class Scene also has a writeFile method. 
     // Both Scene.writeFile and SceneElement.writeFile are called from 
     // SceneList.writeList.
@@ -338,9 +345,9 @@ public class SceneElement {
                 "FileName " + this.msFileName + "\n" +
                 "MotionPath " + this.msModelMotionPath + "\n" +
                 "AlphaImagePath " + this.msAlphaPath + "\n" +
-                "Rotation "    + this.rotation.x    + "," + this.rotation.y    + "," + this.rotation.z + "\n" +
-                "Scale "       + this.scale.x       + "," + this.scale.y       + "," + this.scale.z + "\n" +
-                "Translation " + this.translation.x + "," + this.translation.y + "," + this.translation.z + "\n" +
+                "Rotation "    + this.mRotation.x    + "," + this.mRotation.y    + "," + this.mRotation.z + "\n" +
+                "Scale "       + this.mScale.x       + "," + this.mScale.y       + "," + this.mScale.z + "\n" +
+                "Translation " + this.mTranslation.x + "," + this.mTranslation.y + "," + this.mTranslation.z + "\n" +
                 "ReferencePoint " + this.pointOfReference.x + "," + this.pointOfReference.y + 
                 "," + this.pointOfReference.z + "\n\n";
         } else {
@@ -350,9 +357,9 @@ public class SceneElement {
                 "FileName " + this.msFileName + "\n" +
                 "MotionPath " + this.msModelMotionPath + "\n" +
                 "AlphaImagePath " + this.msAlphaPath + "\n" +
-                "Rotation "    + this.rotation.x    + "," + this.rotation.y    + "," + this.rotation.z + "\n" +
-                "Scale "       + this.scale.x       + "," + this.scale.y       + "," + this.scale.z + "\n" +
-                "Translation " + this.translation.x + "," + this.translation.y + "," + this.translation.z + "\n\n";
+                "Rotation "    + this.mRotation.x    + "," + this.mRotation.y    + "," + this.mRotation.z + "\n" +
+                "Scale "       + this.mScale.x       + "," + this.mScale.y       + "," + this.mScale.z + "\n" +
+                "Translation " + this.mTranslation.x + "," + this.mTranslation.y + "," + this.mTranslation.z + "\n\n";
         }
         
         try {
