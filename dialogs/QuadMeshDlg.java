@@ -68,10 +68,10 @@ protected:
 */
 
     // Instantiated by MainFrame.onToolsCreatemesh
-    public QuadMeshDlg(JFrame pParent /*=NULL*/, boolean pModal) {
-        super(pParent, pModal);
-        //{{AFX_DATA_INIT(CQuadMeshDlg)
-        //}}AFX_DATA_INIT
+    public QuadMeshDlg(JFrame pParent, boolean pbModal) {
+        super(pParent, pbModal);
+        setTitle("Generate a Quadrilateral Mesh Model");
+
     } // QuadMeshDlg ctor
 
     
@@ -91,31 +91,31 @@ protected:
 
     // This method came from QUADMESHDLG.CPP
     void onOK() {
-        String texturePath,destinationDir;
-        String aTexture, aDirectory;
+        String sTexturePath, sDestinationDir;
+        String sTexture, sDirectory;
 
         // The mesh type is assumed to be one more than the  
         // order in which its name appears in the combo box.
-        int meshType = m_QMeshType.getSelectedIndex() + 1; 
-        texturePath = m_TextureImage.getText();
-        destinationDir = m_ModelDirectory.getText();
+        int iMeshType = m_QMeshType.getSelectedIndex() + 1; 
+        sTexturePath = m_TextureImage.getText();
+        sDestinationDir = m_ModelDirectory.getText();
 
-        String ddrive, ddir, dfile, dext;
-        String outDirectory;
+        String sDdrive, sDdir, sDfile, sDext;
+        String sOutDirectory;
 
-        _splitpath(destinationDir, ddrive, ddir, dfile, dext);
-        _makepath(outDirectory, ddrive, ddir, "", "");
+        _splitpath(sDestinationDir, sDdrive, sDdir, sDfile, sDext);
+        _makepath(sOutDirectory, sDdrive, sDdir, "", "");
         
         Globals.statusPrint("Generating Quad Mesh Model."); 
-        String msgText = "Mesh Type: " + meshType + " Model Path: " + texturePath;
-        Globals.statusPrint(msgText);
+        String sMsgText = "Mesh Type: " + iMeshType + " Model Path: " + sTexturePath;
+        Globals.statusPrint(sMsgText);
         
-        int aStatus = Globals.createQMeshModel(texturePath, outDirectory, meshType);
-        if(aStatus == -1) {
+        int iStatus = Globals.createQMeshModel(sTexturePath, sOutDirectory, iMeshType);
+        if(iStatus == -1) {
             Globals.statusPrint("Quad Mesh Model could not be created. See log for more information.");
         } else {
-            msgText = "Models Placed in directory: " + outDirectory;
-            Globals.statusPrint(msgText);
+            sMsgText = "Models Placed in directory: " + sOutDirectory;
+            Globals.statusPrint(sMsgText);
         }
     } // onOK
 
@@ -126,9 +126,9 @@ protected:
         JFileChooser dlg = new JFileChooser();
         dlg.setFileSelectionMode(JFileChooser.FILES_ONLY);
         dlg.setFileFilter(new BMPFileFilter());
-        int result = dlg.showDialog(this, "Select BMP file");
+        int iResult = dlg.showDialog(this, "Select BMP file");
 
-        if (result == JFileChooser.APPROVE_OPTION) {
+        if (iResult == JFileChooser.APPROVE_OPTION) {
             m_TextureImage.setText(dlg.getSelectedFile().getName());
         }	
     } // onLocateTexture
@@ -139,9 +139,9 @@ protected:
         // Find a destination directory
         JFileChooser dlg = new JFileChooser();
         dlg.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        int result = dlg.showDialog(this, "Select directory");
+        int iResult = dlg.showDialog(this, "Select directory");
 
-        if (result == JFileChooser.APPROVE_OPTION) {
+        if (iResult == JFileChooser.APPROVE_OPTION) {
             m_ModelDirectory.setText(dlg.getSelectedFile().getName());	
         }
     } // onLocateDestDir
