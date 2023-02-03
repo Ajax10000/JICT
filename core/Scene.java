@@ -137,7 +137,7 @@ public class Scene {
 
     // Called from:
     //     SceneList.addScene
-    boolean isValid() {
+    public boolean isValid() {
         return this.mbIsValid;
     } // isValid
 
@@ -154,7 +154,7 @@ public class Scene {
     // SceneList.writeList.
     // Called from:
     //     SceneList.writeList
-    void writeFile(BufferedWriter fileout) {
+    public void writeFile(BufferedWriter fileout) {
         String sSequenceArray, sColorArray;
 
         // Creates the scene portion of a scene file
@@ -184,7 +184,7 @@ public class Scene {
     // This method came from SCENELST.H
     // Called from:
     //     SceneList.display
-    void display() {
+    public void display() {
         System.out.print(toString());
     } // display
 
