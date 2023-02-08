@@ -7,6 +7,8 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.border.Border;
+import javax.swing.border.EtchedBorder;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -17,11 +19,19 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 
 // This dialog is displayed when the user selects the 
 // "Warp Image..." menu item from the Tools menu.
 // See method onToolsWarpImage of the MainFrame class.
 // To see what it should look like, see Figure D.7 on p 280 of the book.
+//
+// Per p 279 of the book Visual Special Effects Toolkit in C++:
+// The Warp Image... menu item is a demonstration of one of the planar texture-
+// mapping algorithms discussed in this text. When this option is selected, the
+// dialog box shown in Figure D.7 appears. Enter the desired rotation angles 
+// and/or scale factors and press the OK button. A sample image is texture-mapped
+// onto the planar surface described by the rotation angles you supplied.
 public class WarpParamDlg extends JDialog {
     private MainFrame mMainFrame;
 
@@ -55,8 +65,8 @@ public class WarpParamDlg extends JDialog {
     private JButton btnOK;
     private JButton btnCancel;
 
-    private JPanel pnlRotAngleGroup;
-    private JPanel pnlSclFactorGroup;
+    private static final int iDlgWidth  = 380;
+    private static final int iDlgHeight = 300;
 
 /*
 class CWarpParamDlg : public CDialog
@@ -102,7 +112,7 @@ protected:
         super(pParent, pModal);
         // mMainFrame = (MainFrame)pParent;
         setTitle("Enter Warp Parameters");
-        setSize(400, 300);
+        setSize(iDlgWidth, iDlgHeight);
         setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 
         m_rx = "0.0";
@@ -116,42 +126,13 @@ protected:
         BoxLayout boxLayout = new BoxLayout(panel, BoxLayout.Y_AXIS);
         panel.setLayout(boxLayout);
 
-        Box row01Box = Box.createHorizontalBox();
-        Box row02Box = Box.createHorizontalBox();
-        Box vertBtnBox = Box.createVerticalBox();
+        Box vertBox = Box.createVerticalBox();
+        Box topBox = addTopSection();
+        Box botBox = addBotSection();
 
-        addRotationFields();
-        addScaleFields();
-        Component rectSpacer = Box.createRigidArea(new Dimension(30, 90));
-        row01Box.add(pnlRotAngleGroup);
-        row01Box.add(rectSpacer);
-
-        Component smallRectSpacer = Box.createRigidArea(new Dimension(30, 25));
-        Dimension btnDim = new Dimension(80, 25);
-        btnOK = new JButton("  OK  ");
-        btnOK.setSize(btnDim);
-        btnOK.setPreferredSize(btnDim);
-        btnOK.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent ae) {
-                onOK();
-            }
-        });
-
-        Component smallVertSpacer = Box.createRigidArea(new Dimension(80, 5));
-        btnCancel = new JButton("Cancel");
-        btnCancel.setSize(btnDim);
-        btnCancel.setPreferredSize(btnDim);
-
-        vertBtnBox.add(smallRectSpacer);
-        vertBtnBox.add(btnOK);
-        vertBtnBox.add(smallVertSpacer);
-        vertBtnBox.add(btnCancel);
-
-        row02Box.add(pnlSclFactorGroup);
-        row02Box.add(vertBtnBox);
-
-        panel.add(row01Box);
-        panel.add(row02Box);
+        vertBox.add(topBox);
+        vertBox.add(botBox);
+        panel.add(vertBox);
         add(panel);
 
         setVisible(true);
@@ -160,14 +141,20 @@ protected:
 
     // Called from:
     //     constructor
-    private void addRotationFields() {
+    private Box addTopSection() {
+        final int iPnlWidth = 180;
+        final int iPnlHeight = 150;
+
         Dimension lblSize = new Dimension(80, 25);
         Dimension lblFldSpacerSize = new Dimension(10, 25);
-        Dimension fldSize = new Dimension(50, 30);
+        Dimension fldSize = new Dimension(30, 30);
+        Border loweredetched = BorderFactory.createEtchedBorder(EtchedBorder.LOWERED);
 
         Box row01Box = Box.createHorizontalBox();
         Box row02Box = Box.createHorizontalBox();
         Box row03Box = Box.createHorizontalBox();
+        Box row04Box = Box.createHorizontalBox();
+        Box row05Box = Box.createHorizontalBox();
 
         // Create the components for row 01
         JLabel lblRotX = new JLabel("X-Axis: ");
@@ -185,7 +172,14 @@ protected:
         row01Box.add(lblFldSpacer01);
         row01Box.add(fldRotAboutXAxis);
 
-        // Create the components for row 02
+        // Create component for row02Box
+        // This is a spacer between the X-Axis text field and Y-Axis text field
+        Component rowSpacer01 = Box.createRigidArea(new Dimension(iDlgWidth - 5, 8));
+
+        // Populate row02Box
+        row02Box.add(rowSpacer01);
+
+        // Create the components for row03Box
         JLabel lblRotY = new JLabel("Y-Axis: ");
         lblRotY.setSize(lblSize);
         lblRotY.setPreferredSize(lblSize);
@@ -196,12 +190,19 @@ protected:
         fldRotAboutYAxis.setSize(fldSize);
         fldRotAboutYAxis.setPreferredSize(fldSize);
 
-        // Populate row02Box
-        row02Box.add(lblRotY);
-        row02Box.add(lblFldSpacer02);
-        row02Box.add(fldRotAboutYAxis);
+        // Populate row03Box
+        row03Box.add(lblRotY);
+        row03Box.add(lblFldSpacer02);
+        row03Box.add(fldRotAboutYAxis);
 
-        // Create the components for row 03
+        // Create the component for row04Box
+        // This is a spacer between the Y-Axis text field and the Z-Axis text field
+        Component rowSpacer02 = Box.createRigidArea(new Dimension(iPnlWidth - 5, 8));
+
+        // Populate row04Box
+        row04Box.add(rowSpacer02);
+
+        // Create the components for row05Box
         JLabel lblRotZ = new JLabel("Z-Axis: ");
         lblRotZ.setSize(lblSize);
         lblRotZ.setPreferredSize(lblSize);
@@ -212,31 +213,54 @@ protected:
         fldRotAboutZAxis.setSize(fldSize);
         fldRotAboutZAxis.setPreferredSize(fldSize);
 
-        // Populate row03Box
-        row03Box.add(lblRotZ);
-        row03Box.add(lblFldSpacer03);
-        row03Box.add(fldRotAboutZAxis);
+        // Populate row05Box
+        row05Box.add(lblRotZ);
+        row05Box.add(lblFldSpacer03);
+        row05Box.add(fldRotAboutZAxis);
 
-        pnlRotAngleGroup = new JPanel();
+        Dimension pnlSize = new Dimension(iPnlWidth, iPnlHeight);
+        JPanel pnlRotAngleGroup = new JPanel();
+        pnlRotAngleGroup.setSize(pnlSize);
+        pnlRotAngleGroup.setMaximumSize(pnlSize);
+        pnlRotAngleGroup.setPreferredSize(pnlSize);
         BoxLayout boxLayout = new BoxLayout(pnlRotAngleGroup, BoxLayout.Y_AXIS);
         pnlRotAngleGroup.setLayout(boxLayout);
-        pnlRotAngleGroup.setBorder(BorderFactory.createTitledBorder("Rotation Angles in Degrees"));
+        pnlRotAngleGroup.setBorder(BorderFactory.createTitledBorder(loweredetched, "Rotation Angles in Degrees"));
 
         pnlRotAngleGroup.add(row01Box);
         pnlRotAngleGroup.add(row02Box);
         pnlRotAngleGroup.add(row03Box);
-    } // addRotationFields
+        pnlRotAngleGroup.add(row04Box);
+        pnlRotAngleGroup.add(row05Box);
+        pnlRotAngleGroup.setAlignmentX(SwingConstants.LEFT);
+
+        Box vertBox = Box.createVerticalBox();
+        // Component spacer = Box.createRigidArea(new Dimension(70, 150));
+        Component spacer = Box.createHorizontalGlue();
+        vertBox.add(spacer);
+
+        Box horizontalBox = Box.createHorizontalBox();
+        horizontalBox.add(pnlRotAngleGroup);
+        horizontalBox.add(vertBox);
+
+        return horizontalBox;
+    } // addTopSection
 
 
     // Called from:
     //     constructor
-    private void addScaleFields() {
+    private Box addBotSection() {
+        final int iPnlWidth = 180;
+        final int iPnlHeight = 100;
+
         Dimension lblSize = new Dimension(80, 25);
         Dimension lblFldSpacerSize = new Dimension(10, 25);
-        Dimension fldSize = new Dimension(50, 30);
+        Dimension fldSize = new Dimension(30, 30);
+        Border loweredetched = BorderFactory.createEtchedBorder(EtchedBorder.LOWERED);
 
         Box row01Box = Box.createHorizontalBox();
         Box row02Box = Box.createHorizontalBox();
+        Box row03Box = Box.createHorizontalBox();
 
         // Create components for row01Box
         JLabel lblSclX = new JLabel("X-Axis: ");
@@ -254,7 +278,14 @@ protected:
         row01Box.add(lblFldSpacer01);
         row01Box.add(fldSclAlongXAxis);
 
-        // Create components for row02Box
+        // Create component for row02Box
+        // This is a separator between the X-Axis text field and the Y-Axis text field
+        Component rowSpacer = Box.createRigidArea(new Dimension(iPnlWidth - 5, 8));
+
+        // Populate row02Box
+        row02Box.add(rowSpacer);
+
+        // Create components for row03Box
         JLabel lblSclY = new JLabel("Y-Axis: ");
         lblSclY.setSize(lblSize);
         lblSclY.setPreferredSize(lblSize);
@@ -265,19 +296,63 @@ protected:
         fldSclAlongYAxis.setSize(fldSize);
         fldSclAlongYAxis.setPreferredSize(fldSize);
 
-        // Populate row02Box
-        row02Box.add(lblSclY);
-        row02Box.add(lblFldSpacer02);
-        row02Box.add(fldSclAlongYAxis);
+        // Populate row03Box
+        row03Box.add(lblSclY);
+        row03Box.add(lblFldSpacer02);
+        row03Box.add(fldSclAlongYAxis);
 
-        pnlSclFactorGroup = new JPanel();
+        Dimension pnlSize = new Dimension(iPnlWidth, iPnlHeight);
+        JPanel pnlSclFactorGroup = new JPanel();
+        pnlSclFactorGroup.setSize(pnlSize);
+        pnlSclFactorGroup.setMaximumSize(pnlSize);
+        pnlSclFactorGroup.setPreferredSize(pnlSize);
+
         BoxLayout boxLayout = new BoxLayout(pnlSclFactorGroup, BoxLayout.Y_AXIS);
         pnlSclFactorGroup.setLayout(boxLayout);
-        pnlSclFactorGroup.setBorder(BorderFactory.createTitledBorder("Scale Factors"));
+        pnlSclFactorGroup.setBorder(BorderFactory.createTitledBorder(loweredetched, "Scale Factors"));
 
         pnlSclFactorGroup.add(row01Box);
         pnlSclFactorGroup.add(row02Box);
-    } // addScaleFields
+        pnlSclFactorGroup.add(row03Box);
+
+        // Component rectSpacer = Box.createRigidArea(new Dimension(15, 90));
+        Component rectSpacer = Box.createHorizontalGlue();
+        Box row00Box = Box.createHorizontalBox();
+        row00Box.add(pnlSclFactorGroup);
+        row00Box.add(rectSpacer);
+
+        Box vertBtnBox = Box.createVerticalBox();
+        Component smallRectSpacer = Box.createRigidArea(new Dimension(30, 25));
+        Dimension btnDim = new Dimension(80, 25);
+        btnOK = new JButton("OK");
+        btnOK.setSize(btnDim);
+        btnOK.setMinimumSize(btnDim);
+        btnOK.setMaximumSize(btnDim);
+        btnOK.setPreferredSize(btnDim);
+        btnOK.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ae) {
+                onOK();
+            }
+        });
+
+        Component smallVertSpacer = Box.createRigidArea(new Dimension(80, 5));
+        btnCancel = new JButton("Cancel");
+        btnCancel.setSize(btnDim);
+        btnCancel.setMinimumSize(btnDim);
+        btnCancel.setMaximumSize(btnDim);
+        btnCancel.setPreferredSize(btnDim);
+
+        vertBtnBox.add(smallRectSpacer);
+        vertBtnBox.add(btnOK);
+        vertBtnBox.add(smallVertSpacer);
+        vertBtnBox.add(btnCancel);
+
+        Box horizontalBox = Box.createHorizontalBox();
+        horizontalBox.add(row00Box);
+        horizontalBox.add(vertBtnBox);
+
+        return horizontalBox;
+    } // addBotSection
 
 
     /*
@@ -309,49 +384,45 @@ protected:
         // Get the floating point values the user entered.
         // If they are valid floating point values, store them in the appropriate 
         // MainFrame class field.
-        Float rx = getFloatValue(m_rx);
-        if (rx == null) {
+        Float parsedFloatValue = 0.0f;
+        if (getFloatValue(m_rx, parsedFloatValue) == null) {
+            mMainFrame.mWarpRotateX = parsedFloatValue.floatValue();
+        } else {
             JOptionPane.showMessageDialog(this, "Rotation value entered in x-axis is not a valid number.");
-            fldRotAboutXAxis.requestFocus();
+            fldRotAboutXAxis.requestFocusInWindow();
             return;
-        } else {
-            mMainFrame.mWarpRotateX = rx;
         }
 
-        Float ry = getFloatValue(m_ry);
-        if (ry == null) {
+        if (getFloatValue(m_ry, parsedFloatValue) == null) {
+            mMainFrame.mWarpRotateY = parsedFloatValue.floatValue();
+        } else {
             JOptionPane.showMessageDialog(this, "Rotation value entered in y-axis is not a valid number.");
-            fldRotAboutYAxis.requestFocus();
+            fldRotAboutYAxis.requestFocusInWindow();
             return;
-        } else {
-            mMainFrame.mWarpRotateY = ry;
         }
 
-        Float rz = getFloatValue(m_rz);
-        if (rz == null) {
+        if (getFloatValue(m_rz, parsedFloatValue) == null) {
+            mMainFrame.mWarpRotateZ = parsedFloatValue.floatValue();
+        } else {
             JOptionPane.showMessageDialog(this, "Rotation value entered in z-axis is not a valid number.");
-            fldRotAboutZAxis.requestFocus();
+            fldRotAboutZAxis.requestFocusInWindow();
             return;
-        } else {
-            mMainFrame.mWarpRotateZ = rz;
         }
 
-        Float sx = getFloatValue(m_sx);
-        if (sx == null) {
+        if (getFloatValue(m_sx, parsedFloatValue) == null) {
+            mMainFrame.mWarpScaleX = parsedFloatValue.floatValue();
+        } else {
             JOptionPane.showMessageDialog(this, "Scale value entered in x-axis is not a valid number.");
-            fldSclAlongXAxis.requestFocus();
+            fldSclAlongXAxis.requestFocusInWindow();
             return;
-        } else {
-            mMainFrame.mWarpScaleX = sx;
         }
 
-        Float sy = getFloatValue(m_sy);
-        if (sy == null) {
-            JOptionPane.showMessageDialog(this, "Scale value entered in y-axis is not a valid number.");
-            fldSclAlongYAxis.requestFocus();
-            return;
+        if (getFloatValue(m_sy, parsedFloatValue) == null) {
+            mMainFrame.mWarpScaleY = parsedFloatValue.floatValue();
         } else {
-            mMainFrame.mWarpScaleY = sy;
+            JOptionPane.showMessageDialog(this, "Scale value entered in y-axis is not a valid number.");
+            fldSclAlongYAxis.requestFocusInWindow();
+            return;
         }
 
         mMainFrame.onWarpParamDlgClosed();
@@ -359,17 +430,15 @@ protected:
     } // onOk
 
 
-    private Float getFloatValue(String psFloatAsString) {
-        Float fValue = null;
-
+    private NumberFormatException getFloatValue(String psFloatAsString, Float pFValue) {
         try {
-            fValue = Float.valueOf(psFloatAsString);
+            pFValue = Float.valueOf(psFloatAsString);
         } catch (NumberFormatException nfe) {
-            fValue = null;
+            return nfe;
         }
-
-        return fValue;
+        return null;
     }
+
 
     // Called when the user clicks on the Cancel button
     public void onCancel() {
