@@ -163,12 +163,12 @@ protected:
 
 
     // Read in: 
-    //     onToolsWarpImage
+    //     onWarpParamDlgClosed
     //     ScenePreviewDlg.setTextBoxesWithModelTransform (passed as parameter to DecimalFormat.format)
     //     ScenePreviewDlg.onCmdPlus (passed as parameters to MathUtils.fPolar and SceneList.setCurrentModelTransform)
     // Modified in: 
     //     the constructor, when it calls initFields
-    //     onToolsWarpImage. Here they are passed as parameters to Globals.iwarpz
+    //     onWarpParamDlgClosed. Here they are passed as parameters to Globals.iwarpz
     //     ScenePreviewDlg.chooseModel
     //     ScenePreviewDlg.onCmdPlus
     //     ScenePreviewDlg.onCmdReset
@@ -176,11 +176,11 @@ protected:
     public Float mWarpRotateX, mWarpRotateY, mWarpRotateZ;
 
     // Read in: 
-    //     onToolsWarpImage Here they are passed as parameters to Globals.iwarpz
+    //     onWarpParamDlgClosed Here they are passed as parameters to Globals.iwarpz
     //     ScenePreviewDlg.setTextBoxesWithModelTransform
     // Modified in: 
     //     constructor, when it calls initFields
-    //     onToolsWarpImage. 
+    //     onWarpParamDlgClosed 
     //     ScenePreviewDlg.chooseModel
     //     ScenePreviewDlg.onCmdReset
     //     ScenePreviewDlg.onSelChangeCmbModels
@@ -198,16 +198,22 @@ protected:
     public float mWarpTranslateX, mWarpTranslateY, mWarpTranslateZ;
 
     // Read in: 
-    //     ScenePreviewDlg.setTextBoxesWithViewTransform
-    //     ScenePreviewDlg.onOK
-    public float viewRotateX, viewRotateY, viewRotateZ;
-
-    // Read in: 
+    //     getViewMatrix - converted to radians before being passed to TMatrix.rotate
     //     ScenePreviewDlg.setTextBoxesWithViewTransform
     //     ScenePreviewDlg.onOK
     // Modified in:
+    //     onToolsCreateASceneList - passed as an output parameter to SceneList.getViewTransform
     //     ScenePreviewDlg.onCmdReset
-    public float viewTranslateX, viewTranslateY, viewTranslateZ;
+    public float mViewRotateX, mViewRotateY, mViewRotateZ;
+
+    // Read in: 
+    //     getViewMatrix - passed as a parameter to TMatrix.translate
+    //     ScenePreviewDlg.setTextBoxesWithViewTransform
+    //     ScenePreviewDlg.onOK
+    // Modified in:
+    //     ScenePreviewDlg.onCmdPlus
+    //     ScenePreviewDlg.onCmdReset
+    public float mViewTranslateX, mViewTranslateY, mViewTranslateZ;
     public String sceneName;
 
     // Read in ScenePreviewDlg.onOk
@@ -219,63 +225,111 @@ protected:
     public Integer mIOutputRows = 0, mIOutputColumns = 0;
 
     // Changed from int to boolean
+    // Initialized to false in initFields
     public boolean cutoutEnabled;         // Menu control variables
 
     // Changed from int to boolean
-    public boolean previewSceneEnabled;
-
-    // Chaned from int to boolean
-    public boolean previewSequenceEnabled;
-
-    // Changed from int to boolean
-    public boolean renderSceneEnabled;
+    // Initialized to false in initFields
+    // Modified in:
+    //     onToolsCreateASceneList - set to false at end of method
+    public boolean mbPreviewSceneEnabled;
 
     // Changed from int to boolean
-    public boolean renderSequenceEnabled;
+    // Initialized to false in initFields
+    // Modified in:
+    //     onToolsCreateASceneList - set to true or false depending on value of effectType
+    public boolean mbPreviewSequenceEnabled;
 
     // Changed from int to boolean
-    // Toggled in method onToolsRemoveSampleColors
-    // Affects ImageView.onLButtonDown
-    // Affects ImageView.onRButtonDown
-    public boolean removeSampleColorsEnabled;
+    // Initialized to false in initFields
+    // Modified in:
+    //     onPreviewStillScene - set to true at end of method
+    //     onRenderStillScene - set to false at end of method
+    //     onToolsCreateASceneList - set to false at end of method
+    public boolean mbRenderSceneEnabled;
 
     // Changed from int to boolean
-    public boolean depthSortingEnabled;
+    // Initialized to false in initFields
+    // Modified in:
+    //     onPreviewSequenceEnabled - set to true at end of method
+    //     onRenderSequence - set to false at end of method
+    //     onToolsCreateASceneList - set to false at end of method
+    public boolean mbRenderSequenceEnabled;
 
     // Changed from int to boolean
-    public boolean zBufferEnabled;
+    // Initialized to false in initFields
+    // Read in:
+    //     ImageView.onLButtonDown
+    //     ImageView.onRButtonDown
+    // Modified in:
+    //     onToolsRemoveSampleColors - toggled from true to false or false to true
+    public boolean mbRemoveSampleColorsEnabled;
+
+    // Changed from int to boolean
+    // Initialized to false in initFields
+    // Read in:
+    //     onRenderStillScene - passed as a parameter to SceneList.render
+    //     onRenderSequence - passed as a parameter to SceneList.render
+    // Modified in:
+    //     onRenderDepthSorting - toggled from true to false or false to true
+    public boolean mbDepthSortingEnabled;
+
+    // Changed from int to boolean
+    // Initialized to true in initFields
+    // Read in:
+    //     onRenderStillScene - passed as a parameter to SceneList.render
+    //     onRenderSequence - passed as a parameter to SceneList.render
+    //     onRenderHazeFog - controls toggling of hazeFogEnabled
+    // Modified in:
+    //     onRenderZBuffer - toggled from true to false or true to false
+    public boolean mbZBufferEnabled;
 
     // Chanaged from int to boolean
+    // Initialized to false in initFields
     public boolean imageSamplingEnabled;
 
     // Changed from int to boolean
+    // Initialized to false in initFields
     public boolean motionBlurEnabled;
 
     // Changed from int to boolean
+    // Initialized to false in initFields
     public boolean hazeFogEnabled;
 
     // Changed from int to boolean
+    // Initialized to false in initFields
+    // Read in:
+    //     onRenderStillScene - passed as a parameter to SceneList.render
+    //     onRenderSequence - passed as a parameter to SceneList.render
+    //     onWarpParamDlgClosed - controls whether to call Global.antiAlias() or not
+    // Modified in:
+    //     onRenderAntiAlias - flips the value of the variable (from true to false or false to true)
     public boolean antiAliasEnabled;
 
     // 1 if the scene is being previewed
     // Changed from int to boolean
     // Initialized to false in the constructor when it calls method initFields.
-    // Modified in method onPreviewStillScene.
+    // Modified in: 
+    //     onPreviewStillScene
     public boolean previewingScene;
 
     // 1 if sequence is being previewed
     // Changed from int to boolean
-    // Initialized to false in the consstructor when it calls method initFields.
-    // Modified in method onPreviewSequenceScene.
+    // Initialized to false in the constructor when it calls method initFields.
+    // Modified in: 
+    //     onPreviewSequenceScene (set to true at the beginning of the method, and false at the end of the method)
     public boolean previewingSequence;
 
     // 1 if the ViewPoint is being previewed
     // Changed from int to boolean
-    // Modified in ScenePreviewDlg.chooseModel
+    // Initialized to false in initFields
+    // Modified in: 
+    //     ScenePreviewDlg.chooseModel
     public boolean changeViewPoint;
 
     // Linked List containing scene description
-    // Read in Shape3d constructor, the one that takes 2 parameters, a String and an int
+    // Read in: 
+    //     Shape3d constructor, the one that takes 2 parameters, a String and an int
     public SceneList mySceneList;
 
     // Contains a model transformation
@@ -320,7 +374,8 @@ protected:
         initFields();
 
         // Initialize the gPipe object for VRML rendering
-        Globals.aGraphicPipe.initialize();
+        // TODO: Uncomment the following line when GPipe is completed
+        // Globals.aGraphicPipe.initialize();
 
         setLayout(new BorderLayout());
 
@@ -357,33 +412,34 @@ protected:
         this.mWarpScaleY = 1.0f; 
         this.mWarpScaleZ = 1.0f;
 
-        this.viewRotateX = 0.0f; 
-        this.viewRotateY = 0.0f; 
-        this.viewRotateZ = 0.0f;
+        this.mViewRotateX = 0.0f; 
+        this.mViewRotateY = 0.0f; 
+        this.mViewRotateZ = 0.0f;
 
-        this.viewTranslateX = 0.0f; 
-        this.viewTranslateY = 0.0f; 
-        this.viewTranslateZ = 0.0f;
+        this.mViewTranslateX = 0.0f; 
+        this.mViewTranslateY = 0.0f; 
+        this.mViewTranslateZ = 0.0f;
 
         this.isDirty = false;
         this.cutoutEnabled = false;
-        this.previewSceneEnabled = false;
-        this.previewSequenceEnabled = false;
-        this.renderSceneEnabled = false;
-        this.renderSequenceEnabled = false;
-        this.removeSampleColorsEnabled = false;
-        this.depthSortingEnabled = false;
+        this.mbPreviewSceneEnabled = false;
+        this.mbPreviewSequenceEnabled = false;
+        this.mbRenderSceneEnabled = false;
+        this.mbRenderSequenceEnabled = false;
+        this.mbRemoveSampleColorsEnabled = false;
+        this.mbDepthSortingEnabled = false;
         this.motionBlurEnabled = false;
         this.hazeFogEnabled = false;
         this.antiAliasEnabled = false;
-        this.zBufferEnabled = true;
+        this.mbZBufferEnabled = true;
         this.imageSamplingEnabled = false;
         this.previewingScene = false;
         this.previewingSequence = false;
         this.mIOutputRows = 250;  // Set these in case a SceneList is not read in
         this.mIOutputColumns = 250;
         this.changeViewPoint = false;
-        this.mySceneList = new SceneList();
+        // TODO: Uncomment the following line when SceneList is completed
+        //this.mySceneList = new SceneList();
         this.mViewMatrix = new TMatrix();
         this.modelMatrix = new TMatrix();
         this.previewWindowHandle = null;  // The scene preview window handle
@@ -990,22 +1046,22 @@ POPUP "Tools"
         mySceneList.getSceneInfo(sceneName, effectType, colorMode, 
             mIOutputRows, mIOutputColumns);
 
-        // The following method sets fields viewTranslateX, viewTranslateY, viewTranslateZ, 
-        // viewRotateX, viewRotateY, and viewRotateZ
-        mySceneList.getViewTransform(viewTranslateX, viewTranslateY, viewTranslateZ,
-            viewRotateX, viewRotateY, viewRotateZ);
+        // The following method sets fields mViewTranslateX, mViewTranslateY, mViewTranslateZ, 
+        // mViewRotateX, mViewRotateY, and mViewRotateZ
+        mySceneList.getViewTransform(mViewTranslateX, mViewTranslateY, mViewTranslateZ,
+            mViewRotateX, mViewRotateY, mViewRotateZ);
         getViewMatrix();
 
         if((this.effectType == SEQUENCE) || (this.effectType == MORPH)) {
-            this.previewSequenceEnabled = true;
-            this.previewSceneEnabled    = false;
-            this.renderSceneEnabled     = false;
-            this.renderSequenceEnabled  = false;
+            this.mbPreviewSequenceEnabled = true;
+            this.mbPreviewSceneEnabled    = false;
+            this.mbRenderSceneEnabled     = false;
+            this.mbRenderSequenceEnabled  = false;
         } else {
-            this.previewSceneEnabled    = true;
-            this.previewSequenceEnabled = false;
-            this.renderSceneEnabled     = false;
-            this.renderSequenceEnabled  = false;
+            this.mbPreviewSceneEnabled    = true;
+            this.mbPreviewSequenceEnabled = false;
+            this.mbRenderSceneEnabled     = false;
+            this.mbRenderSequenceEnabled  = false;
         }
     } // onToolsCreateASceneList
 
@@ -1246,7 +1302,7 @@ POPUP "Tools"
     // MENUITEM "Remove Sampled Colors",       ID_TOOLS_REMOVESAMPLEDCOLORS
     // ON_COMMAND(ID_TOOLS_REMOVESAMPLEDCOLORS, OnToolsRemoveSampleColors)
     public void onToolsRemoveSampleColors() {
-        removeSampleColorsEnabled = !removeSampleColorsEnabled;
+        mbRemoveSampleColorsEnabled = !mbRemoveSampleColorsEnabled;
     } // onToolsRemoveSampleColors
 
 /*
@@ -1396,7 +1452,7 @@ POPUP "Tools"
         ScenePreviewDlg dlg = new ScenePreviewDlg(this, true);
         dlg.setVisible(true);
 
-        renderSceneEnabled = true;
+        mbRenderSceneEnabled = true;
         previewingScene = false;
         isDirty = true;
         closeAllChildren();
@@ -1431,7 +1487,7 @@ POPUP "Tools"
         ScenePreviewDlg dlg = new ScenePreviewDlg(this, true);
         dlg.setVisible(true);
 
-        renderSequenceEnabled = true;
+        mbRenderSequenceEnabled = true;
         previewingSequence = false;
         isDirty = true;
         closeAllChildren();
@@ -1482,9 +1538,9 @@ POPUP "Tools"
         // MDITile(MDITILE_VERTICAL);	 //This maximizes the imageWindow
 
         getViewMatrix();
-        mySceneList.render(renderView, mViewMatrix, depthSortingEnabled, zBufferEnabled, 
+        mySceneList.render(renderView, mViewMatrix, mbDepthSortingEnabled, mbZBufferEnabled, 
             antiAliasEnabled, hazeFogEnabled);
-        renderSceneEnabled = false;
+        mbRenderSceneEnabled = false;
 
         isDirty = true;	
     } // onRenderStillScene
@@ -1515,9 +1571,9 @@ POPUP "Tools"
         // MDITile(MDITILE_VERTICAL);	      //Maximize the imageWindow
 
         getViewMatrix();
-        mySceneList.render(renderView, mViewMatrix, depthSortingEnabled, 
-            zBufferEnabled, antiAliasEnabled, hazeFogEnabled);
-        renderSequenceEnabled = false;
+        mySceneList.render(renderView, mViewMatrix, mbDepthSortingEnabled, 
+            mbZBufferEnabled, antiAliasEnabled, hazeFogEnabled);
+        mbRenderSequenceEnabled = false;
         isDirty = true;
     } // onRenderSequence
 
@@ -1532,7 +1588,7 @@ POPUP "Tools"
     // MENUITEM "Z Buffer",                    ID_RENDER_ZBUFFER, CHECKED
     // ON_COMMAND(ID_RENDER_ZBUFFER, OnRenderZbuffer)
     public void onRenderZBuffer() {
-        zBufferEnabled = !zBufferEnabled;	
+        mbZBufferEnabled = !mbZBufferEnabled;	
     } // onRenderZBuffer
 
 /*
@@ -1546,7 +1602,7 @@ POPUP "Tools"
     // MENUITEM "Depth Sorting",               ID_RENDER_DEPTHSORTING
     // ON_COMMAND(ID_RENDER_DEPTHSORTING, OnRenderDepthsorting)
     public void onRenderDepthSorting() {
-        this.depthSortingEnabled = !this.depthSortingEnabled;
+        this.mbDepthSortingEnabled = !this.mbDepthSortingEnabled;
     } // onRenderDepthSorting
 
 /*
@@ -1566,7 +1622,7 @@ POPUP "Tools"
 
     // ON_COMMAND(ID_RENDER_HAZEFOG, OnRenderHazefog)
     public void onRenderHazeFog() {
-        if(zBufferEnabled) {
+        if(mbZBufferEnabled) {
             // Field hazeFogEnabled is passed as a parameter to method 
             // SceneList.render in methods onRenderScene and onRenderSequence
             hazeFogEnabled = !hazeFogEnabled;
@@ -1613,12 +1669,12 @@ POPUP "Tools"
     //     onToolsCreateASceneList
     private void getViewMatrix() {
         mViewMatrix.setIdentity();
-        float xRadians = this.viewRotateX * F_DTR;
-        float yRadians = this.viewRotateY * F_DTR;
-        float zRadians = this.viewRotateZ * F_DTR;
+        float xRadians = this.mViewRotateX * F_DTR;
+        float yRadians = this.mViewRotateY * F_DTR;
+        float zRadians = this.mViewRotateZ * F_DTR;
 
         mViewMatrix.rotate(-xRadians, -yRadians, -zRadians);
-        mViewMatrix.translate(-viewTranslateX, -viewTranslateY, -viewTranslateZ);
+        mViewMatrix.translate(-mViewTranslateX, -mViewTranslateY, -mViewTranslateZ);
     } // getViewMatrix
 
 /*
