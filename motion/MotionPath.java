@@ -7,19 +7,19 @@ import globals.Globals;
 // See pages 123, 127, and 131 of the book Visual Special Effects Toolkit in C++.
 public class MotionPath {
 
-  private boolean mbAllocated;
-  // private void allocate(int);
+    private boolean mbAllocated;
+    // private void allocate(int);
 
-  public int miNumNodes;
-  public MotionNode[] mNodes;
-  
-  // public int read(char *); ---- NOT IMPLEMENTED, couldn't find in C++ code ----
-  // public int readMotion(char *); - implemented
-  // public int write(char *); ---- NOT IMPLEMENTED, couldn't find in C++ code ----
-  // public int getNode(int, motionNode *); - implemented
-  // public motionPath(void); - implemented
-  // public ~motionPath(void); - implemented (as method finalize)
-  // public void getFirstLastFrame(int *firstFrame, int *lastFrame); - implemented
+    public int miNumNodes;
+    public MotionNode[] mNodes;
+    
+    // public int read(char *); ---- NOT IMPLEMENTED, couldn't find in C++ code ----
+    // public int readMotion(char *); - implemented
+    // public int write(char *); ---- NOT IMPLEMENTED, couldn't find in C++ code ----
+    // public int getNode(int, motionNode *); - implemented
+    // public motionPath(void); - implemented
+    // public ~motionPath(void); - implemented (as method finalize)
+    // public void getFirstLastFrame(int *firstFrame, int *lastFrame); - implemented
 
     // This constructor originally came from MOTION.CPP
     // Called from:
@@ -68,6 +68,7 @@ public class MotionPath {
     //     SceneList.previewStill
     //     SceneList.render
     public void getFirstLastFrame(Integer pIFirstFrame, Integer pILastFrame) {
+        // Set the output parameters
         pIFirstFrame = mNodes[0].miNodeNum;
         pILastFrame = mNodes[miNumNodes - 1].miNodeNum;
     } // getFirstLastFrame
@@ -89,11 +90,14 @@ public class MotionPath {
         int iPrevNode = 0, iNextNode = 0, i;
         float fDist, fMult, fDiff;
 
-        // filter the frameNumber
+        // Filter the frameNumber
         Integer firstFrame = 0, lastFrame = 0;
 
         // The following method sets firstFrame and lastFrame
         getFirstLastFrame(firstFrame, lastFrame);
+
+        // Ensure that firstFrame <= piFrameNumber <= lastFrame, 
+        // by changing piFrameNumber if necessary
         if(piFrameNumber < firstFrame) {
             piFrameNumber = firstFrame;
         }
@@ -102,12 +106,16 @@ public class MotionPath {
         }
       
         for(i = 0; i < miNumNodes; i++) {
+            // If piFrameNumber is the same as the node number of an existing node in
+            // array mNodes ...
             if(mNodes[i].miNodeNum == piFrameNumber) {
+                // Set pMtnNode to be a copy of mNodes[i]
                 pMtnNode.copy(mNodes[i]);
                 return 0;
             }
         }
 
+        // We'll have to create an "interpolated" MotionNode pMtnNode
         i = 0;
         while(i < (miNumNodes - 1)) {
             iPrevNode = mNodes[i].miNodeNum;
@@ -190,9 +198,13 @@ public class MotionPath {
         Integer iLineCounter = 0;
         int iNodeCounter = 0;
         int iStatus = 0;
+        tempMotionNode = new MotionNode();
   
         sKeyWord = Globals.getNextMotionLine(sText, iLineCounter, filein);
         while(!sKeyWord.equalsIgnoreCase("EOF")) {
+            // The following method will set the fields of object tempMotionNode
+            // with data read from the string sKeyWord. If everything was read 
+            // and set correctly, it will return the value 0.
             iStatus = tempMotionNode.read(sKeyWord);
             if(iStatus != 0) {
                 sMsgText = "Cannot Read: " + psPathName + "  Line: " + iLineCounter;
@@ -202,11 +214,11 @@ public class MotionPath {
 
             iNodeCounter++;
             sKeyWord = Globals.getNextMotionLine(sText, iLineCounter, filein);
-        }
+        } // while
 
         allocate(iNodeCounter);
         if(!mbAllocated) {
-            dprintf(("motion.read: Cannot allocate memory.\n"));
+            Globals.statusPrint("motion.read: Cannot allocate memory.\n");
             return -1;
         }
   
