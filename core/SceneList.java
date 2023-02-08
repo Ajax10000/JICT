@@ -1116,7 +1116,7 @@ public class SceneList implements ISceneList {
             xfrm.tx = aMotion.mfTx;
             xfrm.ty = aMotion.mfTy;
             xfrm.tz = aMotion.mfTz;
-            xfrm.alpha = aMotion.alpha;
+            xfrm.alpha = aMotion.mfAlpha;
         } else {
             // Set output parameter xfrm
             xfrm.rx = theModel.mRotation.x;
