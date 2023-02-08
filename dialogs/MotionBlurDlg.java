@@ -45,12 +45,12 @@ public class MotionBlurDlg extends JDialog {
     // DDX_Control(pDX, IDC_BlurDepth, m_BlurDepth);
 	JTextField	m_BlurDepth;
 
-    JButton btnOK;
-    JButton btnCancel;
+    private JButton btnOK;
+    private JButton btnCancel;
 
-    JPanel topPanel;
-    JPanel botLeftPanel;
-    JPanel botRightPanel;
+    private JPanel topPanel;
+    private JPanel botLeftPanel;
+    private JPanel botRightPanel;
 
 /*
 class MotionBlurDialog : public CDialog
@@ -105,13 +105,11 @@ protected:
         Box row01Box = Box.createHorizontalBox();
         Box row02Box = Box.createHorizontalBox();
 
-        Box topBox = addTopPanel();
+        Box topBox = addTopSection();
         row01Box.add(topBox);
 
-        Box botLeftBox = addBotLeftPanel();
-        Box botRightBox = addBotRightPanel();
-        row02Box.add(botLeftBox);
-        row02Box.add(botRightBox);
+        Box botBox = addBottomSection();
+        row02Box.add(botBox);
 
         panel.add(row01Box);
         panel.add(row02Box);
@@ -122,7 +120,7 @@ protected:
 
     // Called from:
     //     constructor
-    private Box addTopPanel() {
+    private Box addTopSection() {
         Dimension spacerDim = new Dimension(80, 25);
         Dimension btnDim = new Dimension(80, 25);
         Dimension btnFldSpacerDim = new Dimension(10, 25);
@@ -132,6 +130,7 @@ protected:
         Box row02Box = Box.createHorizontalBox();
         Box row03Box = Box.createHorizontalBox();
         Box row04Box = Box.createHorizontalBox();
+        Box row05Box = Box.createHorizontalBox();
 
         // Create components for row01Box
         Component spacer01 = Box.createRigidArea(spacerDim);
@@ -187,11 +186,20 @@ protected:
         row04Box.add(btnFldSpacer02);
         row04Box.add(m_outDirectory);
 
+        // Create component for row05Box
+        // row05Box will contain a long, thin blank section that will separate the 
+        // top section from the bottom section
+        Component sectionSpacer = Box.createRigidArea(new Dimension(250, 10));
+
+        // Populate row05Box
+        row05Box.add(sectionSpacer);
+
         // Populate vertBox
         vertBox.add(row01Box);
         vertBox.add(row02Box);
         vertBox.add(row03Box);
         vertBox.add(row04Box);
+        vertBox.add(row05Box);
 
         return vertBox;
     } // addTopPanel
@@ -199,77 +207,94 @@ protected:
 
     // Called from:
     //     constructor
-    private Box addBotLeftPanel() {
+    private Box addBottomSection() {
         Dimension spacerDim = new Dimension(200, 25);
-        Dimension lblDim = new Dimension(100, 25);
-        Dimension txtFldDim = new Dimension(100, 25);
+        final int iLblWidth = 100;
+        Dimension lblDim = new Dimension(iLblWidth, 25);
+        final int iTxtFldWidth = 100;
+        Dimension txtFldDim = new Dimension(iTxtFldWidth, 25);
 
-        Box vertBox  = Box.createVerticalBox();
-        Box row01Box = Box.createHorizontalBox();
-        Box row02Box = Box.createHorizontalBox();
-        Box row03Box = Box.createHorizontalBox();
+        // horizBox will contain 3 vertical boxes, vert01Box, vert02Box and vert03Box
+        Box horizBox = Box.createHorizontalBox();
 
-        // Create components for row01Box (a label and a text field)
+        // Here we create the bottom left section ===============================
+        // Create and populate vert01Box
+        Box vert01Box  = Box.createVerticalBox();
+        Box row01aBox = Box.createHorizontalBox();
+        Box row02aBox = Box.createHorizontalBox();
+        Box row03aBox = Box.createHorizontalBox();
+        Box row04aBox = Box.createHorizontalBox();
+
+        // Create components for row01aBox (a label and a text field)
         JLabel lblNumFramesToBlur = new JLabel("#Frames to Blur ");
         lblNumFramesToBlur.setPreferredSize(lblDim);
         m_NumBlurFrames = new JTextField(7);
         m_NumBlurFrames.setSize(txtFldDim);
         m_NumBlurFrames.setPreferredSize(txtFldDim);
 
-        // Populate row01Box
-        row01Box.add(lblNumFramesToBlur);
-        row01Box.add(m_NumBlurFrames);
+        // Populate row01aBox
+        row01aBox.add(lblNumFramesToBlur);
+        row01aBox.add(m_NumBlurFrames);
 
-        // Create components for row02Box (a label and a text field)
+        // Create component for row02aBox
+        // This is a spacer between the "#Frames to Blur" text field and the "Blur Depth" text field
+        Component rowSpacer = Box.createRigidArea(new Dimension(iLblWidth + iTxtFldWidth - 5, 5));
+
+        // Populate row02aBox
+        row02aBox.add(rowSpacer);
+
+        // Create components for row03aBox (a label and a text field)
         JLabel lblBlurDepth = new JLabel("Blur Depth");
         lblBlurDepth.setPreferredSize(lblDim);
         m_BlurDepth = new JTextField(7);
         m_BlurDepth.setSize(txtFldDim);
         m_BlurDepth.setPreferredSize(txtFldDim);
 
-        // Populate row02Box
-        row02Box.add(lblBlurDepth);
-        row02Box.add(m_BlurDepth);
+        // Populate row03aBox
+        row03aBox.add(lblBlurDepth);
+        row03aBox.add(m_BlurDepth);
 
-        // Create components for row03Box (a blank row, so we fill it with a spacer)
+        // Create components for row04aBox (a blank row, so we fill it with a spacer)
         Component spacer = Box.createRigidArea(spacerDim);
 
-        // Populate row03Box
-        row03Box.add(spacer);
+        // Populate row03aBox
+        row04aBox.add(spacer);
 
-        // Populate vertBox
-        vertBox.add(row01Box);
-        vertBox.add(row02Box);
-        vertBox.add(row03Box);
+        // Populate vert01Box
+        vert01Box.add(row01aBox);
+        vert01Box.add(row02aBox);
+        vert01Box.add(row03aBox);
+        vert01Box.add(row04aBox);
 
-        return vertBox;
-    } // addBotLeftPanel
+        // Now we create the bottom middle section, a blank area ================
+        // Create and populate vert02Box
+        Box vert02Box = Box.createVerticalBox();
+        Component spacer02 = Box.createRigidArea(new Dimension(180, 75));
+        vert02Box.add(spacer02);
 
-
-    // Called from:
-    //     constructor
-    private Box addBotRightPanel() {
-        Dimension longSpacerDim = new Dimension(160, 25);
+        // Now we create the bottom right area, which contains 2 buttons ========
         Dimension shortSpacerDim = new Dimension(20, 25);
         Dimension btnDim = new Dimension(80, 25);
 
-        Box vertBox = Box.createVerticalBox();
-        Box row01Box = Box.createHorizontalBox();
-        Box row02Box = Box.createHorizontalBox();
-        Box row03Box = Box.createHorizontalBox();
+        // Create and populate vert03Box
+        Box vert03Box = Box.createVerticalBox();
+        Box row01cBox = Box.createHorizontalBox();
+        Box row02cBox = Box.createHorizontalBox();
+        Box row03cBox = Box.createHorizontalBox();
+        Box row04cBox = Box.createHorizontalBox();
 
-        // Create components for row01Box. Row 1 is a blank line, so we will fill it
-        // with 2 spacers.
-        Component lngSpacer01 = Box.createRigidArea(longSpacerDim);
+        // Create components for row01cBox. Row 1 is a blank line, so we will fill it
+        // with a spacer.
         Component shrtSpacer01 = Box.createRigidArea(shortSpacerDim);
 
-        // Populate row01Box
-        row01Box.add(lngSpacer01);
-        row01Box.add(shrtSpacer01);
+        // Populate row01cBox
+        row01cBox.add(shrtSpacer01);
 
-        // Create components for row02Box (a spacer and a button)
-        Component lngSpacer02 = Box.createRigidArea(longSpacerDim);
+        // Create components for row02cBox (a spacer and a button)
         btnOK = new JButton("OK");
+        btnOK.setSize(btnDim);
+        btnOK.setMinimumSize(btnDim);
+        btnOK.setMaximumSize(btnDim);
         btnOK.setPreferredSize(btnDim);
         btnOK.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
@@ -277,13 +302,21 @@ protected:
             }
         });
 
-        // Populate row02Box
-        row02Box.add(lngSpacer02);
-        row02Box.add(btnOK);
+        // Populate row02cBox
+        row02cBox.add(btnOK);
 
-        // Create components for row03Box (a spacer and a button)
-        Component lngSpacer03 = Box.createRigidArea(longSpacerDim);
+        // Create component for row03cBox
+        Component btnSpacer = Box.createRigidArea(new Dimension(80, 8));
+
+        // Populate row03cBox
+        // This is a spacer between the OK and Cancel buttons
+        row03cBox.add(btnSpacer);
+
+        // Create components for row04cBox (a spacer and a button)
         btnCancel = new JButton("Cancel");
+        btnCancel.setSize(btnDim);
+        btnCancel.setMinimumSize(btnDim);
+        btnCancel.setMaximumSize(btnDim);
         btnCancel.setPreferredSize(btnDim);
         btnCancel.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
@@ -291,17 +324,21 @@ protected:
             }
         });
 
-        // Populate row03Box
-        row03Box.add(lngSpacer03);
-        row03Box.add(btnCancel);
+        // Populate row04cBox
+        row04cBox.add(btnCancel);
 
-        // Populate vertBox
-        vertBox.add(row01Box);
-        vertBox.add(row02Box);
-        vertBox.add(row03Box);
+        // Populate vert03Box
+        vert03Box.add(row01cBox);
+        vert03Box.add(row02cBox);
+        vert03Box.add(row03cBox);
+        vert03Box.add(row04cBox);
 
-        return vertBox;
-    } // addBotRightPanel
+        horizBox.add(vert01Box);
+        horizBox.add(vert02Box);
+        horizBox.add(vert03Box);
+
+        return horizBox;
+    } // addBotLeftPanel
 
 
     /*
@@ -327,9 +364,6 @@ protected:
         //}}AFX_MSG_MAP
     END_MESSAGE_MAP()
     */
-
-    /////////////////////////////////////////////////////////////////////////////
-    // MotionBlurDialog message handlers
 
     // This method came from MOTIONBLURDIALOG.CPP
     void onLocateDestDir() {
@@ -375,7 +409,7 @@ protected:
             iNumBlurFrames = parsedValue.intValue();
         } else {
             JOptionPane.showMessageDialog(this, "# Frames to blur value entered is not a valid number.");
-            m_NumBlurFrames.requestFocus();
+            m_NumBlurFrames.requestFocusInWindow();
             return;
         }
 
@@ -385,7 +419,7 @@ protected:
             iBlurDepth = parsedValue.intValue();
         } else {
             JOptionPane.showMessageDialog(this, "Blur depth value entered is not a valid number.");
-            m_BlurDepth.requestFocus();
+            m_BlurDepth.requestFocusInWindow();
             return;
         }
 
@@ -412,6 +446,8 @@ protected:
         }
         return null;
     }
+
+    
     // Called when the user clicks on the Cancel button
     public void onCancel() {
         dispose();
