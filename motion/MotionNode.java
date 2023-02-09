@@ -4,6 +4,14 @@ import java.util.StringTokenizer;
 
 // A MotionNode object represents a single keyframe in a motion path.
 // See p 131 of Visual Special Effects Toolkit in C++
+// MotionPath objects have a field which is an array of MotionNode objects.
+// 
+// MotionNode and MotionPath objects are used when a scene file (with extension .scn)
+// is read that contains a Model with a MOTIONPATH line, with a non-null path name.
+// The path file name should have the .pth file extension:
+// Model <modelNamae> [Blend|NoBlend] [Warp|NoWarp] AlphaScale alpha [Image|Shape|QuaMesh|SEquence]
+// ...
+// MotionPath [None|<pathName>]
 public class MotionNode {
    // Populated in methods copy, clear, read
    // Set in:
@@ -54,22 +62,22 @@ public class MotionNode {
    // 
    // Called from:
    //     MotionPath.getNode
-   public void copy(MotionNode mn) {
-      this.miNodeNum = mn.miNodeNum;
+   public void copy(MotionNode pMtnNode) {
+      this.miNodeNum = pMtnNode.miNodeNum;
 
-      this.mfTx = mn.mfTx;
-      this.mfTy = mn.mfTy;
-      this.mfTz = mn.mfTz;
+      this.mfTx = pMtnNode.mfTx;
+      this.mfTy = pMtnNode.mfTy;
+      this.mfTz = pMtnNode.mfTz;
 
-      this.mfRx = mn.mfRx;
-      this.mfRy = mn.mfRy;
-      this.mfRz = mn.mfRz;
+      this.mfRx = pMtnNode.mfRx;
+      this.mfRy = pMtnNode.mfRy;
+      this.mfRz = pMtnNode.mfRz;
 
-      this.mfSx = mn.mfSx;
-      this.mfSy = mn.mfSy;
-      this.mfSz = mn.mfSz;
+      this.mfSx = pMtnNode.mfSx;
+      this.mfSy = pMtnNode.mfSy;
+      this.mfSz = pMtnNode.mfSz;
 
-      this.mfAlpha = mn.mfAlpha;
+      this.mfAlpha = pMtnNode.mfAlpha;
    } // copy
   
 
@@ -102,86 +110,86 @@ public class MotionNode {
    //     MotionPath.readMotion
    public int read(String psBuffer) {
       StringTokenizer strTok;
-      String aNodeNum;
-      String anrx, anry, anrz; 
-      String ansx, ansy, ansz; 
-      String antx, anty, antz;
-      String anAlpha;
+      String sNodeNum;
+      String sRx, sRy, sRz; 
+      String sSx, sSy, sSz; 
+      String sTx, sTy, sTz;
+      String sAlpha;
    
       strTok = new StringTokenizer(psBuffer, " ");
-      aNodeNum = strTok.nextToken(" ");
-      if(aNodeNum.length() > 0) {
-         miNodeNum = Integer.parseInt(aNodeNum);
+      sNodeNum = strTok.nextToken(" ");
+      if(sNodeNum.length() > 0) {
+         miNodeNum = Integer.parseInt(sNodeNum);
       } else {
          return 1;
       }
    
-      anrx = strTok.nextToken(" ");
-      if(anrx.length() > 0) {
-         mfRx = Float.parseFloat(anrx);
+      sRx = strTok.nextToken(" ");
+      if(sRx.length() > 0) {
+         mfRx = Float.parseFloat(sRx);
       } else {
          return 2;
       }
    
-      anry = strTok.nextToken(" ");
-      if(anry.length() > 0) {
-         mfRy = Float.parseFloat(anry);
+      sRy = strTok.nextToken(" ");
+      if(sRy.length() > 0) {
+         mfRy = Float.parseFloat(sRy);
       } else {
          return 3;
       }
    
-      anrz = strTok.nextToken(" ");
-      if(anrz.length() > 0) {
-         mfRz = Float.parseFloat(anrz);
+      sRz = strTok.nextToken(" ");
+      if(sRz.length() > 0) {
+         mfRz = Float.parseFloat(sRz);
       } else {
          return 4;
       }
    
-      ansx = strTok.nextToken(" ");
-      if(ansx.length() > 0) {
-         mfSx = Float.parseFloat(ansx);
+      sSx = strTok.nextToken(" ");
+      if(sSx.length() > 0) {
+         mfSx = Float.parseFloat(sSx);
       } else {
          return 5;
       }
    
-      ansy = strTok.nextToken(" ");
-      if(ansy.length() > 0) {
-         mfSy = Float.parseFloat(ansy);
+      sSy = strTok.nextToken(" ");
+      if(sSy.length() > 0) {
+         mfSy = Float.parseFloat(sSy);
       } else {
          return 6;
       }
    
-      ansz = strTok.nextToken(" ");
-      if(ansz.length() > 0) {
-         mfSz = Float.parseFloat(ansz);
+      sSz = strTok.nextToken(" ");
+      if(sSz.length() > 0) {
+         mfSz = Float.parseFloat(sSz);
       } else {
          return 7;
       }
    
-      antx = strTok.nextToken(" ");
-      if(antx.length() > 0) {
-         mfTx = Float.parseFloat(antx);
+      sTx = strTok.nextToken(" ");
+      if(sTx.length() > 0) {
+         mfTx = Float.parseFloat(sTx);
       } else {
          return 8;
       }
    
-      anty = strTok.nextToken(" ");
-      if(anty.length() > 0) {
-         mfTy = Float.parseFloat(anty);
+      sTy = strTok.nextToken(" ");
+      if(sTy.length() > 0) {
+         mfTy = Float.parseFloat(sTy);
       } else {
          return 9;
       }
    
-      antz = strTok.nextToken(" ");
-      if(antz.length() > 0) {
-         mfTz = Float.parseFloat(antz);
+      sTz = strTok.nextToken(" ");
+      if(sTz.length() > 0) {
+         mfTz = Float.parseFloat(sTz);
       } else {
          return 10;
       }
    
-      anAlpha = strTok.nextToken(" ");
-      if(anAlpha.length() > 0) {
-         mfAlpha = Float.parseFloat(anAlpha);
+      sAlpha = strTok.nextToken(" ");
+      if(sAlpha.length() > 0) {
+         mfAlpha = Float.parseFloat(sAlpha);
       } else {
          return 11;
       }
