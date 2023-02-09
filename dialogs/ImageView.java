@@ -1,7 +1,7 @@
 package dialogs;
 
 import core.MemImage;
-
+import core.RenderObject;
 import core.Shape3d;
 
 import docs.ImageDoc;
@@ -353,8 +353,9 @@ protected:
             Globals.statusPrint(msgText);
 
             // If the user wishes to remove sampled colors...do it now
-            if(mainFrame.removeSampleColorsEnabled) {
-                int redLow, redHigh, greenLow,  greenHigh;
+            if(mainFrame.mbRemoveSampleColorsEnabled) {
+                int redLow, redHigh;
+                int greenLow, greenHigh;
                 int blueLow, blueHigh;
 
                 int status = getSampleRange(m_anImage, point.x + xOffset, m_anImage.getHeight() - point.y - yOffset, 
@@ -429,7 +430,7 @@ protected:
                 m_theFileName = getDocument().getPathName();
                 imageFileName = m_theFileName; 
                 cutoutName = new String(dlg.m_Name);
-                int myStatus = prepareCutout(m_aShape, m_hWnd, imageFileName, cutoutName, (int)docSize.cx, (int)docSize.cy);
+                int myStatus = RenderObject.prepareCutout(m_aShape, m_hWnd, imageFileName, cutoutName, (int)docSize.cx, (int)docSize.cy);
                 if(myStatus != 0) {
                     msgText = "Unable to Create Cutout. " + myStatus;
                     Globals.statusPrint(msgText);
@@ -471,7 +472,7 @@ protected:
             theStatus = m_aShape.deleteLastWorldVertex();
         }
         
-        if(mainFrame.removeSampleColorsEnabled) {
+        if(mainFrame.mbRemoveSampleColorsEnabled) {
             //  Ask if the user wishes to save the thresholded image which they have been creating
             // int result = MessageBox("Do you wish to save the modified image?", "Save Image As", MB_YESNO|MB_ICONQUESTION);
             int result = JOptionPane.showConfirmDialog(null, 
