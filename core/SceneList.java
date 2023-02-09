@@ -5,6 +5,7 @@ import dialogs.ImageView;
 import fileUtils.FileUtils;
 
 import globals.Globals;
+import globals.JICTConstants;
 import globals.Preference;
 
 import java.awt.Color;
@@ -72,6 +73,7 @@ public class SceneList implements ISceneList {
     public Scene currentScene;        // Points to the current Scene
     public MemImage backgroundPlate;  // An optional background plate image
 
+    /*
     // This was originally defined in ICT20.H
     public static final float F_DTR = 3.1415926f/180.0f;
 
@@ -110,6 +112,7 @@ public class SceneList implements ISceneList {
     // These were originally defined in MEMIMAGE.H
     public static final int SEQUENTIAL = 1;
     public static final int RANDOM = 0;
+    */
 
     // This was originally defined in ICT20.H
     public static final float ZBUFFERMAXVALUE = 2.0E31f;
@@ -118,8 +121,6 @@ public class SceneList implements ISceneList {
     // Size of model array for depth sorting
     // Increase if > MAXMODELS are to be used in a scene
     public static final int MAXMODELS = 256;
-    
-    private static final int THREE_NUMBERS_NOT_FOUND = 2;
 
     public SceneList() {
         if (bIctDebug) {
@@ -450,7 +451,7 @@ public class SceneList implements ISceneList {
         }
 
         firstFrame = lastFrame = 0;
-        if(effectType == SEQUENCE) {
+        if(effectType == JICTConstants.I_SEQUENCE) {
             // The following method sets both firstFrame and lastFrame
             theScene.mSensorMotion.getFirstLastFrame(firstFrame, lastFrame);
         }
@@ -463,7 +464,7 @@ public class SceneList implements ISceneList {
             SceneElement theModel = theScene.mHead;
             modelCounter = 0;
             eraseOldBoundary = true;
-            if(effectType == SEQUENCE) {
+            if(effectType == JICTConstants.I_SEQUENCE) {
                 // The following method sets viewMatrix
                 getViewMatrix(viewMatrix, frameCounter, theScene);
             }
@@ -491,7 +492,7 @@ public class SceneList implements ISceneList {
                     theModel.mbWarpIndicator == false &&
                     theModel.mbBlendIndicator == false) {
                         if(backgroundPlate == null) {
-                            backgroundPlate = new MemImage(theModel.msFileName, 0, 0, RANDOM, 'R', GREENCOLOR);
+                            backgroundPlate = new MemImage(theModel.msFileName, 0, 0, JICTConstants.I_RANDOM, 'R', JICTConstants.I_GREENCOLOR);
                         }
                     }
                 }
@@ -501,7 +502,7 @@ public class SceneList implements ISceneList {
 
                     // Compose the model transforms
                     if(
-                    (effectType == SEQUENCE) && 
+                    (effectType == JICTConstants.I_SEQUENCE) && 
                     (theModel.mModelMotion != null)) {
                         // The following method modifies aMotion (of type MotionNode)
                         theModel.mModelMotion.getNode(frameCounter, aMotion);
@@ -511,9 +512,9 @@ public class SceneList implements ISceneList {
                     adjustTransforms(effectType, theModel, aMotion, xfrm);
 
                     modelMatrix.scale(xfrm.sx, xfrm.sy, xfrm.sz);
-                    float xRadians = xfrm.rx * F_DTR;
-                    float yRadians = xfrm.ry * F_DTR;
-                    float zRadians = xfrm.rz * F_DTR;
+                    float xRadians = xfrm.rx * JICTConstants.F_DTR;
+                    float yRadians = xfrm.ry * JICTConstants.F_DTR;
+                    float zRadians = xfrm.rz * JICTConstants.F_DTR;
 
                     modelMatrix.rotate(xRadians, yRadians, zRadians);
                     modelMatrix.translate(xfrm.tx, xfrm.ty, xfrm.tz);
@@ -592,14 +593,14 @@ public class SceneList implements ISceneList {
         }
 
         firstFrame = lastFrame = 0;
-        if(effectType == SEQUENCE) {
+        if(effectType == JICTConstants.I_SEQUENCE) {
             theScene.mSensorMotion.getFirstLastFrame(firstFrame, lastFrame);
         }
         eraseOldBoundary = false;
 
         for(frameCounter = firstFrame; frameCounter <= lastFrame; frameCounter++) {
             theModel = theScene.mHead;  // Point to the first model
-            if(effectType == SEQUENCE) {
+            if(effectType == JICTConstants.I_SEQUENCE) {
                 getViewMatrix(viewMatrix, frameCounter, theScene);
             }
             modelCounter = 0;
@@ -611,7 +612,7 @@ public class SceneList implements ISceneList {
                     theModel.miStatusIndicator = 0;
                     theModel.mScreenRdrObject = new RenderObject(theModel.msFileName,
                         theModel.miModelType, theModel.mbDefinedRefPoint, theModel.pointOfReference);
-                    if(theModel.miModelType == I_COMPOUND) {	// Initialize a compound model centroid
+                    if(theModel.miModelType == JICTConstants.I_COMPOUND) {	// Initialize a compound model centroid
                         theModel.pointOfReference.x = 0.0f;
                         theModel.pointOfReference.y = 0.0f;
                         theModel.pointOfReference.z = 0.0f;
@@ -630,9 +631,9 @@ public class SceneList implements ISceneList {
                 // Setup the scene's background plate if needed
                 if(modelCounter == 1 && 
                 theModel.mbWarpIndicator == false &&
-                theModel.mbBlendIndicator == false && theModel.miModelType != I_COMPOUND) {
+                theModel.mbBlendIndicator == false && theModel.miModelType != JICTConstants.I_COMPOUND) {
                     if(backgroundPlate == null) {
-                        backgroundPlate = new MemImage(theModel.msFileName, 0, 0, RANDOM, 'R', GREENCOLOR);
+                        backgroundPlate = new MemImage(theModel.msFileName, 0, 0, JICTConstants.I_RANDOM, 'R', JICTConstants.I_GREENCOLOR);
                     }
                 }
 
@@ -641,24 +642,24 @@ public class SceneList implements ISceneList {
                     modelMatrix.setIdentity();
 
                     // Compose the appropriate transforms
-                    if((effectType == SEQUENCE) && (theModel.mModelMotion != null)) {
+                    if((effectType == JICTConstants.I_SEQUENCE) && (theModel.mModelMotion != null)) {
                         theModel.mModelMotion.getNode(frameCounter, aMotion);
                     }
                 
-                    if(theModel.miModelType == I_COMPOUND) {
+                    if(theModel.miModelType == JICTConstants.I_COMPOUND) {
                         adjustTransforms(effectType, theModel, aMotion, cxfrm);
                         cModelMatrix.scale(cxfrm.sx, cxfrm.sy, cxfrm.sz);
-                        float xRadians = cxfrm.rx * F_DTR;
-                        float yRadians = cxfrm.ry * F_DTR;
-                        float zRadians = cxfrm.rz * F_DTR;
+                        float xRadians = cxfrm.rx * JICTConstants.F_DTR;
+                        float yRadians = cxfrm.ry * JICTConstants.F_DTR;
+                        float zRadians = cxfrm.rz * JICTConstants.F_DTR;
                         cModelMatrix.rotate(xRadians, yRadians, zRadians);
                         cModelMatrix.translate(cxfrm.tx, cxfrm.ty, cxfrm.tz);
                     } else {
                         adjustTransforms(effectType, theModel, aMotion, xfrm);
                         modelMatrix.scale(xfrm.sx, xfrm.sy, xfrm.sz);
-                        float xRadians = xfrm.rx * F_DTR;
-                        float yRadians = xfrm.ry * F_DTR;
-                        float zRadians = xfrm.rz * F_DTR;
+                        float xRadians = xfrm.rx * JICTConstants.F_DTR;
+                        float yRadians = xfrm.ry * JICTConstants.F_DTR;
+                        float zRadians = xfrm.rz * JICTConstants.F_DTR;
                         modelMatrix.rotate(xRadians, yRadians, zRadians);
                         modelMatrix.translate(xfrm.tx, xfrm.ty, xfrm.tz);
                     }
@@ -674,7 +675,7 @@ public class SceneList implements ISceneList {
                     }
 
                     // If this model is compound, calculate the compound model reference Point
-                    if(theModel.miModelType == I_COMPOUND) {
+                    if(theModel.miModelType == JICTConstants.I_COMPOUND) {
                         saveModel = theModel;
                         calcCompoundModelRefPoint(theModel, outputRows, outputColumns, cmCentroidx, cmCentroidy, cmCentroidz);
                         theModel = saveModel;
@@ -682,14 +683,14 @@ public class SceneList implements ISceneList {
 
                     //  Transform the points
                     if(theModel.msFileName.equalsIgnoreCase("Output Image Rectangle") && 
-                    theModel.miModelType != I_COMPOUND &&	     
+                    theModel.miModelType != JICTConstants.I_COMPOUND &&	     
                     theModel.mbCompoundModelMember == false) {    
                         theModel.mScreenRdrObject.transformAndProject(viewModelMatrix, outputRows, outputColumns);
                     }
 
                     if(
                     theModel.msFileName.equalsIgnoreCase("Output Image Rectangle") && 
-                    theModel.miModelType != I_COMPOUND &&
+                    theModel.miModelType != JICTConstants.I_COMPOUND &&
                     theModel.mbCompoundModelMember) {   
                         theModel.mScreenRdrObject.transformAndProject(viewModelMatrix,
                             outputRows, outputColumns, theModel.mbCompoundModelMember, cmCentroidx, cmCentroidy, cmCentroidz);
@@ -700,7 +701,7 @@ public class SceneList implements ISceneList {
                     // If this is a background plate, blt it to the screen
                     if(
                     modelCounter == 1 && 
-                    theModel.miModelType != I_COMPOUND && 
+                    theModel.miModelType != JICTConstants.I_COMPOUND && 
                     theModel.mbWarpIndicator == false &&
                     theModel.mbBlendIndicator == false) {
                         HDC theDC = GetDC(theWindow);
@@ -709,7 +710,7 @@ public class SceneList implements ISceneList {
                         eraseOldBoundary = false;
                     } else {
                         // Draw the model boundary
-                        if(theModel.miModelType != I_COMPOUND) {
+                        if(theModel.miModelType != JICTConstants.I_COMPOUND) {
                             theModel.mScreenRdrObject.drawStill(theWindow, theModel.msModelName, outputRows, outputColumns);
                         }
                     }
@@ -722,7 +723,7 @@ public class SceneList implements ISceneList {
                     // a model that displays the output image rectangle
                     Color aColor;
                     myStatus = addSceneElement(" ", "Output Image Rectangle",  
-                        false, I_SHAPE, false, 
+                        false, JICTConstants.I_SHAPE, false, 
                         1.0f, null, null, null, 
                         "None", "Default", 
                         false, aColor, "None", "None", 
@@ -794,7 +795,7 @@ public class SceneList implements ISceneList {
             zBuffer.init32(ZBUFFERMAXVALUE); 
         }
 
-        if(effectType == SEQUENCE) {
+        if(effectType == JICTConstants.I_SEQUENCE) {
             // The following method sets Integers firstFrame and lastFrame
             theScene.mSensorMotion.getFirstLastFrame(firstFrame, lastFrame);
         }
@@ -806,16 +807,16 @@ public class SceneList implements ISceneList {
         for(frameCounter = firstFrame; frameCounter <= lastFrame; frameCounter++) {
             // Depth Sort the models
             depthSort(models, distances, numModels, depthSortingEnabled);
-            if(effectType == SEQUENCE) {
+            if(effectType == JICTConstants.I_SEQUENCE) {
                 getViewMatrix(viewMatrix, frameCounter, theScene);
             }
 
             // Setup the Color Mode
-            int firstColor = GREEN;
-            int lastColor = GREEN;
-            if (colorMode == COLOR) {
-                firstColor = RED;
-                lastColor = BLUE;
+            int firstColor = JICTConstants.I_GREEN;
+            int lastColor = JICTConstants.I_GREEN;
+            if (colorMode == JICTConstants.I_COLOR) {
+                firstColor = JICTConstants.I_RED;
+                lastColor = JICTConstants.I_BLUE;
             }
 
             for (int theColor = firstColor; theColor <= lastColor; theColor++) {
@@ -842,9 +843,9 @@ public class SceneList implements ISceneList {
                             break;
                         }
 
-                        if(theColor == RED)   currentColor = "Red";
-                        if(theColor == GREEN) currentColor = "Green";
-                        if(theColor == BLUE)  currentColor = "Blue";
+                        if(theColor == JICTConstants.I_RED)   currentColor = "Red";
+                        if(theColor == JICTConstants.I_GREEN) currentColor = "Green";
+                        if(theColor == JICTConstants.I_BLUE)  currentColor = "Blue";
 
                         String msgText = "Processing Frame: " + frameCounter + " Color: " + currentColor + 
                             "  Model: " + theModel.msModelName;
@@ -862,13 +863,13 @@ public class SceneList implements ISceneList {
                             theInputPath = theModel.msFileName;
                         }
 
-                        if(theModel.miModelType == SEQUENCE) {
+                        if(theModel.miModelType == JICTConstants.I_SEQUENCE) {
                             getSequenceFileName(theInputPath, frameCounter);
                         }
 
                         // Open the model's image if appropriate
-                        if(theModel.miModelType != I_SHAPE) {
-                            inputImage = new MemImage(theInputPath, 0, 0, RANDOM, 'R', theColor);
+                        if(theModel.miModelType != JICTConstants.I_SHAPE) {
+                            inputImage = new MemImage(theInputPath, 0, 0, JICTConstants.I_RANDOM, 'R', theColor);
                             if (!inputImage.isValid()) {
                                 msgText = "sceneList.Render: Can't open image: " + theModel.msFileName;
                                 Globals.statusPrint(msgText);
@@ -883,10 +884,10 @@ public class SceneList implements ISceneList {
                             // function iRenderz will create the alphaImage from the warped image.
                             String alphaName;
                             alphaImage = null;
-                            if(theModel.miModelType == I_IMAGE) {
+                            if(theModel.miModelType == JICTConstants.I_IMAGE) {
                                 if(!theModel.msAlphaPath.equalsIgnoreCase("NONE")) {
                                     alphaName = theModel.msAlphaPath;
-                                    alphaImage = new MemImage(alphaName, 0, 0, RANDOM, 'R', EIGHTBITMONOCHROME);
+                                    alphaImage = new MemImage(alphaName, 0, 0, JICTConstants.I_RANDOM, 'R', JICTConstants.I_EIGHTBITMONOCHROME);
                                     if (!alphaImage.isValid()) {
                                         Globals.statusPrint("sceneList::Render. Can't open the custom alpha image");
                                     }
@@ -908,7 +909,7 @@ public class SceneList implements ISceneList {
 
                         // Get the desired transforms from either the model or the motion file
                         // Copy them to the xfrm object
-                        if((effectType == SEQUENCE) && (theModel.mModelMotion != null)) {
+                        if((effectType == JICTConstants.I_SEQUENCE) && (theModel.mModelMotion != null)) {
                             theModel.mModelMotion.getNode(frameCounter, aMotion);
                         }
 
@@ -917,7 +918,7 @@ public class SceneList implements ISceneList {
                         // Properly render the model, based on model type and other options
                         if(zBufferEnabled) {
                             switch(theModel.miModelType) {
-                            case I_IMAGE:
+                            case JICTConstants.I_IMAGE:
                             // case SEQUENCE: //this was causing a duplicate case error (duplicate with SHAPE)
                                 myStatus = Globals.iRenderz(outputImage, alphaImage, inputImage,
                                     zImage, zBuffer,
@@ -930,7 +931,7 @@ public class SceneList implements ISceneList {
                                     theModel.pointOfReference.z);
                                 break;
 
-                            case I_QUADMESH:
+                            case JICTConstants.I_QUADMESH:
                                 // Render the mesh.  The result is a zImage, and a temporary output image
                                 // The rendered mesh is then blended into the final image using the scene ZBuffer and alpha options
                                 myStatus = 0;	//this line for debugging
@@ -938,17 +939,17 @@ public class SceneList implements ISceneList {
                                     zBuffer, vx, vy, vz);
                                 break;
 
-                            case I_SHAPE:
+                            case JICTConstants.I_SHAPE:
                                 // Build the transformation matrix
-                                float XRadians = xfrm.rx * F_DTR;
-                                float YRadians = xfrm.ry * F_DTR;
-                                float ZRadians = xfrm.rz * F_DTR;
+                                float XRadians = xfrm.rx * JICTConstants.F_DTR;
+                                float YRadians = xfrm.ry * JICTConstants.F_DTR;
+                                float ZRadians = xfrm.rz * JICTConstants.F_DTR;
                                 forwardMatrix.setIdentity();
                                 forwardMatrix.scale(xfrm.sx, xfrm.sy, xfrm.sz);
                                 forwardMatrix.rotate(XRadians, YRadians, ZRadians);
                                 forwardMatrix.translate(xfrm.tx, xfrm.ty, xfrm.tz);
                                 viewModelMatrix.multiply(viewMatrix, forwardMatrix);
-                                viewModelMatrix.transformAndProject(theModel.mScreenRdrObject.currentShape,
+                                viewModelMatrix.transformAndProject(theModel.mScreenRdrObject.mCurrentShape,
                                     outputRows, outputColumns, true, 		   
                                     theModel.pointOfReference.x,
                                     theModel.pointOfReference.y,
@@ -960,7 +961,7 @@ public class SceneList implements ISceneList {
                             }
                         } else {            //no zbuffer
                             switch(theModel.miModelType) {
-                            case I_IMAGE:
+                            case JICTConstants.I_IMAGE:
                             // case SEQUENCE: // this was causing a duplicate case error (duplicate with SHAPE)
                                 myStatus = Globals.iRenderz(outputImage, alphaImage, inputImage,
                                     zImage,  zBuffer,
@@ -975,12 +976,12 @@ public class SceneList implements ISceneList {
                                     theModel.pointOfReference.z);
                                 break;
     
-                            case I_QUADMESH:
+                            case JICTConstants.I_QUADMESH:
                                 myStatus = theModel.mScreenRdrObject.renderMesh(outputImage, inputImage,
                                     theModel.mbBlendIndicator);
                                 break;
 
-                            case I_SHAPE:
+                            case JICTConstants.I_SHAPE:
                                 myStatus = theModel.mScreenRdrObject.renderShape(outputImage,
                                     theModel.mbBlendIndicator);
                                 break;
@@ -1003,9 +1004,9 @@ public class SceneList implements ISceneList {
                 outputDir = Globals.ictPreference.getPath(Preference.OutputImageDirectory);
                 outputPath = outputDir + outputFileName;
 
-                if (theColor == RED)   redFileName   = outputPath;
-                if (theColor == GREEN) greenFileName = outputPath;
-                if (theColor == BLUE)  blueFileName  = outputPath;
+                if (theColor == JICTConstants.I_RED)   redFileName   = outputPath;
+                if (theColor == JICTConstants.I_GREEN) greenFileName = outputPath;
+                if (theColor == JICTConstants.I_BLUE)  blueFileName  = outputPath;
 
                 // Optionally anti-alias the output image
                 if(antiAliasEnabled) {
@@ -1028,7 +1029,7 @@ public class SceneList implements ISceneList {
 
             // Combine the color channels together
             myStatus = 0;
-            if(colorMode == COLOR) {
+            if(colorMode == JICTConstants.I_COLOR) {
                 // Prepare a pathname to the default output image location
                 getFileName(RGBFileName, theScene.msSceneName, frameCounter, 0);
                 String RGBPath, RGBDir;
@@ -1086,9 +1087,9 @@ public class SceneList implements ISceneList {
     int piCounter, int piTheColor) {
         char cColorChar;
 
-        if (piTheColor == RED)   cColorChar = 'r';
-        if (piTheColor == GREEN) cColorChar = 'g';
-        if (piTheColor == BLUE)  cColorChar = 'b';
+        if (piTheColor == JICTConstants.I_RED)   cColorChar = 'r';
+        if (piTheColor == JICTConstants.I_GREEN) cColorChar = 'g';
+        if (piTheColor == JICTConstants.I_BLUE)  cColorChar = 'b';
         if (piTheColor == 0)     cColorChar = 'c';
         sprintf(psOutputFileName, "%.16s%#04d%c.bmp\0", psPrefix, piCounter, cColorChar);
     } // getFileName
@@ -1103,7 +1104,7 @@ public class SceneList implements ISceneList {
         // float viewX, viewY, viewZ, rotateX, rotateY, rotateZ; // these local variables are not used
 
         // Copy model transforms into a bundle object
-        if((piEffectType == SEQUENCE) && (theModel.mModelMotion != null)) {
+        if((piEffectType == JICTConstants.I_SEQUENCE) && (theModel.mModelMotion != null)) {
             // Set output parameter xfrm
             xfrm.rx = aMotion.mfRx;
             xfrm.ry = aMotion.mfRy;
@@ -1152,13 +1153,13 @@ public class SceneList implements ISceneList {
 
         if(pTheScene.mSensorMotion != null) {
             pTheScene.mSensorMotion.getNode(piFrameCounter, aMotion);
-            xRadians = aMotion.mfRx * F_DTR;
-            yRadians = aMotion.mfRy * F_DTR;
-            zRadians = aMotion.mfRz * F_DTR;
+            xRadians = aMotion.mfRx * JICTConstants.F_DTR;
+            yRadians = aMotion.mfRy * JICTConstants.F_DTR;
+            zRadians = aMotion.mfRz * JICTConstants.F_DTR;
         } else {
-            xRadians = pTheScene.mRotationPt.x * F_DTR;
-            yRadians = pTheScene.mRotationPt.y * F_DTR;
-            zRadians = pTheScene.mRotationPt.z * F_DTR;
+            xRadians = pTheScene.mRotationPt.x * JICTConstants.F_DTR;
+            yRadians = pTheScene.mRotationPt.y * JICTConstants.F_DTR;
+            zRadians = pTheScene.mRotationPt.z * JICTConstants.F_DTR;
         }
 
         pViewMatrix.rotate(-xRadians, -yRadians, -zRadians);
@@ -1196,9 +1197,9 @@ public class SceneList implements ISceneList {
         while (theModel != null) {
             // Build the model's transformation matrix
             modelMatrix.scale(theModel.mScale.x, theModel.mScale.y, theModel.mScale.z);
-            float xRadians = theModel.mRotation.x * F_DTR;
-            float yRadians = theModel.mRotation.y * F_DTR;
-            float zRadians = theModel.mRotation.z * F_DTR;
+            float xRadians = theModel.mRotation.x * JICTConstants.F_DTR;
+            float yRadians = theModel.mRotation.y * JICTConstants.F_DTR;
+            float zRadians = theModel.mRotation.z * JICTConstants.F_DTR;
             modelMatrix.rotate(xRadians, yRadians, zRadians);
             modelMatrix.translate(theModel.mTranslation.x, theModel.mTranslation.y, theModel.mTranslation.z);
 
@@ -1220,7 +1221,7 @@ public class SceneList implements ISceneList {
             if(theModel.mbCompoundModelMember) {
                 // Transform the individual model
                 theModel.mScreenRdrObject.transformAndProject(modelMatrix, outputRows, outputColumns);
-                theModel.mScreenRdrObject.currentShape.getTCentroid(mCentroidX, mCentroidY, mCentroidZ);
+                theModel.mScreenRdrObject.mCurrentShape.getTCentroid(mCentroidX, mCentroidY, mCentroidZ);
       
                 String msgText;
                 msgText = "calcCmModelRefPoint. model: " + theModel.msModelName;
@@ -1425,7 +1426,7 @@ public class SceneList implements ISceneList {
         boolean prevModelIsACompoundMember = false;
 
         while (theModel != null) {
-            if(theModel.miModelType == I_COMPOUND) {
+            if(theModel.miModelType == JICTConstants.I_COMPOUND) {
                 modelName = theModel.msModelName;
                 bucketX = 0.0f;
                 bucketY = 0.0f;
@@ -1482,9 +1483,9 @@ public class SceneList implements ISceneList {
         aScene = aScene.mNextEntry;
         theModel = aScene.mHead;
         while (theModel != null) {
-            if((!theModel.mbDefinedRefPoint) && (theModel.miModelType != I_COMPOUND)) {
+            if((!theModel.mbDefinedRefPoint) && (theModel.miModelType != JICTConstants.I_COMPOUND)) {
                 // The following method sets centroidX, centroidY, and centroidZ (all of type Float)
-                theModel.mScreenRdrObject.currentShape.getReferencePoint(centroidX, centroidY, centroidZ);
+                theModel.mScreenRdrObject.mCurrentShape.getReferencePoint(centroidX, centroidY, centroidZ);
 
                 theModel.pointOfReference.x = centroidX; 
                 theModel.pointOfReference.y = centroidY;
@@ -1529,17 +1530,19 @@ public class SceneList implements ISceneList {
                 models[modelCounter] = theModel;
                 modelCounter++;
             } else {
-                if(theModel.miModelType == I_IMAGE || theModel.miModelType == I_SHAPE) {
-                    centroidX = theModel.mScreenRdrObject.currentShape.mfOriginX;
-                    centroidY = theModel.mScreenRdrObject.currentShape.mfOriginY;
-                    centroidZ = theModel.mScreenRdrObject.currentShape.mfOriginZ;
+                if(
+                theModel.miModelType == JICTConstants.I_IMAGE || 
+                theModel.miModelType == JICTConstants.I_SHAPE) {
+                    centroidX = theModel.mScreenRdrObject.mCurrentShape.mfOriginX;
+                    centroidY = theModel.mScreenRdrObject.mCurrentShape.mfOriginY;
+                    centroidZ = theModel.mScreenRdrObject.mCurrentShape.mfOriginZ;
                     modelDistance = MathUtils.getDistance3d(viewX, viewY, viewZ, centroidX, centroidY, centroidZ);
                     distances[modelCounter] = modelDistance;
                     models[modelCounter] = theModel;
                     modelCounter++;
                 }
 
-                if(theModel.miModelType == I_QUADMESH) {
+                if(theModel.miModelType == JICTConstants.I_QUADMESH) {
                     centroidX = 0.0f;
                     centroidY = 0.0f;
                     centroidZ = 0.0f;
