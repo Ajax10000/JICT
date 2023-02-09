@@ -2,9 +2,22 @@ package motion;
 
 import globals.Globals;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.LineNumberReader;
+
 // A MotionPath object consists of a list of MotionNode objects stored in field mNodes.
 // The field miNumNodes contains the number of MotionNode (aka keyframes) in the MotionPath.
 // See pages 123, 127, and 131 of the book Visual Special Effects Toolkit in C++.
+// 
+// MotionNode and MotionPath objects are used when a scene file (with extension .scn)
+// is read that contains a Model with a MOTIONPATH line, with a non-null path name.
+// The path file name should have the .pth file extension:
+// Model <modelNamae> [Blend|NoBlend] [Warp|NoWarp] AlphaScale alpha [Image|Shape|QuaMesh|SEquence]
+// ...
+// MotionPath [None|<pathName>]
 public class MotionPath {
 
     private boolean mbAllocated;
@@ -182,29 +195,34 @@ public class MotionPath {
     // Called from:
     //     SceneElement ctor
     public int readMotion(String psPathName) {
-        String sMsgText, sText;
+        String sMsgText, sText = "";
         String sKeyWord;
         MotionNode tempMotionNode;
 
-        // TODO: Replace ifstream with a FileStream
-        ifstream filein = new ifstream(psPathName, ios.in|ios.nocreate);
-
-        if (filein.fail()) {
+        File mtnPathFile = new File(psPathName);
+        FileReader fileReader;
+        try {
+            fileReader = new FileReader(mtnPathFile);
+        } catch(FileNotFoundException fnfe) {
             sMsgText = "readMotion: Unable to open file: " + psPathName;
             Globals.statusPrint(sMsgText) ;
             return -1;
         }
-        filein >> ws;
+
+        LineNumberReader filein = new LineNumberReader(fileReader);
         Integer iLineCounter = 0;
         int iNodeCounter = 0;
         int iStatus = 0;
         tempMotionNode = new MotionNode();
   
+        // The next method reads the next non-comment line from filein and 
+        // places it in String sText, and updates the line counter iLineCounter
         sKeyWord = Globals.getNextMotionLine(sText, iLineCounter, filein);
+        
         while(!sKeyWord.equalsIgnoreCase("EOF")) {
             // The following method will set the fields of object tempMotionNode
-            // with data read from the string sKeyWord. If everything was read 
-            // and set correctly, it will return the value 0.
+            // with data read from the string sKeyWord (NOT from a file). 
+            // If everything was read and set correctly, it will return the value 0.
             iStatus = tempMotionNode.read(sKeyWord);
             if(iStatus != 0) {
                 sMsgText = "Cannot Read: " + psPathName + "  Line: " + iLineCounter;
@@ -213,18 +231,33 @@ public class MotionPath {
             }
 
             iNodeCounter++;
+            // The next method reads the next non-comment line from filein and 
+            // places it in String sText, and updates the line counter iLineCounter
             sKeyWord = Globals.getNextMotionLine(sText, iLineCounter, filein);
         } // while
 
         allocate(iNodeCounter);
         if(!mbAllocated) {
-            Globals.statusPrint("motion.read: Cannot allocate memory.\n");
+            Globals.statusPrint("readMotion: Cannot allocate memory.\n");
             return -1;
         }
   
-        filein.close();
-        // TODO: Replace ifstream with a FileStream
-        ifstream filein2 = new ifstream(psPathName);
+        try {
+            filein.close();
+        } catch (IOException ioe) {
+            Globals.statusPrint("readMotion: Could not close file " + psPathName);
+        }
+
+        FileReader fileReader2;
+        try {
+            fileReader2 = new FileReader(mtnPathFile);
+        } catch(FileNotFoundException fnfe) {
+            sMsgText = "readMotion: Unable to open file: " + psPathName;
+            Globals.statusPrint(sMsgText) ;
+            return -1;
+        }
+        
+        LineNumberReader filein2 = new LineNumberReader(fileReader2);
         iNodeCounter = 0;
         sKeyWord = Globals.getNextMotionLine(sText, iLineCounter, filein2);
         while(!sKeyWord.equalsIgnoreCase("EOF")) {
@@ -233,7 +266,12 @@ public class MotionPath {
             sKeyWord = Globals.getNextMotionLine(sText, iLineCounter, filein2);
         }
 
-        filein2.close();
+        try {
+            filein2.close();
+        } catch (IOException ioe) {
+            Globals.statusPrint("readMotion: Could not close file " + psPathName);
+        }
+        
         return iStatus;
     } // readMotion
 } // class MotionPath
