@@ -124,7 +124,7 @@ protected:
             SetScrollSizes(MM_TEXT, CSize(1,1));
         }
     
-        m_cutoutEnabled = mainFrame.cutoutEnabled;
+        m_cutoutEnabled = mainFrame.mbCutoutEnabled;
     } // onInitialUpdate
 
     
@@ -158,8 +158,8 @@ protected:
     public void onDraw(CDC qdc) {
         int status;
     
-        if(mainFrame.previewingScene) {
-            status = mainFrame.mySceneList.previewStill(m_hWnd, mainFrame.modelMatrix, mainFrame.mViewMatrix);
+        if(mainFrame.mbPreviewingScene) {
+            status = mainFrame.mSceneList.previewStill(m_hWnd, mainFrame.mModelMatrix, mainFrame.mViewMatrix);
             if(status != 0) { 
                 exit;
             }
@@ -167,7 +167,7 @@ protected:
         }
 
         if(theFrame.previewingSequence) {
-            status = mainFrame.mySceneList.preview(m_hWnd, mainFrame.modelMatrix, mainFrame.mViewMatrix);
+            status = mainFrame.mSceneList.preview(m_hWnd, mainFrame.mModelMatrix, mainFrame.mViewMatrix);
             if(status != 0) {
                 exit;
             }
@@ -309,7 +309,7 @@ protected:
         // Peek into the CMainFrame window object to see if 
         // the cutout enabled option has been checked.
         String msgText;
-        m_cutoutEnabled = mainFrame.cutoutEnabled;
+        m_cutoutEnabled = mainFrame.mbCutoutEnabled;
         if(m_cutoutEnabled) {
             if (firstPress == false) {
                 firstPress = true;
@@ -318,7 +318,7 @@ protected:
             }
         }
         
-        if (!m_cutoutEnabled && mainFrame.imageSamplingEnabled) {
+        if (!m_cutoutEnabled && mainFrame.mbImageSamplingEnabled) {
             // Sample the color pixel and display the RGB values
             byte red, green, blue;
             byte theValue;
