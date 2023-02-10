@@ -1283,7 +1283,7 @@ public class SceneList implements ISceneList {
 
     // Called from:
     //     previewStill
-    //     readList
+    //     ScnFileParser.readList
     public int addSceneElement(String mdName, String fName, boolean blendI,
     int theType, boolean warpI, float aScale, 
     Point3d rt, Point3d sc, Point3d tr, 
