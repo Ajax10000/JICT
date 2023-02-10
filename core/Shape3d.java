@@ -5,8 +5,12 @@ import frames.MainFrame;
 import globals.Globals;
 import globals.Preference;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.LineNumberReader;
+
 import java.util.StringTokenizer;
 
 import math.MathUtils;
@@ -166,7 +170,7 @@ public:
                 // Get the sceneList object from the application
                 CWnd theWindow = AfxGetMainWnd();
                 MainFrame theFrame = (MainFrame)theWindow;
-                SceneList aSceneList = theFrame.mySceneList;
+                SceneList aSceneList = theFrame.mSceneList;
 
                 // The following method sets all the parameters
                 aSceneList.getSceneInfo(sceneName, effectType, colorMode, iHeight, iWidth); 
@@ -511,8 +515,9 @@ public:
     // Called from:
     //     Shape3d ctor that takes 2 parameters, a String and an int
     public int readShape(String psPathName) {
-        String theText, theKeyWord;
-        Integer fileType;
+        String sMsgText;
+        String theText = "", theKeyWord;
+        Integer fileType = 0;
         StringTokenizer strtok;
 
         this.miNumVertices = 0; // Initialize data members
@@ -522,7 +527,7 @@ public:
         // The following method will set fileType, iNumVertices and iNumFaces
         int myStatus = getShapeFileInfo(psPathName, fileType, iNumVertices, iNumFaces);
         if (myStatus != 0) {
-            String sMsgText = "readShape: getShapeFileInfo could not open file: " + psPathName;
+            sMsgText = "readShape: getShapeFileInfo could not open file: " + psPathName;
             Globals.statusPrint(sMsgText);
             return -1;
         }
@@ -530,13 +535,22 @@ public:
         this.miNumFaces = iNumFaces;
 
         if (this.miNumVertices == 0) {
-            String sMsgText = "readShape: shape file has 0 vertices: " + psPathName;
+            sMsgText = "readShape: shape file has 0 vertices: " + psPathName;
             Globals.statusPrint(sMsgText);
             return -2;
         }
 
-        ifstream filein;
-        filein.open(psPathName, ios.nocreate);
+        //ifstream filein;
+        //filein.open(psPathName, ios.nocreate);
+        File shapeFile = new File(psPathName);
+        FileReader fileReader;
+        try {
+            fileReader = new FileReader(shapeFile);
+        } catch(FileNotFoundException fnfe) {
+            sMsgText = "readShape: Unable to open file: " + psPathName;
+            Globals.statusPrint(sMsgText) ;
+            return -1;
+        }
         /* We already checked if we can open the file when in getShapeFileInfo
         if (filein.fail()) {
             String msgText = "readShape: Unable to open file: " + psPathName;
@@ -545,7 +559,8 @@ public:
         }
         */
 
-        filein >> ws;
+        LineNumberReader filein = new LineNumberReader(fileReader);
+        // filein >> ws;
         int lineCounter = 0;
         int checkCounter = 0;  // Make certain numVertices vertices are read in
         int counter = 0;
@@ -558,12 +573,14 @@ public:
             while(!theKeyWord.equalsIgnoreCase("EOF")) {
                 if (counter == 0) {
                     nullPointer = new VertexSet[this.miNumVertices];
+                    /* Dead code, per the compiler
                     if (nullPointer == null) {
                         Globals.statusPrint("readShape: could not allocate shape memory");
                         this.miNumAllocatedVertices = 0;
                         filein.close();
                         return -3;
                     }
+                    */
 
                     this.miNumAllocatedVertices = this.miNumVertices;
                     this.vertices = nullPointer;
@@ -590,7 +607,7 @@ public:
 
             myStatus = 0;
             if (checkCounter != this.miNumVertices) {
-                String sMsgText = "readShape: Vertex miscount in input file: " + psPathName;
+                sMsgText = "readShape: Vertex miscount in input file: " + psPathName;
                 Globals.statusPrint(sMsgText);
                 myStatus= -4;
             }
@@ -603,20 +620,24 @@ public:
                 if (counter == 0) {
                     // Allocate vertex and face memory
                     nullPointer = new VertexSet[this.miNumVertices];
+                    /* Dead code, per the compiler
                     if (nullPointer == null) {
                         Globals.statusPrint("readShape: Could not allocate shape vertex memory");
                         this.miNumAllocatedVertices = 0;
                         filein.close();
                         return -5;
                     }
+                    */
 
                     facePointer = new FaceSet[this.miNumFaces];
+                    /* Dead code, per the compiler
                     if (facePointer == null) {
                         Globals.statusPrint("readShape: Could not allocate shape face memory");
                         this.miNumAllocatedVertices = 0;
                         filein.close();
                         return -6;
                     }
+                    */
 
                     this.miNumAllocatedVertices = this.miNumVertices;
                     this.vertices = nullPointer;
@@ -667,7 +688,11 @@ public:
             break;
         }  // switch
 
-        filein.close();
+        try {
+            filein.close();
+        } catch (IOException ioe) {
+            Globals.statusPrint("readMotion: Could not close file " + psPathName);
+        }
         return 0;
     } // readShape
 
@@ -676,17 +701,20 @@ public:
     //     readShape
     public int getShapeFileInfo(String psPathName,  
     Integer pIFileType, Integer pINumVertices, Integer pINumFaces) {
-        ifstream filein;
-        filein.open(psPathName, ios.nocreate);
-
-        if (filein.fail()) {
-            String msgText = String.format("getShapeFileInfo: Unable to open file: %s", psPathName);
-            Globals.statusPrint(msgText);
+        //ifstream filein;
+        //filein.open(psPathName, ios.nocreate);
+        File mtnPathFile = new File(psPathName);
+        FileReader fileReader;
+        try {
+            fileReader = new FileReader(mtnPathFile);
+        } catch(FileNotFoundException fnfe) {
+            String sMsgText = String.format("getShapeFileInfo: Unable to open file: %s", psPathName);
+            Globals.statusPrint(sMsgText) ;
             return -1;
         }
 
-        filein >> ws;
-        String theText, theKeyWord;
+        LineNumberReader filein = new LineNumberReader(fileReader);
+        String theText = "", theKeyWord;
         boolean faces = false;
         int lineCounter = 0;
         int counter = 0;
@@ -702,7 +730,11 @@ public:
                     pIFileType = I_WITHOUTFACES;
                     pINumVertices = Integer.parseInt(theKeyWord);
                     pINumFaces = 0;
-                    filein.close;
+                    try {
+                        filein.close();
+                    } catch (IOException ioe) {
+                        Globals.statusPrint("readMotion: Could not close file " + psPathName);
+                    }
                     return 0;
                 }
             }
@@ -724,7 +756,11 @@ public:
             theKeyWord = getNextLine(theText, lineCounter, filein, 0);
         } // while
 
-        filein.close;
+        try {
+            filein.close();
+        } catch (IOException ioe) {
+            Globals.statusPrint("getShapeFileInfo: Could not close file " + psPathName);
+        }
         return 0;
     } // getShapeFileInfo
 
@@ -1259,7 +1295,7 @@ public:
     } // getNextLine
 
 
-    // TODO: Not a method
+    // TODO: Not a method in the original C++ code
     // Called from:
     //     Constructor that takes 2 parameters, a String and an int
     public void getShapePath(String psModelPath, String psShapeDir, String psShapePath) {
