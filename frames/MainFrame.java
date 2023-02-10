@@ -22,6 +22,7 @@ import fileUtils.SCNFileFilter;
 import fileUtils.WRLFileFilter;
 
 import globals.Globals;
+import globals.JICTConstants;
 import globals.Preference;
 import globals.VRML;
 
@@ -155,11 +156,17 @@ protected:
 */
     private IctApp ictApp;
 
-    private JLabel statusLabel;
-
     // 1 if client window needs erasing
     // I changed this from int to boolean
-    public boolean isDirty;
+    // Modified in:
+    //     onPreviewSequenceScene
+    //     onPreviewStillScene
+    //     onRenderSequence
+    //     onRenderStillScene
+    //     onToolsCreateAlphaImage
+    //     onToolsCreateASceneList
+    //     onToolsCreateCutout
+    public boolean mbIsDirty;
 
 
     // Read in: 
@@ -214,19 +221,40 @@ protected:
     //     ScenePreviewDlg.onCmdPlus
     //     ScenePreviewDlg.onCmdReset
     public float mViewTranslateX, mViewTranslateY, mViewTranslateZ;
-    public String sceneName;
 
-    // Read in ScenePreviewDlg.onOk
-    public String sceneFileName;
-    public int effectType;
-    public int mode, colorMode;
+    // Set in:
+    //     onToolsCreateASceneList (when SceneList.getSceneInfo is called)
+    public String msSceneName;
+
+    // Set in:
+    //     onToolsCreateASceneList
+    // Read in: 
+    //     ScenePreviewDlg.onOk
+    public String msSceneFileName;
+
+    // Read in:
+    //     onToolsCreateASceneList
+    // Set in:
+    //     onToolsCreateASceneList (set when method SceneList.getSceneInfo is called)
+    public Integer mIEffectType;
+
+    // Set in:
+    //     onToolsCreateASceneList (set when method SceneList.getSceneInfo is called)
+    public Integer mIColorMode;
+    public int miMode;
 
     // Initialized in the constructor when it calls initFields
     public Integer mIOutputRows = 0, mIOutputColumns = 0;
 
     // Changed from int to boolean
     // Initialized to false in initFields
-    public boolean cutoutEnabled;         // Menu control variables
+    // Modified in:
+    //     onToolsCreateCutout - flips the value
+    //     onToolsSampleImage - set to false
+    // Read in:
+    //     ImageView.onInitialUpdate
+    //     ImageView.onLButtonDown
+    public boolean mbCutoutEnabled;         // Menu control variables
 
     // Changed from int to boolean
     // Initialized to false in initFields
@@ -281,20 +309,29 @@ protected:
     //     onRenderSequence - passed as a parameter to SceneList.render
     //     onRenderHazeFog - controls toggling of hazeFogEnabled
     // Modified in:
-    //     onRenderZBuffer - toggled from true to false or true to false
+    //     onRenderZBuffer - toggled from true to false or false to true
     public boolean mbZBufferEnabled;
 
     // Chanaged from int to boolean
     // Initialized to false in initFields
-    public boolean imageSamplingEnabled;
+    // Read in:
+    //     ImageView.onLButtonDown
+    // Modified in:
+    //     onToolsSampleImage - toggled from true to false or false to true
+    public boolean mbImageSamplingEnabled;
 
     // Changed from int to boolean
     // Initialized to false in initFields
-    public boolean motionBlurEnabled;
+    public boolean mbMotionBlurEnabled;
 
     // Changed from int to boolean
     // Initialized to false in initFields
-    public boolean hazeFogEnabled;
+    // Read in:
+    //     onRenderStillScene - passed as parameter to SceneList.render
+    //     onRenderSequence - passed as parameter to SceneList.render
+    // Modified in:
+    //     onRenderHazeFog - toggled from true to false or false to true
+    public boolean mbHazeFogEnabled;
 
     // Changed from int to boolean
     // Initialized to false in initFields
@@ -304,36 +341,57 @@ protected:
     //     onWarpParamDlgClosed - controls whether to call Global.antiAlias() or not
     // Modified in:
     //     onRenderAntiAlias - flips the value of the variable (from true to false or false to true)
-    public boolean antiAliasEnabled;
+    public boolean mbAntiAliasEnabled;
 
     // 1 if the scene is being previewed
     // Changed from int to boolean
     // Initialized to false in the constructor when it calls method initFields.
     // Modified in: 
     //     onPreviewStillScene
-    public boolean previewingScene;
+    // Read in:
+    //     ImageView.onDraw
+    public boolean mbPreviewingScene;
 
     // 1 if sequence is being previewed
     // Changed from int to boolean
     // Initialized to false in the constructor when it calls method initFields.
     // Modified in: 
     //     onPreviewSequenceScene (set to true at the beginning of the method, and false at the end of the method)
-    public boolean previewingSequence;
+    //     onPreviewStillScene (set to true t the beginning of the method, and false at the end of the method)
+    public boolean mbPreviewingSequence;
 
     // 1 if the ViewPoint is being previewed
     // Changed from int to boolean
     // Initialized to false in initFields
     // Modified in: 
     //     ScenePreviewDlg.chooseModel
-    public boolean changeViewPoint;
+    //     ScenePreviewDlg.onInitDialog
+    //     ScenePreviewDlg.onChkMoveViewPoint
+    // Read in:
+    //     ScenePreviewDlg.onCmdPlus
+    //     ScenePreviewDlg.onCmdReset
+    public boolean mbChangeViewPoint;
 
     // Linked List containing scene description
+    // Initialized in method initFields
     // Read in: 
+    //     onRenderSequence - used to call method SceneList.render
+    //     onRenderStillSequence - used to call method SceneList.render
+    //     onToolsCreateASceneList - used to call SceneList methods listLength(), clear(), getSceneInfo() and getViewTransform(). Also passed as parameter to ScnFileParser ctor
+    //     ImageView.onDraw - used to call SceneList methods previewStill() and preview()
+    //     ScenePreviewDlg.chooseModel - used to call SceneList methods setCurrentModel() and getCurrentModelTransform()
+    //     ScenePreviewDlg.onCmdPlus - used to call SceneList method setCurrentModelTransform
+    //     ScenePreviewDlg.onInitDialog - used to call SceneList.showModels()
+    //     ScenePreviewDlg.onOK - used to call SceneList methods setViewTransform() and writeList()
+    //     ScenePreviewDlg.onSelChangeCmbModels - used to call SceneList methods setCurrentModel(),  getCurrentModelTransform() 
     //     Shape3d constructor, the one that takes 2 parameters, a String and an int
-    public SceneList mySceneList;
+    public SceneList mSceneList;
 
     // Contains a model transformation
-    public TMatrix modelMatrix;
+    // Initialized in method initFields
+    // Read in:
+    //     ImageView.onDraw, passed as parameter to SceneList.previewStill and SceneList.preview
+    public TMatrix mModelMatrix;
 
     // Contains viewpoint transformation
     // Initialized in the constructor when it calls initFields
@@ -341,31 +399,13 @@ protected:
     public TMatrix mViewMatrix;
 
     // The image window into which the scene preview display is drawn
-    public ImageView previewWindowHandle;	 
-
-    // SEQUENTIAL and RANDOM were defined in MEMIMAGE.H
-    public static final int SEQUENTIAL = 1;
-    public static final int RANDOM     = 0;
-
-    // Effect Types
-    public static final int STILL    = 1;
-    public static final int SEQUENCE = 2;
-    public static final int MORPH    = 3;
-
-    // These were defined in MEMIMAGE.H
-    public static final int REDCOLOR = 1;
-    public static final int GREENCOLOR = 2;
-    public static final int BLUECOLOR = 3;
-    public static final int EIGHTBITMONOCHROME = 2;
-    public static final int A32BIT = 4;
-    public static final int RGBCOLOR = 5;
-    public static final int ONEBITMONOCHROME = 6;
-
-    public static final int MONOCHROME = 1;
-    public static final int COLOR      = 2;
-
-    // This value came from ICT20.H
-    public static final float F_DTR = 3.1415926f/180.0f;
+    // Initialized to null in method initFields
+    // Modified in:
+    //     onPreviewSequence
+    //     onPreviewStillScene
+    //     onRenderSequence
+    //     onRenderStillScene
+    public ImageView mPreviewWindowHandle;	 
 
 
     public MainFrame(IctApp ictApp) {
@@ -399,6 +439,9 @@ protected:
         setVisible(true);
     } // MainFrame ctor
 
+
+    // Called from:
+    //     Constructor
     private void initFields() {
         this.mWarpRotateX = 0.0f; 
         this.mWarpRotateY = 0.0f; 
@@ -420,30 +463,31 @@ protected:
         this.mViewTranslateY = 0.0f; 
         this.mViewTranslateZ = 0.0f;
 
-        this.isDirty = false;
-        this.cutoutEnabled = false;
+        this.mbIsDirty = false;
+        this.mbCutoutEnabled = false;
         this.mbPreviewSceneEnabled = false;
         this.mbPreviewSequenceEnabled = false;
         this.mbRenderSceneEnabled = false;
         this.mbRenderSequenceEnabled = false;
         this.mbRemoveSampleColorsEnabled = false;
         this.mbDepthSortingEnabled = false;
-        this.motionBlurEnabled = false;
-        this.hazeFogEnabled = false;
-        this.antiAliasEnabled = false;
+        this.mbMotionBlurEnabled = false;
+        this.mbHazeFogEnabled = false;
+        this.mbAntiAliasEnabled = false;
         this.mbZBufferEnabled = true;
-        this.imageSamplingEnabled = false;
-        this.previewingScene = false;
-        this.previewingSequence = false;
+        this.mbImageSamplingEnabled = false;
+        this.mbPreviewingScene = false;
+        this.mbPreviewingSequence = false;
         this.mIOutputRows = 250;  // Set these in case a SceneList is not read in
         this.mIOutputColumns = 250;
-        this.changeViewPoint = false;
+        this.mbChangeViewPoint = false;
         // TODO: Uncomment the following line when SceneList is completed
-        //this.mySceneList = new SceneList();
+        //this.mSceneList = new SceneList();
         this.mViewMatrix = new TMatrix();
-        this.modelMatrix = new TMatrix();
-        this.previewWindowHandle = null;  // The scene preview window handle
+        this.mModelMatrix = new TMatrix();
+        this.mPreviewWindowHandle = null;  // The scene preview window handle
     } // initFields
+
 
     // Called from:
     //     MainFrame constructor
@@ -992,14 +1036,14 @@ POPUP "Tools"
         int myStatus;
         
         closeAllChildren();
-        if(isDirty) {         // If the client window has been drawn on, erase it
-            isDirty = false;
+        if(mbIsDirty) {         // If the client window has been drawn on, erase it
+            mbIsDirty = false;
             repaint();
         }
 
-        if(mySceneList.listLength() > 0) {
+        if(mSceneList.listLength() > 0) {
             Globals.statusPrint("Clearing Previous Scene List...");
-            mySceneList.clear();
+            mSceneList.clear();
         }
 
         // Display standard Open dialog box to select a file name.
@@ -1026,33 +1070,33 @@ POPUP "Tools"
         Globals.statusPrint(msgText);
 
         // Create an instance of a class that can parse .scn files
-        ScnFileParser parser = new ScnFileParser(mySceneList);
+        ScnFileParser parser = new ScnFileParser(mSceneList);
 
         // Have it parse the .scn file aFileName
         myStatus = parser.readList(msgText, aFileName);
         Globals.statusPrint(msgText);
 
         if(myStatus != 0) {
-            mySceneList.clear();
+            mSceneList.clear();
             return;
         }
 
-        sceneFileName = dlg.getSelectedFile().getName();  // save the file name
+        msSceneFileName = dlg.getSelectedFile().getName();  // save the file name
 
         // Load the scene information into the client object
-        // The following method sets fields sceneName, effectType, colorMode, 
-        // outputRows and outputColumns
+        // The following method sets fields msSceneName, mIEffectType, mIColorMode, 
+        // mIOutputRows and mIOutputColumns
         // Class SceneList stored the information after ScnFileParser parsed file aFileName
-        mySceneList.getSceneInfo(sceneName, effectType, colorMode, 
+        mSceneList.getSceneInfo(msSceneName, mIEffectType, mIColorMode, 
             mIOutputRows, mIOutputColumns);
 
         // The following method sets fields mViewTranslateX, mViewTranslateY, mViewTranslateZ, 
         // mViewRotateX, mViewRotateY, and mViewRotateZ
-        mySceneList.getViewTransform(mViewTranslateX, mViewTranslateY, mViewTranslateZ,
+        mSceneList.getViewTransform(mViewTranslateX, mViewTranslateY, mViewTranslateZ,
             mViewRotateX, mViewRotateY, mViewRotateZ);
         getViewMatrix();
 
-        if((this.effectType == SEQUENCE) || (this.effectType == MORPH)) {
+        if((this.mIEffectType == JICTConstants.I_SEQUENCE) || (this.mIEffectType == JICTConstants.I_MORPH)) {
             this.mbPreviewSequenceEnabled = true;
             this.mbPreviewSceneEnabled    = false;
             this.mbRenderSceneEnabled     = false;
@@ -1092,12 +1136,12 @@ POPUP "Tools"
     // ON_COMMAND(ID_TOOLS_CREATECUTOUT, OnToolsCreatecutout)
     public void onToolsCreateCutout() {
         closeAllChildren();
-        if(isDirty) {         // If the client window has been drawn on, erase it
-            isDirty = false;
+        if(mbIsDirty) {         // If the client window has been drawn on, erase it
+            mbIsDirty = false;
             repaint();
         }
         
-        cutoutEnabled = !cutoutEnabled;
+        mbCutoutEnabled = !mbCutoutEnabled;
     } // onToolsCreateCutout
 
 /*
@@ -1114,8 +1158,8 @@ POPUP "Tools"
         String sMsgText;
 
         Globals.statusPrint("Creating an Alpha-Channel Image");
-        if(isDirty) {         // If the client window has been drawn on, erase it
-            isDirty = false;
+        if(mbIsDirty) {         // If the client window has been drawn on, erase it
+            mbIsDirty = false;
             repaint();
         }
 
@@ -1151,10 +1195,10 @@ POPUP "Tools"
             // The following method sets parameters imHeight, imWidth and bitsPerPixel
             iStatus = Globals.readBMPHeader(sFileName, imHeight, imWidth, bitsPerPixel);
             if(bitsPerPixel == 8) {
-                inImage = new MemImage(sFileName, 0, 0, RANDOM, 'R', MONOCHROME);
+                inImage = new MemImage(sFileName, 0, 0, JICTConstants.I_RANDOM, 'R', JICTConstants.I_MONOCHROME);
             }
             if(bitsPerPixel == 24) {
-                inImage = new MemImage(sFileName, 0, 0, RANDOM, 'R', RGBCOLOR);
+                inImage = new MemImage(sFileName, 0, 0, JICTConstants.I_RANDOM, 'R', JICTConstants.I_RGBCOLOR);
             }
 
             // Create an alpha image
@@ -1240,10 +1284,10 @@ POPUP "Tools"
         // The following method sets parameters inHeight, inWidth, and bitsPerPixel
         int iStatus = Globals.readBMPHeader(Globals.ictPreference.getPath(Preference.WarpTestPath), inHeight, inWidth, bitsPerPixel);
         if(bitsPerPixel == 8) {
-            inImage = new MemImage(Globals.ictPreference.getPath(Preference.WarpTestPath), 0, 0, RANDOM, 'R', MONOCHROME);
+            inImage = new MemImage(Globals.ictPreference.getPath(Preference.WarpTestPath), 0, 0, JICTConstants.I_RANDOM, 'R', JICTConstants.I_MONOCHROME);
         }
         if(bitsPerPixel == 24) {
-            inImage = new MemImage(Globals.ictPreference.getPath(Preference.WarpTestPath), 0, 0, RANDOM, 'R', RGBCOLOR);
+            inImage = new MemImage(Globals.ictPreference.getPath(Preference.WarpTestPath), 0, 0, JICTConstants.I_RANDOM, 'R', JICTConstants.I_RGBCOLOR);
         }
 
         int outHeight = 350;
@@ -1274,7 +1318,7 @@ POPUP "Tools"
             0.0f, 0.0f, 0.0f);
         outImage.writeBMP("d:\\ict20\\output\\testwarp.bmp");
 
-        if(antiAliasEnabled) {
+        if(mbAntiAliasEnabled) {
             Globals.antiAlias(outImage, aliasImage);
             outView.associateMemImage(aliasImage);
         } else {
@@ -1287,8 +1331,8 @@ POPUP "Tools"
     // MENUITEM "Sample Image",                ID_TOOLS_SAMPLEIMAGE
     // ON_COMMAND(ID_TOOLS_SAMPLEIMAGE, OnToolsSampleimage)
     public void onToolsSampleImage() {
-        imageSamplingEnabled = !imageSamplingEnabled;		
-        cutoutEnabled = false;
+        mbImageSamplingEnabled = !mbImageSamplingEnabled;		
+        mbCutoutEnabled = false;
     } // onToolsSampleImage
 
 /*
@@ -1379,7 +1423,7 @@ POPUP "Tools"
         
         int x, y, translationX, translationY;
         int numImages = 10;
-        float angleIncrement = 360.0f / (float)(numImages - 1) * F_DTR;
+        float angleIncrement = 360.0f / (float)(numImages - 1) * JICTConstants.F_DTR;
         int translationIncrement = 500 / numImages;
         translationX = -230;
         translationY = -230;
@@ -1418,7 +1462,7 @@ POPUP "Tools"
 
             Globals.aGraphicPipe.setPenTranslation(-500.0f, (float)translationIncrement, 0.0f);
             Globals.aGraphicPipe.setPenYRotation(angleIncrement); 
-            Globals.aGraphicPipe.setPenXRotation(-360.0f * F_DTR); 
+            Globals.aGraphicPipe.setPenXRotation(-360.0f * JICTConstants.F_DTR); 
         } // for y
 
         Globals.aGraphicPipe.saveZBuffer("d:\\ict20\\output\\gPipeZBuffer8.bmp");
@@ -1435,26 +1479,26 @@ POPUP "Tools"
     // ON_COMMAND(ID_PREVIEW_SCENE, OnPreviewScene)
     public void onPreviewStillScene() {
         closeAllChildren();
-        if(isDirty) {         //if the client window has been drawn on, erase it
-            isDirty = false;
+        if(mbIsDirty) {         //if the client window has been drawn on, erase it
+            mbIsDirty = false;
             repaint();
         }
-        previewingScene = true;
+        mbPreviewingScene = true;
 
         // Create an imageWindow object to draw into
         ImageView preView = new ImageView(this);
         // ictApp.m_pDocTemplateImage.OpenDocumentFile(null);
         preView = ImageView.getView();
         preView.setCaption("Scene Preview");
-        previewWindowHandle = preView; // Save the imageView window so scene preview dialog can use it
+        mPreviewWindowHandle = preView; // Save the imageView window so scene preview dialog can use it
         // MDITile(MDITILE_VERTICAL);	   // This maximizes the imageWindow
 
         ScenePreviewDlg dlg = new ScenePreviewDlg(this, true);
         dlg.setVisible(true);
 
         mbRenderSceneEnabled = true;
-        previewingScene = false;
-        isDirty = true;
+        mbPreviewingScene = false;
+        mbIsDirty = true;
         closeAllChildren();
     } // onPreviewStillScene
 
@@ -1470,26 +1514,26 @@ POPUP "Tools"
     // ON_COMMAND(ID_PREVIEW_SEQUENCE, OnPreviewSequence)
     public void onPreviewSequenceScene() {
         closeAllChildren();
-        if(isDirty) { // If the client window has been drawn on, erase it
-            isDirty = false;
+        if(mbIsDirty) { // If the client window has been drawn on, erase it
+            mbIsDirty = false;
             repaint();
         }
-        previewingSequence = true;
+        mbPreviewingSequence = true;
 
         // Create an imageWindow object to draw into
         ImageView preView = new ImageView(this);
         // ictApp.m_pDocTemplateImage.OpenDocumentFile(null);
         preView = ImageView.getView();
         preView.setCaption("Sequence Preview");
-        previewWindowHandle = preView; // Save the imageView window so scene preview dialog can use it
+        mPreviewWindowHandle = preView; // Save the imageView window so scene preview dialog can use it
         // MDITile(MDITILE_VERTICAL);	   // This maximizes the imageWindow
 
         ScenePreviewDlg dlg = new ScenePreviewDlg(this, true);
         dlg.setVisible(true);
 
         mbRenderSequenceEnabled = true;
-        previewingSequence = false;
-        isDirty = true;
+        mbPreviewingSequence = false;
+        mbIsDirty = true;
         closeAllChildren();
     } // onPreviewSequenceScene
 
@@ -1524,8 +1568,8 @@ POPUP "Tools"
     // ON_COMMAND(ID_RENDER_SCENE, OnRenderScene)
     public void onRenderStillScene() {
         closeAllChildren();
-        if(isDirty) {         // If the client window has been drawn on, erase it
-            isDirty = false;
+        if(mbIsDirty) {         // If the client window has been drawn on, erase it
+            mbIsDirty = false;
             repaint();
         }
 
@@ -1534,15 +1578,15 @@ POPUP "Tools"
         //ictApp.m_pDocTemplateImage.OpenDocumentFile(null);
         renderView = ImageView.getView();
         renderView.setCaption("Scene Render");
-        previewWindowHandle = renderView; //save the imageView window so scene preview dialog can use it
+        mPreviewWindowHandle = renderView; //save the imageView window so scene preview dialog can use it
         // MDITile(MDITILE_VERTICAL);	 //This maximizes the imageWindow
 
         getViewMatrix();
-        mySceneList.render(renderView, mViewMatrix, mbDepthSortingEnabled, mbZBufferEnabled, 
-            antiAliasEnabled, hazeFogEnabled);
+        mSceneList.render(renderView, mViewMatrix, mbDepthSortingEnabled, mbZBufferEnabled, 
+            mbAntiAliasEnabled, mbHazeFogEnabled);
         mbRenderSceneEnabled = false;
 
-        isDirty = true;	
+        mbIsDirty = true;	
     } // onRenderStillScene
 
 /*
@@ -1557,8 +1601,8 @@ POPUP "Tools"
     // ON_COMMAND(ID_RENDER_SEQUENCE, OnRenderSequence)
     public void onRenderSequence() {
         closeAllChildren();
-        if(isDirty) {         //if the client window has been drawn on, erase it
-            isDirty = false;
+        if(mbIsDirty) {         //if the client window has been drawn on, erase it
+            mbIsDirty = false;
             repaint();
         }
 
@@ -1566,15 +1610,15 @@ POPUP "Tools"
         //ictApp.m_pDocTemplateImage.OpenDocumentFile(null);
         renderView = ImageView.getView();
         renderView.setCaption("Sequence Render");
-        previewWindowHandle = renderView; // Save the imageView window so 
+        mPreviewWindowHandle = renderView; // Save the imageView window so 
                                         // the scene preview dialog can use it
         // MDITile(MDITILE_VERTICAL);	      //Maximize the imageWindow
 
         getViewMatrix();
-        mySceneList.render(renderView, mViewMatrix, mbDepthSortingEnabled, 
-            mbZBufferEnabled, antiAliasEnabled, hazeFogEnabled);
+        mSceneList.render(renderView, mViewMatrix, mbDepthSortingEnabled, 
+            mbZBufferEnabled, mbAntiAliasEnabled, mbHazeFogEnabled);
         mbRenderSequenceEnabled = false;
-        isDirty = true;
+        mbIsDirty = true;
     } // onRenderSequence
 
 /*
@@ -1625,7 +1669,7 @@ POPUP "Tools"
         if(mbZBufferEnabled) {
             // Field hazeFogEnabled is passed as a parameter to method 
             // SceneList.render in methods onRenderScene and onRenderSequence
-            hazeFogEnabled = !hazeFogEnabled;
+            mbHazeFogEnabled = !mbHazeFogEnabled;
         } else {
             Globals.statusPrint("mainfrm: Haze can only be used if the Z-Buffer is enabled");
         }
@@ -1636,7 +1680,7 @@ POPUP "Tools"
     // MENUITEM "Anti-Alias",                  ID_RENDER_ANTIALIAS
     // ON_COMMAND(ID_RENDER_ANTIALIAS, OnRenderAntialias)
     public void onRenderAntiAlias() {
-        antiAliasEnabled = !antiAliasEnabled;
+        mbAntiAliasEnabled = !mbAntiAliasEnabled;
     } // onRenderAntiAlias
 
 /*
@@ -1669,9 +1713,9 @@ POPUP "Tools"
     //     onToolsCreateASceneList
     private void getViewMatrix() {
         mViewMatrix.setIdentity();
-        float xRadians = this.mViewRotateX * F_DTR;
-        float yRadians = this.mViewRotateY * F_DTR;
-        float zRadians = this.mViewRotateZ * F_DTR;
+        float xRadians = this.mViewRotateX * JICTConstants.F_DTR;
+        float yRadians = this.mViewRotateY * JICTConstants.F_DTR;
+        float zRadians = this.mViewRotateZ * JICTConstants.F_DTR;
 
         mViewMatrix.rotate(-xRadians, -yRadians, -zRadians);
         mViewMatrix.translate(-mViewTranslateX, -mViewTranslateY, -mViewTranslateZ);
