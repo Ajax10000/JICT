@@ -3,7 +3,7 @@ package fileUtils;
 import java.io.File;
 
 public class FileUtils {
-    // This method came from UTILS.CPP
+    // This method originally came from UTILS.CPP
     public static boolean fileExists(String psPathName) {
         File file = new File(psPathName);
 
@@ -22,25 +22,27 @@ public class FileUtils {
     } // deleteFile
     
 
-    // This method came from UTILS.CPP
+    // This method originally came from UTILS.CPP
     // Called from:
-    //     motionBlur
+    //     Globals.motionBlur
     public static void makePath(String currentPath, String inPath, String prefix, int frameCounter, String inSuffix) {
-        sprintf(currentPath, "%s%.31s%#04d%s.bmp\0", inPath, prefix, frameCounter, inSuffix);
+        // sprintf(currentPath, "%s%.31s%#04d%s.bmp\0", inPath, prefix, frameCounter, inSuffix);
+        currentPath = String.format("%s%.31s%#04d%s.bmp", inPath, prefix, frameCounter, inSuffix);
     } // makePath
       
 
-    // This method came from UTILS.CPP
+    // This method originally came from UTILS.CPP
     // Called from:
-    //     motionBlur
-    public static int getPathPieces(String firstImagePath, String psDirectory, 
+    //     Globals.motionBlur
+    public static int getPathPieces(String psFirstImagePath, String psDirectory, 
     String psFileName, String psPrefix, Integer pIFrameNum, String psInSuffix) {
-        String sDdrive, sDext, sFrameNum, sTempDirectory;
+        String sDdrive, sDext; // destination drive and destination extension
+        String sFrameNum, sTempDirectory;
         char aDot;
         aDot = '.';
       
         // The following sets output parameter psFileName
-       _splitpath(firstImagePath, sDdrive, psDirectory, psFileName, sDext);
+       _splitpath(psFirstImagePath, sDdrive, psDirectory, psFileName, sDext);
 
        // Assumed input:   xxxxx0000c
        // Set output parameter psDirectory
@@ -61,26 +63,29 @@ public class FileUtils {
     } // getPathPieces
 
 
-    // This method came from SceneList
+    // This method originally came from SCENELST.CPP
     // Called from:
-    //     createCutout
+    //     Globals.createCutout
+    //     SceneList.render
     public static void appendFileName(String psOutputFileName, String psPrefix, String psSuffix) {
-        sprintf(psOutputFileName, "%.31s%s.bmp\0", psPrefix, psSuffix);
+        // sprintf(psOutputFileName, "%.31s%s.bmp\0", psPrefix, psSuffix);
+        psOutputFileName = String.format("%.31s%s.bmp", psPrefix, psSuffix);
     } // appendFileName
 
 
-    public static void constructPathName(String outPath, String inPath, char lastLetter) {
+    // This method originally came from SCENELST.CPP
+    public static void constructPathName(String psOutPath, String psInPath, char pcLastLetter) {
         String sDrive, sDir, sFile, sExt;
-        _splitpath(inPath, sDrive, sDir, sFile, sExt);
+        _splitpath(psInPath, sDrive, sDir, sFile, sExt);
         int iLength = sFile.length();
 
         if(iLength > 0) {
             char[] charArray = new char[1];
-            charArray[0] = lastLetter;
+            charArray[0] = pcLastLetter;
             String sLastLetter = new String(charArray);
             sFile.concat(sLastLetter);  // Substitute a letter
         }
 
-        _makepath(outPath, sDrive, sDir, sFile, sExt);
+        _makepath(psOutPath, sDrive, sDir, sFile, sExt);
     } // constructPathName
 } // class FileUtils
