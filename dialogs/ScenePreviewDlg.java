@@ -352,10 +352,10 @@ protected:
 
         if (theChoice != -1) {
             selectedModel = (String)cboModel.getSelectedItem();
-            m_theFrame.mySceneList.setCurrentModel(selectedModel);
+            m_theFrame.mSceneList.setCurrentModel(selectedModel);
 
             // The following method sets all of the parameters
-            m_theFrame.mySceneList.getCurrentModelTransform(
+            m_theFrame.mSceneList.getCurrentModelTransform(
                 rx, ry, rz, 
                 sx, sy, sz, 
                 tx, ty, tz);
@@ -380,8 +380,8 @@ protected:
     // This method came from SCENEPREVIEWDLG.CPP
     // ON_BN_CLICKED(IDC_chkMoveViewPoint, OnchkMoveViewPoint)
     void onChkMoveViewPoint() {
-        m_theFrame.changeViewPoint = !m_theFrame.changeViewPoint;
-        if(m_theFrame.changeViewPoint == true) {
+        m_theFrame.mbChangeViewPoint = !m_theFrame.mbChangeViewPoint;
+        if(m_theFrame.mbChangeViewPoint == true) {
             setTextBoxesWithViewTransform();
         } else {
             setTextBoxesWithModelTransform();
@@ -405,10 +405,10 @@ protected:
     //     onCmdMinus
     void onCmdPlus() {
         String theBuffer;
-        boolean changingModel = (m_theFrame.changeViewPoint == false);
+        boolean changingModel = (m_theFrame.mbChangeViewPoint == false);
 
         if(changingModel) {
-            if((m_theFrame.effectType == SEQUENCE) || (m_theFrame.effectType == MORPH)) {
+            if((m_theFrame.mIEffectType == SEQUENCE) || (m_theFrame.mIEffectType == MORPH)) {
                 cboModel.setSelectedIndex(0);    // Select the first model
                 chooseModel();
             } else {
@@ -508,7 +508,7 @@ protected:
 
         if(changingModel) {
             // Save the current Transform parameters
-            m_theFrame.mySceneList.setCurrentModelTransform(
+            m_theFrame.mSceneList.setCurrentModelTransform(
                 m_theFrame.mWarpRotateX,    m_theFrame.mWarpRotateY,    m_theFrame.mWarpRotateZ,
                 m_theFrame.mWarpScaleX,     m_theFrame.mWarpScaleY,     m_theFrame.mWarpScaleZ,
                 m_theFrame.mWarpTranslateX, m_theFrame.mWarpTranslateY, m_theFrame.mWarpTranslateZ);
@@ -527,7 +527,7 @@ protected:
             -m_theFrame.mViewTranslateY, -m_theFrame.mViewTranslateZ);
 
         //  Redraw the scene list
-        m_theFrame.previewWindowHandle.repaint();
+        m_theFrame.mPreviewWindowHandle.repaint();
         incrementScaleFactor = 1.0f;
     } // onCmdPlus
     
@@ -536,7 +536,7 @@ protected:
     // Called when the user clicks on the Reset button
     // ON_BN_CLICKED(IDC_cmdReset, OncmdReset)
     void onCmdReset() {
-        if(m_theFrame.changeViewPoint == false) {  // If manipulating a model...
+        if(m_theFrame.mbChangeViewPoint == false) {  // If manipulating a model...
             m_theFrame.mWarpTranslateX = 0.0f;
             m_theFrame.mWarpTranslateY = 0.0f;
             m_theFrame.mWarpTranslateZ = 0.0f;
@@ -567,7 +567,7 @@ protected:
     void onOK() {
         String sBuffer = "";
 
-        m_theFrame.mySceneList.setViewTransform(
+        m_theFrame.mSceneList.setViewTransform(
             m_theFrame.mViewTranslateX, m_theFrame.mViewTranslateY, m_theFrame.mViewTranslateZ, 
             m_theFrame.mViewRotateX,    m_theFrame.mViewRotateY,    m_theFrame.mViewRotateZ);
 
@@ -580,7 +580,7 @@ protected:
 
             switch(result) {
             case JOptionPane.YES_OPTION:
-                m_theFrame.mySceneList.writeList(sBuffer, m_theFrame.sceneFileName);
+                m_theFrame.mSceneList.writeList(sBuffer, m_theFrame.msSceneFileName);
             } // switch
 
             m_theFrame.repaint();
@@ -674,8 +674,8 @@ protected:
         Float tx = 0f, ty = 0f, tz = 0f;
 
         selectedModel = (String)cboModel.getSelectedItem();
-        m_theFrame.mySceneList.setCurrentModel(selectedModel);
-        m_theFrame.mySceneList.getCurrentModelTransform(rx, ry, rz, sx, sy, sz, tx, ty, tz);
+        m_theFrame.mSceneList.setCurrentModel(selectedModel);
+        m_theFrame.mSceneList.getCurrentModelTransform(rx, ry, rz, sx, sy, sz, tx, ty, tz);
 
         m_theFrame.mWarpTranslateX = tx;
         m_theFrame.mWarpTranslateY = ty;
@@ -690,7 +690,7 @@ protected:
         m_theFrame.mWarpRotateZ = rz;
 
         setTextBoxesWithModelTransform();
-        m_theFrame.changeViewPoint = false;
+        m_theFrame.mbChangeViewPoint = false;
     } // chooseModel
     
 
@@ -700,8 +700,8 @@ protected:
         setTextBoxesWithModelTransform();
 
         // Place model names in cboModel
-        m_theFrame.mySceneList.showModels(cboModel);  
-        m_theFrame.changeViewPoint = false;
+        m_theFrame.mSceneList.showModels(cboModel);  
+        m_theFrame.mbChangeViewPoint = false;
     } // onInitDialog
     
 
