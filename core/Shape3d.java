@@ -3,6 +3,7 @@ package core;
 import frames.MainFrame;
 
 import globals.Globals;
+import globals.JICTConstants;
 import globals.Preference;
 
 import java.io.File;
@@ -20,22 +21,40 @@ import structs.Point3d;
 import structs.VertexSet;
 
 public class Shape3d {
-    boolean bIctDebug = false;
+    private boolean bIctDebug = false;
     private int miNumVertices;
     private int miNumFaces;
     private int miNumAllocatedVertices;
 
     // Base address for the vertices
     // Changed fom private to public, as it is used in TMatrix
-    public VertexSet[] vertices;
+    public VertexSet[] mVertices;
 
-    public VertexSet currentVertex;
+    // Read in:
+    //     Globals.iwarpz
+    //     Globals.getIntervals
+    //     Globals.tweenImage
+    //     Globals.tweenShape
+    //     RenderObject.drawSequence
+    //     RenderObject.drawStill
+    //     RenderObject.maskFromShape
+    //     RenderObject.prepareCutout
+    //     TMatrix.transformAndProject (passed as a parameter to TMatrix.transformPoint)
+    // Modified in:
+    //     Globals.tweenImage
+    //     TMatrix.transformAndProject
+    public VertexSet mCurrentVertex;
     public int miCurrVtxIdx; // added
 
     // Base address for the polygon faces
-    private FaceSet[] faces;
+    private FaceSet[] mFaces;
 
-    public FaceSet currentFace;
+    // Read in:
+    //     RenderObject.drawSequence
+    //     RenderObject.drawStill
+    //     RenderObject.renderShape
+    //     RenderObject.renderShapez
+    public FaceSet mCurrentFace;
     public int miCurrFaceIdx; // added
 
     // The shape's point of reference.
@@ -53,66 +72,54 @@ public class Shape3d {
     // Read in SceneList.depthSort
     public float mfOriginX, mfOriginY, mfOriginZ;
 
-    // Model Types
-    public static final int I_IMAGE        = 1;
-    public static final int I_SHAPE        = 2;
-    public static final int I_QUADMESH     = 3;
-    public static final int I_COMPOUND     = 4; // not used in this file
-    public static final int I_LIGHTSOURCE  = 5; // not used in this file
-    
-    // Defined in ShapeList
-    public static final int I_TEMPVERTICES = 32;
-    public static final int I_WITHOUTFACES = 1;
-    public static final int I_WITHFACES    = 2;
-
 /*
 public:
-  shape3d(point3d *UL, point3d *UR, point3d *LR, point3d *LL);
-  shape3d (char *fileName, int modelType);
-  shape3d(int allocatedVertices = 4);
-  shape3d(char *pathName);
-  shape3d(shape3d *transformedShape);
-  ~shape3d();
-  void screenBoundingBox();
-  void worldBoundingBox();
-  void transformBoundingBox();
-  void getTCentroid(float *centroidX, float *centroidY, float *centroidZ);
-  void getWCentroid(float *centroidX, float *centroidY, float *centroidZ);
-  void getReferencePoint(float *centroidX, float *centroidY, float *centroidZ);
-  void setReferencePoint(float centroidX, float centroidY, float centroidZ);
-  void translateW(float offsetX, float offsetY, float offsetZ);
-  void translateT(float offsetX, float offsetY, float offsetZ);
-  void translateS(int offsetX, int offsetY);
-  int readShape(char *pathName);
-  int getShapeFileInfo(char *pathName,  int *fileType, int *numVertices, int *numFaces);
-  int shapeFromBMP(char *fileName);
-  int writeShape(char *pathName);
-  void printShape(char *message);
+  shape3d(point3d *UL, point3d *UR, point3d *LR, point3d *LL); - implemented
+  shape3d (char *fileName, int modelType); - implemented
+  shape3d(int allocatedVertices = 4); - implemented
+  shape3d(char *pathName); - implemented
+  shape3d(shape3d *transformedShape); - implemented
+  ~shape3d(); - implemented as method finalize
+  void screenBoundingBox(); - implemented
+  void worldBoundingBox(); - implemented
+  void transformBoundingBox(); - implemented
+  void getTCentroid(float *centroidX, float *centroidY, float *centroidZ); - implemented
+  void getWCentroid(float *centroidX, float *centroidY, float *centroidZ); - implemented
+  void getReferencePoint(float *centroidX, float *centroidY, float *centroidZ); - implemented
+  void setReferencePoint(float centroidX, float centroidY, float centroidZ); - implemented
+  void translateW(float offsetX, float offsetY, float offsetZ); - implemented
+  void translateT(float offsetX, float offsetY, float offsetZ); - implemented
+  void translateS(int offsetX, int offsetY); - implemented
+  int readShape(char *pathName); - implemented
+  int getShapeFileInfo(char *pathName,  int *fileType, int *numVertices, int *numFaces); - implemented
+  int shapeFromBMP(char *fileName); - implemented
+  int writeShape(char *pathName); - implemented
+  void printShape(char *message); - implemented
 
-  void initCurrentVertex();
-  void initCurrentFace();
-  int addWorldVertex(float x, float y, float z);
-  int addTransformedVertex(float x, float y, float z);
-  int deleteLastWorldVertex();
-  int getLastWorldVertex(float *x, float *y, float *z);
-  int getPreviousWorldVertex(float *x, float *y, float *z);
-  int getScreenVertex(int index, int *sx, int *sy);
-  int getTransformedVertex(int index, float *tx, float *tsy, float *tz);
-  void invertY(int screenHeight);
-  int getNumFaces();
-  int getNumVertices();
-  void setNumVertices(int numVertices);
-  int isValid();
-  float averageX();
-  float averageY();
-  float getWorldDistance(int vertexNumber);
-  int getWorldVertex(float distanceFraction, int *index, float *x, float *y, float *z);
-  int removeDuplicates();
-  shape3d *copyAndExpand(int numAddedVertices);
-  int insertVertexAfter(int index, float x, float y, float z);
-  int addVertices(shape3d *child);
-  int divideLongestArc();
-  void floor();
+  void initCurrentVertex(); - implemented
+  void initCurrentFace(); - implemented
+  int addWorldVertex(float x, float y, float z); - implemented
+  int addTransformedVertex(float x, float y, float z); - implemented
+  int deleteLastWorldVertex(); - implemented
+  int getLastWorldVertex(float *x, float *y, float *z); - implemented
+  int getPreviousWorldVertex(float *x, float *y, float *z); - implemented
+  int getScreenVertex(int index, int *sx, int *sy); - implemented
+  int getTransformedVertex(int index, float *tx, float *tsy, float *tz); - implemented
+  void invertY(int screenHeight); - implemented
+  int getNumFaces(); - implemented
+  int getNumVertices(); - implemented
+  void setNumVertices(int numVertices); - implemented
+  int isValid(); - implemented
+  float averageX(); - implemented
+  float averageY(); - implemented
+  float getWorldDistance(int vertexNumber); - implemented
+  int getWorldVertex(float distanceFraction, int *index, float *x, float *y, float *z); - implemented
+  int removeDuplicates(); - implemented
+  shape3d *copyAndExpand(int numAddedVertices); - implemented
+  int insertVertexAfter(int index, float x, float y, float z); - implemented
+  int addVertices(shape3d *child); - implemented
+  int divideLongestArc(); - implemented
+  void floor(); - implemented
 */
 
     // Called from:
@@ -126,7 +133,7 @@ public:
         this.miNumFaces = 0;
 
         switch (piModelType) {
-        case I_IMAGE:
+        case JICTConstants.I_IMAGE:
             // First try to open a corresponding shape file.  If it doesn't exist,
             // use the image file and set the shape to a rectangle.
             sShapeDir = Globals.ictPreference.getPath(Preference.ShapeFileDirectory);
@@ -149,7 +156,7 @@ public:
             }
             break;
 
-        case I_SHAPE:
+        case JICTConstants.I_SHAPE:
             // Create the shape object by reading a shape file, unless the 
             // output image rectangle is to be created...
             if(psFileName.equalsIgnoreCase("Output Image Rectangle")) {
@@ -174,55 +181,55 @@ public:
 
                 // The following method sets all the parameters
                 aSceneList.getSceneInfo(sceneName, effectType, colorMode, iHeight, iWidth); 
-                this.vertices = nullPointer;
-                this.faces = null;
+                this.mVertices = nullPointer;
+                this.mFaces = null;
                 // this.currentVertex = this.firstVertex;
                 this.miCurrVtxIdx = 0;
                 this.miNumAllocatedVertices = this.miNumVertices;
                 float fHalfHeight = iHeight/ 2.0f;
                 float fHalfWidth  = iWidth / 2.0f;
 
-                currentVertex.sx = -fHalfWidth;
-                currentVertex.sy = -fHalfHeight;
-                currentVertex.x  = -fHalfWidth;
-                currentVertex.y  = -fHalfHeight;
-                currentVertex.z  = 0.0f;
-                currentVertex.tx = -fHalfWidth;
-                currentVertex.ty = -fHalfHeight;
-                currentVertex.tz = 0.0f;
+                mCurrentVertex.sx = -fHalfWidth;
+                mCurrentVertex.sy = -fHalfHeight;
+                mCurrentVertex.x  = -fHalfWidth;
+                mCurrentVertex.y  = -fHalfHeight;
+                mCurrentVertex.z  = 0.0f;
+                mCurrentVertex.tx = -fHalfWidth;
+                mCurrentVertex.ty = -fHalfHeight;
+                mCurrentVertex.tz = 0.0f;
                 // currentVertex++;
                 incCurrentVertex();
 
-                currentVertex.sx =  fHalfWidth;
-                currentVertex.sy = -fHalfHeight;	//define screen coordinates for this shape
-                currentVertex.x  =  fHalfWidth;
-                currentVertex.y  = -fHalfHeight;
-                currentVertex.z  = 0.0f;
-                currentVertex.tx =  fHalfWidth;
-                currentVertex.ty = -fHalfHeight;
-                currentVertex.tz = 0.0f;
+                mCurrentVertex.sx =  fHalfWidth;
+                mCurrentVertex.sy = -fHalfHeight;	//define screen coordinates for this shape
+                mCurrentVertex.x  =  fHalfWidth;
+                mCurrentVertex.y  = -fHalfHeight;
+                mCurrentVertex.z  = 0.0f;
+                mCurrentVertex.tx =  fHalfWidth;
+                mCurrentVertex.ty = -fHalfHeight;
+                mCurrentVertex.tz = 0.0f;
                 // currentVertex++;
                 incCurrentVertex();
 
-                currentVertex.sx = fHalfWidth;
-                currentVertex.sy = fHalfHeight;
-                currentVertex.x  = fHalfWidth;
-                currentVertex.y  = fHalfHeight;
-                currentVertex.z  = 0.0f;
-                currentVertex.tx = fHalfWidth;
-                currentVertex.ty = fHalfHeight;
-                currentVertex.tz = 0.0f;
+                mCurrentVertex.sx = fHalfWidth;
+                mCurrentVertex.sy = fHalfHeight;
+                mCurrentVertex.x  = fHalfWidth;
+                mCurrentVertex.y  = fHalfHeight;
+                mCurrentVertex.z  = 0.0f;
+                mCurrentVertex.tx = fHalfWidth;
+                mCurrentVertex.ty = fHalfHeight;
+                mCurrentVertex.tz = 0.0f;
                 // currentVertex++;
                 incCurrentVertex();
 
-                currentVertex.sx = -fHalfWidth;
-                currentVertex.sy =  fHalfHeight;
-                currentVertex.x  = -fHalfWidth;  // initial coordinate
-                currentVertex.y  =  fHalfHeight;
-                currentVertex.z  = 0.0f;
-                currentVertex.tx = -fHalfWidth; // transformed coordinate
-                currentVertex.ty =  fHalfHeight;
-                currentVertex.tz = 0.0f;
+                mCurrentVertex.sx = -fHalfWidth;
+                mCurrentVertex.sy =  fHalfHeight;
+                mCurrentVertex.x  = -fHalfWidth;  // initial coordinate
+                mCurrentVertex.y  =  fHalfHeight;
+                mCurrentVertex.z  = 0.0f;
+                mCurrentVertex.tx = -fHalfWidth; // transformed coordinate
+                mCurrentVertex.ty =  fHalfHeight;
+                mCurrentVertex.tz = 0.0f;
             } else {
                 // Read the shape file (has a ".shp" extension)
                 iStatus = readShape(psFileName);
@@ -234,7 +241,7 @@ public:
             }
             break;
 
-        case I_QUADMESH:
+        case JICTConstants.I_QUADMESH:
             this.miNumVertices = 4;
             VertexSet[] nullPointer = new VertexSet[this.miNumVertices];
             if(nullPointer == null) {
@@ -242,54 +249,54 @@ public:
                 this.miNumAllocatedVertices = 0; //signal an error
             }
 
-            this.vertices = nullPointer;
-            this.faces = null;
+            this.mVertices = nullPointer;
+            this.mFaces = null;
             // this.currentVertex = this.firstVertex;
             initCurrentVertex();
             
             this.miNumAllocatedVertices = this.miNumVertices;
 
-            currentVertex.sx = 0.0f;
-            currentVertex.sy = 0.0f;
-            currentVertex.x  = 0.0f;
-            currentVertex.y  = 0.0f;
-            currentVertex.z  = 0.0f;
-            currentVertex.tx = 0.0f;
-            currentVertex.ty = 0.0f;
-            currentVertex.tz = 0.0f;
+            mCurrentVertex.sx = 0.0f;
+            mCurrentVertex.sy = 0.0f;
+            mCurrentVertex.x  = 0.0f;
+            mCurrentVertex.y  = 0.0f;
+            mCurrentVertex.z  = 0.0f;
+            mCurrentVertex.tx = 0.0f;
+            mCurrentVertex.ty = 0.0f;
+            mCurrentVertex.tz = 0.0f;
 
             // currentVertex++;
             incCurrentVertex();
-            currentVertex.sx = 0.0f;
-            currentVertex.sy = 0.0f; // define screen coordinates for this shape
-            currentVertex.x  = 0.0f;
-            currentVertex.y  = 0.0f;
-            currentVertex.z  = 0.0f;
-            currentVertex.tx = 0.0f;
-            currentVertex.ty = 0.0f;
-            currentVertex.tz = 0.0f;
+            mCurrentVertex.sx = 0.0f;
+            mCurrentVertex.sy = 0.0f; // define screen coordinates for this shape
+            mCurrentVertex.x  = 0.0f;
+            mCurrentVertex.y  = 0.0f;
+            mCurrentVertex.z  = 0.0f;
+            mCurrentVertex.tx = 0.0f;
+            mCurrentVertex.ty = 0.0f;
+            mCurrentVertex.tz = 0.0f;
 
             // currentVertex++;
             incCurrentVertex();
-            currentVertex.sx = 0.0f;
-            currentVertex.sy = 0.0f;
-            currentVertex.x  = 0.0f;
-            currentVertex.y  = 0.0f;
-            currentVertex.z  = 0.0f;
-            currentVertex.tx = 0.0f;
-            currentVertex.ty = 0.0f;
-            currentVertex.tz = 0.0f;
+            mCurrentVertex.sx = 0.0f;
+            mCurrentVertex.sy = 0.0f;
+            mCurrentVertex.x  = 0.0f;
+            mCurrentVertex.y  = 0.0f;
+            mCurrentVertex.z  = 0.0f;
+            mCurrentVertex.tx = 0.0f;
+            mCurrentVertex.ty = 0.0f;
+            mCurrentVertex.tz = 0.0f;
 
             // currentVertex++;
             incCurrentVertex();
-            currentVertex.sx = 0.0f;
-            currentVertex.sy = 0.0f;
-            currentVertex.x  = 0.0f; // initial coordinate
-            currentVertex.y  = 0.0f;
-            currentVertex.z  = 0.0f;
-            currentVertex.tx = 0.0f; // transformed coordinate
-            currentVertex.ty = 0.0f;
-            currentVertex.tz = 0.0f;
+            mCurrentVertex.sx = 0.0f;
+            mCurrentVertex.sy = 0.0f;
+            mCurrentVertex.x  = 0.0f; // initial coordinate
+            mCurrentVertex.y  = 0.0f;
+            mCurrentVertex.z  = 0.0f;
+            mCurrentVertex.tx = 0.0f; // transformed coordinate
+            mCurrentVertex.ty = 0.0f;
+            mCurrentVertex.tz = 0.0f;
             break;
         } // switch
 
@@ -355,20 +362,20 @@ public:
         }
         */
 
-        this.vertices = nullPointer;
-        this.faces = null;
+        this.mVertices = nullPointer;
+        this.mFaces = null;
         this.miCurrVtxIdx = 0;
-        this.currentVertex = this.vertices[0];
+        this.mCurrentVertex = this.mVertices[0];
         // zero the shape memory
         for (int index = 0; index < this.miNumAllocatedVertices; index++) {
-            currentVertex.sx = 0.0f; // screen coordinate
-            currentVertex.sy = 0.0f;
-            currentVertex.x  = 0.0f; // initial coordinate
-            currentVertex.y  = 0.0f;
-            currentVertex.z  = 0.0f;
-            currentVertex.tx = 0.0f; // transformed coordinate
-            currentVertex.ty = 0.0f;
-            currentVertex.tz = 0.0f;
+            mCurrentVertex.sx = 0.0f; // screen coordinate
+            mCurrentVertex.sy = 0.0f;
+            mCurrentVertex.x  = 0.0f; // initial coordinate
+            mCurrentVertex.y  = 0.0f;
+            mCurrentVertex.z  = 0.0f;
+            mCurrentVertex.tx = 0.0f; // transformed coordinate
+            mCurrentVertex.ty = 0.0f;
+            mCurrentVertex.tz = 0.0f;
             // currentVertex++;
             incCurrentVertex();
         }
@@ -401,19 +408,19 @@ public:
         }
         */
 
-        this.vertices = nullPointer;
-        this.faces = null;
-        this.currentVertex = this.vertices[0];
+        this.mVertices = nullPointer;
+        this.mFaces = null;
+        this.mCurrentVertex = this.mVertices[0];
         pTransformedShape.initCurrentVertex();
         for (int index = 0; index < this.miNumVertices; index++) {
-            currentVertex.sx = pTransformedShape.currentVertex.sx; // screen coord.
-            currentVertex.sy = pTransformedShape.currentVertex.sy;
-            currentVertex.x  = pTransformedShape.currentVertex.tx; // initial coord.
-            currentVertex.y  = pTransformedShape.currentVertex.ty;
-            currentVertex.z  = pTransformedShape.currentVertex.tz;
-            currentVertex.tx = 0.0f; // transformed coord.
-            currentVertex.ty = 0.0f;
-            currentVertex.tz = 0.0f;
+            mCurrentVertex.sx = pTransformedShape.mCurrentVertex.sx; // screen coord.
+            mCurrentVertex.sy = pTransformedShape.mCurrentVertex.sy;
+            mCurrentVertex.x  = pTransformedShape.mCurrentVertex.tx; // initial coord.
+            mCurrentVertex.y  = pTransformedShape.mCurrentVertex.ty;
+            mCurrentVertex.z  = pTransformedShape.mCurrentVertex.tz;
+            mCurrentVertex.tx = 0.0f; // transformed coord.
+            mCurrentVertex.ty = 0.0f;
+            mCurrentVertex.tz = 0.0f;
             // currentVertex++;
             incCurrentVertex();
             // pTransformedShape.currentVertex++;
@@ -450,50 +457,50 @@ public:
         }
         */
 
-        this.vertices = nullPointer;
-        this.faces = null;
-        this.currentVertex = this.vertices[0];
-        currentVertex.sx = 0.0f;
-        currentVertex.sy = 0.0f;
-        currentVertex.x  = pULPt.x; // initial coordinate
-        currentVertex.y  = pULPt.y;
-        currentVertex.z  = pULPt.z;
-        currentVertex.tx = 0.0f;  // transformed coordinate
-        currentVertex.ty = 0.0f;
-        currentVertex.tz = 0.0f;
+        this.mVertices = nullPointer;
+        this.mFaces = null;
+        this.mCurrentVertex = this.mVertices[0];
+        mCurrentVertex.sx = 0.0f;
+        mCurrentVertex.sy = 0.0f;
+        mCurrentVertex.x  = pULPt.x; // initial coordinate
+        mCurrentVertex.y  = pULPt.y;
+        mCurrentVertex.z  = pULPt.z;
+        mCurrentVertex.tx = 0.0f;  // transformed coordinate
+        mCurrentVertex.ty = 0.0f;
+        mCurrentVertex.tz = 0.0f;
 
         // this.currentVertex++;
         incCurrentVertex();
-        currentVertex.sx = 0.0f;
-        currentVertex.sy = 0.0f;
-        currentVertex.x  = pURPt.x;
-        currentVertex.y  = pURPt.y;
-        currentVertex.z  = pURPt.z;
-        currentVertex.tx = 0.0f;
-        currentVertex.ty = 0.0f;
-        currentVertex.tz = 0.0f;
+        mCurrentVertex.sx = 0.0f;
+        mCurrentVertex.sy = 0.0f;
+        mCurrentVertex.x  = pURPt.x;
+        mCurrentVertex.y  = pURPt.y;
+        mCurrentVertex.z  = pURPt.z;
+        mCurrentVertex.tx = 0.0f;
+        mCurrentVertex.ty = 0.0f;
+        mCurrentVertex.tz = 0.0f;
 
         // this.currentVertex++;
         incCurrentVertex();
-        currentVertex.sx = 0.0f;
-        currentVertex.sy = 0.0f;
-        currentVertex.x  = pLRPt.x;
-        currentVertex.y  = pLRPt.y;
-        currentVertex.z  = pLRPt.z;
-        currentVertex.tx = 0.0f;
-        currentVertex.ty = 0.0f;
-        currentVertex.tz = 0.0f;
+        mCurrentVertex.sx = 0.0f;
+        mCurrentVertex.sy = 0.0f;
+        mCurrentVertex.x  = pLRPt.x;
+        mCurrentVertex.y  = pLRPt.y;
+        mCurrentVertex.z  = pLRPt.z;
+        mCurrentVertex.tx = 0.0f;
+        mCurrentVertex.ty = 0.0f;
+        mCurrentVertex.tz = 0.0f;
 
         // this.currentVertex++;
         incCurrentVertex();
-        currentVertex.sx = 0.0f;
-        currentVertex.sy = 0.0f;
-        currentVertex.x  = pLLPt.x;
-        currentVertex.y  = pLLPt.y;
-        currentVertex.z  = pLLPt.z;
-        currentVertex.tx = 0.0f;
-        currentVertex.ty = 0.0f;
-        currentVertex.tz = 0.0f;
+        mCurrentVertex.sx = 0.0f;
+        mCurrentVertex.sy = 0.0f;
+        mCurrentVertex.x  = pLLPt.x;
+        mCurrentVertex.y  = pLLPt.y;
+        mCurrentVertex.z  = pLLPt.z;
+        mCurrentVertex.tx = 0.0f;
+        mCurrentVertex.ty = 0.0f;
+        mCurrentVertex.tz = 0.0f;
 
         Float cX = 0f, cY = 0f, cZ = 0f;
         getWCentroid(cX, cY, cZ);  // calculate and save the world coord centroid
@@ -568,7 +575,7 @@ public:
         FaceSet[] facePointer;
       
         switch (fileType) {
-        case I_WITHOUTFACES:
+        case JICTConstants.I_WITHOUTFACES:
             theKeyWord = getNextLine(theText, lineCounter, filein, 0);
             while(!theKeyWord.equalsIgnoreCase("EOF")) {
                 if (counter == 0) {
@@ -583,19 +590,19 @@ public:
                     */
 
                     this.miNumAllocatedVertices = this.miNumVertices;
-                    this.vertices = nullPointer;
-                    this.faces = null;
+                    this.mVertices = nullPointer;
+                    this.mFaces = null;
                     this.miCurrVtxIdx = 0;
-                    this.currentVertex = this.vertices[0];
+                    this.mCurrentVertex = this.mVertices[0];
                 } else {  //read in a vertex
                     strtok = new StringTokenizer(theKeyWord, ",");
                     String xValue = strtok.nextToken();
                     String yValue = strtok.nextToken();
                     String zValue = strtok.nextToken();
 
-                    if(xValue != null) currentVertex.x = Float.parseFloat(xValue);
-                    if(yValue != null) currentVertex.y = Float.parseFloat(yValue);
-                    if(zValue != null) currentVertex.z = Float.parseFloat(zValue);
+                    if(xValue != null) mCurrentVertex.x = Float.parseFloat(xValue);
+                    if(yValue != null) mCurrentVertex.y = Float.parseFloat(yValue);
+                    if(zValue != null) mCurrentVertex.z = Float.parseFloat(zValue);
                     // currentVertex++;
                     incCurrentVertex();
                     checkCounter++;
@@ -613,7 +620,7 @@ public:
             }
             break;
 
-        case I_WITHFACES:
+        case JICTConstants.I_WITHFACES:
             boolean faces = false;
             theKeyWord = getNextLine(theText, lineCounter, filein, 0);
             while(!theKeyWord.equalsIgnoreCase("EOF")) {
@@ -640,10 +647,10 @@ public:
                     */
 
                     this.miNumAllocatedVertices = this.miNumVertices;
-                    this.vertices = nullPointer;
-                    this.currentVertex = this.vertices[0]; 
-                    this.faces = facePointer;
-                    this.currentFace = this.faces[0];
+                    this.mVertices = nullPointer;
+                    this.mCurrentVertex = this.mVertices[0]; 
+                    this.mFaces = facePointer;
+                    this.mCurrentFace = this.mFaces[0];
                     // if counter == 0
                 } else { //counter > 0
                     if(theKeyWord.equalsIgnoreCase("IndexedFaceSet")) {
@@ -655,15 +662,15 @@ public:
                             String c2 = strtok.nextToken();
                             String c3 = strtok.nextToken();
                             String c4 = strtok.nextToken();
-                            currentFace.i1 = -1;
-                            currentFace.i2 = -1;
-                            currentFace.i3 = -1;
-                            currentFace.i4 = -1;
+                            mCurrentFace.i1 = -1;
+                            mCurrentFace.i2 = -1;
+                            mCurrentFace.i3 = -1;
+                            mCurrentFace.i4 = -1;
 
-                            if(c1 != null) currentFace.i1 = Integer.parseInt(c1);
-                            if(c2 != null) currentFace.i2 = Integer.parseInt(c2);
-                            if(c3 != null) currentFace.i3 = Integer.parseInt(c3);
-                            if(c4 != null) currentFace.i4 = Integer.parseInt(c4);
+                            if(c1 != null) mCurrentFace.i1 = Integer.parseInt(c1);
+                            if(c2 != null) mCurrentFace.i2 = Integer.parseInt(c2);
+                            if(c3 != null) mCurrentFace.i3 = Integer.parseInt(c3);
+                            if(c4 != null) mCurrentFace.i4 = Integer.parseInt(c4);
                             // currentFace++;
                             incCurrentFace();
                         } else {                 // get a vertex
@@ -672,9 +679,9 @@ public:
                             String yValue = strtok.nextToken();
                             String zValue = strtok.nextToken();
 
-                            if(xValue != null) currentVertex.x = Float.parseFloat(xValue);
-                            if(yValue != null) currentVertex.y = Float.parseFloat(yValue);
-                            if(zValue != null) currentVertex.z = Float.parseFloat(zValue);
+                            if(xValue != null) mCurrentVertex.x = Float.parseFloat(xValue);
+                            if(yValue != null) mCurrentVertex.y = Float.parseFloat(yValue);
+                            if(zValue != null) mCurrentVertex.z = Float.parseFloat(zValue);
                             // this.currentVertex++;
                             incCurrentVertex();
                             checkCounter++;
@@ -725,9 +732,9 @@ public:
         while(!theKeyWord.equalsIgnoreCase("EOF")) {
             if (counter == 0) {      // Look for a number or 'Coordinate3'
                 if(theKeyWord.equalsIgnoreCase("Coordinate3")) {
-                    pIFileType = I_WITHFACES;
+                    pIFileType = JICTConstants.I_WITHFACES;
                 } else {
-                    pIFileType = I_WITHOUTFACES;
+                    pIFileType = JICTConstants.I_WITHOUTFACES;
                     pINumVertices = Integer.parseInt(theKeyWord);
                     pINumFaces = 0;
                     try {
@@ -789,54 +796,54 @@ public:
         }
         */
 
-        this.vertices = nullPointer;
-        this.faces = null;
-        this.currentVertex = this.vertices[0];
+        this.mVertices = nullPointer;
+        this.mFaces = null;
+        this.mCurrentVertex = this.mVertices[0];
         this.miNumAllocatedVertices = this.miNumVertices;
         
         float fHalfHeight = height/ 2.0f;
         float fHalfWidth  = width / 2.0f;
-        currentVertex.sx = -fHalfWidth;
-        currentVertex.sy = -fHalfHeight;
-        currentVertex.x  = -fHalfWidth;
-        currentVertex.y  = -fHalfHeight;
-        currentVertex.z  = 0.0f;
-        currentVertex.tx = -fHalfWidth;
-        currentVertex.ty = -fHalfHeight;
-        currentVertex.tz = 0.0f;
+        mCurrentVertex.sx = -fHalfWidth;
+        mCurrentVertex.sy = -fHalfHeight;
+        mCurrentVertex.x  = -fHalfWidth;
+        mCurrentVertex.y  = -fHalfHeight;
+        mCurrentVertex.z  = 0.0f;
+        mCurrentVertex.tx = -fHalfWidth;
+        mCurrentVertex.ty = -fHalfHeight;
+        mCurrentVertex.tz = 0.0f;
         // currentVertex++;
         incCurrentVertex();
         
-        currentVertex.sx =  fHalfWidth;
-        currentVertex.sy = -fHalfHeight;	//define screen coordinates for this shape
-        currentVertex.x  =  fHalfWidth;
-        currentVertex.y  = -fHalfHeight;
-        currentVertex.z  = 0.0f;
-        currentVertex.tx =  fHalfWidth;
-        currentVertex.ty = -fHalfHeight;
-        currentVertex.tz = 0.0f;
+        mCurrentVertex.sx =  fHalfWidth;
+        mCurrentVertex.sy = -fHalfHeight;	//define screen coordinates for this shape
+        mCurrentVertex.x  =  fHalfWidth;
+        mCurrentVertex.y  = -fHalfHeight;
+        mCurrentVertex.z  = 0.0f;
+        mCurrentVertex.tx =  fHalfWidth;
+        mCurrentVertex.ty = -fHalfHeight;
+        mCurrentVertex.tz = 0.0f;
         // currentVertex++;
         incCurrentVertex();
 
-        currentVertex.sx = fHalfWidth;
-        currentVertex.sy = fHalfHeight;
-        currentVertex.x  = fHalfWidth;
-        currentVertex.y  = fHalfHeight;
-        currentVertex.z  = 0.0f;
-        currentVertex.tx = fHalfWidth;
-        currentVertex.ty = fHalfHeight;
-        currentVertex.tz = 0.0f;
+        mCurrentVertex.sx = fHalfWidth;
+        mCurrentVertex.sy = fHalfHeight;
+        mCurrentVertex.x  = fHalfWidth;
+        mCurrentVertex.y  = fHalfHeight;
+        mCurrentVertex.z  = 0.0f;
+        mCurrentVertex.tx = fHalfWidth;
+        mCurrentVertex.ty = fHalfHeight;
+        mCurrentVertex.tz = 0.0f;
         // currentVertex++;
         incCurrentVertex();
 
-        currentVertex.sx = -fHalfWidth;
-        currentVertex.sy =  fHalfHeight;
-        currentVertex.x  = -fHalfWidth;  // initial coordinate
-        currentVertex.y  =  fHalfHeight;
-        currentVertex.z  = 0.0f;
-        currentVertex.tx = -fHalfWidth; // transformed coordinate
-        currentVertex.ty =  fHalfHeight;
-        currentVertex.tz = 0.0f;
+        mCurrentVertex.sx = -fHalfWidth;
+        mCurrentVertex.sy =  fHalfHeight;
+        mCurrentVertex.x  = -fHalfWidth;  // initial coordinate
+        mCurrentVertex.y  =  fHalfHeight;
+        mCurrentVertex.z  = 0.0f;
+        mCurrentVertex.tx = -fHalfWidth; // transformed coordinate
+        mCurrentVertex.ty =  fHalfHeight;
+        mCurrentVertex.tz = 0.0f;
 
         Float cX = 0f, cY = 0f, cZ = 0f;
         getWCentroid(cX, cY, cZ);  // Calculate and save the world coord centroid
@@ -851,6 +858,10 @@ public:
     } // shapeFromBMP
 
 
+    // Not called from within this file
+    // Called from:
+    //     Globals.createCutout
+    //     MainFrame.onToolsCreateAlphaImage
     public int writeShape(String psPathName) {
         ofstream fileOut = new ofstream(psPathName);
 
@@ -865,7 +876,7 @@ public:
         initCurrentVertex();
 
         for (int index = 1; index <= this.miNumVertices; index ++) {
-            output = this.currentVertex.x + "," + this.currentVertex.y + "," + this.currentVertex.z + "\n";
+            output = this.mCurrentVertex.x + "," + this.mCurrentVertex.y + "," + this.mCurrentVertex.z + "\n";
             fileOut << output;
             // this.currentVertex++;
             incCurrentVertex();
@@ -888,9 +899,9 @@ public:
         initCurrentVertex();
         for (int index = 1; index <= this.miNumVertices; index ++) {
             sMsgText = String.format("%6.2f,%6.2f,%6.2f\t\t%6.2f,%6.2f,%6.2f\t%6.2f,%6.2f",
-                currentVertex.x,  currentVertex.y,  currentVertex.z,
-                currentVertex.tx, currentVertex.ty, currentVertex.tz,
-                currentVertex.sx, currentVertex.sy);
+                mCurrentVertex.x,  mCurrentVertex.y,  mCurrentVertex.z,
+                mCurrentVertex.tx, mCurrentVertex.ty, mCurrentVertex.tz,
+                mCurrentVertex.sx, mCurrentVertex.sy);
             Globals.statusPrint(sMsgText);
             // this.currentVertex++;
             incCurrentVertex();
@@ -905,17 +916,17 @@ public:
     //     Globals.iwarpz
     public void screenBoundingBox() {
         initCurrentVertex();
-        this.mfMaxX = currentVertex.sx; 
-        this.mfMaxY = currentVertex.sy;
+        this.mfMaxX = mCurrentVertex.sx; 
+        this.mfMaxY = mCurrentVertex.sy;
 
-        this.mfMinX = currentVertex.sx; 
-        this.mfMinY = currentVertex.sy;
+        this.mfMinX = mCurrentVertex.sx; 
+        this.mfMinY = mCurrentVertex.sy;
 
         for (int index = 0; index < this.miNumVertices; index++) {
-            if(currentVertex.sx > mfMaxX) this.mfMaxX = currentVertex.sx;
-            if(currentVertex.sx < mfMinX) this.mfMinX = currentVertex.sx;
-            if(currentVertex.sy > mfMaxY) this.mfMaxY = currentVertex.sy;
-            if(currentVertex.sy < mfMinY) this.mfMinY = currentVertex.sy;
+            if(mCurrentVertex.sx > mfMaxX) this.mfMaxX = mCurrentVertex.sx;
+            if(mCurrentVertex.sx < mfMinX) this.mfMinX = mCurrentVertex.sx;
+            if(mCurrentVertex.sy > mfMaxY) this.mfMaxY = mCurrentVertex.sy;
+            if(mCurrentVertex.sy < mfMinY) this.mfMinY = mCurrentVertex.sy;
             // this.currentVertex++;
             incCurrentVertex();
         } // for
@@ -923,10 +934,38 @@ public:
 
 
     // Called from:
+    //     Shape3d constructor that takes a string (file name) and an int (model type)
+    //     Shape3d constructor that takes 1 parameter, an int
+    //     Shape3d constructor that take 1 parameter, another Shape3d object
+    //     addVertices
+    //     copyAndExpand
+    //     divideLongestArc
+    //     floor
+    //     getBoundaryPoint
+    //     getTCentroid
+    //     getWCentroid
+    //     getWorldDistance
+    //     getWorldVertex
+    //     insertVertexAfter
+    //     invertY
+    //     printShape
+    //     removeDuplicates
+    //     screenBoundingBox
+    //     transformBoundingBox
+    //     translateS
+    //     translateT
+    //     translateW
+    //     worldBoundingBox
+    //     writeShape
     //     Globals.getIntervals
     //     Globals.iwarpz
+    //     Globals.tweenImage
+    //     Globals.tweenShape
+    //     RenderObject.drawSequence
     //     RenderObject.drawStill
+    //     RenderObject.maskFromShape
     //     RenderObject.prepareCutout
+    //     TMatrix.transformAndProject
     public void initCurrentVertex() {
         // this.currentVertex = this.firstVertex;
         this.miCurrVtxIdx = 0;
@@ -935,26 +974,26 @@ public:
 
     public void incCurrentVertex() {
         this.miCurrVtxIdx++;
-        this.currentVertex = this.vertices[miCurrVtxIdx];
+        this.mCurrentVertex = this.mVertices[miCurrVtxIdx];
     }
 
 
     public void decCurrentVertex() {
         this.miCurrVtxIdx--;
-        this.currentVertex = this.vertices[miCurrVtxIdx];
+        this.mCurrentVertex = this.mVertices[miCurrVtxIdx];
     }
 
 
     public void initCurrentFace() {
         // this.currentFace = this.firstFace;
         this.miCurrFaceIdx = 0;
-        this.currentFace = this.faces[0];
+        this.mCurrentFace = this.mFaces[0];
     } // initCurrentFace
 
 
     public void incCurrentFace() {
         this.miCurrFaceIdx++;
-        this.currentFace = this.faces[miCurrFaceIdx];
+        this.mCurrentFace = this.mFaces[miCurrFaceIdx];
     } // initCurrentFace
 
     
@@ -993,16 +1032,16 @@ public:
     //     Globals.tweenImage
     public void worldBoundingBox() {
         initCurrentVertex();
-        this.mfMaxX = currentVertex.x; 
-        this.mfMaxY = currentVertex.y;
-        this.mfMinX = currentVertex.x; 
-        this.mfMinY = currentVertex.y;
+        this.mfMaxX = mCurrentVertex.x; 
+        this.mfMaxY = mCurrentVertex.y;
+        this.mfMinX = mCurrentVertex.x; 
+        this.mfMinY = mCurrentVertex.y;
 
         for (int index = 0; index < this.miNumVertices; index++) {
-            if(currentVertex.x > mfMaxX) this.mfMaxX = currentVertex.x;
-            if(currentVertex.x < mfMinX) this.mfMinX = currentVertex.x;
-            if(currentVertex.y > mfMaxY) this.mfMaxY = currentVertex.y;
-            if(currentVertex.y < mfMinY) this.mfMinY = currentVertex.y;
+            if(mCurrentVertex.x > mfMaxX) this.mfMaxX = mCurrentVertex.x;
+            if(mCurrentVertex.x < mfMinX) this.mfMinX = mCurrentVertex.x;
+            if(mCurrentVertex.y > mfMaxY) this.mfMaxY = mCurrentVertex.y;
+            if(mCurrentVertex.y < mfMinY) this.mfMinY = mCurrentVertex.y;
             // this.currentVertex++;
             incCurrentVertex();
         } // for index
@@ -1013,21 +1052,21 @@ public:
     //     Globals.iwarpz
     public void transformBoundingBox() {
         initCurrentVertex();
-        this.mfMaxTX = currentVertex.tx; 
-        this.mfMaxTY = currentVertex.ty; 
-        this.mfMaxTZ = currentVertex.tz;
+        this.mfMaxTX = mCurrentVertex.tx; 
+        this.mfMaxTY = mCurrentVertex.ty; 
+        this.mfMaxTZ = mCurrentVertex.tz;
 
-        this.mfMinTX = currentVertex.tx; 
-        this.mfMinTY = currentVertex.ty; 
-        this.mfMinTZ = currentVertex.tz;
+        this.mfMinTX = mCurrentVertex.tx; 
+        this.mfMinTY = mCurrentVertex.ty; 
+        this.mfMinTZ = mCurrentVertex.tz;
 
         for (int index = 0; index < this.miNumVertices; index++) {
-            if(currentVertex.tx > mfMaxTX) this.mfMaxTX = currentVertex.tx;
-            if(currentVertex.tx < mfMinTX) this.mfMinTX = currentVertex.tx;
-            if(currentVertex.ty > mfMaxTY) this.mfMaxTY = currentVertex.ty;
-            if(currentVertex.ty < mfMinTY) this.mfMinTY = currentVertex.ty;
-            if(currentVertex.tz > mfMaxTZ) this.mfMaxTZ = currentVertex.tz;
-            if(currentVertex.tz < mfMinTZ) this.mfMinTZ = currentVertex.tz;
+            if(mCurrentVertex.tx > mfMaxTX) this.mfMaxTX = mCurrentVertex.tx;
+            if(mCurrentVertex.tx < mfMinTX) this.mfMinTX = mCurrentVertex.tx;
+            if(mCurrentVertex.ty > mfMaxTY) this.mfMaxTY = mCurrentVertex.ty;
+            if(mCurrentVertex.ty < mfMinTY) this.mfMinTY = mCurrentVertex.ty;
+            if(mCurrentVertex.tz > mfMaxTZ) this.mfMaxTZ = mCurrentVertex.tz;
+            if(mCurrentVertex.tz < mfMinTZ) this.mfMinTZ = mCurrentVertex.tz;
             // currentVertex++;
             incCurrentVertex();
         } // for index
@@ -1040,7 +1079,7 @@ public:
         initCurrentVertex();
 
         for (int index = 0; index < this.miNumVertices; index++) {
-            currentVertex.y = piScreenHeight - currentVertex.y;
+            mCurrentVertex.y = piScreenHeight - mCurrentVertex.y;
             // currentVertex++;
             incCurrentVertex();
         }
@@ -1056,9 +1095,9 @@ public:
             return -1;
         }
 
-        currentVertex.x = pfX;
-        currentVertex.y = pfY;
-        currentVertex.z = pfZ;
+        mCurrentVertex.x = pfX;
+        mCurrentVertex.y = pfY;
+        mCurrentVertex.z = pfZ;
         // currentVertex++; // advance the vertex pointer
         incCurrentVertex();
 
@@ -1076,9 +1115,9 @@ public:
         }
 
         // Use the input parameters to set currentVertex
-        currentVertex.tx = pfX;
-        currentVertex.ty = pfY;
-        currentVertex.tz = pfZ;
+        mCurrentVertex.tx = pfX;
+        mCurrentVertex.ty = pfY;
+        mCurrentVertex.tz = pfZ;
         // currentVertex++; // advance the vertex pointer
         incCurrentVertex();
 
@@ -1111,9 +1150,9 @@ public:
       pfZ = (currentVertex - 1).z;
       */
 
-      pFX = vertices[miCurrVtxIdx - 1].x;
-      pFY = vertices[miCurrVtxIdx - 1].y;
-      pFZ = vertices[miCurrVtxIdx - 1].z;
+      pFX = mVertices[miCurrVtxIdx - 1].x;
+      pFY = mVertices[miCurrVtxIdx - 1].y;
+      pFZ = mVertices[miCurrVtxIdx - 1].z;
       return 0;
     } // getLastWorldVertex
 
@@ -1129,9 +1168,9 @@ public:
         pFY = (currentVertex - 2).y;
         pFZ = (currentVertex - 2).z;
         */
-        pFX = vertices[miCurrVtxIdx - 2].x;
-        pFY = vertices[miCurrVtxIdx - 2].y;
-        pFZ = vertices[miCurrVtxIdx - 2].z;
+        pFX = mVertices[miCurrVtxIdx - 2].x;
+        pFY = mVertices[miCurrVtxIdx - 2].y;
+        pFZ = mVertices[miCurrVtxIdx - 2].z;
 
         return 0;
     } // getPreviousWorldVertex
@@ -1160,16 +1199,16 @@ public:
     public void getWCentroid(Float pFCentroidX, Float pFCentroidY, Float pFCentroidZ) {
         if(this.miNumAllocatedVertices > 0) {
             initCurrentVertex();
-            float fMaxX = currentVertex.x, fMaxY = currentVertex.y, fMaxZ = currentVertex.z;
-            float fMinX = currentVertex.x, fMinY = currentVertex.y, fMinZ = currentVertex.z;
+            float fMaxX = mCurrentVertex.x, fMaxY = mCurrentVertex.y, fMaxZ = mCurrentVertex.z;
+            float fMinX = mCurrentVertex.x, fMinY = mCurrentVertex.y, fMinZ = mCurrentVertex.z;
 
             for (int index = 0; index < this.miNumVertices; index++) {
-                if(currentVertex.x > fMaxX) fMaxX = currentVertex.x;
-                if(currentVertex.x < fMinX) fMinX = currentVertex.x;
-                if(currentVertex.y > fMaxY) fMaxY = currentVertex.y;
-                if(currentVertex.y < fMinY) fMinY = currentVertex.y;
-                if(currentVertex.z > fMaxZ) fMaxZ = currentVertex.z;
-                if(currentVertex.z < fMinZ) fMinZ = currentVertex.z;
+                if(mCurrentVertex.x > fMaxX) fMaxX = mCurrentVertex.x;
+                if(mCurrentVertex.x < fMinX) fMinX = mCurrentVertex.x;
+                if(mCurrentVertex.y > fMaxY) fMaxY = mCurrentVertex.y;
+                if(mCurrentVertex.y < fMinY) fMinY = mCurrentVertex.y;
+                if(mCurrentVertex.z > fMaxZ) fMaxZ = mCurrentVertex.z;
+                if(mCurrentVertex.z < fMinZ) fMinZ = mCurrentVertex.z;
                 // currentVertex++;
                 incCurrentVertex();
             }
@@ -1195,9 +1234,9 @@ public:
         initCurrentVertex();
 
         for (int index = 0; index < this.miNumVertices; index++) {
-            currentVertex.x += pfOffsetX;
-            currentVertex.y += pfOffsetY;
-            currentVertex.z += pfOffsetZ;
+            mCurrentVertex.x += pfOffsetX;
+            mCurrentVertex.y += pfOffsetY;
+            mCurrentVertex.z += pfOffsetZ;
             // currentVertex++;
             incCurrentVertex();
         }
@@ -1210,11 +1249,11 @@ public:
         initCurrentVertex();
 
         for (int index = 0; index < this.miNumVertices; index++) {
-            currentVertex.x  = (int)currentVertex.x;
-            currentVertex.y  = (int)currentVertex.y;
-            currentVertex.z  = (int)currentVertex.z;
-            currentVertex.sx = (int)currentVertex.sx;
-            currentVertex.sy = (int)currentVertex.sy;
+            mCurrentVertex.x  = (int)mCurrentVertex.x;
+            mCurrentVertex.y  = (int)mCurrentVertex.y;
+            mCurrentVertex.z  = (int)mCurrentVertex.z;
+            mCurrentVertex.sx = (int)mCurrentVertex.sx;
+            mCurrentVertex.sy = (int)mCurrentVertex.sy;
             // currentVertex++;
             incCurrentVertex();
         }
@@ -1226,9 +1265,9 @@ public:
         initCurrentVertex();
 
         for (int index = 0; index < this.miNumVertices; index++) {
-            currentVertex.tx += pfOffsetX;
-            currentVertex.ty += pfOffsetY;
-            currentVertex.tz += pfOffsetZ;
+            mCurrentVertex.tx += pfOffsetX;
+            mCurrentVertex.ty += pfOffsetY;
+            mCurrentVertex.tz += pfOffsetZ;
             // currentVertex++;
             incCurrentVertex();
         }
@@ -1240,14 +1279,15 @@ public:
         initCurrentVertex();
 
         for (int index = 0; index < this.miNumVertices; index++) {
-            currentVertex.sx += piOffsetX;
-            currentVertex.sy += piOffsetY;
+            mCurrentVertex.sx += piOffsetX;
+            mCurrentVertex.sy += piOffsetY;
             // currentVertex++;
             incCurrentVertex();
         }
     } // translateS
 
 
+    // TODO: Not a method of Shape3d in the original C++ code
     // Called from:
     //     getShapeFileInfo
     //     readShape
@@ -1295,7 +1335,7 @@ public:
     } // getNextLine
 
 
-    // TODO: Not a method in the original C++ code
+    // TODO: Not a method of Shape3d in the original C++ code
     // Called from:
     //     Constructor that takes 2 parameters, a String and an int
     public void getShapePath(String psModelPath, String psShapeDir, String psShapePath) {
@@ -1326,6 +1366,7 @@ public:
     } // isValid
 
 
+    // Not a method in the original C++ code for Shape3d
     // Not called from within this file
     public int getBoundaryPoint(Shape3d theShape, 
     float rayCentroidX, float rayCentroidY,
@@ -1350,7 +1391,7 @@ public:
       
         // Calculate the ray angle in degrees
         float rayAngle = MathUtils.polarAtan(rayX2 - rayCentroidX, rayY2 - rayCentroidY);
-        Shape3d tempShape = new Shape3d(I_TEMPVERTICES);
+        Shape3d tempShape = new Shape3d(JICTConstants.I_TEMPVERTICES);
         if (!tempShape.isValid()) {
             Globals.statusPrint("getBoundaryPoint: Unable to create temporary shape object");
             return -1;
@@ -1379,8 +1420,8 @@ public:
         tempShape.initCurrentVertex();
         theShape.initCurrentVertex();
         for (int index = 1; index <= numVertices; index++) {
-            x1 = theShape.currentVertex.x;
-            y1 = theShape.currentVertex.y;
+            x1 = theShape.mCurrentVertex.x;
+            y1 = theShape.mCurrentVertex.y;
             // theShape.currentVertex++;
             theShape.incCurrentVertex();
 
@@ -1389,8 +1430,8 @@ public:
                 theShape.initCurrentVertex();
             }
 
-            x2 = theShape.currentVertex.x;  // Can't use (currentVertex+1).x
-            y2 = theShape.currentVertex.y;  // So first move forward 1 position, then go back.
+            x2 = theShape.mCurrentVertex.x;  // Can't use (currentVertex+1).x
+            y2 = theShape.mCurrentVertex.y;  // So first move forward 1 position, then go back.
             //theShape.currentVertex--;
             theShape.decCurrentVertex();
 
@@ -1469,11 +1510,11 @@ public:
         tempShape.initCurrentVertex();
         numVertices = tempShape.getNumVertices();
 
-        leastDistance = tempShape.currentVertex.tz;
+        leastDistance = tempShape.mCurrentVertex.tz;
         for(int index = 1; index <= numVertices; index++) {
-            tempX = tempShape.currentVertex.tx;
-            tempY = tempShape.currentVertex.ty;
-            tempDistance = tempShape.currentVertex.tz;
+            tempX = tempShape.mCurrentVertex.tx;
+            tempY = tempShape.mCurrentVertex.ty;
+            tempDistance = tempShape.mCurrentVertex.tz;
             if(tempDistance <= leastDistance) {
                 leastDistance = tempDistance;
                 outX = tempX;
@@ -1514,21 +1555,21 @@ public:
         cclockWise = 0;
 
         for (j = 1; j <= numVertices; j++) {
-            cx = child.currentVertex.x;
-            cy = child.currentVertex.y;
+            cx = child.mCurrentVertex.x;
+            cy = child.mCurrentVertex.y;
             childAngle = MathUtils.polarAtan(cx - cCentroidX, cy - cCentroidY);
 
             numMVertices = this.getNumVertices();
             this.initCurrentVertex();
             for(i = 1; i <= numMVertices; i++) {
-                mx1 = this.currentVertex.x;
-                my1 = this.currentVertex.y;
+                mx1 = this.mCurrentVertex.x;
+                my1 = this.mCurrentVertex.y;
                 mAngle1 = MathUtils.polarAtan(mx1 - mCentroidX, my1 - mCentroidY);
                 
                 // this.currentVertex++;
                 this.incCurrentVertex();
-                mx2 = this.currentVertex.x;
-                my2 = this.currentVertex.y;
+                mx2 = this.mCurrentVertex.x;
+                my2 = this.mCurrentVertex.y;
                 mAngle2 = MathUtils.polarAtan(mx2 - mCentroidX, my2 - mCentroidY);
                 if (mAngle2 > mAngle1) { 
                     cclockWise++;
@@ -1601,7 +1642,7 @@ public:
             Globals.statusPrint(sMsgText);
             return -1;
         }
-        VertexSet aVertex = this.vertices[piIndex];
+        VertexSet aVertex = this.mVertices[piIndex];
         pISx = (int)aVertex.sx;
         pISy = (int)aVertex.sy;
 
@@ -1619,7 +1660,7 @@ public:
             return -1;
         }
 
-        VertexSet aVertex = this.vertices[piIndex];
+        VertexSet aVertex = this.mVertices[piIndex];
 
         // Set the output parameters
         pFTx = aVertex.tx;
@@ -1654,9 +1695,9 @@ public:
 
         initCurrentVertex();
         for (int index = 0; index < piVertexNumber - 1; index++) {
-            x1 = currentVertex.x;
-            y1 = currentVertex.y;
-            z1 = currentVertex.z;
+            x1 = mCurrentVertex.x;
+            y1 = mCurrentVertex.y;
+            z1 = mCurrentVertex.z;
             if(index == 0) {
                 firstx = x1;
                 firsty = y1;
@@ -1665,9 +1706,9 @@ public:
 
             // currentVertex++;
             incCurrentVertex();
-            x2 = currentVertex.x;
-            y2 = currentVertex.y;
-            z2 = currentVertex.z;
+            x2 = mCurrentVertex.x;
+            y2 = mCurrentVertex.y;
+            z2 = mCurrentVertex.z;
             totalDistance += MathUtils.getDistance3d(x1, y1, z1, x2, y2, z2);
         }
 
@@ -1703,9 +1744,9 @@ public:
             fDf2 = getWorldDistance(index + 2) / fTotalDistance;
 
             // Get fX1, fY1, and fZ1
-            fX1 = currentVertex.x;
-            fY1 = currentVertex.y;
-            fZ1 = currentVertex.z;
+            fX1 = mCurrentVertex.x;
+            fY1 = mCurrentVertex.y;
+            fZ1 = mCurrentVertex.z;
             if(index == 0) {
                 fFirstx = fX1;
                 fFirsty = fY1;
@@ -1716,9 +1757,9 @@ public:
             incCurrentVertex();
 
             // Now get fX2, fY2, fZ2
-            fX2 = currentVertex.x;
-            fY2 = currentVertex.y;
-            fZ2 = currentVertex.z;
+            fX2 = mCurrentVertex.x;
+            fY2 = mCurrentVertex.y;
+            fZ2 = mCurrentVertex.z;
             if(index == (miNumVertices - 2)) {
                 fX2 = fFirstx;
                 fY2 = fFirsty;
@@ -1757,9 +1798,9 @@ public:
         initCurrentVertex();
 
         for(i = 1; i <= this.miNumVertices; i++) {
-            fX1 = currentVertex.x;
-            fY1 = currentVertex.y;
-            fZ1 = currentVertex.z;
+            fX1 = mCurrentVertex.x;
+            fY1 = mCurrentVertex.y;
+            fZ1 = mCurrentVertex.z;
             if(i == 1) {
                 fFirstX = fX1;
                 fFirstY = fY1;
@@ -1768,9 +1809,9 @@ public:
 
             // currentVertex++;
             incCurrentVertex();
-            fX2 = currentVertex.x;
-            fY2 = currentVertex.y;
-            fZ2 = currentVertex.z;
+            fX2 = mCurrentVertex.x;
+            fY2 = mCurrentVertex.y;
+            fZ2 = mCurrentVertex.z;
             if((fX1 == fX2) && (fY1 == fY2) && (fZ1 == fZ2)) {
                 iCounter++;
                 int currentVertex2Idx = miCurrVtxIdx - 1;
@@ -1778,9 +1819,9 @@ public:
                 iNumVertsToCopy = miNumVertices - i;
 
                 for(j = 1; j <= iNumVertsToCopy; j++) {
-                    vertices[currentVertex2Idx].x = vertices[nextVertexIdx].x;
-                    vertices[currentVertex2Idx].y = vertices[nextVertexIdx].y;
-                    vertices[currentVertex2Idx].z = vertices[nextVertexIdx].z;
+                    mVertices[currentVertex2Idx].x = mVertices[nextVertexIdx].x;
+                    mVertices[currentVertex2Idx].y = mVertices[nextVertexIdx].y;
+                    mVertices[currentVertex2Idx].z = mVertices[nextVertexIdx].z;
                     currentVertex2Idx++;
                     nextVertexIdx++;
                 } // for j
@@ -1795,9 +1836,9 @@ public:
 
         // Remove the last vertex if it is identical to the first.
         if(
-        fFirstX == currentVertex.x &&
-        fFirstY == currentVertex.y &&
-        fFirstZ == currentVertex.z) {
+        fFirstX == mCurrentVertex.x &&
+        fFirstY == mCurrentVertex.y &&
+        fFirstZ == mCurrentVertex.z) {
             this.miNumVertices--;
             iCounter++;
         }
@@ -1813,23 +1854,23 @@ public:
     //     SceneList.calcCompoundModelRefPoint
     public void getTCentroid(Float pFCentroidX, Float pFCentroidY, Float pFCentroidZ) {
         initCurrentVertex();
-        float fMaxtX = currentVertex.tx;
-        float fMaxtY = currentVertex.ty;
-        float fMaxtZ = currentVertex.tz;
+        float fMaxtX = mCurrentVertex.tx;
+        float fMaxtY = mCurrentVertex.ty;
+        float fMaxtZ = mCurrentVertex.tz;
 
-        float fMintX = currentVertex.tx;
-        float fMintY = currentVertex.ty;
-        float fMintZ = currentVertex.tz;
+        float fMintX = mCurrentVertex.tx;
+        float fMintY = mCurrentVertex.ty;
+        float fMintZ = mCurrentVertex.tz;
 
         for (int index = 0; index < miNumVertices; index++) {
-            if(currentVertex.tx > fMaxtX) fMaxtX = currentVertex.tx;
-            if(currentVertex.tx < fMintX) fMintX = currentVertex.tx;
+            if(mCurrentVertex.tx > fMaxtX) fMaxtX = mCurrentVertex.tx;
+            if(mCurrentVertex.tx < fMintX) fMintX = mCurrentVertex.tx;
 
-            if(currentVertex.ty > fMaxtY) fMaxtY = currentVertex.ty;
-            if(currentVertex.ty < fMintY) fMintY = currentVertex.ty;
+            if(mCurrentVertex.ty > fMaxtY) fMaxtY = mCurrentVertex.ty;
+            if(mCurrentVertex.ty < fMintY) fMintY = mCurrentVertex.ty;
 
-            if(currentVertex.tz > fMaxtZ) fMaxtZ = currentVertex.tz;
-            if(currentVertex.tz < fMintZ) fMintZ = currentVertex.tz;
+            if(mCurrentVertex.tz > fMaxtZ) fMaxtZ = mCurrentVertex.tz;
+            if(mCurrentVertex.tz < fMintZ) fMintZ = mCurrentVertex.tz;
             // currentVertex++;
             incCurrentVertex();
         } // for
@@ -1867,24 +1908,24 @@ public:
 
         // currentVertex += numVerts;	 // Points to the position of the new last point
         miCurrVtxIdx += numVerts;
-        currentVertex = vertices[miCurrVtxIdx];
+        mCurrentVertex = mVertices[miCurrVtxIdx];
         int iPrevVtxIdx = miCurrVtxIdx - 1;
-        VertexSet prevVertex = vertices[iPrevVtxIdx - 1];
+        VertexSet prevVertex = mVertices[iPrevVtxIdx - 1];
         int numVertsToCopy = numVerts - index;
         int j;
         for(j = 1; j <= numVertsToCopy; j++) {
-            currentVertex.x = prevVertex.x;
-            currentVertex.y = prevVertex.y;
-            currentVertex.z = prevVertex.z;
+            mCurrentVertex.x = prevVertex.x;
+            mCurrentVertex.y = prevVertex.y;
+            mCurrentVertex.z = prevVertex.z;
             // currentVertex--;
             decCurrentVertex();
             iPrevVtxIdx--;
-            prevVertex = vertices[iPrevVtxIdx];
+            prevVertex = mVertices[iPrevVtxIdx];
         }
 
-        currentVertex.x = x;   // Add the new point
-        currentVertex.y = y;
-        currentVertex.z = z;
+        mCurrentVertex.x = x;   // Add the new point
+        mCurrentVertex.y = y;
+        mCurrentVertex.z = z;
         miNumVertices++;	  // Increase the number of vertices for this shape
 
         return 0;
@@ -1910,14 +1951,14 @@ public:
         newShape.setNumVertices(iNumVertices);
         inShape.initCurrentVertex();
         for (int index = 0; index < iNumVertices; index++) {
-            newShape.currentVertex.sx = inShape.currentVertex.sx;  // screen coord.
-            newShape.currentVertex.sy = inShape.currentVertex.sy;
-            newShape.currentVertex.x  = inShape.currentVertex.x;   // initial coord.
-            newShape.currentVertex.y  = inShape.currentVertex.y;
-            newShape.currentVertex.z  = inShape.currentVertex.z;
-            newShape.currentVertex.tx = inShape.currentVertex.tx;  // transformed coord.
-            newShape.currentVertex.ty = inShape.currentVertex.ty;
-            newShape.currentVertex.tz = inShape.currentVertex.tz;
+            newShape.mCurrentVertex.sx = inShape.mCurrentVertex.sx;  // screen coord.
+            newShape.mCurrentVertex.sy = inShape.mCurrentVertex.sy;
+            newShape.mCurrentVertex.x  = inShape.mCurrentVertex.x;   // initial coord.
+            newShape.mCurrentVertex.y  = inShape.mCurrentVertex.y;
+            newShape.mCurrentVertex.z  = inShape.mCurrentVertex.z;
+            newShape.mCurrentVertex.tx = inShape.mCurrentVertex.tx;  // transformed coord.
+            newShape.mCurrentVertex.ty = inShape.mCurrentVertex.ty;
+            newShape.mCurrentVertex.tz = inShape.mCurrentVertex.tz;
             // newShape.currentVertex++;
             newShape.incCurrentVertex();
             // inShape.currentVertex++;
@@ -1955,8 +1996,8 @@ public:
         
         initCurrentVertex();
         for (j = 1; j < iNumVertices; j++) {
-            fX1 = currentVertex.x;
-            fY1 = currentVertex.y;
+            fX1 = mCurrentVertex.x;
+            fY1 = mCurrentVertex.y;
             /* The following sets fFirstX and fFirstY, but these variables are not used afterwards
             if(j == 1) {
                 fFirstX = fX1;
@@ -1966,8 +2007,8 @@ public:
 
             // currentVertex++;
             incCurrentVertex();
-            fX2 = currentVertex.x;
-            fY2 = currentVertex.y;
+            fX2 = mCurrentVertex.x;
+            fY2 = mCurrentVertex.y;
             fDistance = MathUtils.getDistance2d(fX1, fY1, fX2, fY2);
 
             if(fDistance > fMaxDistance) {
