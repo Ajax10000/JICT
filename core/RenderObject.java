@@ -347,15 +347,15 @@ protected:
         int index;
 
         if(mCurrentShape.getNumFaces() == 0) {
-            firstx = (int)mCurrentShape.currentVertex.sx;
-            firsty = (int)(screenHeight - mCurrentShape.currentVertex.sy);
+            firstx = (int)mCurrentShape.mCurrentVertex.sx;
+            firsty = (int)(screenHeight - mCurrentShape.mCurrentVertex.sy);
             iPt1X = firstx + xOffset;
             iPt1Y = firsty - yOffset;
             for (index = 1; index < mCurrentShape.getNumVertices(); index++) {
                 // currentShape.currentVertex++;
                 mCurrentShape.incCurrentVertex();
-                iPt2X = (int)mCurrentShape.currentVertex.sx + xOffset;
-                iPt2Y = screenHeight - (int)mCurrentShape.currentVertex.sy - yOffset;
+                iPt2X = (int)mCurrentShape.mCurrentVertex.sx + xOffset;
+                iPt2Y = screenHeight - (int)mCurrentShape.mCurrentVertex.sy - yOffset;
                 graphics2D.drawLine(iPt1X, iPt1Y, iPt2X, iPt2Y);
                 iPt1X = iPt2X;
                 iPt1Y = iPt2Y;
@@ -366,22 +366,22 @@ protected:
         } else {  // the model has faces
             mCurrentShape.initCurrentFace();
             for (index = 1; index <= mCurrentShape.getNumFaces(); index++) {
-                mCurrentShape.getScreenVertex(mCurrentShape.currentFace.i1, firstx, firsty);
-                mCurrentShape.getScreenVertex(mCurrentShape.currentFace.i2, nextx, nexty);
+                mCurrentShape.getScreenVertex(mCurrentShape.mCurrentFace.i1, firstx, firsty);
+                mCurrentShape.getScreenVertex(mCurrentShape.mCurrentFace.i2, nextx, nexty);
                 iPt1X = firstx + xOffset;
                 iPt1Y = screenHeight - firsty - yOffset;
                 iPt2X = nextx + xOffset;
                 iPt2Y = screenHeight - nexty - yOffset;
                 graphics2D.drawLine(iPt1X, iPt1Y, iPt2X, iPt2Y);
 
-                mCurrentShape.getScreenVertex(mCurrentShape.currentFace.i3, nextx, nexty);
+                mCurrentShape.getScreenVertex(mCurrentShape.mCurrentFace.i3, nextx, nexty);
                 iPt1X = iPt2X;
                 iPt1Y = iPt2Y;
                 iPt2X = nextx + xOffset;
                 iPt2Y = screenHeight - nexty - yOffset;
                 graphics2D.drawLine(iPt1X, iPt1Y, iPt2X, iPt2Y);
 
-                mCurrentShape.getScreenVertex(mCurrentShape.currentFace.i4, nextx, nexty);
+                mCurrentShape.getScreenVertex(mCurrentShape.mCurrentFace.i4, nextx, nexty);
                 iPt1X = iPt2X;
                 iPt1Y = iPt2Y;
                 iPt2X = nextx + xOffset;
@@ -458,8 +458,8 @@ protected:
         // If the shape has no faces, the vertices describe a planar element
         // If the shape has faces, draw them
         if(mCurrentShape.getNumFaces() == 0) {
-            firstx = (int)mCurrentShape.currentVertex.sx;
-            firsty = (int)(piScreenHeight - mCurrentShape.currentVertex.sy);
+            firstx = (int)mCurrentShape.mCurrentVertex.sx;
+            firsty = (int)(piScreenHeight - mCurrentShape.mCurrentVertex.sy);
             if(highlightVertices) {
                 drawBox(graphics2D, penColor, origColor, 
                     firstx + xOffset, 
@@ -471,8 +471,8 @@ protected:
             for (index = 1; index < mCurrentShape.getNumVertices(); index++) {
                 // currentShape.iCurrVtxIdx++;
                 mCurrentShape.incCurrentVertex();
-                iPt2X = (int)mCurrentShape.currentVertex.sx + xOffset;
-                iPt2Y = piScreenHeight - (int)mCurrentShape.currentVertex.sy - yOffset;
+                iPt2X = (int)mCurrentShape.mCurrentVertex.sx + xOffset;
+                iPt2Y = piScreenHeight - (int)mCurrentShape.mCurrentVertex.sy - yOffset;
                 graphics2D.drawLine(iPt1X, iPt1Y, iPt2X, iPt2Y);
                 iPt1X = iPt2X;
                 iPt1Y = iPt2Y;
@@ -488,7 +488,7 @@ protected:
         } else {  // The model has faces
             mCurrentShape.initCurrentFace();
             for (index = 1; index <= mCurrentShape.getNumFaces(); index++) {
-                mCurrentShape.getScreenVertex(mCurrentShape.currentFace.i1, firstx, firsty);
+                mCurrentShape.getScreenVertex(mCurrentShape.mCurrentFace.i1, firstx, firsty);
               
                 if(highlightVertices) {
                     drawBox(graphics2D, penColor, origColor, 
@@ -498,7 +498,7 @@ protected:
                 iPt1X = firstx + xOffset;
                 iPt1Y = piScreenHeight - firsty - yOffset;
               
-                mCurrentShape.getScreenVertex(mCurrentShape.currentFace.i2, nextx, nexty);
+                mCurrentShape.getScreenVertex(mCurrentShape.mCurrentFace.i2, nextx, nexty);
                 iPt2X = nextx + xOffset;
                 iPt2Y = piScreenHeight - nexty - yOffset;
                 graphics2D.drawLine(iPt1X, iPt1Y, iPt2X, iPt2Y);
@@ -509,7 +509,7 @@ protected:
                         piScreenHeight - nexty - yOffset);
                 }
 
-                mCurrentShape.getScreenVertex(mCurrentShape.currentFace.i3, nextx, nexty);
+                mCurrentShape.getScreenVertex(mCurrentShape.mCurrentFace.i3, nextx, nexty);
                 iPt1X = iPt2X;
                 iPt1Y = iPt2Y;
                 iPt2X = nextx + xOffset;
@@ -522,7 +522,7 @@ protected:
                         piScreenHeight - nexty - yOffset);
                 }
 
-                mCurrentShape.getScreenVertex(mCurrentShape.currentFace.i4, nextx, nexty);
+                mCurrentShape.getScreenVertex(mCurrentShape.mCurrentFace.i4, nextx, nexty);
                 iPt1X = iPt2X;
                 iPt1Y = iPt2Y;
                 iPt2X = nextx + xOffset;
@@ -646,8 +646,8 @@ protected:
         aShape.initCurrentVertex();
         // Create the points for a polygon that will become a cutout boundary
         for(int myIndex = 0; myIndex < numVertices; myIndex++) {
-            thePoints[thePointsIdx].x = aShape.currentVertex.x;
-            thePoints[thePointsIdx].y = aShape.currentVertex.y;
+            thePoints[thePointsIdx].x = aShape.mCurrentVertex.x;
+            thePoints[thePointsIdx].y = aShape.mCurrentVertex.y;
             // aShape.currentVertex++;
             aShape.incCurrentVertex();
             thePointsIdx++;
@@ -732,8 +732,8 @@ protected:
         // Populate array thePoints. This array will later be used as a parameter
         // to MemImage.drawMask, where it will be used to draw a polygon.
         for(int myIndex = 0; myIndex < numVertices; myIndex++) {
-            thePoints[thePointsIdx].x = inShape.currentVertex.x;
-            thePoints[thePointsIdx].y = inShape.currentVertex.y;
+            thePoints[thePointsIdx].x = inShape.mCurrentVertex.x;
+            thePoints[thePointsIdx].y = inShape.mCurrentVertex.y;
             // inShape.currentVertex++;
             inShape.incCurrentVertex();
             thePointsIdx++;
@@ -1619,10 +1619,10 @@ protected:
 
         mCurrentShape.initCurrentFace();
         for (index = 1; index <= mCurrentShape.getNumFaces(); index++) {
-            index1 = mCurrentShape.currentFace.i1; 
-            index2 = mCurrentShape.currentFace.i2; 
-            index3 = mCurrentShape.currentFace.i3; 
-            index4 = mCurrentShape.currentFace.i4; 
+            index1 = mCurrentShape.mCurrentFace.i1; 
+            index2 = mCurrentShape.mCurrentFace.i2; 
+            index3 = mCurrentShape.mCurrentFace.i3; 
+            index4 = mCurrentShape.mCurrentFace.i4; 
 
             mCurrentShape.getScreenVertex(index1, sx1, sy1);
             mCurrentShape.getScreenVertex(index2, sx2, sy2);
@@ -1685,10 +1685,10 @@ protected:
 
         mCurrentShape.initCurrentFace();
         for (index = 1; index <= mCurrentShape.getNumFaces(); index++) {
-            index1 = mCurrentShape.currentFace.i1; 
-            index2 = mCurrentShape.currentFace.i2; 
-            index3 = mCurrentShape.currentFace.i3; 
-            index4 = mCurrentShape.currentFace.i4; 
+            index1 = mCurrentShape.mCurrentFace.i1; 
+            index2 = mCurrentShape.mCurrentFace.i2; 
+            index3 = mCurrentShape.mCurrentFace.i3; 
+            index4 = mCurrentShape.mCurrentFace.i4; 
 
             mCurrentShape.getScreenVertex(index1, sx1, sy1);
             mCurrentShape.getScreenVertex(index2, sx2, sy2);
