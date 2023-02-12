@@ -7,7 +7,10 @@ import core.Shape3d;
 
 import fileUtils.FileUtils;
 
+import globals.JICTConstants;
+
 import java.io.File;
+import java.io.LineNumberReader;
 import java.util.Random;
 
 import javax.swing.JLabel;
@@ -29,46 +32,6 @@ public class Globals {
     // This variable came from MAINFRM.CPP
     public static GPipe aGraphicPipe = new GPipe();  // a globally defined graphic pipeline for VRML viewing
 
-    public static final int CHROMAVALUE  = 0;
-    public static final int CHROMARED    = 0;
-    public static final int CHROMAGREEN  = 0;
-    public static final int CHROMABLUE   = 0;
-
-    // These were defined in MEMIMAGE.H
-    public static final int REDCOLOR = 1;
-    public static final int GREENCOLOR = 2;
-    public static final int BLUECOLOR = 3;
-    public static final int EIGHTBITMONOCHROME = 2;
-    public static final int A32BIT = 4;
-    public static final int RGBCOLOR = 5;
-    public static final int ONEBITMONOCHROME = 6;
-
-    // These were defined in MEMIMAGE.H
-    public static final int SEQUENTIAL = 1;
-    public static final int RANDOM = 0;
-    
-    // These values came from ICT20.H
-    public static final float ZBUFFERMAXVALUE = 2.0E31f;
-    public static final float F_DTR = 3.1415926f/180.0f;
-
-    // These values came from ICT20.H
-    //  Quadrilateral Mesh Model Sub-Types
-    public static final int CYLINDER   = 1;
-    public static final int SPHERE     = 2;
-    public static final int PLANAR     = 3;
-    public static final int SINE1D     = 4;
-    public static final int SINE2D     = 5;
-    public static final int CHECKER    = 6;
-    public static final int WHITENOISE = 7;
-
-    // This value came from IWARP.CPP:
-    public static final int I_MAXWVERTICES = 8;
-
-    // These values came from SHADERS.CPP
-    // Define three standard types of triangle
-    public static final int I_POINTONSIDE = 1;
-    public static final int I_POINTONTOP = 2;
-    public static final int I_POINTONBOTTOM = 3;
 
     // This method came from UTILS.CPP
     public static void statusPrint(String psMessage) {
@@ -236,7 +199,7 @@ public class Globals {
                 switch(iBpp) {  // Optionally blend in color or monochrome
                 case 8:
                     inPixel = pInImage.getMPixel(ix, iy);
-                    if((mattePixel > CHROMAVALUE) && (inPixel > CHROMAVALUE)) {
+                    if((mattePixel > JICTConstants.I_CHROMAVALUE) && (inPixel > JICTConstants.I_CHROMAVALUE)) {
                         outPixel = pOutImage.getMPixel(ix, iy );
                         fInWeight = (float)mattePixel / 255.0f * pfAlphaScale;
                         fOutWeight = 1.0f - fInWeight;
@@ -271,7 +234,7 @@ public class Globals {
         
                 case 24:                           // RGB Blend with Z-Buffer
                     pInImage.getMPixelRGB(ix, iy, inRed, inGreen, inBlue);
-                    if((mattePixel > CHROMAVALUE) && (inGreen > CHROMAVALUE)) {
+                    if((mattePixel > JICTConstants.I_CHROMAVALUE) && (inGreen > JICTConstants.I_CHROMAVALUE)) {
                         outPixel = (byte)pOutImage.getMPixelRGB(ix, iy, outRed, outGreen, outBlue);
                         fInWeight  = (float)mattePixel / 255.0f * pfAlphaScale;
                         fOutWeight = 1.0f - fInWeight;
@@ -329,12 +292,12 @@ public class Globals {
         // Assumes the mask image is an unpacked (8 bit) mask image opened RANDOM,
         // The original must be opened for sequential access.
         // cutoutName: name of cutout image and shape file without the suffix
-        if(pOriginalImage.getAccessMode() != SEQUENTIAL) {
+        if(pOriginalImage.getAccessMode() != JICTConstants.I_SEQUENTIAL) {
             statusPrint("createCutout: original image access mode must be SEQUENTIAL");
             return 1;
         }
 
-        if (pOriginalImage.getColorSpec() == ONEBITMONOCHROME) {
+        if (pOriginalImage.getColorSpec() == JICTConstants.I_ONEBITMONOCHROME) {
             statusPrint("createCutout: original image colorSpec cannot be ONEBITMONOCHROME");
             return 2;
         }
@@ -423,7 +386,7 @@ public class Globals {
 
         // Open two new output images
         boolean color = false;
-        if(pOriginalImage.getColorSpec() == RGBCOLOR) {
+        if(pOriginalImage.getColorSpec() == JICTConstants.I_RGBCOLOR) {
             color = true;
         }
 
@@ -571,7 +534,7 @@ public class Globals {
 
         switch(iBpp) {
         case 8:
-            if (pImage.getMPixel(piX, piY) != CHROMAVALUE) {
+            if (pImage.getMPixel(piX, piY) != JICTConstants.I_CHROMAVALUE) {
                 return true;
             } else {
                 return false;
@@ -581,9 +544,9 @@ public class Globals {
             // The following method sets parameters red, green, and blue
             pImage.getMPixelRGB(piX, piY, red, green, blue);
             if (
-            (red != CHROMARED) || 
-            (green != CHROMAGREEN) ||
-            (blue != CHROMABLUE)) {
+            (red   != JICTConstants.I_CHROMARED) || 
+            (green != JICTConstants.I_CHROMAGREEN) ||
+            (blue  != JICTConstants.I_CHROMABLUE)) {
                 return true;
             } else {
                 return false;
@@ -835,7 +798,7 @@ public class Globals {
     // Called from:
     //     MotionPath.readMotion
     public static String getNextMotionLine(String theText, Integer lineNumber, 
-    ifstream filein) {
+    LineNumberReader filein) {
         boolean aComment = true;
         int theLength = 80;
         String theKeyWord;
@@ -905,11 +868,11 @@ public class Globals {
                     FileUtils.makePath(currentPath, directory, prefix, frameCounter + i, inSuffix);
                     switch(bpp) {
                     case 8:
-                        images[i + blurDepth] = new MemImage(currentPath, 0, 0, RANDOM, 'R', EIGHTBITMONOCHROME);
+                        images[i + blurDepth] = new MemImage(currentPath, 0, 0, JICTConstants.I_RANDOM, 'R', JICTConstants.I_EIGHTBITMONOCHROME);
                         break;
 
                     case 24:
-                        images[i + blurDepth] = new MemImage(currentPath, 0, 0, RANDOM, 'R', RGBCOLOR);
+                        images[i + blurDepth] = new MemImage(currentPath, 0, 0, JICTConstants.I_RANDOM, 'R', JICTConstants.I_RGBCOLOR);
                         break;
                     } // switch
 
@@ -928,11 +891,11 @@ public class Globals {
                 FileUtils.makePath(currentPath, directory, prefix, frameCounter + blurDepth, inSuffix);
                 switch(bpp) {
                 case 8:
-                    images[numOpenImages - 1] = new MemImage(currentPath, 0, 0, RANDOM, 'R', EIGHTBITMONOCHROME);
+                    images[numOpenImages - 1] = new MemImage(currentPath, 0, 0, JICTConstants.I_RANDOM, 'R', JICTConstants.I_EIGHTBITMONOCHROME);
                     break;
 
                 case 24:
-                    images[numOpenImages - 1] = new MemImage(currentPath, 0, 0, RANDOM, 'R', RGBCOLOR);
+                    images[numOpenImages - 1] = new MemImage(currentPath, 0, 0, JICTConstants.I_RANDOM, 'R', JICTConstants.I_RGBCOLOR);
                     break;
                 } // switch
 
@@ -1024,10 +987,10 @@ public class Globals {
         int x, y;
         int myStatus;
         Integer numXCoordsFound;
-        int[] screenXCoords = new int[I_MAXWVERTICES];
-        float[] tZCoords = new float[I_MAXWVERTICES]; 
-        float[] tXCoords = new float[I_MAXWVERTICES]; 
-        float[] tYCoords = new float[I_MAXWVERTICES];
+        int[] screenXCoords = new int[JICTConstants.I_MAXWVERTICES];
+        float[] tZCoords = new float[JICTConstants.I_MAXWVERTICES]; 
+        float[] tXCoords = new float[JICTConstants.I_MAXWVERTICES]; 
+        float[] tYCoords = new float[JICTConstants.I_MAXWVERTICES];
 
         // The shape object contains the projected 4 sided polygon and a z coordinate
         // at each of the projected vertices.
@@ -1052,9 +1015,9 @@ public class Globals {
         TMatrix forwardMatrix = new TMatrix();
 
         // F_DTR = floating-point degree to radian conversion factor
-        float XRadians = rx * F_DTR;
-        float YRadians = ry * F_DTR;
-        float ZRadians = rz * F_DTR;
+        float XRadians = rx * JICTConstants.F_DTR;
+        float YRadians = ry * JICTConstants.F_DTR;
+        float ZRadians = rz * JICTConstants.F_DTR;
 
         forwardMatrix.scale(sx, sy, sz);
         forwardMatrix.rotate(XRadians, YRadians, ZRadians);
@@ -1122,9 +1085,9 @@ public class Globals {
             float xo, yo, zo;
 
             for (int index = 1; index <= aShape.getNumVertices(); index++) {
-                float anX = aShape.currentVertex.tx;
-                float anY = aShape.currentVertex.ty;
-                float anZ = aShape.currentVertex.tz;
+                float anX = aShape.mCurrentVertex.tx;
+                float anY = aShape.mCurrentVertex.ty;
+                float anZ = aShape.mCurrentVertex.tz;
                 inverseMatrix.transformPoint (anX, anY, anZ, xo, yo, zo);
                 // aShape.iCurrVtxIdx++;
                 aShape.incCurrentVertex();
@@ -1155,7 +1118,7 @@ public class Globals {
 
         // Loop through the screen coordinates, filling in with inverse mapped pixels
         for (y = (int)minY; y <= (int)maxY; y++) {
-            myStatus = getIntervals(aShape, y, numXCoordsFound, I_MAXWVERTICES,
+            myStatus = getIntervals(aShape, y, numXCoordsFound, JICTConstants.I_MAXWVERTICES,
                 screenXCoords, tXCoords, tYCoords, tZCoords);
 
             if (myStatus != 0) {
@@ -1253,7 +1216,7 @@ public class Globals {
                     aDist = MathUtils.getDistance3d(xIn, yIn, zIn, vx, vy, vz);
 
                     // Update the zbuffer if a smaller distance and non transparent color
-                    if((aDist < theZ) && ((int)intensity != CHROMAVALUE)) {
+                    if((aDist < theZ) && ((int)intensity != JICTConstants.I_CHROMAVALUE)) {
                         zImage.setMPixel32((int)(x + xCentOffset), (int)(y + yCentOffset), aDist);
                         switch(bpp) {
                         case 8:
@@ -1340,12 +1303,12 @@ public class Globals {
 
         theShape.initCurrentVertex();
         for (index = 1; index <= numShapeVertices; index++) {
-            sx1 = (int)theShape.currentVertex.sx;
-            sy1 = (int)theShape.currentVertex.sy;
+            sx1 = (int)theShape.mCurrentVertex.sx;
+            sy1 = (int)theShape.mCurrentVertex.sy;
             
-            tx1 = theShape.currentVertex.tx;
-            ty1 = theShape.currentVertex.ty;
-            tz1 = theShape.currentVertex.tz;
+            tx1 = theShape.mCurrentVertex.tx;
+            ty1 = theShape.mCurrentVertex.ty;
+            tz1 = theShape.mCurrentVertex.tz;
             // theShape.currentVertex++;
             theShape.incCurrentVertex();
 
@@ -1353,12 +1316,12 @@ public class Globals {
             if(index == numShapeVertices) {
                 theShape.initCurrentVertex();
             }
-            sx2 = (int)theShape.currentVertex.sx;  // Can't use (currentVertex+1).x
-            sy2 = (int)theShape.currentVertex.sy;
+            sx2 = (int)theShape.mCurrentVertex.sx;  // Can't use (currentVertex+1).x
+            sy2 = (int)theShape.mCurrentVertex.sy;
             
-            tx2 = theShape.currentVertex.tx;
-            ty2 = theShape.currentVertex.ty;	 
-            tz2 = theShape.currentVertex.tz;
+            tx2 = theShape.mCurrentVertex.tx;
+            ty2 = theShape.mCurrentVertex.ty;	 
+            tz2 = theShape.mCurrentVertex.tz;
             theShape.decCurrentVertex();
 
             minx = Math.min(sx1, sx2);
@@ -2093,9 +2056,9 @@ public class Globals {
 
         // Build the forward transformation matrix
         TMatrix forwardMatrix = new TMatrix();
-        float XRadians = rx * F_DTR;
-        float YRadians = ry * F_DTR;
-        float ZRadians = rz * F_DTR;
+        float XRadians = rx * JICTConstants.F_DTR;
+        float YRadians = ry * JICTConstants.F_DTR;
+        float ZRadians = rz * JICTConstants.F_DTR;
         forwardMatrix.scale(sx, sy, sz);
         forwardMatrix.rotate(XRadians, YRadians, ZRadians);
         forwardMatrix.translate(tx, ty, tz);
@@ -2213,9 +2176,9 @@ public class Globals {
         // Build the forward transformation matrix
         TMatrix forwardMatrix = new TMatrix();
         TMatrix viewModelMatrix = new TMatrix();
-        float XRadians = rx * F_DTR;
-        float YRadians = ry * F_DTR;
-        float ZRadians = rz * F_DTR;
+        float XRadians = rx * JICTConstants.F_DTR;
+        float YRadians = ry * JICTConstants.F_DTR;
+        float ZRadians = rz * JICTConstants.F_DTR;
         forwardMatrix.scale(sx, sy, sz);
         forwardMatrix.rotate(XRadians, YRadians, ZRadians);
         forwardMatrix.translate(tx, ty, tz);
@@ -2369,9 +2332,9 @@ public class Globals {
         
         // Build the forward transformation matrix
         TMatrix forwardMatrix = new TMatrix();
-        float XRadians = rx * F_DTR;
-        float YRadians = ry * F_DTR;
-        float ZRadians = rz * F_DTR;
+        float XRadians = rx * JICTConstants.F_DTR;
+        float YRadians = ry * JICTConstants.F_DTR;
+        float ZRadians = rz * JICTConstants.F_DTR;
         forwardMatrix.scale(sx, sy, sz);
         forwardMatrix.rotate(XRadians, YRadians, ZRadians);
         forwardMatrix.translate(tx, ty, tz);
@@ -2564,7 +2527,7 @@ public class Globals {
             return -1;
         }
 
-        MemImage inputImage = new MemImage(inputImagePath, 0, 0, RANDOM, 'R', RGBCOLOR);
+        MemImage inputImage = new MemImage(inputImagePath, 0, 0, JICTConstants.I_RANDOM, 'R', JICTConstants.I_RGBCOLOR);
         MemImage xImage = new MemImage(imHeight, imWidth, 32);
         MemImage yImage = new MemImage(imHeight, imWidth, 32);
         MemImage zImage = new MemImage(imHeight, imWidth, 32);
@@ -2576,7 +2539,7 @@ public class Globals {
         sizeFactor = (float)imWidth;
  
         switch(modelType) {
-        case CYLINDER:
+        case JICTConstants.I_CYLINDER:
             radius = (float)imWidth/(2.0f * Pi);
             startTheta =   0.0f;
             stopTheta  = 360.0f;
@@ -2586,8 +2549,8 @@ public class Globals {
                 angleTemp = 0.0f;
 
                 for (col = 1; col <= imWidth; col++) {
-                    x = radius * (float)Math.cos(angleTemp * F_DTR);
-                    y = radius * (float)Math.sin(angleTemp * F_DTR);
+                    x = radius * (float)Math.cos(angleTemp * JICTConstants.F_DTR);
+                    y = radius * (float)Math.sin(angleTemp * JICTConstants.F_DTR);
                     angleTemp += angularInc;
                     xImage.setMPixel32(col, row, x);
                     yImage.setMPixel32(col, row, (float)row);
@@ -2596,7 +2559,7 @@ public class Globals {
             } // for row
             break;
  
-        case PLANAR:
+        case JICTConstants.I_PLANAR:
             for (row = 1; row <= imHeight; row++) {
                 for (col = 1; col <= imWidth; col++) {
                     x = (float)col;
@@ -2608,7 +2571,7 @@ public class Globals {
             } // for row
             break;
  
-        case SPHERE:
+        case JICTConstants.I_SPHERE:
             startTheta = 0.0f;
             stopTheta = 360.0f;
             asAngle = 0.0f;
@@ -2622,16 +2585,16 @@ public class Globals {
             angleTemp  =   0.0f;
 
             for (row = 1; row <= imHeight; row++) {
-                radius = (float)Math.sin(asAngle * F_DTR) * sizeFactor;
+                radius = (float)Math.sin(asAngle * JICTConstants.F_DTR) * sizeFactor;
                 angleTemp = 0.0f;
 
                 for (col = 1; col <= imWidth; col++) {
-                    x = (radius * (float)Math.cos(angleTemp * F_DTR) ) + sizeFactor; //put the left most edge in the positive quadrant
-                    z = (radius * (float)Math.sin(angleTemp * F_DTR) ) + sizeFactor;
+                    x = (radius * (float)Math.cos(angleTemp * JICTConstants.F_DTR) ) + sizeFactor; //put the left most edge in the positive quadrant
+                    z = (radius * (float)Math.sin(angleTemp * JICTConstants.F_DTR) ) + sizeFactor;
                     xImage.setMPixel32(col, row, x);
                     zImage.setMPixel32(col, row, z);
 
-                    yValue = (float)Math.acos(asAngle * F_DTR) * sizeFactor;
+                    yValue = (float)Math.acos(asAngle * JICTConstants.F_DTR) * sizeFactor;
                     yImage.setMPixel32(col, row, yValue);
 
                     angleTemp += angularInc;
@@ -2640,14 +2603,14 @@ public class Globals {
             } // for row
             break;
  
-        case SINE1D:
+        case JICTConstants.I_SINE1D:
             angularInc = 1.0f;
             radius = 100.0f;
             for (row = 1; row <= imHeight; row++) {
                 angleTemp = 0.0f;
 
                 for (col = 1; col <= imWidth; col++) {
-                    z = radius * (float)Math.sin(angleTemp * F_DTR);
+                    z = radius * (float)Math.sin(angleTemp * JICTConstants.F_DTR);
                     xImage.setMPixel32(col, row, (float)col);
                     yImage.setMPixel32(col, row, z);
                     zImage.setMPixel32(col, row, (float)row);
@@ -2656,7 +2619,7 @@ public class Globals {
             } // for row
             break;
  
-        case SINE2D:
+        case JICTConstants.I_SINE2D:
             //  Circumference = 2*Pi*radius
             radius = (float)(imWidth/(2.0f * Pi)/3.0f);   // Make r small enough for three sinusoidal rotations
             angularInc = 360.0f / (float)imWidth;
@@ -2670,12 +2633,12 @@ public class Globals {
                     xImage.setMPixel32(col, row, (float)col);
                     zImage.setMPixel32(col, row, (float)row);
                     distance = (float)Math.sqrt(((col - xCent) * (col - xCent)) + ((row - yCent) * (row - yCent)));           
-                    yImage.setMPixel32(col, row, radius * (float)Math.sin(5.0f * distance  * F_DTR));
+                    yImage.setMPixel32(col, row, radius * (float)Math.sin(5.0f * distance  * JICTConstants.F_DTR));
                 } // for col
             } // for row
             break;
  
-        case WHITENOISE:
+        case JICTConstants.I_WHITENOISE:
             // By default the Random class is seeded with current time
             // the first time it is used.
             // So the numbers will be different every time we run.
@@ -2953,21 +2916,21 @@ public class Globals {
         // Combine separate color channels into one RGB BMP
         int rHeight, rWidth, gHeight, gWidth, bHeight, bWidth;
 
-        MemImage theRed = new MemImage(redImage, 0, 0, SEQUENTIAL, 'R', REDCOLOR);
+        MemImage theRed = new MemImage(redImage, 0, 0, JICTConstants.I_SEQUENTIAL, 'R', JICTConstants.I_REDCOLOR);
         if (!theRed.isValid()) {
             msgBuffer = "makeRGBIMage: Unable to open Red image: " + redImage;
             statusPrint(msgBuffer);
             return 1;
         }
 
-        MemImage theGreen = new MemImage(greenImage, 0, 0, SEQUENTIAL,'R', GREENCOLOR);
+        MemImage theGreen = new MemImage(greenImage, 0, 0, JICTConstants.I_SEQUENTIAL,'R', JICTConstants.I_GREENCOLOR);
         if (!theGreen.isValid()) {
             msgBuffer = "makeRGBIMage: Unable to open Green image: " + greenImage;
             statusPrint(msgBuffer);
             return 1;
         }
 
-        MemImage theBlue = new MemImage(blueImage, 0, 0, SEQUENTIAL,'R', BLUECOLOR);
+        MemImage theBlue = new MemImage(blueImage, 0, 0, JICTConstants.I_SEQUENTIAL,'R', JICTConstants.I_BLUECOLOR);
         if (!theBlue.isValid()) {
             msgBuffer = "makeRGBIMage: Unable to open Blue image: %s" + blueImage;
             statusPrint(msgBuffer);
@@ -2992,7 +2955,7 @@ public class Globals {
             return 1;
         }
 
-        MemImage theRGB = new MemImage(outFileName, gHeight, gWidth, SEQUENTIAL, 'W', RGBCOLOR);
+        MemImage theRGB = new MemImage(outFileName, gHeight, gWidth, JICTConstants.I_SEQUENTIAL, 'W', JICTConstants.I_RGBCOLOR);
         if (!theRGB.isValid()) {
             statusPrint("makeRGBIMage: Unable to open RGB image.");
 
@@ -3099,23 +3062,23 @@ public class Globals {
             case 24:
                 anImage.getMPixelRGB(col, row, red, green, blue);
                 if(
-                red != CHROMARED || 
-                green != CHROMAGREEN || 
-                blue != CHROMABLUE) {
+                red   != JICTConstants.I_CHROMARED || 
+                green != JICTConstants.I_CHROMAGREEN || 
+                blue  != JICTConstants.I_CHROMABLUE) {
                     aValue = 255;
                 } else {
-                    aValue = CHROMAVALUE;
+                    aValue = JICTConstants.I_CHROMAVALUE;
                 }
                 break;
             } // switch
 
-            if(intervalStatus == 0 && aValue != CHROMAVALUE) {  // interval start
+            if(intervalStatus == 0 && aValue != JICTConstants.I_CHROMAVALUE) {  // interval start
                 intervalList[counter] = col;
                 counter++;
                 intervalStatus = 1;
             }
 
-            if(intervalStatus == 1 && aValue == CHROMAVALUE) {  // interval stop
+            if(intervalStatus == 1 && aValue == JICTConstants.I_CHROMAVALUE) {  // interval stop
                 intervalList[counter] = col;
                 counter++;
                 intervalStatus = 0;
@@ -3335,9 +3298,9 @@ public class Globals {
         int row, col, firstX, lastX, triangleType;
         int ix1 = 0, ix2 = 0, ip1 = 0, ip2 = 0, nSteps;
 
-        triangleType = I_POINTONSIDE;
-        if(midY == maxY) triangleType = I_POINTONTOP;
-        if(minY == midY) triangleType = I_POINTONBOTTOM;
+        triangleType = JICTConstants.I_POINTONSIDE;
+        if(midY == maxY) triangleType = JICTConstants.I_POINTONTOP;
+        if(minY == midY) triangleType = JICTConstants.I_POINTONBOTTOM;
 
         // Now we have a rotationally independant situation.  Interpolate rows from 
         // minY to midY then from midY to maxY
@@ -3346,7 +3309,7 @@ public class Globals {
             return -1;
         }
 
-        if(triangleType == I_POINTONSIDE) {
+        if(triangleType == JICTConstants.I_POINTONSIDE) {
             for(row = minY; row <= midY; row++) {
                 // Interpolate the x interval and the intensities at the interval boundary
                 ix1 = (int)MathUtils.interpolate((float)minX, (float)maxX, (float)minY, (float)maxY, (float)row);
@@ -3485,7 +3448,7 @@ public class Globals {
             // Handle pointontop, pointonbottom cases
             for(row = minY; row <= maxY; row++) {
                 // Interpolate the x interval and the intensities at the interval boundary
-                if(triangleType == I_POINTONTOP) {
+                if(triangleType == JICTConstants.I_POINTONTOP) {
                     ix1 = (int)MathUtils.interpolate((float)minX, (float)maxX, (float)minY, (float)maxY, (float)row);
                     ix2 = (int)MathUtils.interpolate((float)minX, (float)midX, (float)minY, (float)midY, (float)row);
                     ip1 = (int)MathUtils.interpolate(       minI,        maxI, (float)minY, (float)maxY, (float)row);
@@ -3495,7 +3458,7 @@ public class Globals {
                         id2 = MathUtils.interpolate(minD, midD, (float)minY, (float)midY, (float)row);
                     }
                 }
-                if(triangleType == I_POINTONBOTTOM) {
+                if(triangleType == JICTConstants.I_POINTONBOTTOM) {
                     ix1 = (int)MathUtils.interpolate((float)minX, (float)maxX, (float)minY, (float)maxY, (float)row);
                     ix2 = (int)MathUtils.interpolate((float)midX, (float)maxX, (float)midY, (float)maxY, (float)row);
                     ip1 = (int)MathUtils.interpolate(       minI,        maxI, (float)minY, (float)maxY, (float)row);
@@ -3766,7 +3729,7 @@ public class Globals {
         }
 
         midZImage.setFileName("midZImage");
-        midZImage.init32(ZBUFFERMAXVALUE);
+        midZImage.init32(JICTConstants.F_ZBUFFERMAXVALUE);
         int imHeight  = textureImage.getHeight();
         int imWidth   = textureImage.getWidth();
         int outHeight = outputImage.getHeight();
@@ -4027,14 +3990,14 @@ public class Globals {
         outShape.initCurrentVertex();
         int numVertices = outShape.getNumVertices();
         for (int i = 1; i <= numVertices; i++){
-            int temp = (int)(outShape.currentVertex.x + 0.5f);
-            outShape.currentVertex.x = (float)temp;
+            int temp = (int)(outShape.mCurrentVertex.x + 0.5f);
+            outShape.mCurrentVertex.x = (float)temp;
 
-            temp = (int)(outShape.currentVertex.y + 0.5f);
-            outShape.currentVertex.y = (float)temp;
+            temp = (int)(outShape.mCurrentVertex.y + 0.5f);
+            outShape.mCurrentVertex.y = (float)temp;
 
-            temp = (int)(outShape.currentVertex.z + 0.5f);
-            outShape.currentVertex.z = (float)temp;
+            temp = (int)(outShape.mCurrentVertex.z + 0.5f);
+            outShape.mCurrentVertex.z = (float)temp;
 
             // outShape.currentVertex++;
             outShape.incCurrentVertex();
@@ -4306,11 +4269,11 @@ public class Globals {
         outputShape.initCurrentVertex();
 
         for (j = 1; j <= numverts1; j++) {
-            x1 = (float)shape1.currentVertex.x;
-            y1 = (float)shape1.currentVertex.y;
+            x1 = (float)shape1.mCurrentVertex.x;
+            y1 = (float)shape1.mCurrentVertex.y;
 
-            x2 = (float)shape2.currentVertex.x;
-            y2 = (float)shape2.currentVertex.y;
+            x2 = (float)shape2.mCurrentVertex.x;
+            y2 = (float)shape2.mCurrentVertex.y;
 
             outX = (fraction * x2) + (1.0f - fraction) * x1;
             outY = (fraction * y2) + (1.0f - fraction) * y1;
