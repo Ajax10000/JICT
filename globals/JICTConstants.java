@@ -80,13 +80,19 @@ public class JICTConstants {
     public static final int I_MONOCHROME = 1;
     public static final int I_COLOR      = 2;
 
+    // These values came from SHADERS.CPP
+    // Define three standard types of triangle
+    public static final int I_POINTONSIDE = 1;
+    public static final int I_POINTONTOP = 2;
+    public static final int I_POINTONBOTTOM = 3;
+
+    // Originally defined in IWARP.CPP
+    public static final int I_MAXWVERTICES = 8;
+    
     // Originally defined in SCENELST.CPP
     // #define THREE_NUMBERS_NOT_FOUND 2
 
     // Originally defined in MORPHDIALOG.H
     // #define twoD 2
     // #define threeD 3
-
-    // Originally defined in IWARP.CPP
-    // #define MAXWVERTICES 8
 }
