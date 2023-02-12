@@ -475,26 +475,26 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
         // Transform the shape using the perspective matrix
         for (int index = 0; index < aShape.getNumVertices(); index++) {
             transformPoint(
-                (float)aShape.currentVertex.x, 
-                (float)aShape.currentVertex.y, 
-                (float)aShape.currentVertex.z,
-                aShape.currentVertex.tx, 
-                aShape.currentVertex.ty, 
-                aShape.currentVertex.tz);
+                (float)aShape.mCurrentVertex.x, 
+                (float)aShape.mCurrentVertex.y, 
+                (float)aShape.mCurrentVertex.z,
+                aShape.mCurrentVertex.tx, 
+                aShape.mCurrentVertex.ty, 
+                aShape.mCurrentVertex.tz);
             
             if(index == 0) {
-                maxtX = mintX = aShape.currentVertex.tx;
-                maxtY = mintY = aShape.currentVertex.ty;
-                maxtZ = mintZ = aShape.currentVertex.tz;
+                maxtX = mintX = aShape.mCurrentVertex.tx;
+                maxtY = mintY = aShape.mCurrentVertex.ty;
+                maxtZ = mintZ = aShape.mCurrentVertex.tz;
             }
 
             // Calculate the transformed object centroid for depth sorting later
-            if(aShape.currentVertex.tx > maxtX) maxtX = aShape.currentVertex.tx;
-            if(aShape.currentVertex.tx < mintX) mintX = aShape.currentVertex.tx;
-            if(aShape.currentVertex.ty > maxtY) maxtY = aShape.currentVertex.ty;
-            if(aShape.currentVertex.ty < mintY) mintY = aShape.currentVertex.ty;
-            if(aShape.currentVertex.tz > maxtZ) maxtZ = aShape.currentVertex.tz;
-            if(aShape.currentVertex.tz < mintZ) mintZ = aShape.currentVertex.tz;
+            if(aShape.mCurrentVertex.tx > maxtX) maxtX = aShape.mCurrentVertex.tx;
+            if(aShape.mCurrentVertex.tx < mintX) mintX = aShape.mCurrentVertex.tx;
+            if(aShape.mCurrentVertex.ty > maxtY) maxtY = aShape.mCurrentVertex.ty;
+            if(aShape.mCurrentVertex.ty < mintY) mintY = aShape.mCurrentVertex.ty;
+            if(aShape.mCurrentVertex.tz > maxtZ) maxtZ = aShape.mCurrentVertex.tz;
+            if(aShape.mCurrentVertex.tz < mintZ) mintZ = aShape.mCurrentVertex.tz;
             // aShape.currentVertex++;
             aShape.incCurrentVertex();
         }
@@ -507,17 +507,17 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
         aShape.initCurrentVertex();
         float d = -512.0f; // Distance from screen to center of projection: (0,0,-d)
         for (int index = 0; index < aShape.getNumVertices(); index++) {
-            float w = (d / (aShape.currentVertex.tz + d));
-            aShape.currentVertex.sx = (aShape.currentVertex.tx) * w;
-            aShape.currentVertex.sy = (aShape.currentVertex.ty) * w;
+            float w = (d / (aShape.mCurrentVertex.tz + d));
+            aShape.mCurrentVertex.sx = (aShape.mCurrentVertex.tx) * w;
+            aShape.mCurrentVertex.sy = (aShape.mCurrentVertex.ty) * w;
 
             // Round the  projected coordinate
-            //sx = (int) (aShape.currentVertex.sx + 0.5);
-            //sy = (int) (aShape.currentVertex.sy + 0.5);
-            sx = (int)(aShape.currentVertex.sx);
-            sy = (int)(aShape.currentVertex.sy);
-            aShape.currentVertex.sx = (float)sx;
-            aShape.currentVertex.sy = (float)sy;
+            //sx = (int) (aShape.mCurrentVertex.sx + 0.5);
+            //sy = (int) (aShape.mCurrentVertex.sy + 0.5);
+            sx = (int)(aShape.mCurrentVertex.sx);
+            sy = (int)(aShape.mCurrentVertex.sy);
+            aShape.mCurrentVertex.sx = (float)sx;
+            aShape.mCurrentVertex.sy = (float)sy;
             // aShape.currentVertex++;
             aShape.incCurrentVertex();
         }
