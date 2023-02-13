@@ -9,6 +9,8 @@ import globals.JICTConstants;
 import globals.Preference;
 
 import java.awt.Color;
+import java.awt.image.BufferedImage;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -411,178 +413,182 @@ public class SceneList implements ISceneList {
     // Not called from within this file.
     // Called from:
     //     ImageView.onDraw
-    public int preview(HWND theWindow, TMatrix modelMatrix, TMatrix viewMatrix) {
-        String msgText;
-        int myStatus = 0;
-        String sceneName, g_msgText;
-        int effectType, colorMode;
-        int outputRows, outputColumns;
-        Integer firstFrame, lastFrame;
-        int frameCounter;
-        MotionNode aMotion;  // current model location, orientation if moving
-        Bundle xfrm;         // create a bundle of transforms
-        TMatrix viewModelMatrix;
+    public int preview(BufferedImage pBuffImg, TMatrix pModelMatrix, TMatrix pViewMatrix) {
+        String sMsgText;
+        int iStatus = 0;
+        String sSceneName;
+        Integer iEffectType = 0;
+        Integer iColorMode = 0;
+        Integer iOutputRows = 0, iOutputColumns = 0;
+        Integer iFirstFrame = 0, iLastFrame = 0;
+        int iFrameCounter;
+        int iModelCounter;
+        Scene theScene;
+        SceneElement modelSE;
+        MotionNode motnNode = new MotionNode();  // current model location, orientation if moving
+        Bundle xfrm = new Bundle();         // create a bundle of transforms
+        TMatrix viewModelMatrix = new TMatrix();
 
-        getSceneInfo(sceneName, effectType, colorMode, outputRows, outputColumns);
+        // The following method sets all the parameters,
+        // but we will not use sSceneName nor iColorMode
+        getSceneInfo(sSceneName, iEffectType, iColorMode, iOutputRows, iOutputColumns);
 
-        // Setup for smooth animation.  Create a memory DC
-        HBITMAP hBitmap, hOldBitmap;
-        HDC memoryDC, dc;
-        dc = GetDC(theWindow);
-        MemImage tempImage = new MemImage(outputRows, outputColumns);
-        hBitmap = CreateBitmap((int)outputColumns, (int)outputRows, 1,
+        // Setup for smooth animation.
+        MemImage tempImage = new MemImage(iOutputRows, iOutputColumns);
+        /*
+        hBitmap = CreateBitmap((int)iOutputColumns, (int)iOutputRows, 1,
             1, tempImage.getBytes());
         if(hBitmap == 0) {
             Globals.statusPrint("SceneList::PreviewSequence. Unable to create internal bitmap");
             return -1;
         }
+        */
 
-        memoryDC = CreateCompatibleDC(dc);
-        hOldBitmap = SelectObject(memoryDC, hBitmap);
         RECT myRect;
-        SetRect(myRect, 0, 0, outputColumns, outputRows);
+        SetRect(myRect, 0, 0, iOutputColumns, iOutputRows);
 
         // Preview the scene models
-        Scene theScene = this.sceneListHead;
+        theScene = this.sceneListHead;
         theScene = theScene.mNextEntry;  // Skip over the list header
         if(theScene == null) {
             Globals.statusPrint("sceneList.previewSequence: Scene list has no models");
             return 0;
         }
 
-        firstFrame = lastFrame = 0;
-        if(effectType == JICTConstants.I_SEQUENCE) {
-            // The following method sets both firstFrame and lastFrame
-            theScene.mSensorMotion.getFirstLastFrame(firstFrame, lastFrame);
+        iFirstFrame = iLastFrame = 0;
+        if(iEffectType == JICTConstants.I_SEQUENCE) {
+            // The following method sets both iFirstFrame and iLastFrame (of type Integer)
+            theScene.mSensorMotion.getFirstLastFrame(iFirstFrame, iLastFrame);
         }
-        int modelCounter;
-        boolean eraseOldBoundary; // variable is set, but not read
 
-        for(frameCounter = firstFrame; frameCounter <= lastFrame; frameCounter++) {
+        for(iFrameCounter = iFirstFrame; iFrameCounter <= iLastFrame; iFrameCounter++) {
             // Clear the memoryDC by drawing a filled white rectangle
-            FillRect(memoryDC, myRect, GetStockObject(WHITE_BRUSH));
-            SceneElement theModel = theScene.mHead;
-            modelCounter = 0;
-            eraseOldBoundary = true;
-            if(effectType == JICTConstants.I_SEQUENCE) {
-                // The following method sets viewMatrix
-                getViewMatrix(viewMatrix, frameCounter, theScene);
+            //FillRect(memoryDC, myRect, GetStockObject(WHITE_BRUSH));
+            modelSE = theScene.mHead;
+            if(iEffectType == JICTConstants.I_SEQUENCE) {
+                // The following method sets parameter pViewMatrix
+                getViewMatrix(pViewMatrix, iFrameCounter, theScene);
             }
+            iModelCounter = 0;
 
-            while (theModel != null) {
+            while (modelSE != null) {
                 // If the renderObject has not been created, create it
-                modelCounter++;
-                if(theModel.mScreenRdrObject == null) {
-                    theModel.miStatusIndicator = 0;
-                    msgText = "PreviewSequence: Creating RenderObject: " + theModel.msModelName;
-                    Globals.statusPrint(msgText);
-                    theModel.mScreenRdrObject = new RenderObject(theModel.msFileName,
-                        theModel.miModelType, theModel.mbDefinedRefPoint, theModel.pointOfReference);
+                iModelCounter++;
+                if(modelSE.mScreenRdrObject == null) {
+                    modelSE.miStatusIndicator = 0;
+                    sMsgText = "PreviewSequence: Creating RenderObject: " + modelSE.msModelName;
+                    Globals.statusPrint(sMsgText);
+                    modelSE.mScreenRdrObject = new RenderObject(modelSE.msFileName,
+                        modelSE.miModelType, modelSE.mbDefinedRefPoint, modelSE.pointOfReference);
 
-                    if (!theModel.mScreenRdrObject.isValid()) {
-                        theModel.miStatusIndicator = 1;  // this object could not be opened
-                        theModel.mbValid = false;
-                        msgText = "PreviewSequence: Couldn't create renderObject: " + theModel.msModelName;
-                        Globals.statusPrint(msgText);
+                    if (!modelSE.mScreenRdrObject.isValid()) {
+                        modelSE.miStatusIndicator = 1;  // this object could not be opened
+                        modelSE.mbValid = false;
+                        sMsgText = "PreviewSequence: Couldn't create renderObject: " + modelSE.msModelName;
+                        Globals.statusPrint(sMsgText);
                         return -1;
                     }
 
-                    // Get the scene's background plate if needed
-                    if(modelCounter == 1 && 
-                    theModel.mbWarpIndicator == false &&
-                    theModel.mbBlendIndicator == false) {
+                    // Setup the scene's background plate if needed
+                    if(iModelCounter == 1 && 
+                    modelSE.mbWarpIndicator == false &&
+                    modelSE.mbBlendIndicator == false) {
                         if(backgroundPlate == null) {
-                            backgroundPlate = new MemImage(theModel.msFileName, 0, 0, JICTConstants.I_RANDOM, 'R', JICTConstants.I_GREENCOLOR);
+                            backgroundPlate = new MemImage(modelSE.msFileName, 0, 0, 
+                                JICTConstants.I_RANDOM, 'R', JICTConstants.I_GREENCOLOR);
                         }
                     }
                 }
 
-                if(theModel.miStatusIndicator == 0) {  // If this is a valid model...
-                    modelMatrix.setIdentity();
+                if(modelSE.miStatusIndicator == 0) {  // If this is a valid model...
+                    pModelMatrix.setIdentity();
 
                     // Compose the model transforms
                     if(
-                    (effectType == JICTConstants.I_SEQUENCE) && 
-                    (theModel.mModelMotion != null)) {
-                        // The following method modifies aMotion (of type MotionNode)
-                        theModel.mModelMotion.getNode(frameCounter, aMotion);
+                    (iEffectType == JICTConstants.I_SEQUENCE) && 
+                    (modelSE.mModelMotion != null)) {
+                        // The following method modifies motnNode (of type MotionNode)
+                        modelSE.mModelMotion.getNode(iFrameCounter, motnNode);
                     }
 
-                    // The following method modifies xfrm (of type Bundle)
-                    adjustTransforms(effectType, theModel, aMotion, xfrm);
+                    // The following method sets the fields of parameter xfrm (of type Bundle)
+                    adjustTransforms(iEffectType, modelSE, motnNode, xfrm);
 
-                    modelMatrix.scale(xfrm.sx, xfrm.sy, xfrm.sz);
-                    float xRadians = xfrm.rx * JICTConstants.F_DTR;
-                    float yRadians = xfrm.ry * JICTConstants.F_DTR;
-                    float zRadians = xfrm.rz * JICTConstants.F_DTR;
+                    pModelMatrix.scale(xfrm.sx, xfrm.sy, xfrm.sz);
+                    float fXRadians = xfrm.rx * JICTConstants.F_DTR;
+                    float fYRadians = xfrm.ry * JICTConstants.F_DTR;
+                    float fZRadians = xfrm.rz * JICTConstants.F_DTR;
 
-                    modelMatrix.rotate(xRadians, yRadians, zRadians);
-                    modelMatrix.translate(xfrm.tx, xfrm.ty, xfrm.tz);
+                    pModelMatrix.rotate(fXRadians, fYRadians, fZRadians);
+                    pModelMatrix.translate(xfrm.tx, xfrm.ty, xfrm.tz);
 
                     // Combine the model matrix with the view Matrix
-                    viewModelMatrix.multiply(viewMatrix, modelMatrix);
+                    viewModelMatrix.multiply(pViewMatrix, pModelMatrix);
 
                     // Apply the matrix
-                    theModel.mScreenRdrObject.transformAndProject(viewModelMatrix, outputRows, outputColumns);
+                    modelSE.mScreenRdrObject.transformAndProject(viewModelMatrix, iOutputRows, iOutputColumns);
 
                     // If this is a background plate, copy it to the screen
                     if(
-                    modelCounter == 1 && 
-                    theModel.mbWarpIndicator == false &&
-                    theModel.mbBlendIndicator == false) {
-                        HDC theDC = GetDC(theWindow);
-                        backgroundPlate.display(theDC, outputColumns, outputRows);
-                        ReleaseDC(theWindow, theDC);
-                        eraseOldBoundary = false;
+                    iModelCounter == 1 && 
+                    modelSE.mbWarpIndicator == false &&
+                    modelSE.mbBlendIndicator == false) {
+                        // Display a MemImage object in the indicated BufferedImage
+                        backgroundPlate.display(pBuffImg, iOutputColumns, iOutputRows);
                     } else {
                         // Draw the object
-                        theModel.mScreenRdrObject.drawSequence(memoryDC, theModel.msModelName, 
-                            outputRows, outputColumns, frameCounter);
+                        modelSE.mScreenRdrObject.drawSequence(pBuffImg, modelSE.msModelName, 
+                            iOutputRows, iOutputColumns, iFrameCounter);
                     }
                 } // end if valid screen object
 
-                theModel = theModel.mNextEntry;
-                BitBlt(dc, 0, 0, outputColumns, outputRows, memoryDC, 0, 0, SRCCOPY);
+                modelSE = modelSE.mNextEntry;
+                BitBlt(0, 0, iOutputColumns, iOutputRows);
             }  // end of single frame 
 
             for(int i = 0; i <= 400000; i++)  {} // delay loop to approximate 30 Hz frame rate
-        } // end of sequence 
+        } // for iFrameCounter
       
         copyRefPoints();  // Copy model ref points to corresponding renderObjects
-        // clean up the memoryDC
-        SelectObject(memoryDC, hOldBitmap);
-        /*
-        DeleteDC(memoryDC);
-        ReleaseDC(theWindow, dc);
-        DeleteObject(hBitmap);
-        */
-        return myStatus;
+
+        return iStatus;
     } // preview
 
  
+    // Method previewStill previews a single image visual effect by traversing 
+    // the list of models (SceneElements) in the SceneList, displaying on the 
+    // screen the name and boundary line segments of each model.
+    //
     // Called from:
     //     ImageView.onDraw
-    public int previewStill(HWND theWindow, TMatrix modelMatrix, TMatrix viewMatrix) {
-        int myStatus = 0;
-        String sceneName;
-        int effectType, colorMode;
-        int outputRows, outputColumns;
-        int firstFrame, lastFrame, frameCounter;
-        int modelCounter;
-        boolean eraseOldBoundary; // variable is set, but not read
+    public int previewStill(BufferedImage pBuffImg, TMatrix pModelMatrix, TMatrix pViewMatrix) {
+        String sMsgText;
+        int iStatus = 0;
+        String sSceneName = "";
+        Integer iEffectType = 0;
+        Integer iColorMode = 0;
+        Integer iOutputRows = 0, iOutputColumns = 0;
+        Integer iFirstFrame = 0, iLastFrame = 0;
+        int iFrameCounter;
+        int iModelCounter;
         Scene theScene;
-        SceneElement theModel, saveModel;
-        MotionNode aMotion;    // current model location, orientation if moving
-        boolean firstTime = false;                                       
-        Bundle xfrm;           // create a bundle of transforms;
-        Bundle cxfrm;          // create a bundle of transforms for a potential compound model;
-        TMatrix viewModelMatrix;
-        TMatrix cModelMatrix;  // holds the compound model transformation matrix
-        TMatrix tempMatrix;
-              
-        getSceneInfo(sceneName, effectType, colorMode, outputRows, outputColumns);
-        int xOffset = outputColumns / 2;	  
-        int yOffset = outputRows / 2;
+        SceneElement modelSE, saveModel;
+        MotionNode motnNode = new MotionNode();    // current model location, orientation if moving
+        boolean bFirstTime = false;                                       
+        Bundle xfrm = new Bundle();           // create a bundle of transforms;
+        Bundle cxfrm = new Bundle();          // create a bundle of transforms for a potential compound model;
+        TMatrix viewModelMatrix = new TMatrix();
+
+        // Holds the compound model transformation matrix
+        // Used if theModel.miModelType == JICTConstants.I_COMPOUND
+        TMatrix cModelMatrix = new TMatrix();  
+        TMatrix tempMatrix = new TMatrix();
+        
+        // The following method sets all the parameters
+        // but we will not use sSceneName nor iColorMode
+        getSceneInfo(sSceneName, iEffectType, iColorMode, iOutputRows, iOutputColumns);
+        // int xOffset = iOutputColumns / 2; // this variable is not used
+        // int yOffset = iOutputRows / 2; // this variable is not used
 
         // Preview the scene models
         theScene = this.sceneListHead;
@@ -592,155 +598,171 @@ public class SceneList implements ISceneList {
             return 0;
         }
 
-        firstFrame = lastFrame = 0;
-        if(effectType == JICTConstants.I_SEQUENCE) {
-            theScene.mSensorMotion.getFirstLastFrame(firstFrame, lastFrame);
+        iFirstFrame = iLastFrame = 0;
+        if(iEffectType == JICTConstants.I_SEQUENCE) {
+            // The following method sets both iFirstFrame and iLastFrame (of type Integer)
+            theScene.mSensorMotion.getFirstLastFrame(iFirstFrame, iLastFrame);
         }
-        eraseOldBoundary = false;
 
-        for(frameCounter = firstFrame; frameCounter <= lastFrame; frameCounter++) {
-            theModel = theScene.mHead;  // Point to the first model
-            if(effectType == JICTConstants.I_SEQUENCE) {
-                getViewMatrix(viewMatrix, frameCounter, theScene);
+        for(iFrameCounter = iFirstFrame; iFrameCounter <= iLastFrame; iFrameCounter++) {
+            modelSE = theScene.mHead;  // Point to the first model
+            if(iEffectType == JICTConstants.I_SEQUENCE) {
+                // The following method sets parameter pViewMatrix
+                getViewMatrix(pViewMatrix, iFrameCounter, theScene);
             }
-            modelCounter = 0;
+            iModelCounter = 0;
 
-            while (theModel != null) {
+            while (modelSE != null) {
                 // If the renderObject has not been created, create it
-                modelCounter++;
-                if(theModel.mScreenRdrObject == null) {
-                    theModel.miStatusIndicator = 0;
-                    theModel.mScreenRdrObject = new RenderObject(theModel.msFileName,
-                        theModel.miModelType, theModel.mbDefinedRefPoint, theModel.pointOfReference);
-                    if(theModel.miModelType == JICTConstants.I_COMPOUND) {	// Initialize a compound model centroid
-                        theModel.pointOfReference.x = 0.0f;
-                        theModel.pointOfReference.y = 0.0f;
-                        theModel.pointOfReference.z = 0.0f;
+                iModelCounter++;
+                if(modelSE.mScreenRdrObject == null) {
+                    modelSE.miStatusIndicator = 0;
+                    modelSE.mScreenRdrObject = new RenderObject(modelSE.msFileName,
+                        modelSE.miModelType, modelSE.mbDefinedRefPoint, modelSE.pointOfReference);
+                    if(modelSE.miModelType == JICTConstants.I_COMPOUND) {	
+                        // Initialize a compound model centroid
+                        modelSE.pointOfReference.x = 0.0f;
+                        modelSE.pointOfReference.y = 0.0f;
+                        modelSE.pointOfReference.z = 0.0f;
                     }
 
-                    firstTime = true;  // This variable used to create the output image rectangle
-                    if (!theModel.mScreenRdrObject.isValid()) {
-                        theModel.miStatusIndicator = 1;  // This object could not be opened
-                        String msgText = "previewStill: Could not create renderObject: " + theModel.msModelName;
-                        Globals.statusPrint(msgText);
+                    bFirstTime = true;  // This variable used to create the output image rectangle
+                    if (!modelSE.mScreenRdrObject.isValid()) {
+                        modelSE.miStatusIndicator = 1;  // This object could not be opened
+                        sMsgText = "previewStill: Could not create renderObject: " + modelSE.msModelName;
+                        Globals.statusPrint(sMsgText);
                         Globals.beep(10, 10);
                         return -1;
                     }
-                }
+                } // if(theModel.mScreenRdrObject == null)
 
                 // Setup the scene's background plate if needed
-                if(modelCounter == 1 && 
-                theModel.mbWarpIndicator == false &&
-                theModel.mbBlendIndicator == false && theModel.miModelType != JICTConstants.I_COMPOUND) {
+                if(iModelCounter == 1 && 
+                modelSE.mbWarpIndicator == false &&
+                modelSE.mbBlendIndicator == false && 
+                modelSE.miModelType != JICTConstants.I_COMPOUND) {
                     if(backgroundPlate == null) {
-                        backgroundPlate = new MemImage(theModel.msFileName, 0, 0, JICTConstants.I_RANDOM, 'R', JICTConstants.I_GREENCOLOR);
+                        backgroundPlate = new MemImage(modelSE.msFileName, 0, 0, 
+                            JICTConstants.I_RANDOM, 'R', JICTConstants.I_GREENCOLOR);
                     }
                 }
 
-                if(theModel.miStatusIndicator == 0) {  // if this is a valid model...
-                    float cmCentroidx, cmCentroidy, cmCentroidz;
-                    modelMatrix.setIdentity();
+                if(modelSE.miStatusIndicator == 0) {  // if this is a valid model...
+                    Float fCmCentroidx = 0.0f, fCmCentroidy = 0.0f, fCmCentroidz = 0.0f;
+                    pModelMatrix.setIdentity();
 
                     // Compose the appropriate transforms
-                    if((effectType == JICTConstants.I_SEQUENCE) && (theModel.mModelMotion != null)) {
-                        theModel.mModelMotion.getNode(frameCounter, aMotion);
+                    if(
+                    (iEffectType == JICTConstants.I_SEQUENCE) && 
+                    (modelSE.mModelMotion != null)) {
+                        modelSE.mModelMotion.getNode(iFrameCounter, motnNode);
                     }
                 
-                    if(theModel.miModelType == JICTConstants.I_COMPOUND) {
-                        adjustTransforms(effectType, theModel, aMotion, cxfrm);
+                    if(modelSE.miModelType == JICTConstants.I_COMPOUND) {
+                        // The following method sets the fields of parameter xcfrm (of type Bundle)
+                        adjustTransforms(iEffectType, modelSE, motnNode, cxfrm);
                         cModelMatrix.scale(cxfrm.sx, cxfrm.sy, cxfrm.sz);
-                        float xRadians = cxfrm.rx * JICTConstants.F_DTR;
-                        float yRadians = cxfrm.ry * JICTConstants.F_DTR;
-                        float zRadians = cxfrm.rz * JICTConstants.F_DTR;
-                        cModelMatrix.rotate(xRadians, yRadians, zRadians);
+                        float fXRadians = cxfrm.rx * JICTConstants.F_DTR;
+                        float fYRadians = cxfrm.ry * JICTConstants.F_DTR;
+                        float fZRadians = cxfrm.rz * JICTConstants.F_DTR;
+                        cModelMatrix.rotate(fXRadians, fYRadians, fZRadians);
                         cModelMatrix.translate(cxfrm.tx, cxfrm.ty, cxfrm.tz);
                     } else {
-                        adjustTransforms(effectType, theModel, aMotion, xfrm);
-                        modelMatrix.scale(xfrm.sx, xfrm.sy, xfrm.sz);
-                        float xRadians = xfrm.rx * JICTConstants.F_DTR;
-                        float yRadians = xfrm.ry * JICTConstants.F_DTR;
-                        float zRadians = xfrm.rz * JICTConstants.F_DTR;
-                        modelMatrix.rotate(xRadians, yRadians, zRadians);
-                        modelMatrix.translate(xfrm.tx, xfrm.ty, xfrm.tz);
+                        // The following method sets the fields of parameter xfrm (of type Bundle)
+                        adjustTransforms(iEffectType, modelSE, motnNode, xfrm);
+                        pModelMatrix.scale(xfrm.sx, xfrm.sy, xfrm.sz);
+                        float fXRadians = xfrm.rx * JICTConstants.F_DTR;
+                        float fYRadians = xfrm.ry * JICTConstants.F_DTR;
+                        float fZRadians = xfrm.rz * JICTConstants.F_DTR;
+                        pModelMatrix.rotate(fXRadians, fYRadians, fZRadians);
+                        pModelMatrix.translate(xfrm.tx, xfrm.ty, xfrm.tz);
                     }
                     
                     // Combine the model matrix with the view Matrix
-                    if(theModel.mbCompoundModelMember) {
+                    if(modelSE.mbCompoundModelMember) {
                         tempMatrix.setIdentity();
-                        tempMatrix.multiply(viewMatrix, modelMatrix);
+                        tempMatrix.multiply(pViewMatrix, pModelMatrix);
                         viewModelMatrix.multiply(cModelMatrix, tempMatrix);
                     } else {
                         // Combine the model matrix with the view Matrix
-                        viewModelMatrix.multiply(viewMatrix, modelMatrix);
+                        viewModelMatrix.multiply(pViewMatrix, pModelMatrix);
                     }
 
-                    // If this model is compound, calculate the compound model reference Point
-                    if(theModel.miModelType == JICTConstants.I_COMPOUND) {
-                        saveModel = theModel;
-                        calcCompoundModelRefPoint(theModel, outputRows, outputColumns, cmCentroidx, cmCentroidy, cmCentroidz);
-                        theModel = saveModel;
+                    // If this model is compound, calculate the compound model reference point
+                    if(modelSE.miModelType == JICTConstants.I_COMPOUND) {
+                        saveModel = modelSE;
+                        // The following method sets parameters fCmCentroidx, fCmCentroidy, and fCmCentroidz
+                        calcCompoundModelRefPoint(modelSE, iOutputRows, iOutputColumns, 
+                            fCmCentroidx, fCmCentroidy, fCmCentroidz);
+                        modelSE = saveModel;
                     }
 
                     //  Transform the points
-                    if(theModel.msFileName.equalsIgnoreCase("Output Image Rectangle") && 
-                    theModel.miModelType != JICTConstants.I_COMPOUND &&	     
-                    theModel.mbCompoundModelMember == false) {    
-                        theModel.mScreenRdrObject.transformAndProject(viewModelMatrix, outputRows, outputColumns);
+                    if(modelSE.msFileName.equalsIgnoreCase("Output Image Rectangle") && 
+                    modelSE.miModelType != JICTConstants.I_COMPOUND &&	     
+                    modelSE.mbCompoundModelMember == false) {
+                        // Apply the matrix
+                        modelSE.mScreenRdrObject.transformAndProject(viewModelMatrix, 
+                            iOutputRows, iOutputColumns);
                     }
 
                     if(
-                    theModel.msFileName.equalsIgnoreCase("Output Image Rectangle") && 
-                    theModel.miModelType != JICTConstants.I_COMPOUND &&
-                    theModel.mbCompoundModelMember) {   
-                        theModel.mScreenRdrObject.transformAndProject(viewModelMatrix,
-                            outputRows, outputColumns, theModel.mbCompoundModelMember, cmCentroidx, cmCentroidy, cmCentroidz);
+                    modelSE.msFileName.equalsIgnoreCase("Output Image Rectangle") && 
+                    modelSE.miModelType != JICTConstants.I_COMPOUND &&
+                    modelSE.mbCompoundModelMember) {
+                        // Apply the matrix
+                        modelSE.mScreenRdrObject.transformAndProject(viewModelMatrix,
+                            iOutputRows, iOutputColumns, modelSE.mbCompoundModelMember, 
+                            fCmCentroidx, fCmCentroidy, fCmCentroidz);
                     }
 
                     // Draw the points
                     //
-                    // If this is a background plate, blt it to the screen
+                    // If this is a background plate, copy it to the screen
                     if(
-                    modelCounter == 1 && 
-                    theModel.miModelType != JICTConstants.I_COMPOUND && 
-                    theModel.mbWarpIndicator == false &&
-                    theModel.mbBlendIndicator == false) {
-                        HDC theDC = GetDC(theWindow);
-                        backgroundPlate.display(theDC, outputColumns, outputRows);
-                        ReleaseDC(theWindow, theDC);
-                        eraseOldBoundary = false;
+                    iModelCounter == 1 && 
+                    modelSE.miModelType != JICTConstants.I_COMPOUND && 
+                    modelSE.mbWarpIndicator == false &&
+                    modelSE.mbBlendIndicator == false) {
+                        // Display a MemImage object in the indicated BufferedImage
+                        backgroundPlate.display(pBuffImg, iOutputColumns, iOutputRows);
                     } else {
                         // Draw the model boundary
-                        if(theModel.miModelType != JICTConstants.I_COMPOUND) {
-                            theModel.mScreenRdrObject.drawStill(theWindow, theModel.msModelName, outputRows, outputColumns);
+                        if(modelSE.miModelType != JICTConstants.I_COMPOUND) {
+                            modelSE.mScreenRdrObject.drawStill(pBuffImg, modelSE.msModelName, iOutputRows, iOutputColumns);
                         }
                     }
                 } // end if valid screen object
 
-                saveModel = theModel;
-                theModel = theModel.mNextEntry;
-                if((theModel == null) && (firstTime == true)) {
+                saveModel = modelSE;
+                modelSE = modelSE.mNextEntry;
+                if((modelSE == null) && (bFirstTime == true)) {
                     // This is the last model.  If the first time through this loop, add
                     // a model that displays the output image rectangle
-                    Color aColor;
-                    myStatus = addSceneElement(" ", "Output Image Rectangle",  
+                    Color aColor = Color.BLACK;
+
+                    // The following creates a SceneElement object and adds it to the
+                    // the list of SceneElements that SceneList maintains
+                    iStatus = addSceneElement(" ", "Output Image Rectangle",  
                         false, JICTConstants.I_SHAPE, false, 
                         1.0f, null, null, null, 
                         "None", "Default", 
                         false, aColor, "None", "None", 
                         false, null);
-                    theModel = saveModel.mNextEntry;
-                    if(theModel != null) {
-                        theModel.mScreenRdrObject = new RenderObject(theModel.msFileName,
-                            theModel.miModelType, theModel.mbDefinedRefPoint, theModel.pointOfReference);
+                    modelSE = saveModel.mNextEntry;
+                    if(modelSE != null) {
+                        modelSE.mScreenRdrObject = new RenderObject(modelSE.msFileName,
+                            modelSE.miModelType, modelSE.mbDefinedRefPoint, modelSE.pointOfReference);
                     }
                 
-                    theModel = theModel.mNextEntry;
+                    modelSE = modelSE.mNextEntry;
                 }
             }
-        }  // frame
+        } // for iFrameCounter
         
         copyRefPoints();  // Copy model ref points to corresponding renderObjects
-        return myStatus;
+
+        return iStatus;
     } // previewStill
 
 
@@ -1099,39 +1121,39 @@ public class SceneList implements ISceneList {
     //     preview
     //     previewStill
     //     render
-    public void adjustTransforms(int piEffectType, SceneElement theModel, 
-    MotionNode aMotion, Bundle xfrm) {
+    public void adjustTransforms(int piEffectType, SceneElement pModelSE, 
+    MotionNode pMotnNode, Bundle pXfrm) {
         // float viewX, viewY, viewZ, rotateX, rotateY, rotateZ; // these local variables are not used
 
         // Copy model transforms into a bundle object
-        if((piEffectType == JICTConstants.I_SEQUENCE) && (theModel.mModelMotion != null)) {
+        if((piEffectType == JICTConstants.I_SEQUENCE) && (pModelSE.mModelMotion != null)) {
             // Set output parameter xfrm
-            xfrm.rx = aMotion.mfRx;
-            xfrm.ry = aMotion.mfRy;
-            xfrm.rz = aMotion.mfRz;
+            pXfrm.rx = pMotnNode.mfRx;
+            pXfrm.ry = pMotnNode.mfRy;
+            pXfrm.rz = pMotnNode.mfRz;
 
-            xfrm.sx = aMotion.mfSx;
-            xfrm.sy = aMotion.mfSy;
-            xfrm.sz = aMotion.mfSz;
+            pXfrm.sx = pMotnNode.mfSx;
+            pXfrm.sy = pMotnNode.mfSy;
+            pXfrm.sz = pMotnNode.mfSz;
 
-            xfrm.tx = aMotion.mfTx;
-            xfrm.ty = aMotion.mfTy;
-            xfrm.tz = aMotion.mfTz;
-            xfrm.alpha = aMotion.mfAlpha;
+            pXfrm.tx = pMotnNode.mfTx;
+            pXfrm.ty = pMotnNode.mfTy;
+            pXfrm.tz = pMotnNode.mfTz;
+            pXfrm.alpha = pMotnNode.mfAlpha;
         } else {
             // Set output parameter xfrm
-            xfrm.rx = theModel.mRotation.x;
-            xfrm.ry = theModel.mRotation.y;
-            xfrm.rz = theModel.mRotation.z;
+            pXfrm.rx = pModelSE.mRotation.x;
+            pXfrm.ry = pModelSE.mRotation.y;
+            pXfrm.rz = pModelSE.mRotation.z;
 
-            xfrm.sx = theModel.mScale.x;
-            xfrm.sy = theModel.mScale.y;
-            xfrm.sz = theModel.mScale.z;
+            pXfrm.sx = pModelSE.mScale.x;
+            pXfrm.sy = pModelSE.mScale.y;
+            pXfrm.sz = pModelSE.mScale.z;
 
-            xfrm.tx = theModel.mTranslation.x;
-            xfrm.ty = theModel.mTranslation.y;
-            xfrm.tz = theModel.mTranslation.z;
-            xfrm.alpha = theModel.mfAlphaScale;
+            pXfrm.tx = pModelSE.mTranslation.x;
+            pXfrm.ty = pModelSE.mTranslation.y;
+            pXfrm.tz = pModelSE.mTranslation.z;
+            pXfrm.alpha = pModelSE.mfAlphaScale;
         }
     } // adjustTransforms
 
@@ -1173,89 +1195,91 @@ public class SceneList implements ISceneList {
 
     // Called from:
     //     previewStill
-    public int calcCompoundModelRefPoint(SceneElement theModel, 
-    int outputRows, int outputColumns, 
-    Float cmCentroidX, Float cmCentroidY, Float cmCentroidZ) {
-        cmCentroidX = 0.0f;
-        cmCentroidY = 0.0f;
-        cmCentroidZ = 0.0f;
+    public int calcCompoundModelRefPoint(SceneElement pModelSceneElem, 
+    int piOutputRows, int piOutputColumns, 
+    Float pFCmCentroidX, Float pFCmCentroidY, Float pFCmCentroidZ) {
+        pFCmCentroidX = 0.0f;
+        pFCmCentroidY = 0.0f;
+        pFCmCentroidZ = 0.0f;
         // SceneElement saveModel; // this variable is not used
-        float bucketX = 0f, bucketY = 0f, bucketZ = 0f;
+        float fBucketX = 0f, fBucketY = 0f, fBucketZ = 0f;
         Float mCentroidX = 0f, mCentroidY = 0f, mCentroidZ = 0f;
-        boolean prevModelIsACompoundMember = false; // changed from int to boolean
-        int modelCounter = 0;
+        boolean bPrevModelIsACompoundMember = false; // changed from int to boolean
+        int iModelCounter = 0;
         TMatrix modelMatrix = new TMatrix();
         
-        // theModel is assumed to point to the compound model object.
+        // pModelSceneElem is assumed to point to the compound model object.
         //
         // Each compound model component is transformed in order to get its centroid
         // These centroids are accumulated and averaged to obtain the centroid of the 
         // compound model.
-        // saveModel = theModel; // this variable is not used
-        theModel = theModel.mNextEntry;
+        // saveModel = pModelSceneElem; // this variable is not used
+        pModelSceneElem = pModelSceneElem.mNextEntry;
 
-        while (theModel != null) {
+        // Process each SceneElement of the containing Scene
+        while (pModelSceneElem != null) {
             // Build the model's transformation matrix
-            modelMatrix.scale(theModel.mScale.x, theModel.mScale.y, theModel.mScale.z);
-            float xRadians = theModel.mRotation.x * JICTConstants.F_DTR;
-            float yRadians = theModel.mRotation.y * JICTConstants.F_DTR;
-            float zRadians = theModel.mRotation.z * JICTConstants.F_DTR;
+            modelMatrix.scale(pModelSceneElem.mScale.x, pModelSceneElem.mScale.y, pModelSceneElem.mScale.z);
+            float xRadians = pModelSceneElem.mRotation.x * JICTConstants.F_DTR;
+            float yRadians = pModelSceneElem.mRotation.y * JICTConstants.F_DTR;
+            float zRadians = pModelSceneElem.mRotation.z * JICTConstants.F_DTR;
             modelMatrix.rotate(xRadians, yRadians, zRadians);
-            modelMatrix.translate(theModel.mTranslation.x, theModel.mTranslation.y, theModel.mTranslation.z);
+            modelMatrix.translate(pModelSceneElem.mTranslation.x, pModelSceneElem.mTranslation.y, pModelSceneElem.mTranslation.z);
 
             // If the model's RenderObject has not been created, create it.
-            if(theModel.mScreenRdrObject == null) {
-                theModel.miStatusIndicator = 0;
-                theModel.mScreenRdrObject = new RenderObject(theModel.msFileName,
-                    theModel.miModelType, theModel.mbDefinedRefPoint, theModel.pointOfReference);
+            if(pModelSceneElem.mScreenRdrObject == null) {
+                pModelSceneElem.miStatusIndicator = 0;
+                pModelSceneElem.mScreenRdrObject = new RenderObject(pModelSceneElem.msFileName,
+                    pModelSceneElem.miModelType, pModelSceneElem.mbDefinedRefPoint, pModelSceneElem.pointOfReference);
 
-                if (!theModel.mScreenRdrObject.isValid()) {
-                    theModel.miStatusIndicator = 1;  // this object could not be opened
-                    String msgText = "calcCompoundModelRefPoint: Could not create renderObject: " + theModel.msModelName;
-                    Globals.statusPrint(msgText);
+                if (!pModelSceneElem.mScreenRdrObject.isValid()) {
+                    pModelSceneElem.miStatusIndicator = 1;  // this object could not be opened
+                    String sMsgText = "calcCompoundModelRefPoint: Could not create renderObject: " + pModelSceneElem.msModelName;
+                    Globals.statusPrint(sMsgText);
                     return -1;
                 }
             }
 
             // Transform the model and get its transformed centroid
-            if(theModel.mbCompoundModelMember) {
+            if(pModelSceneElem.mbCompoundModelMember) {
                 // Transform the individual model
-                theModel.mScreenRdrObject.transformAndProject(modelMatrix, outputRows, outputColumns);
-                theModel.mScreenRdrObject.mCurrentShape.getTCentroid(mCentroidX, mCentroidY, mCentroidZ);
+                pModelSceneElem.mScreenRdrObject.transformAndProject(modelMatrix, piOutputRows, piOutputColumns);
+                pModelSceneElem.mScreenRdrObject.mCurrentShape.getTCentroid(mCentroidX, mCentroidY, mCentroidZ);
       
-                String msgText;
-                msgText = "calcCmModelRefPoint. model: " + theModel.msModelName;
-                Globals.statusPrint(msgText);
-                msgText = "calcCmModelRefPoint. modelCentroid: " + mCentroidX + " " + mCentroidY + " " + mCentroidZ;
-                Globals.statusPrint(msgText);
+                String sMsgText;
+                sMsgText = "calcCmModelRefPoint. model: " + pModelSceneElem.msModelName;
+                Globals.statusPrint(sMsgText);
+                sMsgText = "calcCmModelRefPoint. modelCentroid: " + mCentroidX + " " + mCentroidY + " " + mCentroidZ;
+                Globals.statusPrint(sMsgText);
 
-                bucketX += mCentroidX;
-                bucketY += mCentroidY;
-                bucketZ += mCentroidZ;
-                modelCounter++;
+                fBucketX += mCentroidX;
+                fBucketY += mCentroidY;
+                fBucketZ += mCentroidZ;
+                iModelCounter++;
             }
 
-            if(!theModel.mbCompoundModelMember && prevModelIsACompoundMember) {
+            if(!pModelSceneElem.mbCompoundModelMember && bPrevModelIsACompoundMember) {
                 // Set the output parameters
-                cmCentroidX = bucketX / modelCounter;
-                cmCentroidY = bucketY / modelCounter;
-                cmCentroidZ = bucketZ / modelCounter;
+                pFCmCentroidX = fBucketX / iModelCounter;
+                pFCmCentroidY = fBucketY / iModelCounter;
+                pFCmCentroidZ = fBucketZ / iModelCounter;
 
-                String msgText = "calcCmModelRefPoint. cmCentroid: " + cmCentroidX + " " + cmCentroidY + " " + cmCentroidZ;
-                Globals.statusPrint(msgText);
+                String sMsgText = "calcCmModelRefPoint. cmCentroid: " 
+                    + pFCmCentroidX + " " + pFCmCentroidY + " " + pFCmCentroidZ;
+                Globals.statusPrint(sMsgText);
             }
 
-            prevModelIsACompoundMember = theModel.mbCompoundModelMember;
-            theModel = theModel.mNextEntry;  // Get the pointer to next model
+            bPrevModelIsACompoundMember = pModelSceneElem.mbCompoundModelMember;
+            pModelSceneElem = pModelSceneElem.mNextEntry;  // Get the pointer to next model
         } // while
 
         // Handle the case where a compound model is the last model in the
         // scene list.
-        if(prevModelIsACompoundMember) {
+        if(bPrevModelIsACompoundMember) {
             // Set the output parameters
-            cmCentroidX = bucketX / modelCounter;
-            cmCentroidY = bucketY / modelCounter;
-            cmCentroidZ = bucketZ / modelCounter;
+            pFCmCentroidX = fBucketX / iModelCounter;
+            pFCmCentroidY = fBucketY / iModelCounter;
+            pFCmCentroidZ = fBucketZ / iModelCounter;
         }
 
         return 0;
@@ -1288,7 +1312,7 @@ public class SceneList implements ISceneList {
     int theType, boolean warpI, float aScale, 
     Point3d rt, Point3d sc, Point3d tr, 
     String motionPath, String theAlphaPath,
-    boolean theSortLayer, Color anAdjustment, 
+    boolean theSortLayer, Color pAdjustmentColor, 
     String adjustmentType, String colorAdjustedPath,
     boolean definedRefPt, Point3d refPoint) {
         Scene aScene = currentScene;  //Add an element to the current scene
@@ -1299,7 +1323,7 @@ public class SceneList implements ISceneList {
             theType, warpI, aScale, 
             rt, sc, tr, 
             motionPath, theAlphaPath, 
-            theSortLayer, anAdjustment, 
+            theSortLayer, pAdjustmentColor, 
             adjustmentType, colorAdjustedPath,
             definedRefPt, refPoint);
 
