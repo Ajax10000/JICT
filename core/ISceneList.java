@@ -3,6 +3,7 @@ package core;
 import dialogs.ImageView;
 
 import java.awt.Color;
+import java.awt.image.BufferedImage;
 
 import javax.swing.JComboBox;
 
@@ -45,9 +46,9 @@ public interface ISceneList {
 
     int writeList(String psErrorText, String psFileName);
 
-    int preview(HWND theWindow, TMatrix modelMatrix, TMatrix viewMatrix);
+    int preview(BufferedImage buffImg, TMatrix modelMatrix, TMatrix viewMatrix);
 
-    int previewStill(HWND theWindow, TMatrix modelMatrix, TMatrix viewMatrix);
+    int previewStill(BufferedImage buffImg, TMatrix modelMatrix, TMatrix viewMatrix);
 
     int render(ImageView displayWindow, TMatrix viewMatrix,
     boolean depthSortingEnabled, boolean zBufferEnabled, boolean antiAliasEnabled, 
