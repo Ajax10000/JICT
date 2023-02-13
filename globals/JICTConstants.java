@@ -89,10 +89,10 @@ public class JICTConstants {
     // Originally defined in IWARP.CPP
     public static final int I_MAXWVERTICES = 8;
     
+    // Originally defined in MORPHDIALOG.H
+    public static final int I_TWOD   = 2;
+    public static final int I_THREED = 3;
+
     // Originally defined in SCENELST.CPP
     // #define THREE_NUMBERS_NOT_FOUND 2
-
-    // Originally defined in MORPHDIALOG.H
-    // #define twoD 2
-    // #define threeD 3
 }
