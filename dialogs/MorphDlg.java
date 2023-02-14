@@ -6,17 +6,32 @@ import fileUtils.BMPFileFilter;
 import fileUtils.FileUtils;
 
 import globals.Globals;
+import globals.JICTConstants;
 
 import java.io.File;
 
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+
+import javax.swing.border.Border;
+import javax.swing.border.EtchedBorder;
 
 import math.TMatrix;
 
@@ -84,24 +99,6 @@ public class MorphDlg extends JDialog {
     // LTEXT           "#Frames in Sequence",-1,43,106,73,10
     JLabel lblNumFrames;
 
-
-    // These values were defined in MEMIMAGE.H
-    public static final int REDCOLOR = 1;
-    public static final int GREENCOLOR = 2;
-    public static final int BLUECOLOR = 3;
-    public static final int EIGHTBITMONOCHROME = 2;
-    public static final int A32BIT = 4;
-    public static final int RGBCOLOR = 5;
-    public static final int ONEBITMONOCHROME = 6;
-
-    // These values were defined in MEMIMAGE.H
-    public static final int SEQUENTIAL = 1;
-    public static final int RANDOM = 0;
-
-    // These values were defined in MORPHDIALOG.H
-    public static final int I_TWOD   = 2;
-    public static final int I_THREED = 3;
-
 /* 
 class CMorphDialog : public CDialog
 {
@@ -151,7 +148,283 @@ protected:
         super(pParent, pModal);
 
         setTitle("Create Morph Sequence");
+        setSize(520, 320);
+        JPanel panel = new JPanel();
+        panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5)); // top, left, bottom, right
+        BoxLayout boxLayout = new BoxLayout(panel, BoxLayout.Y_AXIS);
+        panel.setLayout(boxLayout);
+
+        Box row01Box = Box.createHorizontalBox();
+        Box row02Box = Box.createHorizontalBox();
+
+        Box topBox = addTopSection();
+        row01Box.add(topBox);
+
+        Box botBox = addBotSection();
+        row02Box.add(botBox);
+
+        panel.add(row01Box);
+        panel.add(row02Box);
+        this.add(panel);
+
+        setVisible(true);
     } // MorphDlg ctor
+
+
+    // Called from:
+    //     constructor
+    private Box addTopSection() {
+        Dimension txtFldSize = new Dimension(250, 25);
+        Dimension locateBtnSize = new Dimension(90, 25);
+        Dimension btnTxtFldSpacerSize = new Dimension(8, 25);
+        Dimension largeSpacerSize = new Dimension(98, 25);
+        Dimension rowSpacerSize = new Dimension(400, 25);
+
+        Box horiz01Box = Box.createHorizontalBox();
+        Box horiz02Box = Box.createHorizontalBox();
+        Box horiz03Box = Box.createHorizontalBox();
+        Box horiz04Box = Box.createHorizontalBox();
+        Box horiz05Box = Box.createHorizontalBox();
+        Box horiz06Box = Box.createHorizontalBox();
+        Box horiz07Box = Box.createHorizontalBox();
+
+        // Create components for horiz01Box (Label "First Image to Morph")
+        Component spacerForFirstLbl = Box.createRigidArea(largeSpacerSize);
+        JLabel lblFirstImage = new JLabel("First Image to Morph");
+
+        // Populate horiz01Box
+        horiz01Box.add(spacerForFirstLbl);
+        horiz01Box.add(lblFirstImage);
+
+        // Create components for horiz02Box
+        JButton btnLocateFirstImgToMorph = new JButton("Locate");
+        btnLocateFirstImgToMorph.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ae) {
+                onLocateDestDir();
+            }
+        });
+        btnLocateFirstImgToMorph.setSize(locateBtnSize);
+        btnLocateFirstImgToMorph.setPreferredSize(locateBtnSize);
+
+        Component firstBtnTxtFldSpacer = Box.createRigidArea(btnTxtFldSpacerSize);
+
+        m_firstImage = new JTextField();
+        m_firstImage.setSize(txtFldSize);
+        m_firstImage.setMinimumSize(txtFldSize);
+        m_firstImage.setMaximumSize(txtFldSize);
+        m_firstImage.setPreferredSize(txtFldSize);
+
+        // Populate horiz02Box
+        horiz02Box.add(btnLocateFirstImgToMorph);
+        horiz02Box.add(firstBtnTxtFldSpacer);
+        horiz02Box.add(m_firstImage);
+
+        // Create components for horiz03Box (Label "Second Image to morph")
+        Component spacerForSecondLbl = Box.createRigidArea(largeSpacerSize);
+        JLabel lblSecondImage = new JLabel("Second Image to Morph");
+        //lblSecondImage.setSize();
+        //lblSecondImage.setPreferredSize();
+
+        // Populate horiz03Box
+        horiz03Box.add(spacerForSecondLbl);
+        horiz03Box.add(lblSecondImage);
+        
+        // Create components for horiz04Box
+        JButton btnMidLocate = new JButton("Locate");
+        btnMidLocate.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ae) {
+                onLocateDestDir3();
+            }
+        });
+        btnMidLocate.setSize(locateBtnSize);
+        btnMidLocate.setPreferredSize(locateBtnSize);
+
+        Component secondBtnTxtFldSpacer = Box.createRigidArea(btnTxtFldSpacerSize);
+
+        m_secondImage = new JTextField();
+        m_secondImage.setSize(txtFldSize);
+        m_secondImage.setMinimumSize(txtFldSize);
+        m_secondImage.setMaximumSize(txtFldSize);
+        m_secondImage.setPreferredSize(txtFldSize);
+
+        // Populate horiz04Box
+        horiz04Box.add(btnMidLocate);
+        horiz04Box.add(secondBtnTxtFldSpacer);
+        horiz04Box.add(m_secondImage);
+
+        // Create component for horiz05Box (Label "Complete pathname of first image in output sequence")
+        Component spacerForThirdLbl = Box.createRigidArea(largeSpacerSize);
+        JLabel lblCompletePathname = new JLabel("Complete pathname of first image in output sequence");
+
+        // Populate horiz05Box
+        horiz05Box.add(spacerForThirdLbl);
+        horiz05Box.add(lblCompletePathname);
+
+        // Create component for horiz06Box
+        JButton btnBotLocate = new JButton("Locate");
+        btnBotLocate.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ae) {
+                onLocateDestDir2();
+            }
+        });
+        btnBotLocate.setSize(locateBtnSize);
+        btnBotLocate.setPreferredSize(locateBtnSize);
+
+        Component thirdBtnTxtFldSpacer = Box.createRigidArea(btnTxtFldSpacerSize);
+
+        m_firstOutPath = new JTextField();
+        m_firstOutPath.setSize(txtFldSize);
+        m_firstOutPath.setMinimumSize(txtFldSize);
+        m_firstOutPath.setMaximumSize(txtFldSize);
+        m_firstOutPath.setPreferredSize(txtFldSize);
+
+        // Populate horiz06Box
+        horiz06Box.add(btnBotLocate);
+        horiz06Box.add(thirdBtnTxtFldSpacer);
+        horiz06Box.add(m_firstOutPath);
+        
+
+        Box vertBox = Box.createVerticalBox();
+        vertBox.add(horiz01Box);
+        vertBox.add(horiz02Box);
+        vertBox.add(horiz03Box);
+        vertBox.add(horiz04Box);
+        vertBox.add(horiz05Box);
+        vertBox.add(horiz06Box);
+
+        return vertBox;
+    } // addTopSection
+
+
+    // Called from:
+    //     constructor
+    private Box addBotSection() {
+        final int iPnlWidth = 90;
+        final int iPnlHeight = 80;
+        Border loweredetched = BorderFactory.createEtchedBorder(EtchedBorder.LOWERED);
+        Dimension firstSpacerSize = new Dimension(80, 80);
+        Dimension secondSpacerSize = new Dimension(45, 80);
+        Dimension numFramesLblSize = new Dimension(70, 25);
+        Dimension numFramesFldSize = new Dimension(50, 25);
+
+        Box vert01Box = Box.createVerticalBox();
+        Box vert02Box = Box.createVerticalBox();
+        Box vert03Box = Box.createVerticalBox();
+        Box vert04Box = Box.createVerticalBox();
+        Box vert05Box = Box.createVerticalBox();
+        Box vert06Box = Box.createVerticalBox();
+
+        // Create components for vert01Box (a spacer)
+        Component firstSpacer = Box.createRigidArea(firstSpacerSize);
+
+        // Populate vert01Box
+        vert01Box.add(firstSpacer);
+
+        // Create components for vert02Box
+        Component vert01Spacer = Box.createRigidArea(new Dimension(50, 10));
+        JLabel lblNumFramesInSeq = new JLabel("#Frames in Sequence");
+        lblNumFramesInSeq.setSize(numFramesLblSize);
+        lblNumFramesInSeq.setMinimumSize(numFramesLblSize);
+        lblNumFramesInSeq.setPreferredSize(numFramesLblSize);
+        lblNumFramesInSeq.setAlignmentX(0.0f);
+
+        m_preNumFrames = new JTextField();
+        m_preNumFrames.setSize(numFramesFldSize);
+        m_preNumFrames.setMinimumSize(numFramesFldSize);
+        m_preNumFrames.setMaximumSize(numFramesFldSize);
+        m_preNumFrames.setPreferredSize(numFramesFldSize);
+        m_preNumFrames.setAlignmentX(0.0f);
+
+        // Populate vert02Box
+        vert02Box.add(vert01Spacer);
+        vert02Box.add(lblNumFramesInSeq);
+        vert02Box.add(m_preNumFrames);
+
+        // Create components for vert03Box (a spacer)
+        Component secondSpacer = Box.createRigidArea(secondSpacerSize);
+
+        // Populate vert03Box
+        vert03Box.add(secondSpacer);
+
+        // Create components for vert04Box (Type radio buttons)
+        rbn2D = new JRadioButton("2D");
+        rbn2D.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ae) {
+                on2d();
+            }
+        });
+
+        rbn3D = new JRadioButton("3D");
+        rbn3D.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ae) {
+                on3d();
+            }
+        });
+
+        Dimension pnlSize = new Dimension(iPnlWidth, iPnlHeight);
+        JPanel pnlType = new JPanel();
+        pnlType.setSize(pnlSize);
+        pnlType.setMaximumSize(pnlSize);
+        pnlType.setPreferredSize(pnlSize);
+        BoxLayout boxLayout = new BoxLayout(pnlType, BoxLayout.Y_AXIS);
+        pnlType.setLayout(boxLayout);
+        pnlType.setBorder(BorderFactory.createTitledBorder(loweredetched, "Type"));
+        pnlType.setAlignmentX(SwingConstants.LEFT);
+        pnlType.add(rbn2D);
+        pnlType.add(rbn3D);
+        ButtonGroup bg = new ButtonGroup();
+        bg.add(rbn2D);
+        bg.add(rbn3D);
+
+        // Populate vert04Box
+        vert04Box.add(pnlType);
+
+        // Create components for vert05Box 
+        // Populate vert05Box
+
+        // Create components for vert06Box (OK and Cancel buttons)
+        Component btnSpacer = Box.createRigidArea(new Dimension(50, 30));
+        Dimension btnSize = new Dimension(80, 25);
+        btnOK = new JButton("OK");
+        btnOK.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ae) {
+                onOK();
+            }
+        });
+        btnOK.setSize(btnSize);
+        btnOK.setMinimumSize(btnSize);
+        btnOK.setMaximumSize(btnSize);
+        btnOK.setPreferredSize(btnSize);
+
+        Component smallVertSpacer = Box.createRigidArea(new Dimension(80, 5));
+
+        btnCancel = new JButton("Cancel");
+        btnCancel.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ae) {
+                onCancel();
+            }
+        });
+        btnCancel.setSize(btnSize);
+        btnCancel.setMinimumSize(btnSize);
+        btnCancel.setMaximumSize(btnSize);
+        btnCancel.setPreferredSize(btnSize);
+
+        // Populate vert06Box
+        vert06Box.add(btnSpacer);
+        vert06Box.add(btnOK);
+        vert06Box.add(smallVertSpacer);
+        vert06Box.add(btnCancel);
+
+        Box horizBox = Box.createHorizontalBox();
+        horizBox.add(vert01Box);
+        horizBox.add(vert02Box);
+        horizBox.add(vert03Box);
+        horizBox.add(vert04Box);
+        horizBox.add(vert05Box);
+        horizBox.add(vert06Box);
+
+        return horizBox;
+    } // addBotSection
 
 
     /*
@@ -228,7 +501,7 @@ protected:
     // Called when the user clicks on the 2D radio button
     // CONTROL         "2D",IDC_2D,"Button",BS_AUTORADIOBUTTON,140,117,25,10
     private void on2d() {
-        m_morphType = I_TWOD;
+        m_morphType = JICTConstants.I_TWOD;
     } // on2d
 
 
@@ -236,7 +509,7 @@ protected:
     // Called when the user clicks on the 3D radio button
     // CONTROL         "3D",IDC_3D,"Button",BS_AUTORADIOBUTTON,140,128,25,10
     private void on3d() {
-        m_morphType = I_THREED;
+        m_morphType = JICTConstants.I_THREED;
     } // on3d
 
 
@@ -264,15 +537,15 @@ protected:
             prefix, outFrameNum, suffix);
 
         switch(m_morphType) {
-        case I_TWOD:
-            inImageA = new MemImage(firstImage, 0, 0, RANDOM, 'R', RGBCOLOR);
+        case JICTConstants.I_TWOD:
+            inImageA = new MemImage(firstImage, 0, 0, JICTConstants.I_RANDOM, 'R', JICTConstants.I_RGBCOLOR);
             if(!inImageA.isValid()) {
                 Globals.statusPrint("CMorphDialog: Unable to open firstImage.");
                 return;
             }
             inImageA.adjustImageBorder(firstImage);
 
-            inImageB = new MemImage(secondImage, 0, 0, RANDOM, 'R', RGBCOLOR);
+            inImageB = new MemImage(secondImage, 0, 0, JICTConstants.I_RANDOM, 'R', JICTConstants.I_RGBCOLOR);
             if(!inImageB.isValid()) {
                 Globals.statusPrint("CMorphDialog: Unable to open secondImage.");
                 return;
@@ -280,8 +553,8 @@ protected:
 
             inImageB.adjustImageBorder(secondImage);
 
-            inImageB = new MemImage(firstImage, 0, 0, RANDOM, 'R', RGBCOLOR);
-            inImageA = new MemImage(secondImage, 0, 0, RANDOM, 'R', RGBCOLOR);
+            inImageB = new MemImage(firstImage, 0, 0, JICTConstants.I_RANDOM, 'R', JICTConstants.I_RGBCOLOR);
+            inImageA = new MemImage(secondImage, 0, 0, JICTConstants.I_RANDOM, 'R', JICTConstants.I_RGBCOLOR);
             aFraction = 0.0f;
             increment = 1.0f/(float)(m_numFrames - 1.0f);
 
@@ -295,7 +568,7 @@ protected:
             }
             break;
 
-        case I_THREED:
+        case JICTConstants.I_THREED:
             // Given two quadmeshes a and b, create a sequence of images where the
             // result mesh transitions from a to b in numFrames frames.
             float fractionIncrement;
@@ -320,11 +593,11 @@ protected:
             bpp = 8;
             switch (bpp) {
             case 8:
-                aTexture = new MemImage(aTexPath, 0, 0, RANDOM, 'R', GREENCOLOR);
+                aTexture = new MemImage(aTexPath, 0, 0, JICTConstants.I_RANDOM, 'R', JICTConstants.I_GREENCOLOR);
                 break;
 
             case 24:
-                aTexture = new MemImage(aTexPath, 0, 0, RANDOM, 'R', RGBCOLOR);
+                aTexture = new MemImage(aTexPath, 0, 0, JICTConstants.I_RANDOM, 'R', JICTConstants.I_RGBCOLOR);
                 break;
 
             default:
@@ -332,9 +605,9 @@ protected:
                 return;
             } // switch
 
-            aX = new MemImage(aXPath, 0, 0, RANDOM, 'R', A32BIT);
-            aY = new MemImage(aYPath, 0, 0, RANDOM, 'R', A32BIT);
-            aZ = new MemImage(aZPath, 0, 0, RANDOM, 'R', A32BIT);
+            aX = new MemImage(aXPath, 0, 0, JICTConstants.I_RANDOM, 'R', JICTConstants.I_A32BIT);
+            aY = new MemImage(aYPath, 0, 0, JICTConstants.I_RANDOM, 'R', JICTConstants.I_A32BIT);
+            aZ = new MemImage(aZPath, 0, 0, JICTConstants.I_RANDOM, 'R', JICTConstants.I_A32BIT);
 
             bTexPath = new String(secondImage);
             FileUtils.constructPathName(bXPath, bTexPath, 'x');
@@ -343,11 +616,11 @@ protected:
         
             switch (bpp) {
             case 8:
-                bTexture = new MemImage(aTexPath, 0, 0, RANDOM, 'R', GREENCOLOR);
+                bTexture = new MemImage(aTexPath, 0, 0, JICTConstants.I_RANDOM, 'R', JICTConstants.I_GREENCOLOR);
                 break;
 
             case 24:
-                bTexture = new MemImage(aTexPath, 0, 0, RANDOM, 'R', RGBCOLOR);
+                bTexture = new MemImage(aTexPath, 0, 0, JICTConstants.I_RANDOM, 'R', JICTConstants.I_RGBCOLOR);
                 break;
 
             default:
@@ -355,9 +628,9 @@ protected:
                 return;
             } // switch
 
-            bX = new MemImage(bXPath, 0, 0, RANDOM, 'R', A32BIT);
-            bY = new MemImage(bYPath, 0, 0, RANDOM, 'R', A32BIT);
-            bZ = new MemImage(bZPath, 0, 0, RANDOM, 'R', A32BIT);
+            bX = new MemImage(bXPath, 0, 0, JICTConstants.I_RANDOM, 'R', JICTConstants.I_A32BIT);
+            bY = new MemImage(bYPath, 0, 0, JICTConstants.I_RANDOM, 'R', JICTConstants.I_A32BIT);
+            bZ = new MemImage(bZPath, 0, 0, JICTConstants.I_RANDOM, 'R', JICTConstants.I_A32BIT);
 
             int imHeight = aTexture.getHeight();
             int imWidth  = aTexture.getWidth();
@@ -406,6 +679,8 @@ protected:
         this.setVisible(false);
     } // onOK
 
+
+    // Called when the user clicks on the Cancel button
     private void onCancel() {
         this.setVisible(false);
     } // onCancel
