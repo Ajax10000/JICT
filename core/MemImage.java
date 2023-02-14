@@ -2,6 +2,8 @@ package core;
 
 import globals.Globals;
 
+import java.awt.image.BufferedImage;
+
 import math.MathUtils;
 
 import structs.Point2d;
@@ -9,14 +11,14 @@ import structs.Point2d;
 public class MemImage {
     boolean ictdebug = false;
     protected HANDLE fp;            // Used with memimg32.cpp
-    protected String savedFileName;   // The last associated pathname
-    protected int imageHeight;    // Height in pixels
-    protected int imageWidth;     // Width in pixels
-    protected int bitsPerPixel;   // Bits per pixel
-    protected int paddedWidth;    // Physical width of the image in bytes (multiple of 4)
-    protected int pads;           // Difference between imagewidth and paddedwidth (bytes)
-    protected int accessMode;     // SEQUENTIAL or RANDOM
-    protected int theColorSpec;   // Indicates the desired color mapping
+    protected String msSavedFileName;   // The last associated pathname
+    protected int miImageHeight;    // Height in pixels
+    protected int miImageWidth;     // Width in pixels
+    protected int miBitsPerPixel;   // Bits per pixel
+    protected int miPaddedWidth;    // Physical width of the image in bytes (multiple of 4)
+    protected int miPads;           // Difference between imagewidth and paddedwidth (bytes)
+    protected int miAccessMode;     // SEQUENTIAL or RANDOM
+    protected int miColorSpec;   // Indicates the desired color mapping
 
     // State indicator.  1 if successful, else 0
     // I changed this from int to boolean
@@ -190,7 +192,7 @@ public:
         int myStatus;
         this.valid = true;
         myBitsPerPixel = mapColorSpecToBitsPerPixel(piColorSpec);
-        this.savedFileName = psFileName;
+        this.msSavedFileName = psFileName;
 
         // Get a preview of the file 
         Integer myHeight = 0, myWidth = 0;
@@ -210,25 +212,25 @@ public:
         }
 
         //  Assign the MemImage properties
-        this.imageHeight = imHeight;
-        this.imageWidth = imWidth;
-        this.bitsPerPixel = myBitsPerPixel;
-        this.theColorSpec = piColorSpec;
-        this.accessMode = imAccessMode;
+        this.miImageHeight = imHeight;
+        this.miImageWidth = imWidth;
+        this.miBitsPerPixel = myBitsPerPixel;
+        this.miColorSpec = piColorSpec;
+        this.miAccessMode = imAccessMode;
 
         if((rw == 'W') || (rw == 'w')) {
-            int numRows = this.imageHeight;
-            if (this.accessMode == SEQUENTIAL) {
+            int numRows = this.miImageHeight;
+            if (this.miAccessMode == SEQUENTIAL) {
                 numRows = 1;
             }
 
-            allocate(numRows, this.imageWidth);
+            allocate(numRows, this.miImageWidth);
             if(!isValid()) {
                 Globals.statusPrint("MemImage Constructor 1: Could not allocate memory for write");
             }
         }
 
-        if(this.accessMode == SEQUENTIAL) {
+        if(this.miAccessMode == SEQUENTIAL) {
             //  Write or Read the BMP header
             if(rw == 'W' || rw == 'w') {
                 myStatus = writeBMP(psFileName);
@@ -243,7 +245,7 @@ public:
             }
         }
 
-        if(this.accessMode == RANDOM) {
+        if(this.miAccessMode == RANDOM) {
             if((rw == 'W' || rw == 'w') && (piColorSpec == RGBCOLOR)) {
                 Globals.statusPrint("MemImage Constructor 1: RANDOM 24 bit BMPs not supported for writing");
                 this.valid = false;
@@ -261,7 +263,7 @@ public:
                     return;
                 }
 
-                readBMP(psFileName, this.theColorSpec);
+                readBMP(psFileName, this.miColorSpec);
                 if(myStatus != 0) {
                     this.valid = false; // Indicate the file could not be opened
                 }
@@ -286,13 +288,13 @@ public:
     public MemImage(int height, int width, int aBitsPerPixel) {
         //  Allocates a memory resident 8 bit image by default.
         this.valid = false;
-        this.accessMode    = RANDOM;
-        this.imageHeight   = height;
-        this.imageWidth    = width;
-        this.theColorSpec  = EIGHTBITMONOCHROME;
-        this.savedFileName = "No Image File Name";
-        this.bitsPerPixel  = aBitsPerPixel;
-        this.theColorSpec  = mapBitsPerPixelToColorSpec(this.bitsPerPixel);
+        this.miAccessMode    = RANDOM;
+        this.miImageHeight   = height;
+        this.miImageWidth    = width;
+        this.miColorSpec  = EIGHTBITMONOCHROME;
+        this.msSavedFileName = "No Image File Name";
+        this.miBitsPerPixel  = aBitsPerPixel;
+        this.miColorSpec  = mapBitsPerPixelToColorSpec(this.miBitsPerPixel);
         allocate(height, width);
 
         if (ictdebug) {
@@ -313,15 +315,15 @@ public:
 
 
     public MemImage(MemImage m) {
-        this.imageHeight   = m.imageHeight;
-        this.imageWidth    = m.imageWidth;
-        this.bitsPerPixel  = m.bitsPerPixel;
-        this.accessMode    = m.accessMode;
-        this.theColorSpec  = m.theColorSpec;
-        this.savedFileName = m.savedFileName;
+        this.miImageHeight   = m.miImageHeight;
+        this.miImageWidth    = m.miImageWidth;
+        this.miBitsPerPixel  = m.miBitsPerPixel;
+        this.miAccessMode    = m.miAccessMode;
+        this.miColorSpec     = m.miColorSpec;
+        this.msSavedFileName = m.msSavedFileName;
 
         if(m.valid == true) {
-            allocate(m.imageHeight, m.imageWidth);
+            allocate(m.miImageHeight, m.miImageWidth);
         }
 
         if (ictdebug) {
@@ -333,7 +335,7 @@ public:
 
 
     public void finalize() {
-        if((this.accessMode == SEQUENTIAL) && (this.fp > 0)) {
+        if((this.miAccessMode == SEQUENTIAL) && (this.fp > 0)) {
             CloseHandle(this.fp);
         }
 
@@ -351,7 +353,7 @@ public:
     protected void allocate(int piHeight, int piWidthInPixels) {
         int totalBytes;
         byte[] buffer;
-        float bytesPerPixel = (float)this.bitsPerPixel/8.0f;
+        float bytesPerPixel = (float)this.miBitsPerPixel/8.0f;
         float fWidthInBytes = (float)piWidthInPixels * bytesPerPixel;  // 1,24,32 bpp
         int widthInBytes    = (int)fWidthInBytes;
 
@@ -359,14 +361,14 @@ public:
             widthInBytes++;
         }
 
-        this.paddedWidth = (widthInBytes/4)*4;
+        this.miPaddedWidth = (widthInBytes/4)*4;
 
-        if(this.paddedWidth != widthInBytes) {
-            this.paddedWidth += 4;
+        if(this.miPaddedWidth != widthInBytes) {
+            this.miPaddedWidth += 4;
         }
 
-        this.pads = this.paddedWidth - widthInBytes;
-        totalBytes = this.paddedWidth * piHeight;
+        this.miPads = this.miPaddedWidth - widthInBytes;
+        totalBytes = this.miPaddedWidth * piHeight;
 
         this.valid = true;
         this.bytes = new byte[totalBytes];            
@@ -378,15 +380,15 @@ public:
     //     allocate
     public void clear() {
         int x, y;
-        int rows = this.imageHeight;
+        int rows = this.miImageHeight;
 
-        if (this.accessMode == SEQUENTIAL) {
+        if (this.miAccessMode == SEQUENTIAL) {
             rows = 1;
         }
 
         int iBytesIdx = 0;
         for (y = 1; y <= rows; y++) {
-            for (x = 1; x <= this.paddedWidth; x++) {	 // paddedWidth is the number of bytes per row
+            for (x = 1; x <= this.miPaddedWidth; x++) {	 // paddedWidth is the number of bytes per row
                 bytes[iBytesIdx] = 0;
                 iBytesIdx++;
             } // for x
@@ -397,7 +399,7 @@ public:
     public int clearRGB(byte red, byte green, byte blue) {
         // Clear all pixels whose colors match the specified color
         // Use the fastest image traversal method
-        if (this.bitsPerPixel != 24) {
+        if (this.miBitsPerPixel != 24) {
             Globals.statusPrint("MemImage.clearRGB: Bits per pixel must = 24");
             return -1;
         }
@@ -409,13 +411,13 @@ public:
 
         int x, y;
         int iBytesIdx = 0; // an index into array this.bytes
-        int rows = this.imageHeight;
-        if (this.accessMode == SEQUENTIAL) {
+        int rows = this.miImageHeight;
+        if (this.miAccessMode == SEQUENTIAL) {
             rows = 1;
         }
 
         for (y = 1; y <= rows; y++) {
-            for (x = 1; x <= this.imageWidth; x++) {
+            for (x = 1; x <= this.miImageWidth; x++) {
                 if(
                 (bytes[iBytesIdx]     == blue)  && 
                 (bytes[iBytesIdx + 1] == green) && 
@@ -429,7 +431,7 @@ public:
                 iBytesIdx +=3;
             } // for x
 
-            iBytesIdx += pads;
+            iBytesIdx += miPads;
         } // for y
 
         // SetCursor(LoadCursor( null, IDC_ARROW ));
@@ -443,7 +445,7 @@ public:
     public int clearRGBRange(byte redLow, byte redHigh, byte greenLow, byte greenHigh, byte blueLow, byte blueHigh) {
         // Clear all pixels whose colors match the specified color
         // Use the fastest traversal method
-        if (this.bitsPerPixel != 24) {
+        if (this.miBitsPerPixel != 24) {
             Globals.statusPrint("MemImage.clearRGBRange: Bits per pixel must = 24");
             return -1;
         }
@@ -455,14 +457,14 @@ public:
 
         int x, y;
         int iBytesIdx = 0;
-        int rows = this.imageHeight;
+        int rows = this.miImageHeight;
 
-        if (this.accessMode == SEQUENTIAL) {
+        if (this.miAccessMode == SEQUENTIAL) {
             rows = 1;
         }
 
         for (y = 1; y <= rows; y++) {
-            for (x = 1; x <= this.imageWidth; x++) {
+            for (x = 1; x <= this.miImageWidth; x++) {
                 if(
                 (bytes[iBytesIdx]   >= blueLow)  && (bytes[iBytesIdx]   <= blueHigh)  && 
                 (bytes[iBytesIdx+1] >= greenLow) && (bytes[iBytesIdx+1] <= greenHigh) && 
@@ -475,7 +477,7 @@ public:
                 iBytesIdx += 3;
             } // for x
 
-            iBytesIdx += pads;
+            iBytesIdx += miPads;
         } // for y
 
         // SetCursor(LoadCursor( null, IDC_ARROW ));
@@ -501,15 +503,15 @@ public:
 
         // Don't need paddedWidth here because each row
         // is by definition a multiple of 4 bytes
-        int iRows = this.imageHeight;
+        int iRows = this.miImageHeight;
         // int iCols = this.imageWidth;  // not used
                                 
-        if (this.accessMode == SEQUENTIAL) {
+        if (this.miAccessMode == SEQUENTIAL) {
             iRows = 1;
         }
 
         for (iy = 1; iy <= iRows; iy++) {
-            for (ix = 1; ix <= this.imageWidth; ix++) {
+            for (ix = 1; ix <= this.miImageWidth; ix++) {
                 *fTemp = pfValue;
                 fTemp++;
             } // for ix
@@ -533,7 +535,7 @@ public:
         String sMsgText;
         boolean IGNOREMAXVALUE = true;
 
-        if((pScaledImage.bitsPerPixel != 8) || (this.bitsPerPixel != 32)) {
+        if((pScaledImage.miBitsPerPixel != 8) || (this.miBitsPerPixel != 32)) {
             Globals.statusPrint("MemImage.scaleTo8: Bits per pixel mismatch");
             return 1;
         }
@@ -550,10 +552,10 @@ public:
 
         // Don't need paddedWidth here because each row width
         // is by definition a multiple of 4 bytes
-        iRows = this.imageHeight;
+        iRows = this.miImageHeight;
         fDesMin = 1.0f;
         fDesMax = 255.0f;
-        if (this.accessMode == SEQUENTIAL) {
+        if (this.miAccessMode == SEQUENTIAL) {
             iRows = 1;
         }
         
@@ -564,7 +566,7 @@ public:
 
         // Determine the image min and max values
         for (iy = 1; iy <= iRows; iy++) {
-            for (ix = 1; ix <= this.imageWidth; ix++) {
+            for (ix = 1; ix <= this.miImageWidth; ix++) {
                 if(*fTemp < fActMin) {
                     fActMin = *fTemp;
                 }
@@ -592,7 +594,7 @@ public:
 
         // Scale the image
         for (iy = 1; iy <= iRows; iy++) {
-            for (ix = 1; ix <= this.imageWidth; ix++) {
+            for (ix = 1; ix <= this.miImageWidth; ix++) {
                 actValue = *fTemp;
                 if(IGNOREMAXVALUE) {
                     if(actValue != ZBUFFERMAXVALUE) {
@@ -614,15 +616,16 @@ public:
     } // scaleTo8
 
 
-    // TODO: Replace paramater dc with one of type Graphics2D, 
-    // as this method performs graphics
+    // Draws a MemImage on the indicated BufferedImage
+    //
     // Called from:
     //     SceneList.preview
     //     SceneList.previewStill
     //     SceneList.render
-    public void display(HDC dc, int piOutWidth, int piOutHeight) {
+    public void display(BufferedImage pBuffImg, int piOutWidth, int piOutHeight) {
         // TODO: Rewrite this
         return;
+        // TODO: Derive a Graphics2D from the BufferedImage to perform graphics
         /*
         HBITMAP hBitmap, holdBitmap;
         HDC newdc;
@@ -748,20 +751,20 @@ public:
     public int copy(MemImage outImage, int piXoffset, int piYoffset) {
         int x, y;
 
-        if(outImage.bitsPerPixel != this.bitsPerPixel) {
+        if(outImage.miBitsPerPixel != this.miBitsPerPixel) {
             Globals.statusPrint("MemImage.copy: Destination image does not have matching pixel depth");
             return -1;
         }
 
-        if((this.bitsPerPixel != 8) && (this.bitsPerPixel != 24)) {
+        if((this.miBitsPerPixel != 8) && (this.miBitsPerPixel != 24)) {
             Globals.statusPrint("MemImage.copy: Only 8 or 24 bit images are supported");
             return -2;
         }
 
         byte thePixel, red, green, blue;
-        for (x = 1; x <= this.imageWidth; x++) {
-            for (y = 1; y < this.imageHeight; y++) {
-                switch (this.bitsPerPixel) {
+        for (x = 1; x <= this.miImageWidth; x++) {
+            for (y = 1; y < this.miImageHeight; y++) {
+                switch (this.miBitsPerPixel) {
                 case 8:
                     thePixel = getMPixel(x, y);
                     if(thePixel != 0) {
@@ -782,28 +785,28 @@ public:
 
 
     public int fastCopy(MemImage outImage, int piXOffset, int piYOffset) {
-        if(outImage.bitsPerPixel != this.bitsPerPixel) {
+        if(outImage.miBitsPerPixel != this.miBitsPerPixel) {
             Globals.statusPrint("MemImage.fastCopy: Destination image does not have matching pixel depth");
             return -1;
         }
 
-        if(this.bitsPerPixel != 8) {
+        if(this.miBitsPerPixel != 8) {
             Globals.statusPrint("MemImage.fastCopy: Only 8 bit images are supported");
             return -2;
         }
 
-        if ((piXOffset > outImage.imageWidth) || (piYOffset > outImage.imageHeight)) {
+        if ((piXOffset > outImage.miImageWidth) || (piYOffset > outImage.miImageHeight)) {
             Globals.statusPrint("MemImage.fastCopy: 1 or more offsets are larger than the output image");
             return -3;
         }
 
-        int a = outImage.imageWidth  - piXOffset;
-        int b = outImage.imageHeight - piYOffset;
-        int c = piXOffset + this.imageWidth - outImage.imageWidth;
+        int a = outImage.miImageWidth  - piXOffset;
+        int b = outImage.miImageHeight - piYOffset;
+        int c = piXOffset + this.miImageWidth - outImage.miImageWidth;
 
         // Although outLoc is written to, it is not read
         // byte *outLoc = outImage.bytes + ((piYOffset * outImage.imageWidth) + piXOffset);
-        int outLoc = ((piYOffset * outImage.imageWidth) + piXOffset);
+        int outLoc = ((piYOffset * outImage.miImageWidth) + piXOffset);
 
         // copy b rows of image data
         int i, j;
@@ -822,8 +825,8 @@ public:
             } // for i
 
             // if image is over the edge, skip those pixels then add the pad
-            currentPix = currentPix + c + pads;
-            outLoc += (outImage.pads + piXOffset);
+            currentPix = currentPix + c + miPads;
+            outLoc += (outImage.miPads + piXOffset);
         } // for j
 
         return 0;
@@ -833,19 +836,19 @@ public:
     public int copy8To24(MemImage outImage) {
         int x, y;
 
-        if(outImage.bitsPerPixel != 24) {
+        if(outImage.miBitsPerPixel != 24) {
             Globals.statusPrint("MemImage.copy8To24: Destination image must have 24 bit pixels");
             return -1;
         }
 
-        if(this.bitsPerPixel != 8) {
+        if(this.miBitsPerPixel != 8) {
             Globals.statusPrint("MemImage.copy8To24: Source image must have 8 bit pixels");
             return -2;
         }
 
         byte intensity;
-        for (x = 1; x <= this.imageWidth; x++) {
-            for (y = 1; y < this.imageHeight; y++) {
+        for (x = 1; x <= this.miImageWidth; x++) {
+            for (y = 1; y < this.miImageHeight; y++) {
                 intensity = getMPixel(x, y);
                 outImage.setMPixelRGB(x, y, intensity, intensity, intensity);
             } // for y
@@ -862,17 +865,17 @@ public:
         // byte *thePixel;
         // byte *myTemp = bytes;
 
-        if(this.accessMode == SEQUENTIAL) {
+        if(this.miAccessMode == SEQUENTIAL) {
             y = 1;
         }
 
         if (
-        (y < 1) || (y > this.imageHeight) || 
-        (x < 1) || (x > this.imageWidth)) {
+        (y < 1) || (y > this.miImageHeight) || 
+        (x < 1) || (x > this.miImageWidth)) {
             return -1;
         }
 
-        addr = ((y - 1) * (int)paddedWidth) + ((x - 1)*3);  // 3 bytes/color pixel
+        addr = ((y - 1) * (int)miPaddedWidth) + ((x - 1)*3);  // 3 bytes/color pixel
         /*
         myTemp = myTemp + addr;
         thePixel = myTemp;
@@ -900,24 +903,24 @@ public:
     public int getMPixelRGB(int x, int y, Byte red, Byte green, Byte blue) {
         //  Inputs x and y are assumed to be 1 relative
         //  Returns the desired pixel from a color image
-        if(this.bitsPerPixel != 24) {
+        if(this.miBitsPerPixel != 24) {
             Globals.statusPrint("MemImage.getMPixelRGB: Image must be 24 bits per pixel");
             return -1;
         }
 
         int addr;
 
-        if(this.accessMode == SEQUENTIAL) {
+        if(this.miAccessMode == SEQUENTIAL) {
             y = 1;
         }
 
         if (
-        (y < 1) || (y > this.imageHeight) || 
-        (x < 1) || (x > this.imageWidth)) {
+        (y < 1) || (y > this.miImageHeight) || 
+        (x < 1) || (x > this.miImageWidth)) {
             return -1;
         }
 
-        addr = ((y - 1) * this.paddedWidth) + ((x - 1)*(this.bitsPerPixel/8));  // 3 bytes/color pixel
+        addr = ((y - 1) * this.miPaddedWidth) + ((x - 1)*(this.miBitsPerPixel/8));  // 3 bytes/color pixel
 
         // Set the output parameters
         blue  = bytes[addr];
@@ -939,24 +942,24 @@ public:
     public int setMPixelRGB(int x, int y, byte red, byte green, byte blue) {
         // Inputs x and y are assumed to be 1 relative
         // Returns the desired pixel from a color image
-        if(this.bitsPerPixel != 24) {
+        if(this.miBitsPerPixel != 24) {
             Globals.statusPrint("MemImage.setMPixelRGB: Image must be 24 bits per pixel");
             return -1;
         }
 
         int addr;
 
-        if(this.accessMode == SEQUENTIAL) {
+        if(this.miAccessMode == SEQUENTIAL) {
             y = 1;
         }
 
         if (
-        (y < 1) || (y > this.imageHeight) || 
-        (x < 1) || (x > this.imageWidth)) {
+        (y < 1) || (y > this.miImageHeight) || 
+        (x < 1) || (x > this.miImageWidth)) {
             return -1;
         }
 
-        addr = ((y - 1) * paddedWidth) + ((x - 1)*(this.bitsPerPixel/8));  // 3 bytes/color pixel
+        addr = ((y - 1) * miPaddedWidth) + ((x - 1)*(this.miBitsPerPixel/8));  // 3 bytes/color pixel
 
         bytes[addr] = blue;
         bytes[addr + 1] = green;
@@ -980,7 +983,7 @@ public:
         // Inputs x and y are assumed to be 1 relative
         int addr;
 
-        if(this.accessMode == SEQUENTIAL) {
+        if(this.miAccessMode == SEQUENTIAL) {
             y = 1;
         }
 
@@ -988,12 +991,12 @@ public:
         // the bounds of the associted image array, no action is taken.
         // See p 119 of Visual Special Effects Toolkit in C++.
         if (
-        (y < 1) || (y > this.imageHeight) || 
-        (x < 1) || (x > this.imageWidth)) {
+        (y < 1) || (y > this.miImageHeight) || 
+        (x < 1) || (x > this.miImageWidth)) {
             return -1;
         }
 
-        addr = ((y - 1) * paddedWidth) + x - 1;
+        addr = ((y - 1) * miPaddedWidth) + x - 1;
         bytes[addr] = value;
 
         return value;
@@ -1006,13 +1009,13 @@ public:
         // byte *myTemp = this.bytes;
         int myTemp;
 
-        if(this.accessMode == SEQUENTIAL) {
+        if(this.miAccessMode == SEQUENTIAL) {
             y = 1;
         }
 
         if (
-        (y < 1) || (y > (float)this.imageHeight) || 
-        (x < 1) || (x > (float)this.imageWidth)) {
+        (y < 1) || (y > (float)this.miImageHeight) || 
+        (x < 1) || (x > (float)this.miImageWidth)) {
             return -1;
         }
 
@@ -1029,7 +1032,7 @@ public:
         valab = (byte)((xa * yb * (float)value) + 0.5f);
         valbb = (byte)((xb * yb * (float)value) + 0.5f);
 
-        addr = (((int)y - 1) * paddedWidth) + (int)x - 1;
+        addr = (((int)y - 1) * miPaddedWidth) + (int)x - 1;
 
         // Set the pixel value if this is the first contribution, else add this
         // pixel to what is already present.
@@ -1066,10 +1069,10 @@ public:
             *(myTemp + addr + paddedWidth) = *(myTemp + addr + paddedWidth) + valab;
         }
         */
-        if(bytes[addr + paddedWidth] == chromaColor) {
-            bytes[addr + paddedWidth] = valab;
+        if(bytes[addr + miPaddedWidth] == chromaColor) {
+            bytes[addr + miPaddedWidth] = valab;
         } else {
-            bytes[addr + paddedWidth] = bytes[addr + paddedWidth] + valab;
+            bytes[addr + miPaddedWidth] = bytes[addr + miPaddedWidth] + valab;
         }
 
         /*
@@ -1080,10 +1083,10 @@ public:
         }
         */
 
-        if(bytes[addr + paddedWidth + 1] == chromaColor ) {
-            bytes[addr + paddedWidth + 1] = valbb;
+        if(bytes[addr + miPaddedWidth + 1] == chromaColor ) {
+            bytes[addr + miPaddedWidth + 1] = valbb;
         } else {
-            bytes[addr + paddedWidth + 1] = bytes[addr + paddedWidth + 1] + valbb;
+            bytes[addr + miPaddedWidth + 1] = bytes[addr + miPaddedWidth + 1] + valbb;
         }
 
         return value;
@@ -1095,13 +1098,13 @@ public:
         int addr;
         byte *myTemp = this.bytes;
 
-        if(this.accessMode == SEQUENTIAL) {
+        if(this.miAccessMode == SEQUENTIAL) {
             y = (byte)1;
         }
 
         if (
-        (y < 1) || (y > (float)this.imageHeight) || 
-        (x < 1) || (x > (float)this.imageWidth)) {
+        (y < 1) || (y > (float)this.miImageHeight) || 
+        (x < 1) || (x > (float)this.miImageWidth)) {
             return (byte)0;
         }
 
@@ -1119,11 +1122,11 @@ public:
         wab = xa * yb;
         wbb = xb * yb;
 
-        addr = (((int)y - 1) * (int)paddedWidth) + (int)x - 1;
+        addr = (((int)y - 1) * (int)miPaddedWidth) + (int)x - 1;
         valaa = *(myTemp + addr);
-        valab = *(myTemp + addr + (int)paddedWidth);
+        valab = *(myTemp + addr + (int)miPaddedWidth);
         valba = *(myTemp + addr + 1);
-        valbb = *(myTemp + addr + (int)paddedWidth + 1);
+        valbb = *(myTemp + addr + (int)miPaddedWidth + 1);
 
         if(valaa != chromaColor) {
             bucket += (valaa * waa);
@@ -1160,7 +1163,7 @@ public:
         int addr;
         int iBytesIdx = 0; // index into this.bytes
 
-        if(this.accessMode == SEQUENTIAL) {
+        if(this.miAccessMode == SEQUENTIAL) {
             y = 1;
         }
 
@@ -1168,12 +1171,12 @@ public:
         // the bounds of the associted image array, no action is taken.
         // See p 119 of Visual Special Effects Toolkit in C++.
         if (
-        (y < 1) || (y > this.imageHeight) || 
-        (x < 1) || (x > this.imageWidth)) {
+        (y < 1) || (y > this.miImageHeight) || 
+        (x < 1) || (x > this.miImageWidth)) {
             return 0;
         }
 
-        addr = ((y - 1) * paddedWidth) + x - 1;
+        addr = ((y - 1) * miPaddedWidth) + x - 1;
         iBytesIdx = iBytesIdx + addr;
 
         return this.bytes[iBytesIdx];
@@ -1191,17 +1194,17 @@ public:
         byte *myTemp = this.bytes;
         float *pPixel;
 
-        if(this.accessMode == SEQUENTIAL) {
+        if(this.miAccessMode == SEQUENTIAL) {
             y = 1;
         }
 
         if (
-        (y < 1) || (y > this.imageHeight) || 
-        (x < 1) || (x > this.imageWidth)) {
+        (y < 1) || (y > this.miImageHeight) || 
+        (x < 1) || (x > this.miImageWidth)) {
             return -1;
         }
 
-        addr = ((y - 1) * (int)paddedWidth) + ((x - 1) * (this.bitsPerPixel/8));
+        addr = ((y - 1) * (int)miPaddedWidth) + ((x - 1) * (this.miBitsPerPixel/8));
         myTemp = myTemp + addr;
         pPixel = (float *)myTemp;
         *(pPixel) = aValue;
@@ -1220,17 +1223,17 @@ public:
         byte *myTemp = this.bytes;
         float *pPixel;
 
-        if(this.accessMode == SEQUENTIAL) {
+        if(this.miAccessMode == SEQUENTIAL) {
             y = 1;
         }
 
         if (
-        (y < 1) || (y > this.imageHeight) || 
-        (x < 1) || (x > this.imageWidth)) {
+        (y < 1) || (y > this.miImageHeight) || 
+        (x < 1) || (x > this.miImageWidth)) {
             return -1.0f;
         }
 
-        addr = ((y - 1) * (int)paddedWidth) + ((x - 1) * (this.bitsPerPixel/8));
+        addr = ((y - 1) * miPaddedWidth) + ((x - 1) * (this.miBitsPerPixel/8));
         myTemp = myTemp + addr;
         pPixel = (float *)myTemp;
 
@@ -1249,7 +1252,7 @@ public:
     //     RenderObject.renderMeshz
     //     RenderObject.renderShapez
     public int getHeight() {
-        return this.imageHeight;
+        return this.miImageHeight;
     } // getHeight
 
 
@@ -1263,17 +1266,17 @@ public:
     //     Globals.tweenMesh
     //     RenderObject.renderMeshz
     public int getWidth() {
-        return this.imageWidth;
+        return this.miImageWidth;
     } // getWidth
 
 
     public int getAccessMode() {
-        return this.accessMode;
+        return this.miAccessMode;
     } // getAccessMode
 
 
     public int getColorSpec() {
-        return this.theColorSpec;
+        return this.miColorSpec;
     } // getColorSpec
 
 
@@ -1285,7 +1288,7 @@ public:
     //     Globals.tweenImage
     //     Globals.tweenMesh
     public int getBitsPerPixel() {
-        return this.bitsPerPixel;
+        return this.miBitsPerPixel;
     } // getBitsPerPixel
 
 
@@ -1587,7 +1590,7 @@ public:
         boolean myStatus;
         int numBytesRead;
 
-        myStatus = ReadFile(this.fp, this.bytes, this.paddedWidth, numBytesRead, null);
+        myStatus = ReadFile(this.fp, this.bytes, this.miPaddedWidth, numBytesRead, null);
         if (myStatus) {
             return 1;
         } else {
@@ -1613,7 +1616,7 @@ public:
         boolean myStatus;
         int numBytesWritten;
 
-        myStatus = WriteFile(this.fp, this.bytes, this.paddedWidth, numBytesWritten, null);
+        myStatus = WriteFile(this.fp, this.bytes, this.miPaddedWidth, numBytesWritten, null);
         if (myStatus) {
             return true;
         } else {
@@ -1669,7 +1672,7 @@ public:
 
 
     public int getImageSizeInBytes() {
-        return this.imageHeight * this.paddedWidth;
+        return this.miImageHeight * this.miPaddedWidth;
     } // getImageSizeInBytes
 
 
@@ -1736,7 +1739,7 @@ public:
         } // for i
 
         // Display the histogram to the ict log
-        sMsgBuffer = "MemImage.histogram: Histogram of " + savedFileName;
+        sMsgBuffer = "MemImage.histogram: Histogram of " + msSavedFileName;
         Globals.statusPrint(sMsgBuffer);
         for(i = 0; i <= 240; i += 16) {
             sMsgBuffer = String.format("%3d: %6d %6d %6d %6d %6d %6d %6d %6d %6d %6d %6d %6d %6d %6d %6d %6d",
@@ -1752,6 +1755,8 @@ public:
     } // histogram
     
 
+    // For more information on this method, see pages 110 - 118 of the book
+    // Visual Special Effects Toolkits in C++
     // Sets pMidRed, pMidGreen and pMidBlue
     public int adjustColor(int piDesiredRed, int piDesiredGreen, int piDesiredBlue,
     Byte pMidRed, Byte pMidGreen, Byte pMidBlue, MemImage pOutImage, 
@@ -1948,7 +1953,7 @@ public:
         byte[] lineBuffer   = new byte[32];
         float[] fLineBuffer = new float[32];
 
-        sMsgBuffer = "MemImage.printValue: Display of " + savedFileName;
+        sMsgBuffer = "MemImage.printValue: Display of " + msSavedFileName;
         Globals.statusPrint(sMsgBuffer);
         sMsgBuffer = String.format("   %6d %6d %6d %6d %6d %6d %6d %6d %6d %6d %6d %6d",
                 x,     x + 1, x +  2, x +  3, 
@@ -2008,7 +2013,7 @@ public:
     //     RenderObject.renderMeshz
     //     SceneList.render
     public void setFileName(String psFileName) {
-        this.savedFileName = psFileName;
+        this.msSavedFileName = psFileName;
     } // setFileName
 
 
@@ -2045,20 +2050,20 @@ public:
     // This method will set parameters xBeg, xEnd, yBeg and yEnd
     public int getBoundingBox(Integer xBeg, Integer xEnd, Integer yBeg, Integer yEnd) {
         int x, y;
-        if((this.bitsPerPixel != 8) && (this.bitsPerPixel != 24)) {
+        if((this.miBitsPerPixel != 8) && (this.miBitsPerPixel != 24)) {
             Globals.statusPrint("MemImage.getBoundingBox: Only 8 or 24 bit images are supported");
             return -2;
         }
 
         byte thePixel, red, green, blue;
-        xBeg = Math.max(this.imageWidth, this.imageHeight);
-        yBeg = Math.max(this.imageWidth, this.imageHeight);
+        xBeg = Math.max(this.miImageWidth, this.miImageHeight);
+        yBeg = Math.max(this.miImageWidth, this.miImageHeight);
         xEnd = 1;
         yEnd = 1;
 
-        for (x = 1; x <= this.imageWidth; x++) {
-            for (y = 1; y < this.imageHeight; y++) {
-                switch (this.bitsPerPixel) {
+        for (x = 1; x <= this.miImageWidth; x++) {
+            for (y = 1; y < this.miImageHeight; y++) {
+                switch (this.miBitsPerPixel) {
                 case 8:
                     thePixel = getMPixel(x, y);
                     if(thePixel != CHROMAVALUE) {
@@ -2093,7 +2098,7 @@ public:
                 } // switch
             } // for y
 
-            Globals.statusPrint(savedFileName);
+            Globals.statusPrint(msSavedFileName);
             String msgText = "MemImage.getBoundingBox: xBeg: " + xBeg + "  xEnd: " + xEnd + " yBeg: " + yBeg + "  yEnd: " + yEnd; 
             Globals.statusPrint(msgText);
         } // for x
@@ -2111,14 +2116,14 @@ public:
         byte thePixel;
         Byte aRed = (byte)0, aGreen = (byte)0, aBlue = (byte)0;
 
-        if(pOutImage.bitsPerPixel != 8) {
+        if(pOutImage.miBitsPerPixel != 8) {
             Globals.statusPrint("MemImage.createAlphaImage: Output image must be 8 bits per pixel");
             return -1;
         }
 
-        for (iy = 1; iy <= imageHeight; iy++) {
-            for (ix = 1; ix < imageWidth; ix++) {
-                switch(bitsPerPixel) {
+        for (iy = 1; iy <= miImageHeight; iy++) {
+            for (ix = 1; ix < miImageWidth; ix++) {
+                switch(miBitsPerPixel) {
                 case 8:
                     thePixel = getMPixel(ix, iy);
                     break;
@@ -2153,19 +2158,19 @@ public:
         // The input image must be one bit per pixel
         // The output image must be 8 bits per pixel
         // The output image must be opened for RANDOM access
-        if (theColorSpec != ONEBITMONOCHROME) {
+        if (miColorSpec != ONEBITMONOCHROME) {
             Globals.statusPrint("MemImage.unPack: Input image colorSpec must be ONEBITMONOCHROME");
             return 1;
         }
       
-        if(outputImage.accessMode != RANDOM) {
+        if(outputImage.miAccessMode != RANDOM) {
             Globals.statusPrint("MemImage.unPack: Output image access mode must be RANDOM");
             return 2;
         }
 
         if (
-        outputImage.theColorSpec == RGBCOLOR ||
-        outputImage.theColorSpec == ONEBITMONOCHROME) {
+        outputImage.miColorSpec == RGBCOLOR ||
+        outputImage.miColorSpec == ONEBITMONOCHROME) {
             Globals.statusPrint("MemImage.unPack: Output image colorSpec must be REDCOLOR, GREENCOLOR, or BLUECOLOR");
             return 3;
         }
@@ -2178,8 +2183,8 @@ public:
         // the 1 bit image was created using GetBitmapBits which assumes that an image
         // width is a multiple of 2 bytes.  We need to calculate this width
         // before proceeding
-        int myWidth   = imageWidth / 8;
-        int remainder = imageWidth % 8;
+        int myWidth   = miImageWidth / 8;
+        int remainder = miImageWidth % 8;
         if (remainder > 0) {
             myWidth++;
         }
@@ -2187,17 +2192,17 @@ public:
             myWidth++;
         }
       
-        for (y = 1; y <= imageHeight; y++) {
+        for (y = 1; y <= miImageHeight; y++) {
             int xCounter = 0;
             for (x = 1; x <= myWidth; x++) {
                 packedByte = *packedBytes;
                 for(int bitCounter = 0; bitCounter < 8; bitCounter++) {
                     xCounter++;
-                    if(xCounter <=imageWidth) {
+                    if(xCounter <= miImageWidth) {
                         if((packedByte >> (7-bitCounter)) & 0x1) {
-                            outputImage.setMPixel(xCounter, imageHeight-(y-1), 255);
+                            outputImage.setMPixel(xCounter, miImageHeight-(y-1), 255);
                         } else {
-                            outputImage.setMPixel(xCounter, imageHeight-(y-1), CHROMAVALUE);
+                            outputImage.setMPixel(xCounter, miImageHeight-(y-1), CHROMAVALUE);
                         }
                     }
                 } // for bitCounter
@@ -2219,7 +2224,7 @@ public:
         // from sources other than function createAlphaImage.
         int imHeight = getHeight();
         int imWidth  = getWidth();
-        if(this.bitsPerPixel != 24) {
+        if(this.miBitsPerPixel != 24) {
             Globals.statusPrint("MemImage.adjustImageBorder: Image must have 24 bit pixels.");
             return -1;
         }
