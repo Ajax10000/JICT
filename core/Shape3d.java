@@ -163,7 +163,7 @@ public:
                 this.miNumVertices = 4;
                 VertexSet[] nullPointer = new VertexSet[this.miNumVertices];
                 if(nullPointer == null) {
-                    Globals.statusPrint("shape3d::shape3d: Unable to allocate shape object");
+                    Globals.statusPrint("Shape3d ctor: Unable to allocate shape object");
                     this.miNumAllocatedVertices = 0; //signal an error
                     // Though an error has occurred, the code continues. Why?
                 }
@@ -772,6 +772,8 @@ public:
     } // getShapeFileInfo
 
 
+    // Called from:
+    //     Shape3d ctor the one that takes 2 parameters, a String and an int
     public int shapeFromBMP(String psImageFileName) {
         // Create a 4 vertex shape object from a rectangular image boundary
         int myStatus;
@@ -790,7 +792,7 @@ public:
         VertexSet[] nullPointer = new VertexSet[this.miNumVertices];
         /* Dead code, per the compiler
         if(nullPointer == null) {
-            Globals.statusPrint("Shape3d::shapeFromBMP: Unable to allocate shape object");
+            Globals.statusPrint("Shape3d.shapeFromBMP: Unable to allocate shape object");
             this.numAllocatedVertices = 0; //signal an error
             return -1;
         }
@@ -871,13 +873,13 @@ public:
             return -1;
         }
 
-        String output = this.miNumVertices + "\n";
-        fileOut << output;
+        String sOutput = this.miNumVertices + "\n";
+        fileOut << sOutput;
         initCurrentVertex();
 
         for (int index = 1; index <= this.miNumVertices; index ++) {
-            output = this.mCurrentVertex.x + "," + this.mCurrentVertex.y + "," + this.mCurrentVertex.z + "\n";
-            fileOut << output;
+            sOutput = this.mCurrentVertex.x + "," + this.mCurrentVertex.y + "," + this.mCurrentVertex.z + "\n";
+            fileOut << sOutput;
             // this.currentVertex++;
             incCurrentVertex();
         }
@@ -1293,26 +1295,26 @@ public:
     //     readShape
     public static String getNextLine(String psTheText, Integer piLineNumber, 
     LineNumberReader filein, int piMinLineLength) {
-        boolean aComment;
+        boolean bComment;
         // int theLength = 80; // this variable is no longer used
-        String theKeyWord;
+        String sKeyWord;
         StringTokenizer strtok;
 
-        aComment = true;
-        while (aComment) {
+        bComment = true;
+        while (bComment) {
             try {
                 psTheText = filein.readLine();  // Ignore comments and empty lines
             } catch (IOException ioe) {
                 // Assume we've reached the end of the file
                 psTheText = "EOF ";
-                theKeyWord = "EOF";
-                return(theKeyWord);
+                sKeyWord = "EOF";
+                return(sKeyWord);
             }
             if(psTheText == null) {
                 // We've reached the end of the file
                 psTheText = "EOF ";
-                theKeyWord = "EOF";
-                return(theKeyWord);
+                sKeyWord = "EOF";
+                return(sKeyWord);
             }
             piLineNumber++;
 
@@ -1323,15 +1325,15 @@ public:
                 // The line started with two forward slash (/) character, indicating comment, 
                 // or the line had fewer than piMinLineLength characters.
                 // So we ignore the line. We will read the next line.
-                aComment = true;
+                bComment = true;
             } else {
-                aComment = false;
+                bComment = false;
             }
         } // while
 
         strtok = new StringTokenizer(psTheText, " ");
-        theKeyWord = strtok.nextToken();
-        return(theKeyWord);
+        sKeyWord = strtok.nextToken();
+        return(sKeyWord);
     } // getNextLine
 
 
@@ -1342,8 +1344,8 @@ public:
         String sDrive, sDir, sFile, sExt;
         _splitpath(psModelPath, sDrive, sDir, sFile, sExt);
 
-        int theLength = sFile.length();
-        if(theLength > 0) {
+        int iLength = sFile.length();
+        if(iLength > 0) {
             psShapePath = psShapeDir;
             psShapePath.concat(sFile);
             psShapePath.concat(".shp");
@@ -1368,20 +1370,21 @@ public:
 
     // Not a method in the original C++ code for Shape3d
     // Not called from within this file
-    public int getBoundaryPoint(Shape3d theShape, 
-    float rayCentroidX, float rayCentroidY,
-    float rayX2, float rayY2,
-    Float outX, Float outY, 
-    float lastX, float lastY) {
+    // Couldn't find where this is being called from
+    public int getBoundaryPoint(Shape3d pShape, 
+    float pfRayCentroidX, float pfRayCentroidY,
+    float pfRayX2, float pfRayY2,
+    Float pFOutX, Float pFOutY, 
+    float pfLastX, float pfLastY) {
         // Find the screen x,y coord where the
         // shape intersects the input ray.  
-        Float m = 0f, b = 0f;
-        Boolean horzFlag = false, vertFlag = false;
-        Boolean rayHorzFlag = false, rayVertFlag = false;
+        Float fM = 0f, fB = 0f;
+        Boolean bHorzFlag = false, bVertFlag = false;
+        Boolean bRayHorzFlag = false, bRayVertFlag = false;
         // int *currentScreenX; // this variable is not used
         float x1, y1, x2, y2;
-        float minx, miny, maxx, maxy;
-        int numVertices = theShape.getNumVertices();
+        float fMinX, fMinY, fMaxX, fMaxY;
+        int iNumVertices = pShape.getNumVertices();
 
         // In the case of a convoluted input shape, there may be more than one
         // intercept.  Save all of them and select the point closest to the last selected.
@@ -1390,111 +1393,122 @@ public:
         // A shape object is created to store the candidate intersection points.
       
         // Calculate the ray angle in degrees
-        float rayAngle = MathUtils.polarAtan(rayX2 - rayCentroidX, rayY2 - rayCentroidY);
+        float fRayAngle = MathUtils.polarAtan(pfRayX2 - pfRayCentroidX, pfRayY2 - pfRayCentroidY);
         Shape3d tempShape = new Shape3d(JICTConstants.I_TEMPVERTICES);
         if (!tempShape.isValid()) {
             Globals.statusPrint("getBoundaryPoint: Unable to create temporary shape object");
             return -1;
         }
 
-        Float raySlope = 0f, rayYIntercept = 0f;
-        float aDistance = 0f, theX = 0f, theY = 0f;
-        int aStatus = 0;
+        Float fRaySlope = 0f, fRayYIntercept = 0f;
+        float fDistance = 0f;
+        float fIntX = 0f, fIntY = 0f;
+        int iStatus = 0;
 
-        // Get the equation of the ray
-        // The following method will set raySlope, rayYIntercept, 
-        // rayHorzFlag and rayVertFlag
-        MathUtils.getFLineEquation(rayCentroidX, rayCentroidY, rayX2, rayY2, 
-            raySlope, rayYIntercept, rayHorzFlag, rayVertFlag);
+        // Given two points (pfRayCentroidX, pfRayCentroidY) and (pfRayX2, pfRayY2), 
+        // on a ray, get the equation of the ray
+        // The following method will set fRaySlope, fRayYIntercept, 
+        // bRayHorzFlag and bRayVertFlag
+        MathUtils.getFLineEquation(pfRayCentroidX, pfRayCentroidY, pfRayX2, pfRayY2, 
+            fRaySlope, fRayYIntercept, bRayHorzFlag, bRayVertFlag);
 
         // Get the centroid of the shape, and the translation which will center the shape
         // on the ray centroid.  This will adjustment normalize line equation and angle calculations.
       
-        Float shapeCentX = 0f, shapeCentY = 0f, shapeCentZ = 0f;
+        Float fShapeCentX = 0f, fShapeCentY = 0f, fShapeCentZ = 0f;
         // float translationX, translationY; // these variables are not used
       
-        // The following method will set shapeCentX, shapeCentY, and shapeCentZ
-        theShape.getWCentroid(shapeCentX, shapeCentY, shapeCentZ);
+        // The following method will set fShapeCentX, fShapeCentY, and fShapeCentZ
+        pShape.getWCentroid(fShapeCentX, fShapeCentY, fShapeCentZ);
 
         // Scan through the shape
         tempShape.initCurrentVertex();
-        theShape.initCurrentVertex();
-        for (int index = 1; index <= numVertices; index++) {
-            x1 = theShape.mCurrentVertex.x;
-            y1 = theShape.mCurrentVertex.y;
+        pShape.initCurrentVertex();
+        for (int index = 1; index <= iNumVertices; index++) {
+            x1 = pShape.mCurrentVertex.x;
+            y1 = pShape.mCurrentVertex.y;
             // theShape.currentVertex++;
-            theShape.incCurrentVertex();
+            pShape.incCurrentVertex();
 
             // If this is the last line segment, circle around to the beginning
-            if(index == numVertices) {
-                theShape.initCurrentVertex();
+            if(index == iNumVertices) {
+                pShape.initCurrentVertex();
             }
 
-            x2 = theShape.mCurrentVertex.x;  // Can't use (currentVertex+1).x
-            y2 = theShape.mCurrentVertex.y;  // So first move forward 1 position, then go back.
+            x2 = pShape.mCurrentVertex.x;  // Can't use (currentVertex+1).x
+            y2 = pShape.mCurrentVertex.y;  // So first move forward 1 position, then go back.
             //theShape.currentVertex--;
-            theShape.decCurrentVertex();
+            pShape.decCurrentVertex();
 
-            minx = Math.min(x1, x2);
-            maxx = Math.max(x1, x2);
-            miny = Math.min(y1, y2);
-            maxy = Math.max(y1, y2);
+            fMinX = Math.min(x1, x2);
+            fMaxX = Math.max(x1, x2);
+            fMinY = Math.min(y1, y2);
+            fMaxY = Math.max(y1, y2);
 
-            MathUtils.getFLineEquation(x1, y1, x2, y2, m, b, horzFlag, vertFlag);
+            // Given two points (x1, y1) and (x2, y2) on a line,
+            // calculate the equation of the line in the form of
+            // y = mx + b
+            // where 
+            // m (= fM) is the slope and
+            // b (= fB) is the y-intercept
+            MathUtils.getFLineEquation(x1, y1, x2, y2, fM, fB, bHorzFlag, bVertFlag);
 
-            // Calculate the point of intersection, handling all possible cases
+            // Calculate the point of intersection (fIntX, fIntY) of the line above 
+            // with the line given by raySlope and rayYIntercept, handling all 
+            // possible cases
             if (
-            (raySlope.floatValue() == m.floatValue()) && 
-            (rayYIntercept.floatValue() == b.floatValue())) {	//  The ray and the line segment lie on the same line!
-                theX = (minx + maxx) / 2.0f;
-                theY = (miny + maxy) / 2.0f;
+            (fRaySlope.floatValue() == fM.floatValue()) && 
+            (fRayYIntercept.floatValue() == fB.floatValue())) {	//  The ray and the line segment lie on the same line!
+                fIntX = (fMinX + fMaxX) / 2.0f;
+                fIntY = (fMinY + fMaxY) / 2.0f;
             } else {
-                if (raySlope.floatValue() == m.floatValue()) { //  parallel lines
-                    theShape.incCurrentVertex();
+                if (fRaySlope.floatValue() == fM.floatValue()) { //  parallel lines
+                    pShape.incCurrentVertex();
                     continue;
                 }
-                if (!(horzFlag || vertFlag) && (!rayHorzFlag && !rayVertFlag)) {  // Ray is diagonal
-                    theX = (rayYIntercept - b) / (m - raySlope);
-                    theY = (m * theX) + b;
+                if (!(bHorzFlag || bVertFlag) && (!bRayHorzFlag && !bRayVertFlag)) {  // Ray is diagonal
+                    fIntX = (fRayYIntercept - fB) / (fM - fRaySlope);
+                    fIntY = (fM * fIntX) + fB;
                 }
-                if (vertFlag && !horzFlag && (!rayHorzFlag && !rayVertFlag)) {   // l.s. is vertical
-                    theX =  x1;
-                    theY = (raySlope * theX) + rayYIntercept;
-                }
-                    
-                if (horzFlag && !vertFlag && (!rayHorzFlag && !rayVertFlag)) {   // l.s. is horizontal
-                    theY =  y1;
-                    theX = (theY - rayYIntercept) / raySlope;
-                }
-                if (!(horzFlag || vertFlag) && (rayVertFlag)) { // Ray is vertical, l.s. is diagonal
-                    theX = rayX2;
-                    theY = (m * theX) + b;
+                if (bVertFlag && !bHorzFlag && (!bRayHorzFlag && !bRayVertFlag)) {   // l.s. is vertical
+                    fIntX =  x1;
+                    fIntY = (fRaySlope * fIntX) + fRayYIntercept;
                 }
                     
-                if (horzFlag && !vertFlag && (rayVertFlag)) {   // Ray is vertical l.s. is horizontal
-                    theX = rayX2;
-                    theY = y1;
+                if (bHorzFlag && !bVertFlag && (!bRayHorzFlag && !bRayVertFlag)) {   // l.s. is horizontal
+                    fIntY =  y1;
+                    fIntX = (fIntY - fRayYIntercept) / fRaySlope;
                 }
-                if (!(horzFlag || vertFlag) && (rayHorzFlag)) {  // Ray is horizontal, l.s. is diagonal
-                    theY = rayY2;
-                    theX = (theY - b) / m;
+                if (!(bHorzFlag || bVertFlag) && (bRayVertFlag)) { // Ray is vertical, l.s. is diagonal
+                    fIntX = pfRayX2;
+                    fIntY = (fM * fIntX) + fB;
                 }
-                if (vertFlag && !horzFlag && (rayHorzFlag)) {   // Ray is horizontal, l.s. is vertical
-                    theY = rayY2;
-                    theX = x1;
+                    
+                if (bHorzFlag && !bVertFlag && (bRayVertFlag)) {   // Ray is vertical l.s. is horizontal
+                    fIntX = pfRayX2;
+                    fIntY = y1;
+                }
+                if (!(bHorzFlag || bVertFlag) && (bRayHorzFlag)) {  // Ray is horizontal, l.s. is diagonal
+                    fIntY = pfRayY2;
+                    fIntX = (fIntY - fB) / fM;
+                }
+                if (bVertFlag && !bHorzFlag && (bRayHorzFlag)) {   // Ray is horizontal, l.s. is vertical
+                    fIntY = pfRayY2;
+                    fIntX = x1;
                 }
             }
 
-            // If the intersection point lies within the current boundary line segment,
-            // keep it!
+            // If the intersection point (fIntX, fIntY) lies within the current 
+            // boundary line segment, keep it!
             if (
-            (theX >= minx && theX <= maxx) && 
-            (theY >= miny && theY <= maxy)) {
-                float segmentAngle = MathUtils.polarAtan(theX - shapeCentX, theY - shapeCentY);
-                if(Math.abs(segmentAngle - rayAngle) <= 0.01f) { //eliminate matches that are 180 degs out of phase
-                    aDistance = MathUtils.getDistance2d(theX, theY, lastX, lastY);
-                    aStatus = tempShape.addTransformedVertex(theX, theY, aDistance);
-                    if(aStatus != 0) {
+            (fIntX >= fMinX && fIntX <= fMaxX) && 
+            (fIntY >= fMinY && fIntY <= fMaxY)) {
+                float fSegmentAngle = MathUtils.polarAtan(fIntX - fShapeCentX, fIntY - fShapeCentY);
+
+                if(Math.abs(fSegmentAngle - fRayAngle) <= 0.01f) { // eliminate matches that are 180 degs out of phase
+                    fDistance = MathUtils.getDistance2d(fIntX, fIntY, pfLastX, pfLastY);
+                    iStatus = tempShape.addTransformedVertex(fIntX, fIntY, fDistance);
+                    if(iStatus != 0) {
                         Globals.statusPrint("getBoundaryPoint: Could not add temporary intersection point");
                         return -1;
                     }
@@ -1502,23 +1516,28 @@ public:
             }  // end if between x1 and x2
 
             // theShape.currentVertex++;
-            theShape.incCurrentVertex();
+            pShape.incCurrentVertex();
         } // for
 
-        // Select the vertex that has the smallest distance
-        float tempX, tempY, tempDistance, leastDistance;
+        // Select the vertex (fTempX, fTempY) that has the smallest distance
+        // Note that for the vertex 
+        // (fTempX, fTempY) = (tempShape.mCurrentVertex.tx, tempShape.mCurrentVertex.ty)
+        // the distance is held in the z-coordinate tempShape.mCurrentVertex.tz.
+        // See the way we called tempShape.addTransformedVertex above.
+        float fTempX, fTempY, fTempDistance, fLeastDistance;
         tempShape.initCurrentVertex();
-        numVertices = tempShape.getNumVertices();
+        iNumVertices = tempShape.getNumVertices();
 
-        leastDistance = tempShape.mCurrentVertex.tz;
-        for(int index = 1; index <= numVertices; index++) {
-            tempX = tempShape.mCurrentVertex.tx;
-            tempY = tempShape.mCurrentVertex.ty;
-            tempDistance = tempShape.mCurrentVertex.tz;
-            if(tempDistance <= leastDistance) {
-                leastDistance = tempDistance;
-                outX = tempX;
-                outY = tempY;
+        fLeastDistance = tempShape.mCurrentVertex.tz;
+        for(int index = 1; index <= iNumVertices; index++) {
+            fTempX = tempShape.mCurrentVertex.tx;
+            fTempY = tempShape.mCurrentVertex.ty;
+            fTempDistance = tempShape.mCurrentVertex.tz;
+            if(fTempDistance <= fLeastDistance) {
+                fLeastDistance = fTempDistance;
+                // Set the output parameters
+                pFOutX = fTempX;
+                pFOutY = fTempY;
             }
 
             // tempShape.currentVertex++;
@@ -1530,14 +1549,14 @@ public:
 
 
     // Not called from within this file.
-    public int addVertices(Shape3d child) {
+    public int addVertices(Shape3d pChildShape) {
         // Add the vertices of the child shape to the shape pointed to by this 
-        int numVertices = child.getNumVertices();
+        int numVertices = pChildShape.getNumVertices();
         Float mCentroidX = 0f, mCentroidY = 0f, mCentroidZ = 0f;
         Float cCentroidX = 0f, cCentroidY = 0f, cCentroidZ = 0f;
 
         this.getWCentroid(mCentroidX, mCentroidY, mCentroidZ);
-        child.getWCentroid(cCentroidX, cCentroidY, cCentroidZ);
+        pChildShape.getWCentroid(cCentroidX, cCentroidY, cCentroidZ);
 
         int i, j, numMVertices; 
         float cx, cy, mx1, my1, mx2, my2;
@@ -1549,14 +1568,14 @@ public:
 
         // int boundaryDirection = counterClockwise; // this variable is not used
 
-        child.initCurrentVertex();
+        pChildShape.initCurrentVertex();
         int clockWise, cclockWise;
         clockWise = 0;
         cclockWise = 0;
 
         for (j = 1; j <= numVertices; j++) {
-            cx = child.mCurrentVertex.x;
-            cy = child.mCurrentVertex.y;
+            cx = pChildShape.mCurrentVertex.x;
+            cy = pChildShape.mCurrentVertex.y;
             childAngle = MathUtils.polarAtan(cx - cCentroidX, cy - cCentroidY);
 
             numMVertices = this.getNumVertices();
@@ -1588,7 +1607,7 @@ public:
                     Globals.statusPrint(sMsgText);
                     aStatus = insertVertexAfter(i, cx, cy, 0.0f);
                     if(aStatus != 0) {
-                        Globals.statusPrint("Shape3d::addVertices.  Unable to add vertex.");
+                        Globals.statusPrint("Shape3d.addVertices.  Unable to add vertex.");
                         return -1;
                     }
 
@@ -1598,7 +1617,7 @@ public:
             } // for i
 
             // child.currentVertex++;
-            child.incCurrentVertex();
+            pChildShape.incCurrentVertex();
         } // for j
 
         String sMsgText = "cclockWise: " + cclockWise + "  clockWise: " + clockWise;
@@ -1677,10 +1696,10 @@ public:
         // Calculate the sum of distances of the first vertexNumber line
         // segments in a shape.  VeertexNumber is 1 relative.  If vertexNumber 
         // is zero, the total shape boundary distance is returned.
-        float totalDistance = 0.0f;
-        float x1 = 0.0f, y1 = 0.0f, z1 = 0.0f;
-        float x2 = 0.0f, y2 = 0.0f, z2 = 0.0f;
-        float firstx = 0.0f, firsty = 0.0f, firstz = 0.0f;
+        float fTotalDistance = 0.0f;
+        float fX1 = 0.0f, fY1 = 0.0f, fZ1 = 0.0f;
+        float fX2 = 0.0f, fY2 = 0.0f, fZ2 = 0.0f;
+        float fFirstX = 0.0f, fFirstY = 0.0f, fFirstZ = 0.0f;
         
         if(piVertexNumber == 0) {
             piVertexNumber = this.miNumVertices;
@@ -1695,29 +1714,29 @@ public:
 
         initCurrentVertex();
         for (int index = 0; index < piVertexNumber - 1; index++) {
-            x1 = mCurrentVertex.x;
-            y1 = mCurrentVertex.y;
-            z1 = mCurrentVertex.z;
+            fX1 = mCurrentVertex.x;
+            fY1 = mCurrentVertex.y;
+            fZ1 = mCurrentVertex.z;
             if(index == 0) {
-                firstx = x1;
-                firsty = y1;
-                firstz = z1;
+                fFirstX = fX1;
+                fFirstY = fY1;
+                fFirstZ = fZ1;
             }
 
             // currentVertex++;
             incCurrentVertex();
-            x2 = mCurrentVertex.x;
-            y2 = mCurrentVertex.y;
-            z2 = mCurrentVertex.z;
-            totalDistance += MathUtils.getDistance3d(x1, y1, z1, x2, y2, z2);
+            fX2 = mCurrentVertex.x;
+            fY2 = mCurrentVertex.y;
+            fZ2 = mCurrentVertex.z;
+            fTotalDistance += MathUtils.getDistance3d(fX1, fY1, fZ1, fX2, fY2, fZ2);
         }
 
         //  Optionally, add the last line segment
         if(piVertexNumber == this.miNumVertices) {
-            totalDistance += MathUtils.getDistance3d(firstx, firsty, firstz, x2, y2, z2);
+            fTotalDistance += MathUtils.getDistance3d(fFirstX, fFirstY, fFirstZ, fX2, fY2, fZ2);
         }
 
-        return totalDistance;
+        return fTotalDistance;
     } // getWorldDistance
 
 
@@ -1756,7 +1775,7 @@ public:
             // currentVertex++;
             incCurrentVertex();
 
-            // Now get fX2, fY2, fZ2
+            // Now get the next vertex: fX2, fY2, fZ2
             fX2 = mCurrentVertex.x;
             fY2 = mCurrentVertex.y;
             fZ2 = mCurrentVertex.z;
@@ -1806,6 +1825,7 @@ public:
                 fFirstY = fY1;
                 fFirstZ = fZ1;
             }
+            // We will now look for duplicates of fX1, fY1, and fZ1
 
             // currentVertex++;
             incCurrentVertex();
@@ -1813,6 +1833,9 @@ public:
             fY2 = mCurrentVertex.y;
             fZ2 = mCurrentVertex.z;
             if((fX1 == fX2) && (fY1 == fY2) && (fZ1 == fZ2)) {
+                // We have found a duplicate.
+                // Shift the other elements over by one
+                // (of course, overwriting this duplicate).
                 iCounter++;
                 int currentVertex2Idx = miCurrVtxIdx - 1;
                 int nextVertexIdx = miCurrVtxIdx;
@@ -1883,37 +1906,38 @@ public:
 
 
     // This method came from TWEEN.CPP
+    //
     // Called from:
     //     addVertices
     //     divideLongestArc
-    public int insertVertexAfter(int index, float x, float y, float z) {
+    public int insertVertexAfter(int piIndex, float pfX, float pfY, float pfZ) {
         // This function assumes that there is enough room in the existing shape to accomodate
         // a new world vertex.  If there is not enough room in the shape to accomodate the new
         // vertex, an error results.
         //
-        // index is a zero relative location after which the new vertex is to
+        // piIndex is a zero relative location after which the new vertex is to
         // be added
-        int numVerts = getNumVertices();
-        if(index > numVerts) {
-            String sMsgText = String.format("insertVertexAfter: index: %d > num Vertices: %d", index, numVerts);
+        int iNumVerts = getNumVertices();
+        if(piIndex > iNumVerts) {
+            String sMsgText = String.format("insertVertexAfter: index: %d > num Vertices: %d", piIndex, iNumVerts);
             Globals.statusPrint(sMsgText);
             return -1;
         }
         initCurrentVertex();
         
-        if (numVerts + 1 > miNumAllocatedVertices) {
+        if (iNumVerts + 1 > miNumAllocatedVertices) {
             Globals.statusPrint("insertVertexAfter: Not enough memory in shape object to accomodate new vertex");
             return -2;
         }
 
         // currentVertex += numVerts;	 // Points to the position of the new last point
-        miCurrVtxIdx += numVerts;
+        miCurrVtxIdx += iNumVerts;
         mCurrentVertex = mVertices[miCurrVtxIdx];
         int iPrevVtxIdx = miCurrVtxIdx - 1;
         VertexSet prevVertex = mVertices[iPrevVtxIdx - 1];
-        int numVertsToCopy = numVerts - index;
+        int iNumVertsToCopy = iNumVerts - piIndex;
         int j;
-        for(j = 1; j <= numVertsToCopy; j++) {
+        for(j = 1; j <= iNumVertsToCopy; j++) {
             mCurrentVertex.x = prevVertex.x;
             mCurrentVertex.y = prevVertex.y;
             mCurrentVertex.z = prevVertex.z;
@@ -1923,17 +1947,18 @@ public:
             prevVertex = mVertices[iPrevVtxIdx];
         }
 
-        mCurrentVertex.x = x;   // Add the new point
-        mCurrentVertex.y = y;
-        mCurrentVertex.z = z;
+        mCurrentVertex.x = pfX;   // Add the new point
+        mCurrentVertex.y = pfY;
+        mCurrentVertex.z = pfZ;
         miNumVertices++;	  // Increase the number of vertices for this shape
 
         return 0;
     } // insertVertexAfter
 
 
-    // This method came from TWEEN.CPP
+    // This method originally came from TWEEN.CPP
     // Not called from within this file.
+    //
     // Called from:
     //     Globals.createTweenableShapes
     public Shape3d copyAndExpand(int piNumAddedVertices) {
