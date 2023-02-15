@@ -256,6 +256,7 @@ public class SceneList implements ISceneList {
 
     // Called from:
     //     depthSort
+    //     MainFrame.onToolsCreateASceneList
     public int getViewTransform(
     Float pFViewX,   Float pFViewY,   Float pFViewZ, 
     Float pFRotateX, Float pFRotateY, Float pFRotateZ) {
@@ -303,7 +304,7 @@ public class SceneList implements ISceneList {
 
     // Called from:
     //     render
-    public int getViewPoint(Float pFViewX, Float pFViewY, Float pFViewZ,
+    private int getViewPoint(Float pFViewX, Float pFViewY, Float pFViewZ,
     Float pFRotateX, Float pFRotateY, Float pFRotateZ) {
         Scene scene = this.mSceneListHead;
         scene = scene.mNextEntry;  // Skip over the list header
@@ -436,6 +437,7 @@ public class SceneList implements ISceneList {
                     modelSE.miStatusIndicator = 0;
                     sMsgText = "PreviewSequence: Creating RenderObject: " + modelSE.msModelName;
                     Globals.statusPrint(sMsgText);
+                    // Create the RenderObject
                     modelSE.mScreenRdrObject = new RenderObject(modelSE.msFileName,
                         modelSE.miModelType, modelSE.mbDefinedRefPoint, modelSE.pointOfReference);
 
@@ -571,10 +573,11 @@ public class SceneList implements ISceneList {
             iModelCounter = 0;
 
             while (modelSE != null) {
-                // If the renderObject has not been created, create it
+                // If the RenderObject has not been created, create it
                 iModelCounter++;
                 if(modelSE.mScreenRdrObject == null) {
                     modelSE.miStatusIndicator = 0;
+                    // Create the RenderObject
                     modelSE.mScreenRdrObject = new RenderObject(modelSE.msFileName,
                         modelSE.miModelType, modelSE.mbDefinedRefPoint, modelSE.pointOfReference);
                     if(modelSE.miModelType == JICTConstants.I_COMPOUND) {	
@@ -642,7 +645,7 @@ public class SceneList implements ISceneList {
                         tempMatrix.multiply(pViewMatrix, pModelMatrix);
                         viewModelMatrix.multiply(cModelMatrix, tempMatrix);
                     } else {
-                        // Combine the model matrix with the view Matrix
+                        // Combine the model matrix with the view matrix
                         viewModelMatrix.multiply(pViewMatrix, pModelMatrix);
                     }
 
@@ -1134,26 +1137,27 @@ public class SceneList implements ISceneList {
     //     previewStill
     //     render
     public void getViewMatrix(TMatrix pViewMatrix, int piFrameCounter, Scene pScene) {
-        MotionNode aMotion = new MotionNode();
+        MotionNode motnNode = new MotionNode();
         pViewMatrix.setIdentity();
-        float xRadians, yRadians, zRadians;
+        float fXRadians, fYRadians, fZRadians;
         // Note: F_DTR is a floating point constant, 
         // a degree to radians conversion factor
 
         if(pScene.mSensorMotion != null) {
-            pScene.mSensorMotion.getNode(piFrameCounter, aMotion);
-            xRadians = aMotion.mfRx * JICTConstants.F_DTR;
-            yRadians = aMotion.mfRy * JICTConstants.F_DTR;
-            zRadians = aMotion.mfRz * JICTConstants.F_DTR;
+            // The following method will modify parameter motnNode
+            pScene.mSensorMotion.getNode(piFrameCounter, motnNode);
+            fXRadians = motnNode.mfRx * JICTConstants.F_DTR;
+            fYRadians = motnNode.mfRy * JICTConstants.F_DTR;
+            fZRadians = motnNode.mfRz * JICTConstants.F_DTR;
         } else {
-            xRadians = pScene.mRotationPt.x * JICTConstants.F_DTR;
-            yRadians = pScene.mRotationPt.y * JICTConstants.F_DTR;
-            zRadians = pScene.mRotationPt.z * JICTConstants.F_DTR;
+            fXRadians = pScene.mRotationPt.x * JICTConstants.F_DTR;
+            fYRadians = pScene.mRotationPt.y * JICTConstants.F_DTR;
+            fZRadians = pScene.mRotationPt.z * JICTConstants.F_DTR;
         }
 
-        pViewMatrix.rotate(-xRadians, -yRadians, -zRadians);
+        pViewMatrix.rotate(-fXRadians, -fYRadians, -fZRadians);
         if(pScene.mSensorMotion != null) {
-            pViewMatrix.translate(-aMotion.mfTx, -aMotion.mfTy, -aMotion.mfTz);
+            pViewMatrix.translate(-motnNode.mfTx, -motnNode.mfTy, -motnNode.mfTz);
         } else {
             pViewMatrix.translate(-pScene.mTranslationPt.x, -pScene.mTranslationPt.y, -pScene.mTranslationPt.z);
         }
@@ -1182,7 +1186,6 @@ public class SceneList implements ISceneList {
         // compound model.
         // saveModel = pModelSceneElem; // this variable is not used
         pModelSE = pModelSE.mNextEntry;
-
         // Process each SceneElement of the containing Scene
         while (pModelSE != null) {
             // Build the model's transformation matrix
@@ -1254,21 +1257,21 @@ public class SceneList implements ISceneList {
 
 
     // Called from:
-    //     readList
-    public int addScene(String theSceneName, int theType, 
-    int outImCols, int outImRows, int theColorMode, 
-    Point3d rt, Point3d tr, String thePath) {
-        int status = 0;
-        Scene newScene = new Scene(theSceneName, theType, outImCols, outImRows,
-            theColorMode, rt, tr, thePath);
+    //     SceneFileParser.readList
+    public int addScene(String psSceneName, int piType, 
+    int piOutImCols, int piOutImRows, int piColorMode, 
+    Point3d pRtPt, Point3d pTrPt, String psPath) {
+        int iStatus = 0;
+        Scene newScene = new Scene(psSceneName, piType, piOutImCols, piOutImRows,
+            piColorMode, pRtPt, pTrPt, psPath);
         if (!newScene.isValid()) {
-            status = 1;
+            iStatus = 1;
         }
 
         mSceneListHead.mNextEntry = newScene;
         newScene.mPrevEntry = this.mSceneListHead;
         this.mCurrentScene = newScene;  // Make the new scene the Current scene
-        return status;
+        return iStatus;
     } // addScene
 
 
@@ -1277,7 +1280,7 @@ public class SceneList implements ISceneList {
     // from a scene file:
     // Model <modelName> [Blend|NoBlend] [Warp|NoWarp] AlphaScale <alpha> [Image|Shape|QuadMesh|Sequence]
     // => psModelName, pbBlendI, pfScale (= <alpha>)
-    // => piType (=)
+    // => piType (depends on choice of [Image|Shape|QuadMesh|Sequence] selected)
     // FileName <pathName>                => psFileName
     // MotionPath [None|<pathName>]       => psMotionPath
     // [AlphaImagePath [None|<pathName>]] => psAlphaPath
@@ -1297,7 +1300,7 @@ public class SceneList implements ISceneList {
     String psAdjustmentType, String psColorAdjustedPath,
     boolean pbDefinedRefPt, Point3d pRefPoint) {
         Scene scene = this.mCurrentScene;  // Add an element to the current scene
-        SceneElement aModel = scene.mHead;
+        SceneElement aModelSE = scene.mHead;
 
         // Create a new SceneElement from the parameters passed in
         SceneElement modelSE = new SceneElement(psModlName, psFileName, 
@@ -1322,12 +1325,12 @@ public class SceneList implements ISceneList {
             modelSE.mNextEntry = null;
         } else {
             // Add modelSE at the end of the list
-            aModel = scene.mHead;  // Find the last element
-            while (aModel.mNextEntry != null) {
-                aModel = aModel.mNextEntry;
+            aModelSE = scene.mHead;  // Find the last element
+            while (aModelSE.mNextEntry != null) {
+                aModelSE = aModelSE.mNextEntry;
             }
-            aModel.mNextEntry = modelSE;
-            modelSE.mNextEntry = aModel;
+            aModelSE.mNextEntry = modelSE;
+            modelSE.mNextEntry = aModelSE;
         }
 
         // Update the tail pointer to point to modelSE
@@ -1336,6 +1339,8 @@ public class SceneList implements ISceneList {
     } // addSceneElement
 
 
+    // Apparently used for debugging purposes.
+    // Did not see it being called.
     public void display() {
         Scene scene = mSceneListHead;
         Scene currentScene;
@@ -1385,8 +1390,8 @@ public class SceneList implements ISceneList {
     public int setModelReferencePoint(String psModelName, 
     float pfCentroidX, float pfCentroidY, float pfCentroidZ) {
         Scene scene = this.mSceneListHead;
-        SceneElement theModel;
-        String msgText;
+        SceneElement modelSE;
+        String sMsgText;
 
         if(scene.mNextEntry == null) {
             Globals.statusPrint("setModelReferencePoint: sceneList has no scene object.");
@@ -1394,22 +1399,22 @@ public class SceneList implements ISceneList {
         }
 
         scene = scene.mNextEntry;
-        theModel = scene.mHead;
-        boolean found = false;
+        modelSE = scene.mHead;
+        boolean bFound = false;
 
-        while (theModel != null) {
-            if(psModelName.equalsIgnoreCase(theModel.msModelName)) {
-                theModel.pointOfReference.x = pfCentroidX;
-                theModel.pointOfReference.y = pfCentroidY;
-                theModel.pointOfReference.z = pfCentroidZ;
-                found = true;
+        while (modelSE != null) {
+            if(psModelName.equalsIgnoreCase(modelSE.msModelName)) {
+                modelSE.pointOfReference.x = pfCentroidX;
+                modelSE.pointOfReference.y = pfCentroidY;
+                modelSE.pointOfReference.z = pfCentroidZ;
+                bFound = true;
             }
-            theModel = theModel.mNextEntry;  // Get the pointer to next model
+            modelSE = modelSE.mNextEntry;  // Get the pointer to next model
         } // while
 
-        if(!found) {
-            msgText = "setModelReferencePoint: Model Not Found: " + psModelName;
-            Globals.statusPrint(msgText);
+        if(!bFound) {
+            sMsgText = "setModelReferencePoint: Model Not Found: " + psModelName;
+            Globals.statusPrint(sMsgText);
             return -1;
         }
 
@@ -1418,12 +1423,13 @@ public class SceneList implements ISceneList {
 
 
     // Not called from within this file
+    // Could not find where this is called from
     public int setCompoundRefPoints() {
         Scene scene = this.mSceneListHead;
-        SceneElement theModel;
-        String modelName = "";
-        float bucketX = 0.0f, bucketY = 0.0f, bucketZ = 0.0f;
-        float centroidX, centroidY, centroidZ;
+        SceneElement modelSE;
+        String sModelName = "";
+        float fBucketX = 0.0f, fBucketY = 0.0f, fBucketZ = 0.0f;
+        float fCentroidX, fCentroidY, fCentroidZ;
 
         if(scene.mNextEntry == null) {
             Globals.statusPrint("setCompoundRefPoints: sceneList has no scene object.");
@@ -1431,45 +1437,45 @@ public class SceneList implements ISceneList {
         }
 
         scene = scene.mNextEntry;
-        theModel = scene.mHead;
+        modelSE = scene.mHead;
         // int found = FALSE; // this variable is not used
         int modelCounter = 0;
         boolean prevModelIsACompoundMember = false;
 
-        while (theModel != null) {
-            if(theModel.miModelType == JICTConstants.I_COMPOUND) {
-                modelName = theModel.msModelName;
-                bucketX = 0.0f;
-                bucketY = 0.0f;
-                bucketZ = 0.0f;
+        while (modelSE != null) {
+            if(modelSE.miModelType == JICTConstants.I_COMPOUND) {
+                sModelName = modelSE.msModelName;
+                fBucketX = 0.0f;
+                fBucketY = 0.0f;
+                fBucketZ = 0.0f;
                 modelCounter = 0;
             }
 
-            if(theModel.mbCompoundModelMember) {
-                bucketX += theModel.pointOfReference.x;
-                bucketY += theModel.pointOfReference.y;
-                bucketZ += theModel.pointOfReference.z;
+            if(modelSE.mbCompoundModelMember) {
+                fBucketX += modelSE.pointOfReference.x;
+                fBucketY += modelSE.pointOfReference.y;
+                fBucketZ += modelSE.pointOfReference.z;
                 modelCounter++;
             }
 
-            if((!theModel.mbCompoundModelMember) && (prevModelIsACompoundMember)) {
-                centroidX = bucketX / modelCounter;
-                centroidY = bucketY / modelCounter;
-                centroidZ = bucketZ / modelCounter;
-                setModelReferencePoint(modelName, centroidX, centroidY, centroidZ);
+            if((!modelSE.mbCompoundModelMember) && (prevModelIsACompoundMember)) {
+                fCentroidX = fBucketX / modelCounter;
+                fCentroidY = fBucketY / modelCounter;
+                fCentroidZ = fBucketZ / modelCounter;
+                setModelReferencePoint(sModelName, fCentroidX, fCentroidY, fCentroidZ);
             }
 
-            prevModelIsACompoundMember = theModel.mbCompoundModelMember;
-            theModel = theModel.mNextEntry;  // Get the pointer to next model
+            prevModelIsACompoundMember = modelSE.mbCompoundModelMember;
+            modelSE = modelSE.mNextEntry;  // Get the pointer to next model
         } 
 
         // Handle the case where a compound model is the last model in the
         // scene list.
         if(prevModelIsACompoundMember) {
-            centroidX = bucketX / modelCounter;
-            centroidY = bucketY / modelCounter;
-            centroidZ = bucketZ / modelCounter;
-            setModelReferencePoint(modelName, centroidX, centroidY, centroidZ);
+            fCentroidX = fBucketX / modelCounter;
+            fCentroidY = fBucketY / modelCounter;
+            fCentroidZ = fBucketZ / modelCounter;
+            setModelReferencePoint(sModelName, fCentroidX, fCentroidY, fCentroidZ);
         }
 
         return 0;
@@ -1479,32 +1485,34 @@ public class SceneList implements ISceneList {
     // Called from:
     //     preview
     //     previewStill
-    public int copyRefPoints() {
+    private int copyRefPoints() {
         // Copies reference points into a model from its corresponding
         // renderObject
-        Scene aScene = this.mSceneListHead;
-        SceneElement theModel;
-        Float centroidX = 0.0f, centroidY = 0.0f, centroidZ = 0.0f;
+        Scene scene = this.mSceneListHead;
+        SceneElement modelSE;
+        Float fCentroidX = 0.0f, fCentroidY = 0.0f, fCentroidZ = 0.0f;
 
-        if(aScene.mNextEntry == null) {
+        if(scene.mNextEntry == null) {
             Globals.statusPrint("copyRefPoints: sceneList has no scene object.");
             return -2; 
         }
 
-        aScene = aScene.mNextEntry;
-        theModel = aScene.mHead;
-        while (theModel != null) {
-            if((!theModel.mbDefinedRefPoint) && (theModel.miModelType != JICTConstants.I_COMPOUND)) {
+        scene = scene.mNextEntry;
+        modelSE = scene.mHead;
+        while (modelSE != null) {
+            if(
+            (!modelSE.mbDefinedRefPoint) && 
+            (modelSE.miModelType != JICTConstants.I_COMPOUND)) {
                 // The following method sets centroidX, centroidY, and centroidZ (all of type Float)
-                theModel.mScreenRdrObject.mCurrentShape.getReferencePoint(centroidX, centroidY, centroidZ);
+                modelSE.mScreenRdrObject.mCurrentShape.getReferencePoint(fCentroidX, fCentroidY, fCentroidZ);
 
-                theModel.pointOfReference.x = centroidX; 
-                theModel.pointOfReference.y = centroidY;
-                theModel.pointOfReference.z = centroidZ;
+                modelSE.pointOfReference.x = fCentroidX; 
+                modelSE.pointOfReference.y = fCentroidY;
+                modelSE.pointOfReference.z = fCentroidZ;
             }
 
-            theModel = theModel.mNextEntry;  // Get the pointer to next model
-        } // while theModel != null
+            modelSE = modelSE.mNextEntry;  // Get the pointer to next model
+        } // while modelSE != null
 
         return 0;
     } // copyRefPoints
@@ -1513,8 +1521,8 @@ public class SceneList implements ISceneList {
     // This method came from DEPTHSRT.CPP
     // Called from:
     //     render
-    public int depthSort(SceneElement[] models, float[] distances,
-    Integer numModels, boolean depthSortingEnabled) {
+    public int depthSort(SceneElement[] paModels, float[] pafDistances,
+    Integer pINumModels, boolean pbDepthSortingEnabled) {
         Float fViewX = 0f, fViewY = 0f, fViewZ = 0f;
         Float fRotateX = 0f, fRotateY = 0f, fRotateZ = 0f;
         float fCentroidX, fCentroidY, fCentroidZ;
@@ -1529,47 +1537,47 @@ public class SceneList implements ISceneList {
             return -1;
         }
 
-        SceneElement theModel = scene.mHead;
-        int modelCounter = 0;
+        SceneElement modelSE = scene.mHead;
+        int iModelCounter = 0;
 
-        while (theModel != null) {
+        while (modelSE != null) {
             if(
-            modelCounter == 0 && 
-            theModel.mbWarpIndicator == false &&
-            theModel.mbBlendIndicator == false) {
-                distances[modelCounter] = 999999999.9f;  // set the distance of the backdrop image
-                models[modelCounter] = theModel;
-                modelCounter++;
+            iModelCounter == 0 && 
+            modelSE.mbWarpIndicator == false &&
+            modelSE.mbBlendIndicator == false) {
+                pafDistances[iModelCounter] = 999999999.9f;  // set the distance of the backdrop image
+                paModels[iModelCounter] = modelSE;
+                iModelCounter++;
             } else {
                 if(
-                theModel.miModelType == JICTConstants.I_IMAGE || 
-                theModel.miModelType == JICTConstants.I_SHAPE) {
-                    fCentroidX = theModel.mScreenRdrObject.mCurrentShape.mfOriginX;
-                    fCentroidY = theModel.mScreenRdrObject.mCurrentShape.mfOriginY;
-                    fCentroidZ = theModel.mScreenRdrObject.mCurrentShape.mfOriginZ;
+                modelSE.miModelType == JICTConstants.I_IMAGE || 
+                modelSE.miModelType == JICTConstants.I_SHAPE) {
+                    fCentroidX = modelSE.mScreenRdrObject.mCurrentShape.mfOriginX;
+                    fCentroidY = modelSE.mScreenRdrObject.mCurrentShape.mfOriginY;
+                    fCentroidZ = modelSE.mScreenRdrObject.mCurrentShape.mfOriginZ;
                     fModelDistance = MathUtils.getDistance3d(fViewX, fViewY, fViewZ, fCentroidX, fCentroidY, fCentroidZ);
-                    distances[modelCounter] = fModelDistance;
-                    models[modelCounter] = theModel;
-                    modelCounter++;
+                    pafDistances[iModelCounter] = fModelDistance;
+                    paModels[iModelCounter] = modelSE;
+                    iModelCounter++;
                 }
 
-                if(theModel.miModelType == JICTConstants.I_QUADMESH) {
+                if(modelSE.miModelType == JICTConstants.I_QUADMESH) {
                     fCentroidX = 0.0f;
                     fCentroidY = 0.0f;
                     fCentroidZ = 0.0f;
                     fModelDistance = MathUtils.getDistance3d(fViewX, fViewY, fViewZ, fCentroidX, fCentroidY, fCentroidZ);
-                    distances[modelCounter] = fModelDistance;
-                    models[modelCounter] = theModel;
-                    modelCounter++;
+                    pafDistances[iModelCounter] = fModelDistance;
+                    paModels[iModelCounter] = modelSE;
+                    iModelCounter++;
                 }
             }
             
-            theModel = theModel.mNextEntry;
+            modelSE = modelSE.mNextEntry;
         }
 
-        numModels = modelCounter;
-        if(depthSortingEnabled) {
-            Globals.insertionSort2(distances, models, numModels);
+        pINumModels = iModelCounter;
+        if(pbDepthSortingEnabled) {
+            Globals.insertionSort2(pafDistances, paModels, pINumModels);
         }
         
         return 0;
