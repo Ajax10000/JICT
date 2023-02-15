@@ -41,9 +41,6 @@ public interface ISceneList {
     int setViewTransform(float pfViewX, float pfViewY, float pfViewZ,
     float pfRotateX, float pfRotateY, float pfRotateZ);
 
-    int getViewPoint(Float viewX, Float viewY, Float viewZ,
-    Float rotateX, Float rotateY, Float rotateZ);
-
     int writeList(String psErrorText, String psFileName);
 
     int preview(BufferedImage buffImg, TMatrix modelMatrix, TMatrix viewMatrix);
@@ -88,8 +85,6 @@ public interface ISceneList {
     float pfCentroidX, float pfCentroidY, float pfCentroidZ);
 
     int setCompoundRefPoints();
-
-    int copyRefPoints();
 
     int depthSort(SceneElement[] models, float[] distances,
     Integer numModels, boolean depthSortingEnabled);
