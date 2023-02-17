@@ -1,6 +1,7 @@
 package core;
 
 import globals.Globals;
+import globals.JICTConstants;
 
 import java.awt.Color;
 import java.io.BufferedWriter;
@@ -42,7 +43,7 @@ import structs.Point3d;
     Translation <tx>, <ty>, <tz>
 */
 public class SceneElement {
-    public boolean bIctDebug = false;
+    private boolean bIctDebug = false;
 
     // Changed from private to public as it is used by SceneList
     // Name of the Model
@@ -162,14 +163,6 @@ public class SceneElement {
     public SceneElement mNextEntry;
   // friend class sceneList;
 
-    // Model Types
-    // These were originally defined in ICT20.H
-    public static final int I_IMAGE        = 1;
-    public static final int I_SHAPE        = 2;
-    public static final int I_QUADMESH     = 3;
-    public static final int I_COMPOUND     = 4;
-    public static final int I_LIGHTSOURCE  = 5;
-
 
     // This constructor originally came from MODEL.CPP
     // Called from:
@@ -248,14 +241,13 @@ public class SceneElement {
         this.mNextEntry = null;
 
         if (bIctDebug) {
-            String sMsgBuffer;
-            sMsgBuffer = "Constructor. Size of sceneElement: " + sizeLowerLimit();
-            Globals.statusPrint(sMsgBuffer);
+            Globals.statusPrint("SceneElement constructor.");
         }
     } // SceneElement ctor
 
 
     // This method originally came from SCENELST.H
+    // Apparently used for debugging purposes.
     // Called from:
     //     fShowList
     //     SceneList.display
@@ -292,10 +284,10 @@ public class SceneElement {
 
 
     void fshowlist() {  // Display scene's elements traversing
-        SceneElement next = this;     // the list in the forward direction.
-        while (next != null) {
-            next.display();
-            next = next.mNextEntry;
+        SceneElement nextSE = this;     // the list in the forward direction.
+        while (nextSE != null) {
+            nextSE.display();
+            nextSE = nextSE.mNextEntry;
         } // while
     } // fshowlist
 
@@ -314,7 +306,7 @@ public class SceneElement {
     // SceneList.writeList.
     // Called from:
     //     SceneList.writeList
-    void writeFile(BufferedWriter fileout) {
+    void writeFile(BufferedWriter pFileout) {
         // Creates the model portion of a scene file
         String sBlendArray, sWarpArray, sModelTypeArray;
         String sModelNameArray;
@@ -330,11 +322,11 @@ public class SceneElement {
         sModelTypeArray = "Image";
         if(!this.mbBlendIndicator) sBlendArray = "NoBlend";
         if(!this.mbWarpIndicator) sWarpArray = "NoWarp";
-        if(this.miModelType == I_IMAGE) sModelTypeArray = "Image";
-        if(this.miModelType == I_SHAPE) sModelTypeArray = "Shape";
-        if(this.miModelType == I_QUADMESH) sModelTypeArray = "QuadMesh";
-        if(this.miModelType == I_COMPOUND) sModelTypeArray = "Compound";
-        if(this.miModelType == I_LIGHTSOURCE) sModelTypeArray = "LightSource";
+        if(this.miModelType == JICTConstants.I_IMAGE) sModelTypeArray = "Image";
+        if(this.miModelType == JICTConstants.I_SHAPE) sModelTypeArray = "Shape";
+        if(this.miModelType == JICTConstants.I_QUADMESH) sModelTypeArray = "QuadMesh";
+        if(this.miModelType == JICTConstants.I_COMPOUND) sModelTypeArray = "Compound";
+        if(this.miModelType == JICTConstants.I_LIGHTSOURCE) sModelTypeArray = "LightSource";
 
         // Write out the sceneElement information, the reference point is optionally saved
         String thisObjectAsString;
@@ -363,58 +355,9 @@ public class SceneElement {
         }
         
         try {
-            fileout.write(thisObjectAsString);
+            pFileout.write(thisObjectAsString);
         } catch(IOException ioe) {
             // TODO: Need to return an error indicator
         }
     } // writeFile
-
-
-    // This method returns an estimate of the size of the SceneElement object
-    // It does not take into account static field values, as those would be 
-    // part of the SceneElement class, not a SceneElement object
-    public int sizeLowerLimit() {
-        int mySize = 0;
-        int booleanFieldsSizeInBits = 0;
-        int booleanFieldsSize = 0;
-        int intFieldsSize = 0;
-        int floatFieldsSize = 0;
-        int referenceFieldsSize = 0;
-
-        /*
-        public boolean ictdebug = false;
-        public boolean compoundModelMember;
-        public boolean definedRefPoint;	 
-        public boolean blendIndicator;
-        public boolean warpIndicator; 
-        private boolean valid;
-        public int modelType;
-        public int statusIndicator;
-        public float alphaScale;
-        public  String modelName;
-        private String modelMotionPath;
-        public String fileName;
-        public String colorAdjustedPath;
-        public String alphaPath;
-        public String adjustmentType;
-        private Color colorAdjustment; 
-        public MotionPath modelMotion;
-        public Point3d pointOfReference;   
-        public Point3d rotation;
-        public Point3d scale;
-        public Point3d translation;
-        public RenderObject screenObject;
-        public SceneElement prevEntry;
-        public SceneElement nextEntry;
-        */
-
-        booleanFieldsSizeInBits = 6; // 6 booleans
-        booleanFieldsSize = 1; // 6 bits fit in a byte
-        intFieldsSize = 2*4; // 2 ints
-        floatFieldsSize = 1*4; // 1 float
-        referenceFieldsSize = 15*4; // 15 references to objects
-        mySize = booleanFieldsSize + intFieldsSize + floatFieldsSize + referenceFieldsSize;
-
-        return mySize;
-    } // sizeLowerLimit
 } // class SceneElement
