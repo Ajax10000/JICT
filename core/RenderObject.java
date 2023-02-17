@@ -3,6 +3,7 @@ package core;
 import fileUtils.FileUtils;
 
 import globals.Globals;
+import globals.JICTConstants;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -55,28 +56,6 @@ public class RenderObject {
     //     isValid
     private boolean mbValid;
 
-    // Model Types
-    public static final int IMAGE       = 1;
-    public static final int SHAPE       = 2;
-    public static final int QUADMESH    = 3;
-    public static final int COMPOUND    = 4;
-    public static final int LIGHTSOURCE = 5;
-
-    // SEQUENTIAL and RANDOM were defined in MEMIMAGE.H
-    public static final int SEQUENTIAL = 1;
-    public static final int RANDOM     = 0;
-
-    // These were defined in MEMIMAGE.H
-    public static final int REDCOLOR = 1;
-    public static final int GREENCOLOR = 2;
-    public static final int BLUECOLOR = 3;
-    public static final int EIGHTBITMONOCHROME = 2;
-    public static final int A32BIT = 4;
-    public static final int RGBCOLOR = 5;
-    public static final int ONEBITMONOCHROME = 6;
-
-    // This value came from ICT20.H
-    public static final float ZBUFFERMAXVALUE = 2.0E31f;
 /*
 public:
   renderObject (point3d *UL, point3d *UR, point3d *LR, point3d *LL); - implemented
@@ -115,32 +94,31 @@ protected:
 */
 
 
-    public RenderObject(Point3d aUL, Point3d aUR, Point3d aLR, Point3d aLL) {
+    public RenderObject(Point3d pULPt, Point3d pURPt, Point3d pLRPt, Point3d pLLPt) {
         this.mCurrentShape = null;
         this.mLastShape = null;
         if(bIctDebug) {
-            String msgBuffer = "RenderObject Constructor 1: Size of renderObject: " + sizeofLowerLimit();
-            Globals.statusPrint(msgBuffer);
+            Globals.statusPrint("RenderObject Constructor 1");
         }
 
-        this.mCurrentShape = new Shape3d(aUL, aUR, aLR, aLL);
-        Float centroidX = 0f, centroidY = 0f, centroidZ = 0f;
-        this.mCurrentShape.getWCentroid(centroidX, centroidY, centroidZ);
+        this.mCurrentShape = new Shape3d(pULPt, pURPt, pLRPt, pLLPt);
+        Float fCentroidX = 0f, fCentroidY = 0f, fCentroidZ = 0f;
+        this.mCurrentShape.getWCentroid(fCentroidX, fCentroidY, fCentroidZ);
 
         // Make certain the shape is centered in the X-Y plane.
         if(
-        (centroidX > 0.5f || centroidX < -0.5f) ||
-        (centroidY > 0.5f || centroidY < -0.5f) ||
-        (centroidZ > 0.5f || centroidZ < -0.5f) ) {
-            String msgText = String.format("RenderObject Constructor 1: Centering shape - xCent: %f, yCent: %f zCent: %f",
-                centroidX, centroidY, centroidZ);
-            Globals.statusPrint(msgText);
-            mCurrentShape.translateW(-centroidX, -centroidY, -centroidZ);   
+        (fCentroidX > 0.5f || fCentroidX < -0.5f) ||
+        (fCentroidY > 0.5f || fCentroidY < -0.5f) ||
+        (fCentroidZ > 0.5f || fCentroidZ < -0.5f) ) {
+            String sMsgText = String.format("RenderObject Constructor 1: Centering shape - xCent: %f, yCent: %f zCent: %f",
+                fCentroidX, fCentroidY, fCentroidZ);
+            Globals.statusPrint(sMsgText);
+            mCurrentShape.translateW(-fCentroidX, -fCentroidY, -fCentroidZ);   
             mCurrentShape.floor();   
-            mCurrentShape.getWCentroid(centroidX, centroidY, centroidZ);
+            mCurrentShape.getWCentroid(fCentroidX, fCentroidY, fCentroidZ);
         }
 
-        mCurrentShape.setReferencePoint(centroidX, centroidY, centroidZ);
+        mCurrentShape.setReferencePoint(fCentroidX, fCentroidY, fCentroidZ);
         this.mLastShape = new Shape3d(4); // 4 vertex shape with coords set to 0
         this.mMatrix = new TMatrix();
         this.mbValid = true;
@@ -151,10 +129,10 @@ protected:
     //     SceneList.calcCompoundModelRefPoint
     //     SceneList.preview
     //     SceneList.previewStill
-    public RenderObject(String fileName, int aModelType, boolean userPOR, Point3d POR) {
-        boolean validCurrentShape = true;
-        boolean validLastShape = true;
-        Float centroidX = 0f, centroidY = 0f, centroidZ = 0f;
+    public RenderObject(String psFileName, int piModelType, boolean pbUserPOR, Point3d POR) {
+        boolean bValidCurrentShape = true;
+        boolean bValidLastShape = true;
+        Float fCentroidX = 0f, fCentroidY = 0f, fCentroidZ = 0f;
 
         this.mCurrentShape = null;
         this.mLastShape = null;
@@ -162,47 +140,49 @@ protected:
         this.mXImage = null;
         this.mYImage = null;
         this.mZImage = null;
-        this.miModelType = aModelType;  // set data members
+        this.miModelType = piModelType;  // set data members
         this.mMatrix = new TMatrix();
 
         if (bIctDebug) {
-            String msgText;
-            msgText = "RenderObject Constructor 2: Size of renderObject: " + sizeofLowerLimit();
-            Globals.statusPrint(msgText);
+            Globals.statusPrint("RenderObject Constructor 2");
         }
         this.mbValid = true;
 
         switch(this.miModelType) {
-        case QUADMESH:
-            String texturePath, xPath = "", yPath = "", zPath = "";
-            texturePath = fileName;
-            assembleName(texturePath, 'x', xPath);
-            assembleName(texturePath, 'y', yPath);
-            assembleName(texturePath, 'z', zPath);
+        case JICTConstants.I_QUADMESH:
+            String sTexturePath, sXPath = "", sYPath = "", sZPath = "";
+            sTexturePath = psFileName;
+            assembleName(sTexturePath, 'x', sXPath);
+            assembleName(sTexturePath, 'y', sYPath);
+            assembleName(sTexturePath, 'z', sZPath);
 
-            mTextureImage = new MemImage(fileName, 0, 0, RANDOM, 'R', 0);
-            mXImage = new MemImage(xPath, 0, 0, RANDOM, 'R', 0);
-            mYImage = new MemImage(yPath, 0, 0, RANDOM, 'R', 0);
-            mZImage = new MemImage(zPath, 0, 0, RANDOM, 'R', 0);
+            mTextureImage = new MemImage(psFileName, 0, 0, 
+                JICTConstants.I_RANDOM, 'R', 0);
+            mXImage = new MemImage(sXPath, 0, 0, 
+                JICTConstants.I_RANDOM, 'R', 0);
+            mYImage = new MemImage(sYPath, 0, 0, 
+                JICTConstants.I_RANDOM, 'R', 0);
+            mZImage = new MemImage(sZPath, 0, 0, 
+                JICTConstants.I_RANDOM, 'R', 0);
 
             // Make certain the QuadMesh is centered in the X-Y plane.
-            Globals.getMeshCentroid(mXImage, mYImage, mZImage, centroidX, centroidY, centroidZ);
+            Globals.getMeshCentroid(mXImage, mYImage, mZImage, fCentroidX, fCentroidY, fCentroidZ);
             if(
-            (centroidX > 0.5f || centroidX < -0.5f) ||
-            (centroidY > 0.5f || centroidY < -0.5f) ||
-            (centroidZ > 0.5f || centroidZ < -0.5f) ) {
+            (fCentroidX > 0.5f || fCentroidX < -0.5f) ||
+            (fCentroidY > 0.5f || fCentroidY < -0.5f) ||
+            (fCentroidZ > 0.5f || fCentroidZ < -0.5f) ) {
                 String msgText = "RenderObject Constructor 2: Centering QuadMesh - " + 
-                    "xCent: " + centroidX + 
-                    ", yCent: " + centroidY + 
-                    ", zCent: " + centroidZ;
+                    "xCent: "   + fCentroidX + 
+                    ", yCent: " + fCentroidY + 
+                    ", zCent: " + fCentroidZ;
                 Globals.statusPrint(msgText);
-                Globals.translateMesh(mXImage, mYImage, mZImage, -centroidX, -centroidY, -centroidZ);
+                Globals.translateMesh(mXImage, mYImage, mZImage, -fCentroidX, -fCentroidY, -fCentroidZ);
             }
 
             // Create shape objects. store the quadmesh centroid in the currentshape
-            mCurrentShape = new Shape3d(fileName, miModelType);
+            mCurrentShape = new Shape3d(psFileName, miModelType);
             if(!mCurrentShape.isValid()) {
-                validCurrentShape = false;
+                bValidCurrentShape = false;
             } else {
                 mCurrentShape.setReferencePoint(0.0f, 0.0f, 0.0f);
             }
@@ -210,97 +190,97 @@ protected:
             // Create an n vertex shape with coords set to 0
             mLastShape = new Shape3d(mCurrentShape.getNumVertices());
             if(!mLastShape.isValid()) {
-                validLastShape = false;
+                bValidLastShape = false;
             }
 
             // The Shape3d constructor will issue a message if either of these
             // objects are not successfully created.
-            if(!validCurrentShape || !validLastShape) {
+            if(!bValidCurrentShape || !bValidLastShape) {
                 this.mbValid = false;
             }
             break;
 
-        case IMAGE: 
-            mCurrentShape = new Shape3d(fileName, this.miModelType);
+        case JICTConstants.I_IMAGE: 
+            mCurrentShape = new Shape3d(psFileName, this.miModelType);
             if(!mCurrentShape.isValid()) {
-                validCurrentShape = false;
+                bValidCurrentShape = false;
             } else {
-                if(userPOR) {  // If the user has defined a Point of Reference
+                if(pbUserPOR) {  // If the user has defined a Point of Reference
                   mCurrentShape.setReferencePoint(POR.x, POR.y, POR.z);
                 } else {
                     // Make certain the shape is centered in the X-Y plane.
-                    mCurrentShape.getWCentroid(centroidX, centroidY, centroidZ);
+                    mCurrentShape.getWCentroid(fCentroidX, fCentroidY, fCentroidZ);
                     if(
-                    (centroidX > 0.5f || centroidX < -0.5f) ||
-                    (centroidY > 0.5f || centroidY < -0.5f) ||
-                    (centroidZ > 0.5f || centroidZ < -0.5f) ) {
+                    (fCentroidX > 0.5f || fCentroidX < -0.5f) ||
+                    (fCentroidY > 0.5f || fCentroidY < -0.5f) ||
+                    (fCentroidZ > 0.5f || fCentroidZ < -0.5f) ) {
                         String msgText = "RenderObject Constructor 2: Centering Shape - " + 
-                            "xCent: " + centroidX + 
-                            ", yCent: " + centroidY + 
-                            ", zCent: " + centroidZ;
+                            "xCent: "   + fCentroidX + 
+                            ", yCent: " + fCentroidY + 
+                            ", zCent: " + fCentroidZ;
                         Globals.statusPrint(msgText);
-                        mCurrentShape.translateW(-centroidX, -centroidY, -centroidZ);   
+                        mCurrentShape.translateW(-fCentroidX, -fCentroidY, -fCentroidZ);   
                     }
-                    mCurrentShape.getWCentroid(centroidX, centroidY, centroidZ);
-                    mCurrentShape.setReferencePoint(centroidX, centroidY, centroidZ);
+                    mCurrentShape.getWCentroid(fCentroidX, fCentroidY, fCentroidZ);
+                    mCurrentShape.setReferencePoint(fCentroidX, fCentroidY, fCentroidZ);
                 }
             }
 
             // Create an n vertex shape with coords set to 0
             mLastShape = new Shape3d(mCurrentShape.getNumVertices());
             if(!mLastShape.isValid()) {
-                validLastShape = false;
+                bValidLastShape = false;
             }
 
             // The Shape3d constructor will issue a message if either of these
             // objects are not successfully created.
-            if(!validCurrentShape|| !validLastShape) {
+            if(!bValidCurrentShape|| !bValidLastShape) {
                 this.mbValid = false;
             }
             break;
 
-        case SHAPE: 
-            mCurrentShape = new Shape3d(fileName, miModelType);
+        case JICTConstants.I_SHAPE: 
+            mCurrentShape = new Shape3d(psFileName, miModelType);
             if(!mCurrentShape.isValid()) {
-                validCurrentShape = false;
+                bValidCurrentShape = false;
             } else {
-                if(userPOR) {  // If the user has defined a Point of Reference
+                if(pbUserPOR) {  // If the user has defined a Point of Reference
                   mCurrentShape.setReferencePoint(POR.x, POR.y, POR.z);
                 } else {
-                    mCurrentShape.getWCentroid(centroidX, centroidY, centroidZ);
+                    mCurrentShape.getWCentroid(fCentroidX, fCentroidY, fCentroidZ);
 
                     // Make certain the shape is centered in the X-Y plane.
-                    mCurrentShape.getWCentroid(centroidX, centroidY, centroidZ);
+                    mCurrentShape.getWCentroid(fCentroidX, fCentroidY, fCentroidZ);
                     if(
-                    (centroidX > 0.5f || centroidX < -0.5f) ||
-                    (centroidY > 0.5f || centroidY < -0.5f) ||
-                    (centroidZ > 0.5f || centroidZ < -0.5f) ) {
-                        String msgText = "RenderObject Constructor 2: Centering Shape: " + 
-                            "xCent: " + centroidX + 
-                            ", yCent: " + centroidY + 
-                            ", zCent: " + centroidZ;
-                        Globals.statusPrint(msgText);
-                        mCurrentShape.translateW(-centroidX, -centroidY, -centroidZ);   
+                    (fCentroidX > 0.5f || fCentroidX < -0.5f) ||
+                    (fCentroidY > 0.5f || fCentroidY < -0.5f) ||
+                    (fCentroidZ > 0.5f || fCentroidZ < -0.5f) ) {
+                        String sMsgText = "RenderObject Constructor 2: Centering Shape: " + 
+                            "xCent: "   + fCentroidX + 
+                            ", yCent: " + fCentroidY + 
+                            ", zCent: " + fCentroidZ;
+                        Globals.statusPrint(sMsgText);
+                        mCurrentShape.translateW(-fCentroidX, -fCentroidY, -fCentroidZ);   
                     }
-                    mCurrentShape.getWCentroid(centroidX, centroidY, centroidZ);
-                    mCurrentShape.setReferencePoint(centroidX, centroidY, centroidZ);
+                    mCurrentShape.getWCentroid(fCentroidX, fCentroidY, fCentroidZ);
+                    mCurrentShape.setReferencePoint(fCentroidX, fCentroidY, fCentroidZ);
                 }
             }
 
             // Create an n vertex shape with coords set to 0
             mLastShape = new Shape3d(mCurrentShape.getNumVertices());
             if(!mLastShape.isValid()) {
-                validLastShape = false;
+                bValidLastShape = false;
             }
 
             // The Shape3d constructor will issue a message if either of these
             // objects are not successfully created.
-            if(!validCurrentShape || !validLastShape) {
+            if(!bValidCurrentShape || !bValidLastShape) {
                 this.mbValid = false;
             }
             break;
 
-        case COMPOUND: 
+        case JICTConstants.I_COMPOUND: 
             break;
         }  // switch
     } // RenderObject ctor
@@ -308,18 +288,18 @@ protected:
 
     public void finalize() {
         if(bIctDebug) {
-          Globals.statusPrint("RenderObject Destructor ");
+          Globals.statusPrint("RenderObject Destructor");
         }
     } // finalize
 
 
     // Called from:
     //     SceneList.preview
-    public void drawSequence(BufferedImage pBuffImg, String modelName, 
-    int screenHeight, int screenWidth, int frameCounter) {
+    public void drawSequence(BufferedImage pBuffImg, String psModelName, 
+    int piScreenHeight, int piScreenWidth, int piFrameCounter) {
         Graphics2D graphics2D = pBuffImg.createGraphics();
         Color blackColor;
-        boolean highlightVertices = false;
+        // boolean highlightVertices = false; // variable is not used
         int iPt1X, iPt1Y;
         int iPt2X = 0, iPt2Y = 0;
         // float referenceX, referenceY, referenceZ; // These variables are not used
@@ -331,11 +311,11 @@ protected:
 
         mLastShape.initCurrentVertex();
         Color oldColor = graphics2D.getColor();
-        int xOffset = screenWidth / 2;
-        int yOffset = screenHeight / 2;
+        int iXOffset = piScreenWidth / 2;
+        int iYOffset = piScreenHeight / 2;
       
-        if (this.miModelType == QUADMESH) {
-            previewMesh(graphics2D, modelName, xOffset, yOffset, screenHeight, screenWidth);
+        if (this.miModelType == JICTConstants.I_QUADMESH) {
+            previewMesh(graphics2D, psModelName, iXOffset, iYOffset, piScreenHeight, piScreenWidth);
             return;
         }
 
@@ -343,56 +323,56 @@ protected:
         blackColor = Color.BLACK;
         graphics2D.setColor(blackColor);
 
-        Integer firstx = 0, firsty = 0, nextx = 0, nexty = 0;
+        Integer iFirstx = 0, iFirsty = 0, iNextx = 0, iNexty = 0;
         int index;
 
         if(mCurrentShape.getNumFaces() == 0) {
-            firstx = (int)mCurrentShape.mCurrentVertex.sx;
-            firsty = (int)(screenHeight - mCurrentShape.mCurrentVertex.sy);
-            iPt1X = firstx + xOffset;
-            iPt1Y = firsty - yOffset;
+            iFirstx = (int)mCurrentShape.mCurrentVertex.sx;
+            iFirsty = (int)(piScreenHeight - mCurrentShape.mCurrentVertex.sy);
+            iPt1X = iFirstx + iXOffset;
+            iPt1Y = iFirsty - iYOffset;
             for (index = 1; index < mCurrentShape.getNumVertices(); index++) {
                 // currentShape.currentVertex++;
                 mCurrentShape.incCurrentVertex();
-                iPt2X = (int)mCurrentShape.mCurrentVertex.sx + xOffset;
-                iPt2Y = screenHeight - (int)mCurrentShape.mCurrentVertex.sy - yOffset;
+                iPt2X = (int)mCurrentShape.mCurrentVertex.sx + iXOffset;
+                iPt2Y = piScreenHeight - (int)mCurrentShape.mCurrentVertex.sy - iYOffset;
                 graphics2D.drawLine(iPt1X, iPt1Y, iPt2X, iPt2Y);
                 iPt1X = iPt2X;
                 iPt1Y = iPt2Y;
             }
             
             // Now draw a line from the last point to the first point.
-            graphics2D.drawLine(iPt2X, iPt2Y, firstx + xOffset, firsty - yOffset);
+            graphics2D.drawLine(iPt2X, iPt2Y, iFirstx + iXOffset, iFirsty - iYOffset);
         } else {  // the model has faces
             mCurrentShape.initCurrentFace();
             for (index = 1; index <= mCurrentShape.getNumFaces(); index++) {
-                mCurrentShape.getScreenVertex(mCurrentShape.mCurrentFace.i1, firstx, firsty);
-                mCurrentShape.getScreenVertex(mCurrentShape.mCurrentFace.i2, nextx, nexty);
-                iPt1X = firstx + xOffset;
-                iPt1Y = screenHeight - firsty - yOffset;
-                iPt2X = nextx + xOffset;
-                iPt2Y = screenHeight - nexty - yOffset;
+                mCurrentShape.getScreenVertex(mCurrentShape.mCurrentFace.i1, iFirstx, iFirsty);
+                mCurrentShape.getScreenVertex(mCurrentShape.mCurrentFace.i2, iNextx, iNexty);
+                iPt1X = iFirstx + iXOffset;
+                iPt1Y = piScreenHeight - iFirsty - iYOffset;
+                iPt2X = iNextx + iXOffset;
+                iPt2Y = piScreenHeight - iNexty - iYOffset;
                 graphics2D.drawLine(iPt1X, iPt1Y, iPt2X, iPt2Y);
 
-                mCurrentShape.getScreenVertex(mCurrentShape.mCurrentFace.i3, nextx, nexty);
+                mCurrentShape.getScreenVertex(mCurrentShape.mCurrentFace.i3, iNextx, iNexty);
                 iPt1X = iPt2X;
                 iPt1Y = iPt2Y;
-                iPt2X = nextx + xOffset;
-                iPt2Y = screenHeight - nexty - yOffset;
+                iPt2X = iNextx + iXOffset;
+                iPt2Y = piScreenHeight - iNexty - iYOffset;
                 graphics2D.drawLine(iPt1X, iPt1Y, iPt2X, iPt2Y);
 
-                mCurrentShape.getScreenVertex(mCurrentShape.mCurrentFace.i4, nextx, nexty);
+                mCurrentShape.getScreenVertex(mCurrentShape.mCurrentFace.i4, iNextx, iNexty);
                 iPt1X = iPt2X;
                 iPt1Y = iPt2Y;
-                iPt2X = nextx + xOffset;
-                iPt2Y = screenHeight - nexty - yOffset;
+                iPt2X = iNextx + iXOffset;
+                iPt2Y = piScreenHeight - iNexty - iYOffset;
                 graphics2D.drawLine(iPt1X, iPt1Y, iPt2X, iPt2Y);
 
                 // Now draw a line from the last point to the first point.
                 iPt1X = iPt2X;
                 iPt1Y = iPt2Y;
-                iPt2X = firstx + xOffset;
-                iPt2Y = screenHeight - firsty - yOffset;
+                iPt2X = iFirstx + iXOffset;
+                iPt2Y = piScreenHeight - iFirsty - iYOffset;
                 graphics2D.drawLine(iPt1X, iPt1Y, iPt2X, iPt2Y);
 
                 // currentShape.currentFace++;
@@ -401,17 +381,17 @@ protected:
         }
 
         // Display the model's name
-        float ax, ay;
-        ax = mCurrentShape.averageX() + mCurrentShape.mfMinX;
-        ay = screenHeight - (mCurrentShape.averageY() + mCurrentShape.mfMinY);
+        float fX, fY;
+        fX = mCurrentShape.averageX() + mCurrentShape.mfMinX;
+        fY = piScreenHeight - (mCurrentShape.averageY() + mCurrentShape.mfMinY);
         graphics2D.setColor(Color.RED); // red
-        graphics2D.drawString(modelName, (int)ax + xOffset, (int)ay - yOffset);
+        graphics2D.drawString(psModelName, (int)fX + iXOffset, (int)fY - iYOffset);
 
         // Put the frame number on the screen
-        String frameString = frameCounter + "";
+        String sFrameString = piFrameCounter + "";
 
         // 10, 10 refers to screen coordinates
-        graphics2D.drawString(frameString, 10, 10);
+        graphics2D.drawString(sFrameString, 10, 10);
         graphics2D.setColor(oldColor);
     } // drawSequence
 
@@ -419,16 +399,16 @@ protected:
     // TODO: a method?
     // Called from:
     //     SceneList.previewStill
-    void drawStill(BufferedImage pBuffImg, String psModelName, 
+    public void drawStill(BufferedImage pBuffImg, String psModelName, 
     int piScreenHeight, int piScreenWidth) {
         Graphics2D graphics2D = pBuffImg.createGraphics();
-        boolean highlightVertices = false;  // Controls whether vertices are highlighted
+        boolean bHighlightVertices = false;  // Controls whether vertices are highlighted
 
-        int xOffset = piScreenWidth / 2;
-        int yOffset = piScreenHeight / 2;
+        int iXOffset = piScreenWidth / 2;
+        int iYOffset = piScreenHeight / 2;
         
-        if (miModelType == QUADMESH) {
-            previewMesh(graphics2D, psModelName, xOffset, yOffset, piScreenHeight, piScreenWidth);
+        if (miModelType == JICTConstants.I_QUADMESH) {
+            previewMesh(graphics2D, psModelName, iXOffset, iYOffset, piScreenHeight, piScreenWidth);
             return;
         }
         
@@ -442,8 +422,8 @@ protected:
         Color backgroundColor = graphics2D.getBackground();
 
         int index;
-        float ax, ay;
-        int firstx = 0, firsty = 0, nextx = 0, nexty = 0;
+        float fX, fY;
+        int iFirstx = 0, iFirsty = 0, iNextx = 0, iNexty = 0;
         int iPt1X, iPt1Y;
         int iPt2X = 0, iPt2Y = 0;
 
@@ -458,87 +438,87 @@ protected:
         // If the shape has no faces, the vertices describe a planar element
         // If the shape has faces, draw them
         if(mCurrentShape.getNumFaces() == 0) {
-            firstx = (int)mCurrentShape.mCurrentVertex.sx;
-            firsty = (int)(piScreenHeight - mCurrentShape.mCurrentVertex.sy);
-            if(highlightVertices) {
+            iFirstx = (int)mCurrentShape.mCurrentVertex.sx;
+            iFirsty = (int)(piScreenHeight - mCurrentShape.mCurrentVertex.sy);
+            if(bHighlightVertices) {
                 drawBox(graphics2D, penColor, origColor, 
-                    firstx + xOffset, 
-                    firsty - yOffset);
+                    iFirstx + iXOffset, 
+                    iFirsty - iYOffset);
             }
 
-            iPt1X = firstx + xOffset;
-            iPt1Y = firsty - yOffset;
+            iPt1X = iFirstx + iXOffset;
+            iPt1Y = iFirsty - iYOffset;
             for (index = 1; index < mCurrentShape.getNumVertices(); index++) {
                 // currentShape.iCurrVtxIdx++;
                 mCurrentShape.incCurrentVertex();
-                iPt2X = (int)mCurrentShape.mCurrentVertex.sx + xOffset;
-                iPt2Y = piScreenHeight - (int)mCurrentShape.mCurrentVertex.sy - yOffset;
+                iPt2X = (int)mCurrentShape.mCurrentVertex.sx + iXOffset;
+                iPt2Y = piScreenHeight - (int)mCurrentShape.mCurrentVertex.sy - iXOffset;
                 graphics2D.drawLine(iPt1X, iPt1Y, iPt2X, iPt2Y);
                 iPt1X = iPt2X;
                 iPt1Y = iPt2Y;
 
-                if(highlightVertices) {
+                if(bHighlightVertices) {
                      drawBox(graphics2D, penColor, origColor, 
                         iPt2X, iPt2Y);
                 }
             } // for
             
             // Now draw a line from the last point to the first point
-            graphics2D.drawLine(iPt2X, iPt2Y, firstx + xOffset, firsty - yOffset);
+            graphics2D.drawLine(iPt2X, iPt2Y, iFirstx + iXOffset, iFirsty - iYOffset);
         } else {  // The model has faces
             mCurrentShape.initCurrentFace();
             for (index = 1; index <= mCurrentShape.getNumFaces(); index++) {
-                mCurrentShape.getScreenVertex(mCurrentShape.mCurrentFace.i1, firstx, firsty);
+                mCurrentShape.getScreenVertex(mCurrentShape.mCurrentFace.i1, iFirstx, iFirsty);
               
-                if(highlightVertices) {
+                if(bHighlightVertices) {
                     drawBox(graphics2D, penColor, origColor, 
-                        firstx + xOffset, 
-                        firsty - yOffset);
+                        iFirstx + iXOffset, 
+                        iFirsty - iYOffset);
                 }
-                iPt1X = firstx + xOffset;
-                iPt1Y = piScreenHeight - firsty - yOffset;
+                iPt1X = iFirstx + iXOffset;
+                iPt1Y = piScreenHeight - iFirsty - iYOffset;
               
-                mCurrentShape.getScreenVertex(mCurrentShape.mCurrentFace.i2, nextx, nexty);
-                iPt2X = nextx + xOffset;
-                iPt2Y = piScreenHeight - nexty - yOffset;
+                mCurrentShape.getScreenVertex(mCurrentShape.mCurrentFace.i2, iNextx, iNexty);
+                iPt2X = iNextx + iXOffset;
+                iPt2Y = piScreenHeight - iNexty - iYOffset;
                 graphics2D.drawLine(iPt1X, iPt1Y, iPt2X, iPt2Y);
 
-                if(highlightVertices) {
+                if(bHighlightVertices) {
                     drawBox(graphics2D, penColor, origColor, 
-                        nextx + xOffset, 
-                        piScreenHeight - nexty - yOffset);
+                        iNextx + iXOffset, 
+                        piScreenHeight - iNexty - iYOffset);
                 }
 
-                mCurrentShape.getScreenVertex(mCurrentShape.mCurrentFace.i3, nextx, nexty);
+                mCurrentShape.getScreenVertex(mCurrentShape.mCurrentFace.i3, iNextx, iNexty);
                 iPt1X = iPt2X;
                 iPt1Y = iPt2Y;
-                iPt2X = nextx + xOffset;
-                iPt2Y = piScreenHeight - nexty - yOffset;
+                iPt2X = iNextx + iXOffset;
+                iPt2Y = piScreenHeight - iNexty - iYOffset;
                 graphics2D.drawLine(iPt1X, iPt1Y, iPt2X, iPt2Y);
 
-                if(highlightVertices) {
+                if(bHighlightVertices) {
                     drawBox(graphics2D, penColor, origColor, 
-                        nextx + xOffset, 
-                        piScreenHeight - nexty - yOffset);
+                        iNextx + iXOffset, 
+                        piScreenHeight - iNexty - iYOffset);
                 }
 
-                mCurrentShape.getScreenVertex(mCurrentShape.mCurrentFace.i4, nextx, nexty);
+                mCurrentShape.getScreenVertex(mCurrentShape.mCurrentFace.i4, iNextx, iNexty);
                 iPt1X = iPt2X;
                 iPt1Y = iPt2Y;
-                iPt2X = nextx + xOffset;
-                iPt2Y = piScreenHeight - nexty - yOffset;
+                iPt2X = iNextx + iXOffset;
+                iPt2Y = piScreenHeight - iNexty - iYOffset;
                 graphics2D.drawLine(iPt1X, iPt1Y, iPt2X, iPt2Y);
 
-                if(highlightVertices) {
+                if(bHighlightVertices) {
                     drawBox(graphics2D, penColor, origColor, 
-                        nextx + xOffset, 
-                        piScreenHeight - nexty - yOffset);
+                        iNextx + iXOffset, 
+                        piScreenHeight - iNexty - iYOffset);
                 }
 
                 iPt1X = iPt2X;
                 iPt1Y = iPt2Y;
-                iPt2X = firstx + xOffset;
-                iPt2Y = piScreenHeight - firsty - yOffset;
+                iPt2X = iFirstx + iXOffset;
+                iPt2Y = piScreenHeight - iFirsty - iYOffset;
                 graphics2D.drawLine(iPt1X, iPt1Y, iPt2X, iPt2Y);
 
                 // currentShape.currentFace++;
@@ -547,17 +527,20 @@ protected:
         } // if
 
         // Display the model's name
-        ax = mCurrentShape.averageX() + mCurrentShape.mfMinX;
-        ay = piScreenHeight - (mCurrentShape.averageY() + mCurrentShape.mfMinY);
+        fX = mCurrentShape.averageX() + mCurrentShape.mfMinX;
+        fY = piScreenHeight - (mCurrentShape.averageY() + mCurrentShape.mfMinY);
         graphics2D.setColor(Color.RED);   // red pen
         graphics2D.setBackground(backgroundColor); 
         if(!psModelName.equals(" ")) {
-            graphics2D.drawString(psModelName, (int)ax + xOffset, (int)ay - yOffset);
+            graphics2D.drawString(psModelName, (int)fX + iXOffset, (int)fY - iYOffset);
         }
     } // drawStill
 
 
     // TODO: Not a method of RenderObject in the original C++ code
+    // Not called from within this file.
+    // Could not find where this is called from.
+    /*
     public void setPalette() {
         LPLOGPALETTE myPalette = 0;
         HPALETTE hNewPal;
@@ -580,45 +563,62 @@ protected:
         SelectPalette(hNewPal, false);
         RealizePalette();
     } // setPalette
+    */
 
 
     // TODO: Not a method of RenderObject in the original C++ code
-    void insertionSort(int theItems[], int numItems) {
-        int itemTemp;
-        int index, indexTmp, theValue;
+    // Not called from within this file
+    // Could not find where this is called from.
+    //
+    // Globals.java has 3 insertion methods
+    // public static void insertionSort2(float theItems[], SceneElement itemData[], int numItems)
+    // public static void insertionSort(int theItems[], float itemData1[], float itemData2[], float itemData3[], int numItems)
+    // public static void insertionSort(int theItems[], int itemData1[], float itemData2[], float itemData3[], float itemData4[], int numItems)
+    void insertionSort(int paiItems[], int piNumItems) {
+        int iTemp;
+        int i, iIdxTmp, iValue;
 
-        for( index = 0; index < numItems; index++ ) {
-            itemTemp = theItems[index];
-            theValue = theItems[index];
-            for(indexTmp = index; indexTmp > 0; indexTmp-- ) {
-                if( theItems[indexTmp - 1] > theValue ) {
-                    theItems[indexTmp] = theItems[indexTmp - 1];
+        for(i = 0; i < piNumItems; i++) {
+            // Try to find the right index iIdxTmp at which to store iTemp
+            iTemp = paiItems[i];
+            iValue = paiItems[i];
+            for(iIdxTmp = i; iIdxTmp > 0; iIdxTmp-- ) {
+                if( paiItems[iIdxTmp - 1] > iValue ) {
+                    paiItems[iIdxTmp] = paiItems[iIdxTmp - 1];
                 } else {
                     break;
                 }
             }
-            theItems[indexTmp] = itemTemp;
+            paiItems[iIdxTmp] = iTemp;
         }
     } // insertionSort
 
 
     // TODO: Not a method of RenderObject in the original C++ code
-    void removeDuplicates(int theList[], int listLength) {
-        int numVertices = listLength;
+    // Could not find where this method is called from.
+    //
+    // Shapes3d.java also has a removeDuplicates method:
+    // public int removeDuplicates()
+    // Globals.java also has two removeDuplicates method:
+    // public static int removeDuplicates(int theList[], float theItemData1[], float theItemData2[], float theItemData3[], Integer listLength)
+    // public static int removeDuplicates(int theList[], int theItemData1[], float theItemData2[], float theItemData3[], float theItemData4[], Integer listLength)
+    void removeDuplicates(int paiList[], int piListLength) {
+        int iNumVertices = piListLength;
 
-        if ((numVertices / 2) * 2 == numVertices) {
+        if ((iNumVertices / 2) * 2 == iNumVertices) {
             return;
         }
-        if (listLength <= 2) {
+        if (piListLength <= 2) {
             return;
         }
 
-        for (int index = 0; index + 1 < listLength; index++) {
-            if (theList[index + 1] == theList[index]) {
-                for (int index2 = index; index2 < listLength; index2++) {
-                    theList[index2] = theList[index2 + 1];
+        for (int index = 0; index + 1 < piListLength; index++) {
+            if (paiList[index + 1] == paiList[index]) {
+                for (int index2 = index; index2 < piListLength; index2++) {
+                    paiList[index2] = paiList[index2 + 1];
                 }
-                listLength--;
+
+                piListLength--;
                 index--;
             }
         }
@@ -632,72 +632,75 @@ protected:
     //
     // Called from:
     //     ImageView.onLButtonDblClk
-    public static int prepareCutout(Shape3d aShape, HWND HWindow, String imageFileName,
-    String cutoutName, int imageWidth, int imageHeight) {
+    public static int prepareCutout(Shape3d pShape, HWND HWindow, String psImageFileName,
+    String psCutoutName, int piImageWidth, int piImageHeight) {
         // Creates a cutout image, alpha image, and shape file from
         // a boundary traced by the user
-        int numVertices = aShape.getNumVertices();
+        int iNumVertices = pShape.getNumVertices();
 
         // Variable thePoints will later be used as a parameter to MemImage.drawMask,
         // where it will then be used as a parameter to the Polygon function
-        Point2d[] thePoints = new Point2d[numVertices];
-        int thePointsIdx = 0;
+        Point2d[] thePoints = new Point2d[iNumVertices];
+        int iPointsIdx = 0;
 
-        aShape.initCurrentVertex();
+        pShape.initCurrentVertex();
         // Create the points for a polygon that will become a cutout boundary
-        for(int myIndex = 0; myIndex < numVertices; myIndex++) {
-            thePoints[thePointsIdx].x = aShape.mCurrentVertex.x;
-            thePoints[thePointsIdx].y = aShape.mCurrentVertex.y;
+        for(int myIndex = 0; myIndex < iNumVertices; myIndex++) {
+            thePoints[iPointsIdx].x = pShape.mCurrentVertex.x;
+            thePoints[iPointsIdx].y = pShape.mCurrentVertex.y;
             // aShape.currentVertex++;
-            aShape.incCurrentVertex();
-            thePointsIdx++;
+            pShape.incCurrentVertex();
+            iPointsIdx++;
         }
 
         // Create a 1-bit Windows .bmp file named "OneBit.bmp"
-        MemImage maskImage = new MemImage("OneBit.bmp", imageHeight, imageWidth, RANDOM, 'W', ONEBITMONOCHROME);
-        if(!maskImage.isValid()) {
+        MemImage maskMImage = new MemImage("OneBit.bmp", 
+            piImageHeight, piImageWidth, 
+            JICTConstants.I_RANDOM, 'W', JICTConstants.I_ONEBITMONOCHROME);
+        if(!maskMImage.isValid()) {
             Globals.statusPrint("RenderObject.prepareCutout: Couldn't create 1 bit mask image");
             return 1;
         }
 
         // drawMask calls graphics2D.drawPolygon
-        int myStatus = maskImage.drawMask(thePoints, numVertices);
-        if (myStatus != 0) {
-            String msgText = "RenderObject.prepareCutout: Couldn't create 1 bit mask " + myStatus;
+        int iStatus = maskMImage.drawMask(thePoints, iNumVertices);
+        if (iStatus != 0) {
+            String msgText = "RenderObject.prepareCutout: Couldn't create 1 bit mask " + iStatus;
             Globals.statusPrint(msgText);
-            maskImage.close();
+            maskMImage.close();
             return 2;
         }
 
         // Create an 8 bit mask image
         Globals.statusPrint("RenderObject.prepareCutout: Unpacking Mask Image...");
-        MemImage unpackedMaskImage = new MemImage(imageHeight, imageWidth);
-        if(!unpackedMaskImage.isValid()) {
+        MemImage unpackedMaskMImage = new MemImage(piImageHeight, piImageWidth);
+        if(!unpackedMaskMImage.isValid()) {
             Globals.statusPrint("RenderObject.prepareCutout: Not Enough memory to create unpacked mask image");
             return 1;
         }
 
         // Unpack the 1-bit Windows bitmap to create an 8-bit Windows bitmap
-        maskImage.unPack(unpackedMaskImage);
-        if(!unpackedMaskImage.isValid()) {
+        maskMImage.unPack(unpackedMaskMImage);
+        if(!unpackedMaskMImage.isValid()) {
             Globals.statusPrint("RenderObject.prepareCutout: unpack image operation was aborted");
             return 1;
         }
 
-        maskImage.close();
+        maskMImage.close();
         // Delete the file we created earlier for maskImage
         FileUtils.deleteFile("OneBit.bmp");
         
         Globals.statusPrint("RenderObject.prepareCutout: Removing borders from mask image...");
-        MemImage originalImage = new MemImage(imageFileName, 0, 0, SEQUENTIAL, 'R', 0);
-        if(!originalImage.isValid()) {
+        MemImage originalMImage = new MemImage(psImageFileName, 0, 0, 
+            JICTConstants.I_SEQUENTIAL, 'R', 0);
+        if(!originalMImage.isValid()) {
             Globals.statusPrint("RenderObject.prepareCutout: Unable to open original image");
             return 1;
         }
 
         // The following calls Shape3d.writeShape(sShapeName) to save the shape file
-        myStatus = Globals.createCutout(originalImage, unpackedMaskImage, cutoutName, aShape);
-        if(myStatus != 0) {
+        iStatus = Globals.createCutout(originalMImage, unpackedMaskMImage, psCutoutName, pShape);
+        if(iStatus != 0) {
             Globals.statusPrint("RenderObject.prepareCutout: Unable to prepare mask and image cutouts");
             return 1;
         }
@@ -709,13 +712,13 @@ protected:
     // TODO: Not a method of RenderObject in the original C++ code
     // Called from:
     //     Globals.tweenImage
-    public static int maskFromShape(Shape3d inShape, MemImage maskImage) {
+    public static int maskFromShape(Shape3d pInShape, MemImage pMaskMImage) {
         // Create a mask image from a 2D boundary.
         // The generated image is displayed on the Cmainframe window.
         // This function could be modified use a memory DC instead.
-        int imageHeight = maskImage.getHeight();
-        int imageWidth  = maskImage.getWidth();
-        int numVertices = inShape.getNumVertices();
+        int iImageHeight = pMaskMImage.getHeight();
+        int iImageWidth  = pMaskMImage.getWidth();
+        int iNumVertices = pInShape.getNumVertices();
         
         // CWnd theWindow = AfxGetMainWnd();
         // HWND HWindow = theWindow.m_hWnd;
@@ -725,23 +728,24 @@ protected:
 
         // Variable thePoints will be used later as a parameter to MemImage.drawMask, 
         // where it will then be used as a parameter to the Polygon function
-        Point2d[] thePoints = new Point2d[numVertices];
+        Point2d[] thePoints = new Point2d[iNumVertices];
         int thePointsIdx = 0;
-        inShape.initCurrentVertex();
+        pInShape.initCurrentVertex();
 
         // Populate array thePoints. This array will later be used as a parameter
         // to MemImage.drawMask, where it will be used to draw a polygon.
-        for(int myIndex = 0; myIndex < numVertices; myIndex++) {
-            thePoints[thePointsIdx].x = inShape.mCurrentVertex.x;
-            thePoints[thePointsIdx].y = inShape.mCurrentVertex.y;
+        for(int myIndex = 0; myIndex < iNumVertices; myIndex++) {
+            thePoints[thePointsIdx].x = pInShape.mCurrentVertex.x;
+            thePoints[thePointsIdx].y = pInShape.mCurrentVertex.y;
             // inShape.currentVertex++;
-            inShape.incCurrentVertex();
+            pInShape.incCurrentVertex();
             thePointsIdx++;
         }
 
-        MemImage tempMaskImage = new MemImage("OneBit.bmp", imageHeight, imageWidth,
-            RANDOM, 'W', ONEBITMONOCHROME);  //Memory, write, 1 bit
-        if(!tempMaskImage.isValid()) {
+        MemImage tempMaskMImage = new MemImage("OneBit.bmp", 
+            iImageHeight, iImageWidth,
+            JICTConstants.I_RANDOM, 'W', JICTConstants.I_ONEBITMONOCHROME);  //Memory, write, 1 bit
+        if(!tempMaskMImage.isValid()) {
             Globals.statusPrint("RenderObject.maskFromShape: Couldn't create 1 bit mask image");
             return 1;
         }
@@ -749,18 +753,18 @@ protected:
         // HDC memoryDC = CreateCompatibleDC();
 
         // Use the Graphics2D.drawPolygon method to draw the points
-        int myStatus = tempMaskImage.drawMask(thePoints, numVertices);
+        int iStatus = tempMaskMImage.drawMask(thePoints, iNumVertices);
 
-        if (myStatus != 0) {
-            String msgText = "RenderObject.maskFromShape: Couldn't create 1 bit mask " + myStatus;
-            Globals.statusPrint(msgText);
-            tempMaskImage.close();
+        if (iStatus != 0) {
+            String sMsgText = "RenderObject.maskFromShape: Couldn't create 1 bit mask " + iStatus;
+            Globals.statusPrint(sMsgText);
+            tempMaskMImage.close();
             return 2;
         }
 
         // Create an unpacked (8 bit) mask image
         // statusPrint("maskFromShape: Unpacking Mask Image...");
-        tempMaskImage.unPack(maskImage);
+        tempMaskMImage.unPack(pMaskMImage);
         FileUtils.deleteFile("OneBit.bmp");
 
         return 0;
@@ -801,9 +805,9 @@ protected:
     // See p 172 of Visual Special Effects Toolkit in C++.
     // Called from:
     //     drawStill
-    void previewMesh(Graphics2D graphics2D, String modelName, 
-    float xOff, float yOff, 
-    int screenHeight, int screenWidth) {
+    void previewMesh(Graphics2D pGraphics2D, String psModelName, 
+    float pfXOff, float pfYOff, // are these 2 parameters used?
+    int piScreenHeight, int piScreenWidth) {
         // Create the line buffer data structure
         int[] xBuffer, yBuffer;
         int xBufferIdx, yBufferIdx;
@@ -858,7 +862,7 @@ protected:
         yBufferIdx = 0;
         iBufferIdx = 0;
 
-        graphics2D.setColor(Color.BLACK);
+        pGraphics2D.setColor(Color.BLACK);
 
         // int xOffset = (int)(xOff + 0.5f); // this variable is not used
         // int yOffset = (int)(yOff + 0.5f); // this variable is not used
@@ -888,7 +892,7 @@ protected:
                 mMatrix.transformAndProjectPoint(x1, y1, z1, 
                     sx1, sy1, 
                     refX, refY, refZ, 
-                    screenHeight, screenWidth, 
+                    piScreenHeight, piScreenWidth, 
                     tx, ty, tz);
                 
                 if((row == 1) && (col == 1)) {	// Initialize the projected mesh bounding box
@@ -945,22 +949,22 @@ protected:
                     // Draw only if the texture is not transparent 
                     if((iPrev2Idx != 0) && (iTemp2 != 0) && (iTemp1 != 0)) {
                           if(row == (meshIncrement + 1)) {   // draw the first row
-                              graphics2D.drawLine(
-                                  xPrev1Idx, screenHeight - (yPrev1Idx),
-                                  xPrev2Idx, screenHeight - (yPrev2Idx));
+                              pGraphics2D.drawLine(
+                                  xPrev1Idx, piScreenHeight - (yPrev1Idx),
+                                  xPrev2Idx, piScreenHeight - (yPrev2Idx));
                           }
                           if(col == (meshIncrement + 1)) {  // draw the first column
-                              graphics2D.drawLine(
-                                  xPrev1Idx, screenHeight - (yPrev1Idx),
-                                  xTemp1, screenHeight - yTemp1);
+                              pGraphics2D.drawLine(
+                                  xPrev1Idx, piScreenHeight - (yPrev1Idx),
+                                  xTemp1, piScreenHeight - yTemp1);
                           }
 
-                          graphics2D.drawLine(
-                              xPrev2Idx, screenHeight - (yPrev2Idx),
-                              xTemp2, screenHeight - yTemp2);
-                          graphics2D.drawLine(
-                              xTemp2, screenHeight - yTemp2,
-                              xTemp1, screenHeight - yTemp1);
+                          pGraphics2D.drawLine(
+                              xPrev2Idx, piScreenHeight - (yPrev2Idx),
+                              xTemp2, piScreenHeight - yTemp2);
+                          pGraphics2D.drawLine(
+                              xTemp2, piScreenHeight - yTemp2,
+                              xTemp1, piScreenHeight - yTemp1);
                     }
 
                     xBuffer[xPrev1Idx] = xTemp1;
@@ -988,10 +992,10 @@ protected:
         } // for row
 
         // Display the name in the center of the projected model
-        int xText = sxMin + ((sxMax - sxMin)/2);
-        int yText = screenHeight - (syMin + ((syMax - syMin)/2));
-        graphics2D.setColor(Color.RED); // red
-        graphics2D.drawString(modelName, xText, yText);
+        int iXText = sxMin + ((sxMax - sxMin)/2);
+        int iYText = piScreenHeight - (syMin + ((syMax - syMin)/2));
+        pGraphics2D.setColor(Color.RED); // red
+        pGraphics2D.drawString(psModelName, iXText, iYText);
     } // previewMesh
 
 
@@ -1001,8 +1005,8 @@ protected:
     // 6 parameters: a String, 4 MemImage ojbects, and a TMatrix.
     // Called from:
     //     SceneList.render
-    public int renderMesh(MemImage outputImage, MemImage inputImage, 
-    boolean blendIndicator) {
+    public int renderMesh(MemImage pOutputMImage, MemImage pInputMImage, 
+    boolean pbBlendIndicator) { // parameter pbBlendIndicator is not used
         // Create the line buffer data structure
         int[] xBuffer, yBuffer;
         int xBufferIdx, yBufferIdx;
@@ -1040,7 +1044,7 @@ protected:
         }
         */
 
-        iBuffer = new byte[inputImage.getWidth()];
+        iBuffer = new byte[pInputMImage.getWidth()];
         /* Dead code, per the compiler
         if (iBuffer == null) {
             Globals.statusPrint("renderMesh: Not enough memory for iBuffer");
@@ -1052,10 +1056,10 @@ protected:
         yBufferIdx = 0;
         iBufferIdx = 0;
 
-        int imHeight  = inputImage.getHeight();
-        int imWidth   = inputImage.getWidth();
-        int outHeight = outputImage.getHeight();
-        int outWidth  = outputImage.getWidth();
+        int imHeight  = pInputMImage.getHeight();
+        int imWidth   = pInputMImage.getWidth();
+        int outHeight = pOutputMImage.getHeight();
+        int outWidth  = pOutputMImage.getWidth();
         int row, col;
         float x1, y1, z1;
         Float tx = 0f, ty = 0f, tz = 0f;
@@ -1075,7 +1079,7 @@ protected:
                 x1 = mXImage.getMPixel32(col, row);
                 y1 = mYImage.getMPixel32(col, row);
                 z1 = mZImage.getMPixel32(col, row);
-                i1 = inputImage.getMPixel(col, row);
+                i1 = pInputMImage.getMPixel(col, row);
 
                 // Project to the screen
                 mMatrix.transformAndProjectPoint(x1, y1, z1, sx1, sy1, 
@@ -1122,7 +1126,7 @@ protected:
                     iTemp2 = i1;
            
                     // Render the quadrangle
-                    outputImage.fillPolyz(
+                    pOutputMImage.fillPolyz(
                         xPrev1Idx, yPrev1Idx, iPrev1Idx, 0.0f,
                         xPrev2Idx, yPrev2Idx, iPrev2Idx, 0.0f,
                         xTemp2,    yTemp2,    iTemp2,    0.0f,
@@ -1155,8 +1159,9 @@ protected:
 
     // Called from:
     //     SceneList.render
-    public int renderMeshz(MemImage outputImage, MemImage maskImage, 
-    MemImage inputImage, MemImage zBuffer, float vx, float vy, float vz) {
+    public int renderMeshz(MemImage pOutputMImage, 
+    MemImage pMaskMImage, // this parameter is not used
+    MemImage pInputMImage, MemImage pZBuffMImage, float pfVx, float pfVy, float pfVz) {
         String msgText;
 
         //  create the line buffer data structures
@@ -1207,7 +1212,7 @@ protected:
         }
         */
 
-        iBuffer = new byte[inputImage.getWidth()];
+        iBuffer = new byte[pInputMImage.getWidth()];
         /* Dead code, per compiler
         if (iBuffer == null) {
             Globals.statusPrint("RenderObject.renderMeshz: Not enough memory for iBuffer");
@@ -1215,32 +1220,32 @@ protected:
         }
         */
 
-        MemImage midImage = new MemImage(outputImage.getHeight(), outputImage.getWidth());
+        MemImage midImage = new MemImage(pOutputMImage.getHeight(), pOutputMImage.getWidth());
         if(!midImage.isValid()) {
             Globals.statusPrint("RenderObject.renderMeshZ: Not enough memory to open intermediate image");
             return -1;
         }
 
         midImage.setFileName("midImage");
-        MemImage midZImage = new MemImage(outputImage.getHeight(), outputImage.getWidth(), 32);
+        MemImage midZImage = new MemImage(pOutputMImage.getHeight(), pOutputMImage.getWidth(), 32);
         if(!midZImage.isValid()) {
             Globals.statusPrint("RenderObject.renderMeshZ: Not enough memory to open intermediate Z image");
             return -1;
         }
 
         midZImage.setFileName("midZImage");
-        midZImage.init32(ZBUFFERMAXVALUE);
-        int imHeight  = inputImage.getHeight();
-        int imWidth   = inputImage.getWidth();
-        int outHeight = outputImage.getHeight();
-        int outWidth  = outputImage.getWidth();
+        midZImage.init32(JICTConstants.F_ZBUFFERMAXVALUE);
+        int imHeight  = pInputMImage.getHeight();
+        int imWidth   = pInputMImage.getWidth();
+        int outHeight = pOutputMImage.getHeight();
+        int outWidth  = pOutputMImage.getWidth();
 
         //  Temporary - for testing
-        vx = (float)outWidth/2.0f;
-        vy = (float)outHeight/2.0f;
-        vz = 512.0f;
+        pfVx = (float)outWidth/2.0f;
+        pfVy = (float)outHeight/2.0f;
+        pfVz = 512.0f;
 
-        msgText = String.format("RenderObject.renderMeshz: Viewer location - vx: %f, vy: %f, vz: %f", vx, vy, vz);
+        msgText = String.format("RenderObject.renderMeshz: Viewer location - vx: %f, vy: %f, vz: %f", pfVx, pfVy, pfVz);
         Globals.statusPrint(msgText);
         xBufferIdx = 0;
         yBufferIdx = 0;
@@ -1277,7 +1282,7 @@ protected:
                 x1 = mXImage.getMPixel32(col, row);
                 y1 = mYImage.getMPixel32(col, row);
                 z1 = mZImage.getMPixel32(col, row);
-                i1 = inputImage.getMPixel(col, row);
+                i1 = pInputMImage.getMPixel(col, row);
 
                 // Project to the screen
                 mMatrix.transformAndProjectPoint(x1, y1, z1, sx1, sy1, 
@@ -1295,7 +1300,7 @@ protected:
                     iBuffer[iBufferIdx] = i1;
                     iBufferIdx++;
 
-                    dBuffer[dBufferIdx] = MathUtils.getDistance3d(tx, ty, tz, vx, vy, vz);
+                    dBuffer[dBufferIdx] = MathUtils.getDistance3d(tx, ty, tz, pfVx, pfVy, pfVz);
                     dBufferIdx++;
                 }
               
@@ -1321,7 +1326,7 @@ protected:
                     dPrev2Idx = 0;
                     dPrev2Idx++;
 
-                    dTemp1 = MathUtils.getDistance3d(tx, ty, tz, vx, vy, vz);
+                    dTemp1 = MathUtils.getDistance3d(tx, ty, tz, pfVx, pfVy, pfVz);
                 }
       
                 if (row > 1 && col > 1) {
@@ -1329,7 +1334,7 @@ protected:
                     yTemp2 = sy1;
                     iTemp2 = i1;
 
-                    dTemp2 = MathUtils.getDistance3d(tx, ty, tz, vx, vy, vz);
+                    dTemp2 = MathUtils.getDistance3d(tx, ty, tz, pfVx, pfVy, pfVz);
                                   
                     // Render the quadrangle intensities
                     //                     
@@ -1474,13 +1479,13 @@ protected:
         //
 
         // First, create the matte image
-        MemImage matte = new MemImage(outputImage.getHeight(), outputImage.getWidth());
+        MemImage matte = new MemImage(pOutputMImage.getHeight(), pOutputMImage.getWidth());
         midImage.createAlphaImage(matte);
         Globals.statusPrint("RenderObject.renderMeshz: Creating a matte for the rendered quad mesh");
         matte.alphaSmooth5();
 
         float alphaScale = 1.0f;
-        Globals.blendz(midImage, matte, midZImage, zBuffer, outputImage, alphaScale);
+        Globals.blendz(midImage, matte, midZImage, pZBuffMImage, pOutputMImage, alphaScale);
 
         return 0;
     } // renderMeshz
@@ -1490,11 +1495,13 @@ protected:
     //     transformAndProject (the method which takes 3 parameters)
     //     SceneList.previewStill
     public void transformAndProject(TMatrix pTMatrix, int piOutHeight, int piOutWidth,
-    boolean externalCentroid,
+    boolean pbExternalCentroid,
     float pfCentroidX, float pfCentroidY, float pfCentroidZ) {
-        if((this.miModelType == SHAPE) || (this.miModelType == IMAGE)) {
+        if(
+        (this.miModelType == JICTConstants.I_SHAPE) || 
+        (this.miModelType == JICTConstants.I_IMAGE)) {
             pTMatrix.transformAndProject(mCurrentShape, piOutHeight, piOutWidth, 
-                externalCentroid,
+                pbExternalCentroid,
                 pfCentroidX, pfCentroidY, pfCentroidZ);
         } else {
             // Copy the transformation matrix for later use
@@ -1514,6 +1521,7 @@ protected:
     }
 
     // TODO: Not a method of RenderObject in the original C++ code
+    // Could not find where this method is called from.
     void transformAndProjectPoint2(TMatrix pTMatrix, float pfX, float pfY, float pfZ, 
     Integer sx, Integer sy, 
     float pfRefX, float pfRefY, float pfRefZ, 
@@ -1565,46 +1573,47 @@ protected:
     // TODO: Not a method of RenderObject in the original C++ code
     // Called from:
     //     drawStill
-    void drawBox(Graphics2D graphics2D, Color pPenColor, Color pOrigColor, int x, int y) {
+    void drawBox(Graphics2D pGraphics2D, Color pPenColor, Color pOrigColor, int piX, int piY) {
         //  Draw a box 2 * offset + 1 pixels wide and high around the point x,y
-        int offset = 2;
+        int iOffset = 2;
         int iPt1X, iPt1Y;
         int iPt2X, iPt2Y;
-        graphics2D.setColor(pPenColor);
+        pGraphics2D.setColor(pPenColor);
 
-        iPt1X = x - offset;
-        iPt1Y = y + offset;
-        iPt2X = x + offset;
-        iPt2Y = y + offset;
-        graphics2D.drawLine(iPt1X, iPt1Y, iPt2X, iPt2Y);
-
-        iPt1X = iPt2X;
-        iPt1Y = iPt2Y;
-        iPt2X = x + offset;
-        iPt2Y = y - offset;
-        graphics2D.drawLine(iPt1X, iPt1Y, iPt2X, iPt2Y);
+        iPt1X = piX - iOffset;
+        iPt1Y = piY + iOffset;
+        iPt2X = piX + iOffset;
+        iPt2Y = piY + iOffset;
+        pGraphics2D.drawLine(iPt1X, iPt1Y, iPt2X, iPt2Y);
 
         iPt1X = iPt2X;
         iPt1Y = iPt2Y;
-        iPt2X = x - offset;
-        iPt2Y = y - offset;
-        graphics2D.drawLine(iPt1X, iPt1Y, iPt2X, iPt2Y);
+        iPt2X = piX + iOffset;
+        iPt2Y = piY - iOffset;
+        pGraphics2D.drawLine(iPt1X, iPt1Y, iPt2X, iPt2Y);
 
         iPt1X = iPt2X;
         iPt1Y = iPt2Y;
-        iPt2X = x - offset;
-        iPt2Y = y + offset;
-        graphics2D.drawLine(iPt1X, iPt1Y, iPt2X, iPt2Y);
+        iPt2X = piX - iOffset;
+        iPt2Y = piY - iOffset;
+        pGraphics2D.drawLine(iPt1X, iPt1Y, iPt2X, iPt2Y);
+
+        iPt1X = iPt2X;
+        iPt1Y = iPt2Y;
+        iPt2X = piX - iOffset;
+        iPt2Y = piY + iOffset;
+        pGraphics2D.drawLine(iPt1X, iPt1Y, iPt2X, iPt2Y);
 
         // MoveToEx(x, y); // this doesn't actually draw anything
-        graphics2D.setColor(pOrigColor);
+        pGraphics2D.setColor(pOrigColor);
     } // drawBox
 
 
     // Not called from within this file
     // Called from:
     //     SceneList.render
-    public int renderShape(MemImage outputImage, boolean blendIndicator) {
+    // TODO: Parameter pbBlendIndicator is not used
+    public int renderShape(MemImage pOutputMImage, boolean pbBlendIndicator) {
         if(mCurrentShape.getNumFaces() == 0) {
             Globals.statusPrint("RenderObject.renderShape: Shape has no faces - cannot be rendered");
             return 0;
@@ -1633,7 +1642,7 @@ protected:
 
             // Draw the face
             if (index4 > 0) {
-                outputImage.fillPolyz(
+                pOutputMImage.fillPolyz(
                     sx1, sy1, I1p, 0.0f, 
                     sx2, sy2, I2p, 0.0f, 
                     sx3, sy3, I3p, 0.0f, 
@@ -1653,8 +1662,8 @@ protected:
     // Not called from within this file
     // Called from:
     //     SceneList.render
-    public int renderShapez(MemImage outputImage, 
-    MemImage alphaImage, MemImage zBuffer, 
+    public int renderShapez(MemImage pOutputMImage, 
+    MemImage pAlphaMImage, MemImage pZBufMImage, 
     float vx, float vy, float vz) {
         
         //  The shape object is already transformed upon entry to this procedure
@@ -1680,8 +1689,8 @@ protected:
             Globals.statusPrint("RenderObject.renderShapez: Shape has no faces - cannot be rendered");
             return 0;
         }
-        int yo = outputImage.getHeight() / 2;
-        int xo = outputImage.getWidth() / 2;
+        int yo = pOutputMImage.getHeight() / 2;
+        int xo = pOutputMImage.getWidth() / 2;
 
         mCurrentShape.initCurrentFace();
         for (index = 1; index <= mCurrentShape.getNumFaces(); index++) {
@@ -1715,12 +1724,12 @@ protected:
                 p4.x = tx4; p4.y = ty4; p4.z = tz4;
                 I1p = Globals.getLight(p1, p2, p3, p4);
 
-                outputImage.fillPolyz(
+                pOutputMImage.fillPolyz(
                     sx1 + xo, sy1 + yo, I1p, I1d,
                     sx2 + xo, sy2 + yo, I1p, I2d, 
                     sx3 + xo, sy3 + yo, I1p, I3d, 
                     sx4 + xo, sy4 + yo, I1p, I4d,
-                    zBuffer);
+                    pZBufMImage);
             } else { 
                 //its a triangle
             }
@@ -1730,33 +1739,4 @@ protected:
 
         return 0;
     } // renderShapez
-
-
-    public int sizeofLowerLimit() {
-        int mySize = 0;
-        int booleanFieldsSizeInBits = 0;
-        int booleanFieldsSize = 0;
-        int intFieldsSize = 0;
-        int floatFieldsSize = 0;
-        int referenceFieldsSize = 0;
-
-        /*
-        boolean ictdebug = false;
-        boolean valid;
-        int modelType;		// a copy of the sceneElement model Type
-        Shape3d currentShape;
-        Shape3d lastShape;
-        MemImage textureImage, xImage, yImage, zImage;
-        TMatrix m_matrix; 
-        */
-
-        booleanFieldsSizeInBits = 2; // 2 booleans
-        booleanFieldsSize = 1; // 2 bits fit in a byte
-        intFieldsSize = 1*4; // 1 ints
-        floatFieldsSize = 0*4; // 0 floats
-        referenceFieldsSize = 7*4; // 7 references to objects
-        mySize = booleanFieldsSize + intFieldsSize + floatFieldsSize + referenceFieldsSize;
-
-        return mySize;
-    } // sizeofLowerLimit
 } // class RenderObject
