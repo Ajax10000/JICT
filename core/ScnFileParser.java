@@ -3,6 +3,7 @@ package core;
 import fileUtils.FileUtils;
 
 import globals.Globals;
+import globals.JICTConstants;
 
 import java.awt.Color;
 import java.io.File;
@@ -16,43 +17,11 @@ import java.util.StringTokenizer;
 import structs.Point3d;
 
 public class ScnFileParser {
-    private SceneList sceneList;
-
-    // These were defined in SCENELST.H
-    public static final int MONOCHROME = 1;
-    public static final int COLOR      = 2;
-
-    // Effect Types
-    // These were defined in ICT20.H
-    public static final int STILL    = 1;
-    public static final int SEQUENCE = 2;
-    public static final int MORPH    = 3;
-
-    // Model Types
-    // These were defined in ICT20.H
-    public static final int IMAGE       = 1;
-    public static final int SHAPE       = 2;
-    public static final int QUADMESH    = 3;
-    public static final int COMPOUND    = 4;
-    public static final int LIGHTSOURCE = 5;
-
-    // These were defined in MEMIMAGE.H
-    public static final int REDCOLOR = 1;
-    public static final int GREENCOLOR = 2;
-    public static final int BLUECOLOR = 3;
-    public static final int EIGHTBITMONOCHROME = 2;
-    public static final int A32BIT = 4;
-    public static final int RGBCOLOR = 5;
-    public static final int ONEBITMONOCHROME = 6;
-
-    // These were defined in MEMIMAGE.H
-    public static final int SEQUENTIAL = 1;
-    public static final int RANDOM = 0;
-
+    private SceneList mSceneList;
 
     // Called from MainFrame.onToolsCreateASceneList
     public ScnFileParser(SceneList sceneList) {
-        this.sceneList = sceneList;
+        this.mSceneList = sceneList;
     } // ScnFileParser ctor
 
 
@@ -170,10 +139,10 @@ public class ScnFileParser {
                     theSequence = 1;
                     if(effectType != null) {
                         if(effectType.equalsIgnoreCase("SEQUENCE")) {
-                            theSequence = SEQUENCE;
+                            theSequence = JICTConstants.I_SEQUENCE;
                         }
                         if(effectType.equalsIgnoreCase("MORPH")) {
-                            theSequence = MORPH;
+                            theSequence = JICTConstants.I_MORPH;
                         }
                     } else {
                         errorText = "A Sequence must have a name. Line " + lineCounter;
@@ -193,11 +162,11 @@ public class ScnFileParser {
                     // scene <sceneName> [Sequence|Still] <outHeight>, <outWidth> [Color|Mono]
                     aColorMode = strtok.nextToken();
                     // Assume "Mono"
-                    theColorMode = MONOCHROME;
+                    theColorMode = JICTConstants.I_MONOCHROME;
                     if(aColorMode != null) {
                         if(aColorMode.equalsIgnoreCase("COLOR")) { 
                             // We assumed wrong, so we correct our assumption.
-                            theColorMode = COLOR;
+                            theColorMode = JICTConstants.I_COLOR;
                         }
                     } else {
                         // We expected Color or Mono. We didn't find anything.
@@ -332,7 +301,9 @@ public class ScnFileParser {
                 return -1;
             }
 
-            myStatus = sceneList.addScene(theSceneName, theSequence, outImageCols, outImageRows, theColorMode, rt, tr, theMotionPath);
+            myStatus = mSceneList.addScene(theSceneName, theSequence, 
+                outImageCols, outImageRows, theColorMode, 
+                rt, tr, theMotionPath);
             if(myStatus != 0) {
                 errorText = "Could not add Scene to Scene List. Line " + lineCounter;
                 // errorText will be printed with Global.statusPrint by the caller.
@@ -341,11 +312,11 @@ public class ScnFileParser {
                 return -1;
             }
 
-            theType = IMAGE;
+            theType = JICTConstants.I_IMAGE;
             theMotionPath = "";
             theFileName = "";
             int nModels = 0;
-            String aModelName, aBlend, aWarp, aScale, aScaleValue, aType;
+            String sModelName, sBlend, sWarp, sScale, sScaleValue, sType;
             theBlend = true;
             theWarp = true;
             theAlpha = 1.0f;
@@ -375,7 +346,8 @@ public class ScnFileParser {
                         // file name to point to the color corrected image.
                         // AdjustColor [Target|Relative] <R> <G> <B>
                         if(adjustmentType.equalsIgnoreCase("None")) {
-                            MemImage inputImage = new MemImage(theFileName, 0, 0, RANDOM, 'R', RGBCOLOR);
+                            MemImage inputImage = new MemImage(theFileName, 0, 0, 
+                                JICTConstants.I_RANDOM, 'R', JICTConstants.I_RGBCOLOR);
                             if (!inputImage.isValid()) {
                                 msgBuffer = "sceneList.readList: Can't open image for color correction: " + theFileName;
                                 Globals.statusPrint(msgBuffer);
@@ -395,12 +367,17 @@ public class ScnFileParser {
                             correctedImage.writeBMP(colorAdjustedPath);
                         }
 
-                        if(compoundMMember == 1 && theType == COMPOUND) compoundMember = false;
-                        if(compoundMMember == 1 && theType != COMPOUND) compoundMember = true;
+                        if(compoundMMember == 1 && theType == JICTConstants.I_COMPOUND) compoundMember = false;
+                        if(compoundMMember == 1 && theType != JICTConstants.I_COMPOUND) compoundMember = true;
 
-                        myStatus = sceneList.addSceneElement(theModelName, theFileName, theBlend, theType,
-                            theWarp, theAlpha, rt, sc, tr, theMotionPath, theAlphaPath,
-                            compoundMember, anAdjustment, adjustmentType, colorAdjustedPath,
+                        myStatus = mSceneList.addSceneElement(theModelName, theFileName, 
+                            theBlend, theType,
+                            theWarp, theAlpha, 
+                            rt, sc, tr, 
+                            theMotionPath, theAlphaPath,
+                            compoundMember, 
+                            anAdjustment, adjustmentType, 
+                            colorAdjustedPath,
                             definedRefPoint, pointOfReference);
                         if(compoundMMember == 0) {
                             compoundMember = false;
@@ -418,7 +395,7 @@ public class ScnFileParser {
                         theBlend = true; 
                         theWarp = true; 
                         theAlpha = 1.0f; 
-                        theType = IMAGE;
+                        theType = JICTConstants.I_IMAGE;
                         definedRefPoint = false;
                         theMotionPath = "";
                         theFileName = "";
@@ -429,36 +406,36 @@ public class ScnFileParser {
                     // Look for the model name:
                     // Model <modelName> [Blend|NoBlend] [Warp|NoWarp] AlphaScale <alpha> [Image|Shape|QuadMesh|Sequence]
                     // aModelName = strtok(TheText+6, BLANK);
-                    aModelName = strtok.nextToken();
+                    sModelName = strtok.nextToken();
 
                     // If the modelName is ".", set it to an empty string
                     // causing the model to be displayed without a label
-                    if(aModelName.equalsIgnoreCase(".")) {
+                    if(sModelName.equalsIgnoreCase(".")) {
                         theModelName = "";
                     } else {
-                        theModelName = aModelName;
+                        theModelName = sModelName;
                     }
 
                     // Look for the BLEND specification (i.e., [Blend|NoBlend]):
                     // Model <modelName> [Blend|NoBlend] [Warp|NoWarp] AlphaScale <alpha> [Image|Shape|QuadMesh|Sequence]
-                    aBlend      = strtok.nextToken();
+                    sBlend      = strtok.nextToken();
 
                     // Look for the Warp/NoWarp specification (i.e., [Warp|NoWarp]):
                     // Model <modelName> [Blend|NoBlend] [Warp|NoWarp] AlphaScale <alpha> [Image|Shape|QuadMesh|Sequence]
-                    aWarp       = strtok.nextToken();
+                    sWarp       = strtok.nextToken();
 
                     // Look for the AlphaScale specification (i.e., AlphaScale <alpha>):
                     // Model <modelName> [Blend|NoBlend] [Warp|NoWarp] AlphaScale <alpha> [Image|Shape|QuadMesh|Sequence]
-                    aScale      = strtok.nextToken();
-                    aScaleValue = strtok.nextToken();
+                    sScale      = strtok.nextToken();
+                    sScaleValue = strtok.nextToken();
 
                     // Look for the model type (i.e., for [Image|Shape|QuadMesh|Sequence]):
                     // Model <modelName> [Blend|NoBlend] [Warp|NoWarp] AlphaScale <alpha> [Image|Shape|QuadMesh|Sequence]
-                    aType       = strtok.nextToken();
+                    sType       = strtok.nextToken();
 
                     theBlend = true;
-                    if(aBlend != null) {
-                        if(aBlend.equalsIgnoreCase("NOBLEND")) { 
+                    if(sBlend != null) {
+                        if(sBlend.equalsIgnoreCase("NOBLEND")) { 
                             theBlend = false;
                         }
                     } else {
@@ -470,8 +447,8 @@ public class ScnFileParser {
                     }
 
                     theWarp = true;
-                    if(aWarp != null) {
-                        if(aWarp.equalsIgnoreCase("NOWARP")) { 
+                    if(sWarp != null) {
+                        if(sWarp.equalsIgnoreCase("NOWARP")) { 
                             theWarp = false;
                         }
                     } else {
@@ -483,9 +460,9 @@ public class ScnFileParser {
                     }
 
                     theAlpha = 1.0f;
-                    if(aScale != null) {
-                        if(aScale.equalsIgnoreCase("ALPHASCALE")) {
-                            theAlpha = Float.parseFloat(aScaleValue);
+                    if(sScale != null) {
+                        if(sScale.equalsIgnoreCase("ALPHASCALE")) {
+                            theAlpha = Float.parseFloat(sScaleValue);
                         }
                     } else {
                         errorText = "Missing value or term on Line " + lineCounter;
@@ -497,13 +474,13 @@ public class ScnFileParser {
 
                     // Look for the model type (i.e., [Image|Shape|QuadMesh|Sequence]):
                     // Model <modelName> [Blend|NoBlend] [Warp|NoWarp] AlphaScale <alpha> [Image|Shape|QuadMesh|Sequence]
-                    theType = IMAGE;
-                    if(aType != null) {
-                        if(aType.equalsIgnoreCase("SHAPE"))    theType = SHAPE;
-                        if(aType.equalsIgnoreCase("QUADMESH")) theType = QUADMESH;
-                        if(aType.equalsIgnoreCase("SEQUENCE")) theType = SEQUENCE;
-                        if(aType.equalsIgnoreCase("COMPOUND")) {
-                            theType = COMPOUND;
+                    theType = JICTConstants.I_IMAGE;
+                    if(sType != null) {
+                        if(sType.equalsIgnoreCase("SHAPE"))    theType = JICTConstants.I_SHAPE;
+                        if(sType.equalsIgnoreCase("QUADMESH")) theType = JICTConstants.I_QUADMESH;
+                        if(sType.equalsIgnoreCase("SEQUENCE")) theType = JICTConstants.I_SEQUENCE;
+                        if(sType.equalsIgnoreCase("COMPOUND")) {
+                            theType = JICTConstants.I_COMPOUND;
                             compoundMMember = 1;
                         }
                     } else {
@@ -711,7 +688,7 @@ public class ScnFileParser {
                             closeLineNumberReader(filein);
                             return -1;
                         }
-                        sceneList.setSceneOutImageSize(outImageRows, outImageCols);
+                        mSceneList.setSceneOutImageSize(outImageRows, outImageCols);
                         getOutImageSizeFlag = false;
                     }
                     notFound = FALSE;
@@ -736,7 +713,8 @@ public class ScnFileParser {
                     // adjust it now and change the input image
                     // file name to point to the color corrected image.
                     if(adjustmentType.equalsIgnoreCase("None")) {
-                        MemImage inputImage = new MemImage(theFileName, 0, 0, RANDOM, 'R', RGBCOLOR);
+                        MemImage inputImage = new MemImage(theFileName, 0, 0, 
+                            JICTConstants.I_RANDOM, 'R', JICTConstants.I_RGBCOLOR);
                         if (!inputImage.isValid()) {
                             msgBuffer = "sceneList.readList: Can't open image for color correction: " + theFileName;
                             Globals.statusPrint(msgBuffer);
@@ -756,12 +734,15 @@ public class ScnFileParser {
                         correctedImage.writeBMP(colorAdjustedPath);
                     }
 
-                    if(compoundMMember == 1 && theType == COMPOUND) compoundMember = false;
-                    if(compoundMMember == 1 && theType != COMPOUND) compoundMember = true;
+                    if(compoundMMember == 1 && theType == JICTConstants.I_COMPOUND) compoundMember = false;
+                    if(compoundMMember == 1 && theType != JICTConstants.I_COMPOUND) compoundMember = true;
 
-                    myStatus = sceneList.addSceneElement(theModelName, theFileName, theBlend, theType,
-                        theWarp, theAlpha, rt, sc, tr, theMotionPath, theAlphaPath,
-                        compoundMember, anAdjustment, adjustmentType, colorAdjustedPath,
+                    myStatus = mSceneList.addSceneElement(theModelName, theFileName, theBlend, theType,
+                        theWarp, theAlpha, 
+                        rt, sc, tr, 
+                        theMotionPath, theAlphaPath,
+                        compoundMember, anAdjustment, adjustmentType, 
+                        colorAdjustedPath,
                         definedRefPoint, pointOfReference);
                     if(compoundMMember == 0) compoundMember = false;
 
