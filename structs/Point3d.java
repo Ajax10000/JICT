@@ -5,10 +5,10 @@ import globals.Globals;
 public class Point3d {
     public float x, y, z;
 
-    // This method came from VECTOR.CPP
-    public void display(String message) {
-        String msgText = message + "  x: " + x + "  y: " + y + "  z: " + z;
-        Globals.statusPrint(msgText);
+    // This method originally came from VECTOR.CPP
+    public void display(String psMessage) {
+        String sMsgText = psMessage + "  x: " + x + "  y: " + y + "  z: " + z;
+        Globals.statusPrint(sMsgText);
     } // display
     
 
