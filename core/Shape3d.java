@@ -8,9 +8,14 @@ import globals.Preference;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.LineNumberReader;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+
+import java.nio.file.Path;
 
 import java.util.StringTokenizer;
 
@@ -140,15 +145,22 @@ public:
             getShapePath(psFileName, sShapeDir, sShapePath);
 
             // Read the shape file (has extension ".shp")
+            // This will populate this object's fields with the data it finds
+            // in the shape file.
             iStatus = readShape(sShapePath);
             if (iStatus != 0) {
+                // There was a problem reading the shape file
                 sMsgText = "Shape3d. Can't open shape file: " + iStatus + " " + sShapePath;
                 Globals.statusPrint(sMsgText);
                 this.miNumAllocatedVertices = 0;
                 this.pointOfReference = null;
 
+                // We'll try a different tactic.
+                // We'll read the bmp file, and set the object's fields
+                // using info we read in the bmp file
                 iStatus = shapeFromBMP(psFileName);
                 if (iStatus != 0) {
+                    // There was a problem reading the bmp file
                     sMsgText = "Shape3d. shapeFromBMP error: " + iStatus + " " + psFileName;
                     Globals.statusPrint(sMsgText);
                     this.miNumAllocatedVertices = 0;
@@ -170,8 +182,9 @@ public:
                 // nullPointer will be used to set firstVertex
 
                 Integer iWidth = 0, iHeight = 0;
-                String sceneName;
-                int effectType, colorMode;
+                String sSceneName;
+                Integer iEffectType = 0; 
+                Integer iColorMode = 0;
 
                 // Get the pointer to the sceneList object in order to get the output image size.
                 // Get the sceneList object from the application
@@ -180,7 +193,11 @@ public:
                 SceneList aSceneList = theFrame.mSceneList;
 
                 // The following method sets all the parameters
-                aSceneList.getSceneInfo(sceneName, effectType, colorMode, iHeight, iWidth); 
+                // However parameters sSceneName, iEffectType and iColorMode will
+                // not henceforth be used in this constructor.
+                aSceneList.getSceneInfo(sSceneName, iEffectType, iColorMode, iHeight, iWidth); 
+
+                // Using the scene information, populate this object's fields.
                 this.mVertices = nullPointer;
                 this.mFaces = null;
                 // this.currentVertex = this.firstVertex;
@@ -301,8 +318,7 @@ public:
         } // switch
 
         if (bIctDebug) {
-            sMsgText = String.format("Shape3d constructor 1. Size of Shape3d: %d", sizeofLowerLimit());
-            Globals.statusPrint(sMsgText);
+            Globals.statusPrint("Shape3d constructor 1.");
         }
 
         if(this.miNumAllocatedVertices != 0) {
@@ -318,8 +334,7 @@ public:
 
     public Shape3d(String psPathName) {
         if(bIctDebug) {
-            String sMsgText = String.format("Shape3d constructor 2 (calls readShape). Size of Shape3d: %d", sizeofLowerLimit());
-            Globals.statusPrint(sMsgText);
+            Globals.statusPrint("Shape3d constructor 2 (calls readShape).");
         }
 
         this.miNumFaces = 0;
@@ -344,9 +359,7 @@ public:
     //     RenderObject ctor that takes 4 parameters: a String, int, boolean and Point3d
     public Shape3d(int piNumVerts) {
         if(bIctDebug) {
-            String sMsgText;
-            sMsgText = String.format("Shape3d constructor 3. Size of Shape3d: %d", sizeofLowerLimit());
-            Globals.statusPrint(sMsgText);
+            Globals.statusPrint("Shape3d constructor 3.");
         }
 
         this.miNumVertices = 0;
@@ -391,8 +404,7 @@ public:
     public Shape3d(Shape3d pTransformedShape) {
         // Creates a new shape by copying the shape supplied.
         if(bIctDebug) {
-            String sMsgText = String.format("Shape3d constructor 4. Size of Shape3d: %d", sizeofLowerLimit());
-            Globals.statusPrint(sMsgText);
+            Globals.statusPrint("Shape3d constructor 4.");
         }
 
         this.miNumFaces = 0;
@@ -440,8 +452,7 @@ public:
     //     RenderObject constructor that takes 4 Point3d parameters
     public Shape3d(Point3d pULPt, Point3d pURPt, Point3d pLRPt, Point3d pLLPt) {
         if (bIctDebug) {
-            String sMsgText = "Shape3d constructor 5. Size of Shape3d: " + sizeofLowerLimit();
-            Globals.statusPrint(sMsgText);
+            Globals.statusPrint("Shape3d constructor 5.");
         }
 
         this.miNumFaces = 0;
@@ -865,21 +876,24 @@ public:
     //     Globals.createCutout
     //     MainFrame.onToolsCreateAlphaImage
     public int writeShape(String psPathName) {
-        ofstream fileOut = new ofstream(psPathName);
-
-        if (fileOut.fail()) {
+        OutputStream os;
+        PrintWriter fileOut;
+        try {
+            os = new FileOutputStream(psPathName);
+            fileOut = new PrintWriter(os);
+        } catch (IOException ioe) {
             String sMsgText = "writeShape: Unable to open file: " + psPathName;
             Globals.statusPrint(sMsgText);
             return -1;
         }
 
         String sOutput = this.miNumVertices + "\n";
-        fileOut << sOutput;
+        fileOut.write(sOutput);
         initCurrentVertex();
 
         for (int index = 1; index <= this.miNumVertices; index ++) {
             sOutput = this.mCurrentVertex.x + "," + this.mCurrentVertex.y + "," + this.mCurrentVertex.z + "\n";
-            fileOut << sOutput;
+            fileOut.write(sOutput);
             // this.currentVertex++;
             incCurrentVertex();
         }
@@ -1232,6 +1246,7 @@ public:
     //     Globals.tweenImage
     //     RenderObject ctor that takes 4 Point3d parameters
     //     RenderObject ctor that takes 4 parameters: a String, int, boolean and Point3d
+    //     TMatrix.transformAndProject
     public void translateW(float pfOffsetX, float pfOffsetY, float pfOffsetZ) {
         initCurrentVertex();
 
@@ -1277,6 +1292,8 @@ public:
 
 
     // Not called from within this file
+    // Called from:
+    //     TMatrix.transformAndProject
     public void translateS(int piOffsetX, int piOffsetY) {
         initCurrentVertex();
 
@@ -1338,19 +1355,27 @@ public:
 
 
     // TODO: Not a method of Shape3d in the original C++ code
+    // This method sets psShapePath
+    //
     // Called from:
     //     Constructor that takes 2 parameters, a String and an int
     public void getShapePath(String psModelPath, String psShapeDir, String psShapePath) {
-        String sDrive, sDir, sFile, sExt;
-        _splitpath(psModelPath, sDrive, sDir, sFile, sExt);
+        String sFileWExt, sBaseFile;
+        File modelPathFile = new File(psModelPath);
 
-        int iLength = sFile.length();
+        // sFileWExt = file name with extension at end of path psModelPath
+        sFileWExt = modelPathFile.getName(); 
+        // Now strip the extension from sFileWExt
+        sBaseFile = sFileWExt.substring(0, sFileWExt.lastIndexOf('.'));
+
+        int iLength = sBaseFile.length();
         if(iLength > 0) {
+            // Set the output parameter
             psShapePath = psShapeDir;
-            psShapePath.concat(sFile);
+            psShapePath.concat(sBaseFile);
             psShapePath.concat(".shp");
         } else {
-            Globals.statusPrint("getShapePath: Empty fileName");
+            Globals.statusPrint("getShapePath: Empty file name");
         }
     } // getShapePath
 
@@ -1630,6 +1655,7 @@ public:
     // Called from: 
     //     RenderObject.renderMeshz
     //     SceneList.copyRefPoints
+    //     TMatrix.transformAndProject
     public void getReferencePoint(Float pFCentroidX, Float pFCentroidY, Float pFCentroidZ) {
         // Set the output parameters
         pFCentroidX = this.pointOfReference.x;
@@ -2055,40 +2081,4 @@ public:
         int iStatus = insertVertexAfter(iSaveJ, fNewX, fNewY, 0.0f);
         return iStatus;
     } // divideLongestArc
-
-    
-    public int sizeofLowerLimit() {
-        int mySize = 0;
-        int booleanFieldsSizeInBits = 0;
-        int booleanFieldsSize = 0;
-        int intFieldsSize = 0;
-        int floatFieldsSize = 0;
-        int referenceFieldsSize = 0;
-
-        /*
-        boolean ictdebug = false;
-        private int numVertices;
-        private int numFaces;
-        private int numAllocatedVertices;
-        public int iCurrVtxIdx;
-        public int iCurrFaceIdx;
-        public float minX, minY, maxX, maxY;
-        public float minTX, maxTX, minTY, maxTY, minTZ, maxTZ;
-        public float originX, originY, originZ;
-        private Point3d pointOfReference;
-        public VertexSet[] vertices;
-        public VertexSet currentVertex;
-        private FaceSet[] faces;
-        public FaceSet currentFace;
-        */
-        
-        booleanFieldsSizeInBits = 1; // 1 booleans
-        booleanFieldsSize = 1; // 1 bit fits in a byte
-        intFieldsSize = 5*4; // 5 ints
-        floatFieldsSize = 13*4; // 13 floats
-        referenceFieldsSize = 5*4; // 5 references to objects
-        mySize = booleanFieldsSize + intFieldsSize + floatFieldsSize + referenceFieldsSize;
-
-        return mySize;
-    } // sizeofLowerLimit
 } // class Shape3d
