@@ -10,7 +10,7 @@ import motion.MotionPath;
 import structs.Point3d;
 
 public class Scene {
-    boolean bIctDebug = false;
+    private boolean bIctDebug = false;
 
     // Name of the Scene
     // Changed from private to public as it is used by SceneList
@@ -90,8 +90,7 @@ public class Scene {
     public Scene(String psName, int piSeqType, int piNumOutCols, int piNumOutRows,
     int piColorMode, Point3d pRtPt, Point3d pTrPt, String psSensorpth) {
         if (bIctDebug) {
-            String sMsgBuffer = "Constructor. Size of scene: " + sizeLowerLimit();
-            Globals.statusPrint(sMsgBuffer);
+            Globals.statusPrint("Scene Constructor.");
         }
     
         mbIsValid = true;
@@ -154,7 +153,7 @@ public class Scene {
     // SceneList.writeList.
     // Called from:
     //     SceneList.writeList
-    public void writeFile(BufferedWriter fileout) {
+    public void writeFile(BufferedWriter pFileout) {
         String sSequenceArray, sColorArray;
 
         // Creates the scene portion of a scene file
@@ -174,7 +173,7 @@ public class Scene {
             "MotionPath "  + this.msSensorPath + "\n\n";
 
         try {
-            fileout.write(thisObjectAsString);
+            pFileout.write(thisObjectAsString);
         } catch(IOException ioe) {
             // TODO: Need to return an error indicator!
         }
@@ -182,6 +181,7 @@ public class Scene {
 
 
     // This method came from SCENELST.H
+    // Apparently used for debugging purposes.
     // Called from:
     //     SceneList.display
     public void display() {
@@ -204,40 +204,4 @@ public class Scene {
 
         return thisObject;
     } // toString
-
-
-    public int sizeLowerLimit() {
-        int mySize = 0;
-        int booleanFieldsSizeInBits = 0;
-        int booleanFieldsSize = 0;
-        int intFieldsSize = 0;
-        int referenceFieldsSize = 0;
-
-        /*
-        boolean ictdebug = false;
-        private boolean valid;  
-        public int sequenceType;
-        public int colorMode;
-        public int outputRows;
-        public int outputColumns;
-        public String sceneName;
-        private String sensorPath;
-        public MotionPath sensorMotion;
-        public Point3d rotation;
-        public Point3d translation;
-        public SceneElement tail;
-        public SceneElement head;
-        public SceneElement currentSceneElement; 
-        public Scene prevEntry;
-        public Scene nextEntry;
-        */
-
-        booleanFieldsSizeInBits = 2; // 2 booleans
-        booleanFieldsSize = 1; // 2 bits fit in a byte
-        intFieldsSize = 4*4; // 4 ints
-        referenceFieldsSize = 10*4; // 10 references to objects
-        mySize = booleanFieldsSize + intFieldsSize + referenceFieldsSize;
-
-        return mySize;
-    } // sizeLowerLimit
 } // class Scene
