@@ -9,9 +9,6 @@ import javax.swing.JComboBox;
 
 import math.TMatrix;
 
-import motion.MotionNode;
-
-import structs.Bundle;
 import structs.Point3d;
 
 
@@ -51,19 +48,8 @@ public interface ISceneList {
     boolean depthSortingEnabled, boolean zBufferEnabled, boolean antiAliasEnabled, 
     boolean hazeFogEnabled);
 
-    void getSequenceFileName(String psTheInputPath, int piFrameCounter);
-
     void getFileName(String psOutputFileName, String psPrefix, 
     int piCounter, int piTheColor);
-
-    void adjustTransforms(int piEffectType, SceneElement theModel, 
-    MotionNode aMotion, Bundle xfrm);
-
-    void getViewMatrix(TMatrix pViewMatrix, int piFrameCounter, Scene pTheScene);
-
-    int calcCompoundModelRefPoint(SceneElement theModel, 
-    int outputRows, int outputColumns, 
-    Float cmCentroidX, Float cmCentroidY, Float cmCentroidZ);
 
     int addScene(String theSceneName, int theType, 
     int outImCols, int outImRows, int theColorMode, 
@@ -88,6 +74,4 @@ public interface ISceneList {
 
     int depthSort(SceneElement[] models, float[] distances,
     Integer numModels, boolean depthSortingEnabled);
-
-    int sizeofLowerLimit();
 } // interface ISceneList
