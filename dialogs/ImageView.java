@@ -11,6 +11,7 @@ import fileUtils.BMPFileFilter;
 import frames.MainFrame;
 
 import globals.Globals;
+import globals.JICTConstants;
 
 import java.awt.Color;
 import java.io.File;
@@ -66,35 +67,28 @@ protected:
 };
 */
 
-    private MainFrame mainFrame;
+    private MainFrame mMainFrame;
     public HBITMAP hBitmap;
-    public MemImage m_anImage;
-    public Shape3d m_aShape;  // used during cutout image creation
-    public boolean m_cutoutEnabled;
+    public MemImage mMImage;
+    public Shape3d mShape;  // used during cutout image creation
+    public boolean mbCutoutEnabled;
 
     // if true then the onDraw erases the window prior to redrawing
-    public boolean m_eraseMe;
+    public boolean mbEraseMe;
 
-    public boolean firstPress;
-    public String m_theFileName;
-
-    // These were defined in MEMIMAGE.H
-    public static final int SEQUENTIAL = 1;
-    public static final int RANDOM = 0;
-
-    // This value ws defined in SHAPE3D.H
-    public static final int I_MAXVERTICES = 1024;
+    public boolean mbFirstPress;
+    public String msFileName;
 
 
     // Called from:
     //     MainFrame.onPreviewStillScene
     //     MainFrame.onPreviewSequenceScene
     public ImageView(MainFrame pMainFrame) {
-        this.mainFrame = pMainFrame;
+        this.mMainFrame = pMainFrame;
 
-        firstPress = false;
-        m_eraseMe = false;
-        m_anImage = null;
+        mbFirstPress = false;
+        mbEraseMe = false;
+        mMImage = null;
     } // ImageView ctor
 
 
@@ -113,18 +107,18 @@ protected:
         String anImage;
         ScrollView.OnInitialUpdate();
         ASSERT(getDocument() != null);
-        m_anImage = getDocument().getImagePointer();
-        if (m_anImage != null) {
+        mMImage = getDocument().getImagePointer();
+        if (mMImage != null) {
             SetScrollSizes(MM_TEXT, getDocument().getDocSize());
             getBitmap();
-            m_theFileName = getDocument().getPathName();
-            anImage = new String(m_theFileName);
+            msFileName = getDocument().getPathName();
+            anImage = new String(msFileName);
             setCaption(anImage);
         } else {
             SetScrollSizes(MM_TEXT, CSize(1,1));
         }
     
-        m_cutoutEnabled = mainFrame.mbCutoutEnabled;
+        mbCutoutEnabled = mMainFrame.mbCutoutEnabled;
     } // onInitialUpdate
 
     
@@ -158,8 +152,8 @@ protected:
     public void onDraw(CDC qdc) {
         int status;
     
-        if(mainFrame.mbPreviewingScene) {
-            status = mainFrame.mSceneList.previewStill(m_hWnd, mainFrame.mModelMatrix, mainFrame.mViewMatrix);
+        if(mMainFrame.mbPreviewingScene) {
+            status = mMainFrame.mSceneList.previewStill(m_hWnd, mMainFrame.mModelMatrix, mMainFrame.mViewMatrix);
             if(status != 0) { 
                 exit;
             }
@@ -167,7 +161,7 @@ protected:
         }
 
         if(theFrame.previewingSequence) {
-            status = mainFrame.mSceneList.preview(m_hWnd, mainFrame.mModelMatrix, mainFrame.mViewMatrix);
+            status = mMainFrame.mSceneList.preview(m_hWnd, mMainFrame.mModelMatrix, mMainFrame.mViewMatrix);
             if(status != 0) {
                 exit;
             }
@@ -226,15 +220,15 @@ protected:
     // Called from:
     //     MainFrame.onToolsWarpImage
     public boolean associateMemImage(MemImage theImage) {
-        m_anImage = theImage;                      //  set the view's image
+        mMImage = theImage;                      //  set the view's image
         getDocument().setImagePointer(theImage);  //  set the document's image
         getBitmap();
 
         CDC qdc;
-        m_eraseMe = true;
+        mbEraseMe = true;
         onUpdate();
         onDraw(qdc);
-        m_eraseMe = false;
+        mbEraseMe = false;
 
         return true;
     } // associateMemImage
@@ -254,10 +248,10 @@ protected:
         }
         
         pbmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-        pbmi.bmiHeader.biWidth = m_anImage.getWidth();
-        pbmi.bmiHeader.biHeight = m_anImage.getHeight();
+        pbmi.bmiHeader.biWidth = mMImage.getWidth();
+        pbmi.bmiHeader.biHeight = mMImage.getHeight();
         pbmi.bmiHeader.biPlanes = 1;
-        pbmi.bmiHeader.biBitCount = m_anImage.getBitsPerPixel();
+        pbmi.bmiHeader.biBitCount = mMImage.getBitsPerPixel();
         pbmi.bmiHeader.biCompression = BI_RGB;
         
         memcpy(pbmi.bmiColors, pal, sizeof(RGBQUAD) * 256);
@@ -269,13 +263,14 @@ protected:
 
     public boolean loadBMP(String name) {
         String msgText;
-        m_anImage = new MemImage(name, 0, 0, RANDOM, 'R', 0);
-        if(!m_anImage.isValid()) {
+        mMImage = new MemImage(name, 0, 0, 
+            JICTConstants.I_RANDOM, 'R', 0);
+        if(!mMImage.isValid()) {
             msgText = "Cannot open bitmap file: " + name;
             Globals.statusPrint(msgText);
             return false;
         }
-        m_theFileName = name;
+        msFileName = name;
         getBitmap();
         return true;
     } // loadBMP
@@ -309,16 +304,16 @@ protected:
         // Peek into the CMainFrame window object to see if 
         // the cutout enabled option has been checked.
         String msgText;
-        m_cutoutEnabled = mainFrame.mbCutoutEnabled;
-        if(m_cutoutEnabled) {
-            if (firstPress == false) {
-                firstPress = true;
-                m_aShape = new Shape3d(I_MAXVERTICES); 
+        mbCutoutEnabled = mMainFrame.mbCutoutEnabled;
+        if(mbCutoutEnabled) {
+            if (mbFirstPress == false) {
+                mbFirstPress = true;
+                mShape = new Shape3d(JICTConstants.I_MAXVERTICES); 
                 Globals.statusPrint("LButtonDown event: Created shape object");
             }
         }
         
-        if (!m_cutoutEnabled && mainFrame.mbImageSamplingEnabled) {
+        if (!mbCutoutEnabled && mMainFrame.mbImageSamplingEnabled) {
             // Sample the color pixel and display the RGB values
             byte red, green, blue;
             byte theValue;
@@ -326,24 +321,24 @@ protected:
             int xOffset, yOffset;
             getScrollPos(xOffset, yOffset);
 
-            switch(m_anImage.getBitsPerPixel()) {
+            switch(mMImage.getBitsPerPixel()) {
             case 32:
-                theValue32 = m_anImage.getMPixel32(point.x + xOffset + 1, m_anImage.getHeight() - point.y - yOffset);
-                msgText = "x: " + point.x + xOffset + 1 + "  y: " + m_anImage.getHeight() - point.y - yOffset + 
+                theValue32 = mMImage.getMPixel32(point.x + xOffset + 1, mMImage.getHeight() - point.y - yOffset);
+                msgText = "x: " + point.x + xOffset + 1 + "  y: " + mMImage.getHeight() - point.y - yOffset + 
                     "  Value: " + theValue32;
                 break;
         
             case 24:
-                m_anImage.getMPixelRGB(point.x + xOffset + 1, m_anImage.getHeight() - point.y - yOffset, 
+                mMImage.getMPixelRGB(point.x + xOffset + 1, mMImage.getHeight() - point.y - yOffset, 
                     red, green, blue);
-                msgText = "x: " + point.x + xOffset + 1 + "  y: " + m_anImage.getHeight() - point.y - yOffset + 
+                msgText = "x: " + point.x + xOffset + 1 + "  y: " + mMImage.getHeight() - point.y - yOffset + 
                     "  Color: red: " + red + "  green: " + green + "  blue: "  + blue;
                 break;
         
             case 8:
-                theValue = m_anImage.getMPixel(point.x + xOffset + 1, 
-                    m_anImage.getHeight() - point.y - yOffset);
-                msgText = "x: " + point.x + xOffset + 1 + "  y: " + m_anImage.getHeight() - point.y - yOffset + 
+                theValue = mMImage.getMPixel(point.x + xOffset + 1, 
+                    mMImage.getHeight() - point.y - yOffset);
+                msgText = "x: " + point.x + xOffset + 1 + "  y: " + mMImage.getHeight() - point.y - yOffset + 
                     " Value: " + theValue;
                 break;
         
@@ -353,18 +348,18 @@ protected:
             Globals.statusPrint(msgText);
 
             // If the user wishes to remove sampled colors...do it now
-            if(mainFrame.mbRemoveSampleColorsEnabled) {
+            if(mMainFrame.mbRemoveSampleColorsEnabled) {
                 int redLow, redHigh;
                 int greenLow, greenHigh;
                 int blueLow, blueHigh;
 
-                int status = getSampleRange(m_anImage, point.x + xOffset, m_anImage.getHeight() - point.y - yOffset, 
+                int status = getSampleRange(mMImage, point.x + xOffset, mMImage.getHeight() - point.y - yOffset, 
                     redLow,  redHigh, 
                     greenLow,  greenHigh,
                     blueLow,  blueHigh);
             
                 if (status != -1) {
-                    m_anImage.clearRGBRange((byte)redLow,(byte)redHigh,
+                    mMImage.clearRGBRange((byte)redLow,(byte)redHigh,
                     (byte)greenLow,(byte)greenHigh, 
                     (byte)blueLow, (byte)blueHigh);
                 }
@@ -379,26 +374,26 @@ protected:
     
 
     public void onLButtonUp(UINT nFlags, CPoint point) {
-        if(m_cutoutEnabled) {
+        if(mbCutoutEnabled) {
             String msgText;
-            if(firstPress == false) {
+            if(mbFirstPress == false) {
                 return;
             }
 
             int xOffset, yOffset;
             getScrollPos(xOffset, yOffset);
-            msgText = "Adding point " + m_aShape.getNumVertices() + 
+            msgText = "Adding point " + mShape.getNumVertices() + 
                 ": (" + point.x + xOffset + ", " + point.y - yOffset + ")";
             Globals.statusPrint(msgText);
             int myStatus;
-            myStatus = m_aShape.addWorldVertex((float)(point.x + xOffset), (float)(point.y - yOffset), 0.0f); // z = 0 at the screen
+            myStatus = mShape.addWorldVertex((float)(point.x + xOffset), (float)(point.y - yOffset), 0.0f); // z = 0 at the screen
             
             HPEN hpen;
             hpen = CreatePen(PS_SOLID, 1, Color.WHITE);
             SelectObject(hpen);
 
             float x, y, z;
-            myStatus = m_aShape.getPreviousWorldVertex(x, y, z);
+            myStatus = mShape.getPreviousWorldVertex(x, y, z);
             if (myStatus == 0) {
                 MoveToEx((int)(x - xOffset + 0.5), (int)(y + yOffset + 0.5), 0L);
                 LineTo(point.x, point.y);
@@ -417,31 +412,31 @@ protected:
         String cutoutName, imageFileName;
         CSize docSize = getDocument().getDocSize();
 
-        if(m_cutoutEnabled) {
+        if(mbCutoutEnabled) {
             Globals.statusPrint("Left button double click: Save files and Exit");
             // Remove the vertex added by the first click in the double-click
-            m_aShape.deleteLastWorldVertex();
+            mShape.deleteLastWorldVertex();
 
             NameDlg dlg = new NameDlg(null, true);
             dlg.setVisible(true);
 
             // May have to move this if statement to NameDlg.java
             if (dlg.DoModal() == IDOK) {
-                m_theFileName = getDocument().getPathName();
-                imageFileName = m_theFileName; 
+                msFileName = getDocument().getPathName();
+                imageFileName = msFileName; 
                 cutoutName = new String(dlg.m_Name);
-                int myStatus = RenderObject.prepareCutout(m_aShape, m_hWnd, imageFileName, cutoutName, (int)docSize.cx, (int)docSize.cy);
+                int myStatus = RenderObject.prepareCutout(mShape, m_hWnd, imageFileName, cutoutName, (int)docSize.cx, (int)docSize.cy);
                 if(myStatus != 0) {
                     msgText = "Unable to Create Cutout. " + myStatus;
                     Globals.statusPrint(msgText);
-                    m_cutoutEnabled = false;
-                    firstPress = false;
+                    mbCutoutEnabled = false;
+                    mbFirstPress = false;
                     return;
                 }
 
-                m_cutoutEnabled = false;
+                mbCutoutEnabled = false;
                 Globals.statusPrint("Cutout Created Successfully");
-                firstPress = false;
+                mbFirstPress = false;
             }
         }
 
@@ -450,7 +445,7 @@ protected:
     
     
     public void onRButtonDown(UINT nFlags, CPoint point) {
-        if(m_cutoutEnabled) {
+        if(mbCutoutEnabled) {
             String msgText;
             int xOffset, yOffset;
 
@@ -464,15 +459,15 @@ protected:
             int theStatus;
 
             float x, y, z, px, py, pz;
-            m_aShape.getLastWorldVertex(x, y, z);
-            m_aShape.getPreviousWorldVertex(px, py, pz);
+            mShape.getLastWorldVertex(x, y, z);
+            mShape.getPreviousWorldVertex(px, py, pz);
 
             MoveToEx((int)(px + 0.5f), (int)(py + 0.5f), 0L);
             LineTo((int)(x + 0.5f), (int)(y + 0.5f));
-            theStatus = m_aShape.deleteLastWorldVertex();
+            theStatus = mShape.deleteLastWorldVertex();
         }
         
-        if(mainFrame.mbRemoveSampleColorsEnabled) {
+        if(mMainFrame.mbRemoveSampleColorsEnabled) {
             //  Ask if the user wishes to save the thresholded image which they have been creating
             // int result = MessageBox("Do you wish to save the modified image?", "Save Image As", MB_YESNO|MB_ICONQUESTION);
             int result = JOptionPane.showConfirmDialog(null, 
@@ -490,7 +485,7 @@ protected:
                 if (showDlgResult == JFileChooser.APPROVE_OPTION) {
                     File file = dlg.getSelectedFile();
                     aFileName = file.getName();
-                    m_anImage.writeBMP(aFileName);
+                    mMImage.writeBMP(aFileName);
                 }
             }
         }
