@@ -1,8 +1,10 @@
 package core;
 
 import globals.Globals;
+import globals.JICTConstants;
 
 import java.awt.image.BufferedImage;
+import java.io.File;
 
 import math.MathUtils;
 
@@ -10,7 +12,7 @@ import structs.Point2d;
 
 public class MemImage {
     boolean ictdebug = false;
-    protected HANDLE fp;            // Used with memimg32.cpp
+    protected File fp;
     protected String msSavedFileName;   // The last associated pathname
     protected int miImageHeight;    // Height in pixels
     protected int miImageWidth;     // Width in pixels
@@ -24,50 +26,9 @@ public class MemImage {
     // I changed this from int to boolean
     protected boolean valid;          
     protected byte[] bytes;         // Pointer to the image bytes
+    protected BufferedImage mBuffImg;
 
-    // These were defined in MEMIMAGE.H
-    public static final int REDCOLOR = 1;
-    public static final int GREENCOLOR = 2;
-    public static final int BLUECOLOR = 3;
-    public static final int EIGHTBITMONOCHROME = 2;
-    public static final int A32BIT = 4;
-    public static final int RGBCOLOR = 5;
-    public static final int ONEBITMONOCHROME = 6;
     
-    public static final int CHROMAVALUE  = 0;
-    public static final int CHROMARED    = 0;
-    public static final int CHROMAGREEN  = 0;
-    public static final int CHROMABLUE   = 0;
-
-    // These were defined in MEMIMAGE.H
-    // Used in: 
-    //     the constructor that takes 6 parameters (to check parameter imAccessMode)
-    //     finalize
-    //     clear
-    //     clearRGB
-    //     clearRGBRange
-    //     init32
-    //     scaleTo8
-    //     getMPixel(int x, int y, char aColor)
-    //     getMPixelRGB
-    //     setMPixelRGB
-    //     setMPixel
-    //     setMPixelA
-    //     getMPixelA
-    //     getMPixel(int x, int y)
-    //     setMPixel32
-    //     getMPixel32
-    //     readBMP
-    public static final int SEQUENTIAL = 1;
-
-    // Used in: 
-    // the constructor that takes 6 parameters
-    public static final int RANDOM = 0;
-
-    // This value came from ICT20.H
-    // Used in: 
-    //     scaleTo8
-    public static final float ZBUFFERMAXVALUE = 2.0E31f;
 /*
 protected:
   void allocate(int height, int widthInPixels); - implemented
@@ -153,14 +114,14 @@ public:
         String msgBuffer;
 
         if (
-        piColorSpec != ONEBITMONOCHROME && 
-        piColorSpec != REDCOLOR &&
-        piColorSpec != GREENCOLOR && 
-        piColorSpec != BLUECOLOR &&
-        piColorSpec != RGBCOLOR && 
-        piColorSpec != EIGHTBITMONOCHROME &&
+        piColorSpec != JICTConstants.I_ONEBITMONOCHROME && 
+        piColorSpec != JICTConstants.I_REDCOLOR &&
+        piColorSpec != JICTConstants.I_GREENCOLOR && 
+        piColorSpec != JICTConstants.I_BLUECOLOR &&
+        piColorSpec != JICTConstants.I_RGBCOLOR && 
+        piColorSpec != JICTConstants.I_EIGHTBITMONOCHROME &&
         piColorSpec != 0 && 
-        piColorSpec != A32BIT) {
+        piColorSpec != JICTConstants.I_A32BIT) {
             msgBuffer = "MemImage Constructor 1: ColorSpec not valid - " + piColorSpec;
             Globals.statusPrint(msgBuffer);
             this.valid = false;
@@ -174,7 +135,9 @@ public:
             return;
         }
 
-        if((imAccessMode != RANDOM) && (imAccessMode != SEQUENTIAL)) {
+        if(
+        (imAccessMode != JICTConstants.I_RANDOM) && 
+        (imAccessMode != JICTConstants.I_SEQUENTIAL)) {
             msgBuffer = "MemImage Constructor 1: accessMode must be RANDOM or SEQUENTIAL - " + imAccessMode;
             Globals.statusPrint(msgBuffer);
             this.valid = false;
@@ -189,7 +152,7 @@ public:
         }
 
         Integer myBitsPerPixel = 0; 
-        int myStatus;
+        int iStatus = 0;
         this.valid = true;
         myBitsPerPixel = mapColorSpecToBitsPerPixel(piColorSpec);
         this.msSavedFileName = psFileName;
@@ -197,8 +160,8 @@ public:
         // Get a preview of the file 
         Integer myHeight = 0, myWidth = 0;
         if(imHeight == 0 || imWidth == 0 || piColorSpec == 0) {
-            myStatus = Globals.readBMPHeader(psFileName, myHeight, myWidth, myBitsPerPixel);
-            if(myStatus != 0) {
+            iStatus = Globals.readBMPHeader(psFileName, myHeight, myWidth, myBitsPerPixel);
+            if(iStatus != 0) {
                 this.valid = false;
                 Globals.statusPrint("MemImage Constructor 1: Unable to open BMP header for read access");
                 return;
@@ -220,7 +183,7 @@ public:
 
         if((rw == 'W') || (rw == 'w')) {
             int numRows = this.miImageHeight;
-            if (this.miAccessMode == SEQUENTIAL) {
+            if (this.miAccessMode == JICTConstants.I_SEQUENTIAL) {
                 numRows = 1;
             }
 
@@ -230,49 +193,52 @@ public:
             }
         }
 
-        if(this.miAccessMode == SEQUENTIAL) {
+        if(this.miAccessMode == JICTConstants.I_SEQUENTIAL) {
             //  Write or Read the BMP header
             if(rw == 'W' || rw == 'w') {
-                myStatus = writeBMP(psFileName);
+                iStatus = writeBMP(psFileName);
             }
 
             if(rw == 'R' || rw == 'r') {
-                myStatus = readBMP(psFileName, piColorSpec);
+                iStatus = readBMP(psFileName, piColorSpec);
             }
 
-            if(myStatus != 0) {
+            if(iStatus != 0) {
                 this.valid = false; // Indicate the file could not be opened
             }
         }
 
-        if(this.miAccessMode == RANDOM) {
-            if((rw == 'W' || rw == 'w') && (piColorSpec == RGBCOLOR)) {
+        if(this.miAccessMode == JICTConstants.I_RANDOM) {
+            if(
+            (rw == 'W' || rw == 'w') && 
+            (piColorSpec == JICTConstants.I_RGBCOLOR)) {
                 Globals.statusPrint("MemImage Constructor 1: RANDOM 24 bit BMPs not supported for writing");
                 this.valid = false;
                 return;
             }
-            if((rw == 'W' || rw == 'w') && (piColorSpec != RGBCOLOR)) {
-                myStatus = writeBMP(psFileName);
+            if(
+            (rw == 'W' || rw == 'w') && 
+            (piColorSpec != JICTConstants.I_RGBCOLOR)) {
+                iStatus = writeBMP(psFileName);
             }
 
             if(rw == 'R' || rw == 'r') {
-                myStatus = Globals.readBMPHeader(psFileName, myHeight, myWidth, myBitsPerPixel);
-                if(myStatus != 0) {
+                iStatus = Globals.readBMPHeader(psFileName, myHeight, myWidth, myBitsPerPixel);
+                if(iStatus != 0) {
                     this.valid = false; // Indicate that the file could not be opened
                     Globals.statusPrint("MemImage Constructor 1: Unable to open BMP header");
                     return;
                 }
 
                 readBMP(psFileName, this.miColorSpec);
-                if(myStatus != 0) {
+                if(iStatus != 0) {
                     this.valid = false; // Indicate the file could not be opened
                 }
             }
         }
         
         if (ictdebug) {
-            msgBuffer = "MemImage Constructor 1: Size of MemImage: " + sizeofLowerLimit();
-            Globals.statusPrint(msgBuffer);
+            Globals.statusPrint("MemImage Constructor 1");
         }
     } // MemImage ctor
 
@@ -288,18 +254,17 @@ public:
     public MemImage(int height, int width, int aBitsPerPixel) {
         //  Allocates a memory resident 8 bit image by default.
         this.valid = false;
-        this.miAccessMode    = RANDOM;
+        this.miAccessMode    = JICTConstants.I_RANDOM;
         this.miImageHeight   = height;
         this.miImageWidth    = width;
-        this.miColorSpec  = EIGHTBITMONOCHROME;
+        this.miColorSpec     = JICTConstants.I_EIGHTBITMONOCHROME;
         this.msSavedFileName = "No Image File Name";
         this.miBitsPerPixel  = aBitsPerPixel;
         this.miColorSpec  = mapBitsPerPixelToColorSpec(this.miBitsPerPixel);
         allocate(height, width);
 
         if (ictdebug) {
-            String msgBuffer = "MemImage Constructor 2: Size of MemImage: " + sizeofLowerLimit();
-            Globals.statusPrint(msgBuffer);
+            Globals.statusPrint("MemImage Constructor 2");
         }
     } // MemImage ctor
 
@@ -327,18 +292,12 @@ public:
         }
 
         if (ictdebug) {
-            String msgBuffer;
-            msgBuffer = "MemImage Constructor 4: Size of MemImage: " + sizeofLowerLimit();
-            Globals.statusPrint(msgBuffer);
+            Globals.statusPrint("MemImage Constructor 4");
         }
     } // MemImage ctor
 
 
     public void finalize() {
-        if((this.miAccessMode == SEQUENTIAL) && (this.fp > 0)) {
-            CloseHandle(this.fp);
-        }
-
         if(ictdebug) {
             Globals.statusPrint("MemImage Destructor");
         }
@@ -352,7 +311,7 @@ public:
     //     readBMP
     protected void allocate(int piHeight, int piWidthInPixels) {
         int totalBytes;
-        byte[] buffer;
+        // byte[] buffer; // not used
         float bytesPerPixel = (float)this.miBitsPerPixel/8.0f;
         float fWidthInBytes = (float)piWidthInPixels * bytesPerPixel;  // 1,24,32 bpp
         int widthInBytes    = (int)fWidthInBytes;
@@ -382,7 +341,7 @@ public:
         int x, y;
         int rows = this.miImageHeight;
 
-        if (this.miAccessMode == SEQUENTIAL) {
+        if (this.miAccessMode == JICTConstants.I_SEQUENTIAL) {
             rows = 1;
         }
 
@@ -412,7 +371,7 @@ public:
         int x, y;
         int iBytesIdx = 0; // an index into array this.bytes
         int rows = this.miImageHeight;
-        if (this.miAccessMode == SEQUENTIAL) {
+        if (this.miAccessMode == JICTConstants.I_SEQUENTIAL) {
             rows = 1;
         }
 
@@ -459,7 +418,7 @@ public:
         int iBytesIdx = 0;
         int rows = this.miImageHeight;
 
-        if (this.miAccessMode == SEQUENTIAL) {
+        if (this.miAccessMode == JICTConstants.I_SEQUENTIAL) {
             rows = 1;
         }
 
@@ -506,7 +465,7 @@ public:
         int iRows = this.miImageHeight;
         // int iCols = this.imageWidth;  // not used
                                 
-        if (this.miAccessMode == SEQUENTIAL) {
+        if (this.miAccessMode == JICTConstants.I_SEQUENTIAL) {
             iRows = 1;
         }
 
@@ -555,7 +514,7 @@ public:
         iRows = this.miImageHeight;
         fDesMin = 1.0f;
         fDesMax = 255.0f;
-        if (this.miAccessMode == SEQUENTIAL) {
+        if (this.miAccessMode == JICTConstants.I_SEQUENTIAL) {
             iRows = 1;
         }
         
@@ -571,7 +530,7 @@ public:
                     fActMin = *fTemp;
                 }
                 if(IGNOREMAXVALUE) {
-                    if((*fTemp > fActMax) && (*(fTemp) != ZBUFFERMAXVALUE)) {
+                    if((*fTemp > fActMax) && (*(fTemp) != JICTConstants.F_ZBUFFERMAXVALUE)) {
                         fActMax = *fTemp;
                     }
                 } else {
@@ -597,7 +556,7 @@ public:
             for (ix = 1; ix <= this.miImageWidth; ix++) {
                 actValue = *fTemp;
                 if(IGNOREMAXVALUE) {
-                    if(actValue != ZBUFFERMAXVALUE) {
+                    if(actValue != JICTConstants.F_ZBUFFERMAXVALUE) {
                         desValue = ((actValue - fActMin) * fsFactor) + fDesMin;
                         scaledValue = (byte)(desValue + 0.5f);
                         pScaledImage.setMPixel(ix, iy, scaledValue);
@@ -622,8 +581,9 @@ public:
     //     SceneList.preview
     //     SceneList.previewStill
     //     SceneList.render
-    public void display(BufferedImage pBuffImg, int piOutWidth, int piOutHeight) {
+    public void display(int piOutWidth, int piOutHeight) {
         // TODO: Rewrite this
+        BufferedImage buffImg = this.mBuffImg;
         return;
         // TODO: Derive a Graphics2D from the BufferedImage to perform graphics
         /*
@@ -694,8 +654,10 @@ public:
     // TODO: Replace paramater dc with one of type Graphics2D, 
     // as this method performs graphics
     // Called from:
+    //     RenderObject.maskFromShape
     //     RenderObject.prepareCutout
     public int drawMask(Point2d[] thePoints, int numVertices) {
+        BufferedImage buffImage = this.mBuffImg;
         // TODO: Rewrite this
         return 0;
         
@@ -761,7 +723,8 @@ public:
             return -2;
         }
 
-        byte thePixel, red, green, blue;
+        byte thePixel;
+        Byte bytRed = (byte)0, bytGreen = (byte)0, bytBlue = (byte)0;
         for (x = 1; x <= this.miImageWidth; x++) {
             for (y = 1; y < this.miImageHeight; y++) {
                 switch (this.miBitsPerPixel) {
@@ -773,8 +736,8 @@ public:
                     break;
 
                 case 24:
-                    getMPixelRGB(x, y, red, green, blue);
-                    outImage.setMPixelRGB(x + piXoffset, y + piYoffset, red, green, blue);
+                    getMPixelRGB(x, y, bytRed, bytGreen, bytBlue);
+                    outImage.setMPixelRGB(x + piXoffset, y + piYoffset, bytRed, bytGreen, bytBlue);
                     break;
                 }
             }
@@ -804,9 +767,8 @@ public:
         int b = outImage.miImageHeight - piYOffset;
         int c = piXOffset + this.miImageWidth - outImage.miImageWidth;
 
-        // Although outLoc is written to, it is not read
-        // byte *outLoc = outImage.bytes + ((piYOffset * outImage.imageWidth) + piXOffset);
-        int outLoc = ((piYOffset * outImage.miImageWidth) + piXOffset);
+        // Now we will copy a portion of array this.bytes to array outImage.bytes
+        int outLoc = ((piYOffset * outImage.miImageWidth) + piXOffset); // not used
 
         // copy b rows of image data
         int i, j;
@@ -817,16 +779,16 @@ public:
             for (i = 1; i <= a; i++) {
                 if(bytes[currentPix] != 0) {
                     // *outLoc = *currentPix;
-                    outLoc = bytes[currentPix];
+                    outImage.bytes[outLoc] = bytes[currentPix];
                 }
 
-                outLoc++;
+                outLoc++; 
                 currentPix++;  
             } // for i
 
             // if image is over the edge, skip those pixels then add the pad
             currentPix = currentPix + c + miPads;
-            outLoc += (outImage.miPads + piXOffset);
+            outLoc += (outImage.miPads + piXOffset); 
         } // for j
 
         return 0;
@@ -865,7 +827,7 @@ public:
         // byte *thePixel;
         // byte *myTemp = bytes;
 
-        if(this.miAccessMode == SEQUENTIAL) {
+        if(this.miAccessMode == JICTConstants.I_SEQUENTIAL) {
             y = 1;
         }
 
@@ -910,7 +872,7 @@ public:
 
         int addr;
 
-        if(this.miAccessMode == SEQUENTIAL) {
+        if(this.miAccessMode == JICTConstants.I_SEQUENTIAL) {
             y = 1;
         }
 
@@ -949,7 +911,7 @@ public:
 
         int addr;
 
-        if(this.miAccessMode == SEQUENTIAL) {
+        if(this.miAccessMode == JICTConstants.I_SEQUENTIAL) {
             y = 1;
         }
 
@@ -983,7 +945,7 @@ public:
         // Inputs x and y are assumed to be 1 relative
         int addr;
 
-        if(this.miAccessMode == SEQUENTIAL) {
+        if(this.miAccessMode == JICTConstants.I_SEQUENTIAL) {
             y = 1;
         }
 
@@ -1009,7 +971,7 @@ public:
         // byte *myTemp = this.bytes;
         int myTemp;
 
-        if(this.miAccessMode == SEQUENTIAL) {
+        if(this.miAccessMode == JICTConstants.I_SEQUENTIAL) {
             y = 1;
         }
 
@@ -1098,7 +1060,7 @@ public:
         int addr;
         byte *myTemp = this.bytes;
 
-        if(this.miAccessMode == SEQUENTIAL) {
+        if(this.miAccessMode == JICTConstants.I_SEQUENTIAL) {
             y = (byte)1;
         }
 
@@ -1163,7 +1125,7 @@ public:
         int addr;
         int iBytesIdx = 0; // index into this.bytes
 
-        if(this.miAccessMode == SEQUENTIAL) {
+        if(this.miAccessMode == JICTConstants.I_SEQUENTIAL) {
             y = 1;
         }
 
@@ -1194,7 +1156,7 @@ public:
         byte *myTemp = this.bytes;
         float *pPixel;
 
-        if(this.miAccessMode == SEQUENTIAL) {
+        if(this.miAccessMode == JICTConstants.I_SEQUENTIAL) {
             y = 1;
         }
 
@@ -1223,7 +1185,7 @@ public:
         byte *myTemp = this.bytes;
         float *pPixel;
 
-        if(this.miAccessMode == SEQUENTIAL) {
+        if(this.miAccessMode == JICTConstants.I_SEQUENTIAL) {
             y = 1;
         }
 
@@ -1323,6 +1285,7 @@ public:
     //     Texture.createTexture
     public int writeBMP(String fileName) {
         // TODO: Rewrite this
+        // TODO: Here we need to set fp, of type File
         return 0;
 
         /*
@@ -1604,8 +1567,7 @@ public:
     //     RenderObject.maskFromShape
     //     RenderObject.prepareCutout
     public void close() {
-        CloseHandle(this.fp);
-        this.fp = 0;
+        
     } // close
 
 
@@ -1634,20 +1596,20 @@ public:
         int iBpp = -1;
 
         if(
-        piColorSpec == REDCOLOR ||
-        piColorSpec == GREENCOLOR ||
-        piColorSpec == BLUECOLOR ||
-        piColorSpec == EIGHTBITMONOCHROME ) {
+        piColorSpec == JICTConstants.I_REDCOLOR ||
+        piColorSpec == JICTConstants.I_GREENCOLOR ||
+        piColorSpec == JICTConstants.I_BLUECOLOR ||
+        piColorSpec == JICTConstants.I_EIGHTBITMONOCHROME ) {
             iBpp = 8;
         }
 
-        if(piColorSpec == RGBCOLOR ) {
+        if(piColorSpec == JICTConstants.I_RGBCOLOR ) {
             iBpp = 24;
         }
-        if(piColorSpec == ONEBITMONOCHROME ) {
+        if(piColorSpec == JICTConstants.I_ONEBITMONOCHROME ) {
             iBpp = 1;
         }
-        if(piColorSpec == A32BIT ) {
+        if(piColorSpec == JICTConstants.I_A32BIT ) {
             iBpp = 32;
         }
 
@@ -1660,12 +1622,12 @@ public:
     //     The MemImage constructor that takes 6 parameters
     //     The MemImage constructor that takes 3 parameters
     int mapBitsPerPixelToColorSpec(int piBitsPerPixel) {
-        int iColorSpec = EIGHTBITMONOCHROME;
+        int iColorSpec = JICTConstants.I_EIGHTBITMONOCHROME;
 
-        if(piBitsPerPixel ==  1) iColorSpec = ONEBITMONOCHROME;
-        if(piBitsPerPixel ==  8) iColorSpec = EIGHTBITMONOCHROME;
-        if(piBitsPerPixel == 24) iColorSpec = RGBCOLOR;
-        if(piBitsPerPixel == 32) iColorSpec = A32BIT;
+        if(piBitsPerPixel ==  1) iColorSpec = JICTConstants.I_ONEBITMONOCHROME;
+        if(piBitsPerPixel ==  8) iColorSpec = JICTConstants.I_EIGHTBITMONOCHROME;
+        if(piBitsPerPixel == 24) iColorSpec = JICTConstants.I_RGBCOLOR;
+        if(piBitsPerPixel == 32) iColorSpec = JICTConstants.I_A32BIT;
 
         return iColorSpec;
     } // mapBitsPerPixelToColorSpec
@@ -1765,7 +1727,7 @@ public:
         // Compute the color difference vector between the average color and the desired color
         // Create a new image by adjusting each color by the difference vector, clipping outliers
         float fRedBucket, fGreenBucket, fBlueBucket;
-        float fAvgRed, fAvgGreen, fAvgBlue;
+        float fAvgRed = 0.0f, fAvgGreen = 0.0f, fAvgBlue = 0.0f;
         int iBpp = getBitsPerPixel();
         if((iBpp != 24) && (iBpp != 8)) {
             Globals.statusPrint("MemImage.adjustColor: Input image must be 8 or 24 bits per pixel");
@@ -1831,13 +1793,13 @@ public:
                 break;
 
             case 8:
-                if(piInputImageColor == REDCOLOR) {
+                if(piInputImageColor == JICTConstants.I_REDCOLOR) {
                     fAvgGreen = (float)piDesiredRed   - fGreenBucket;
                 }  
-                if(piInputImageColor == GREENCOLOR) {
+                if(piInputImageColor == JICTConstants.I_GREENCOLOR) {
                     fAvgGreen = (float)piDesiredGreen - fGreenBucket;
                 }
-                if(piInputImageColor == BLUECOLOR) {
+                if(piInputImageColor == JICTConstants.I_BLUECOLOR) {
                     fAvgGreen = (float)piDesiredBlue  - fGreenBucket;
                 }
                 break;
@@ -1853,13 +1815,13 @@ public:
                 break;
 
             case 8:
-                if (piInputImageColor == REDCOLOR) {
+                if (piInputImageColor == JICTConstants.I_REDCOLOR) {
                     fAvgGreen = piDesiredRed;
                 }
-                if (piInputImageColor == GREENCOLOR) {
+                if (piInputImageColor == JICTConstants.I_GREENCOLOR) {
                     fAvgGreen = piDesiredGreen;
                 }
-                if (piInputImageColor == BLUECOLOR) {
+                if (piInputImageColor == JICTConstants.I_BLUECOLOR) {
                     fAvgGreen = piDesiredBlue;
                 }
                 break;
@@ -2055,7 +2017,8 @@ public:
             return -2;
         }
 
-        byte thePixel, red, green, blue;
+        byte thePixel;
+        Byte bytRed = (byte)0, bytGreen = (byte)0, bytBlue = (byte)0;
         xBeg = Math.max(this.miImageWidth, this.miImageHeight);
         yBeg = Math.max(this.miImageWidth, this.miImageHeight);
         xEnd = 1;
@@ -2066,7 +2029,7 @@ public:
                 switch (this.miBitsPerPixel) {
                 case 8:
                     thePixel = getMPixel(x, y);
-                    if(thePixel != CHROMAVALUE) {
+                    if(thePixel != JICTConstants.I_CHROMAVALUE) {
                         if(x < xBeg) xBeg = x;
                         if(x > xEnd) xEnd = x;
                         if(y < yBeg) yBeg = x;
@@ -2075,20 +2038,20 @@ public:
                     break;
 
                 case 24:
-                    getMPixelRGB(x, y, red, green, blue);
-                    if(red != CHROMARED) {
+                    getMPixelRGB(x, y, bytRed, bytGreen, bytBlue);
+                    if(bytRed != JICTConstants.I_CHROMARED) {
                         if(x < xBeg) xBeg = x;
                         if(x > xEnd) xEnd = x;
                         if(y < yBeg) yBeg = x;
                         if(y > yEnd) yEnd = x;
                     }
-                    if(green != CHROMAGREEN) {
+                    if(bytGreen != JICTConstants.I_CHROMAGREEN) {
                         if(x < xBeg) xBeg = x;
                         if(x > xEnd) xEnd = x;
                         if(y < yBeg) yBeg = x;
                         if(y > yEnd) yEnd = x;
                     }
-                    if(blue != CHROMABLUE) {
+                    if(bytBlue != JICTConstants.I_CHROMABLUE) {
                         if(x < xBeg) xBeg = x;
                         if(x > xEnd) xEnd = x;
                         if(y < yBeg) yBeg = x;
@@ -2131,17 +2094,17 @@ public:
                 case 24:
                     // The following method sets parameters aRed, aGreen and aBlue
                     getMPixelRGB(ix, iy, aRed, aGreen, aBlue);
-                    thePixel = CHROMAVALUE;
+                    thePixel = JICTConstants.I_CHROMAVALUE;
                     if(
-                    aRed != CHROMAVALUE || 
-                    aGreen != CHROMAVALUE ||
-                    aBlue != CHROMAVALUE) { 
+                    aRed != JICTConstants.I_CHROMAVALUE || 
+                    aGreen != JICTConstants.I_CHROMAVALUE ||
+                    aBlue != JICTConstants.I_CHROMAVALUE) { 
                         thePixel = 255;
                     }
                     break;
                 } // switch
 
-                if(thePixel != CHROMAVALUE) {
+                if(thePixel != JICTConstants.I_CHROMAVALUE) {
                     pOutImage.setMPixel(ix, iy, (byte)255);
                 }
             } // for ix
@@ -2158,19 +2121,19 @@ public:
         // The input image must be one bit per pixel
         // The output image must be 8 bits per pixel
         // The output image must be opened for RANDOM access
-        if (miColorSpec != ONEBITMONOCHROME) {
+        if (miColorSpec != JICTConstants.I_ONEBITMONOCHROME) {
             Globals.statusPrint("MemImage.unPack: Input image colorSpec must be ONEBITMONOCHROME");
             return 1;
         }
       
-        if(outputImage.miAccessMode != RANDOM) {
+        if(outputImage.miAccessMode != JICTConstants.I_RANDOM) {
             Globals.statusPrint("MemImage.unPack: Output image access mode must be RANDOM");
             return 2;
         }
 
         if (
-        outputImage.miColorSpec == RGBCOLOR ||
-        outputImage.miColorSpec == ONEBITMONOCHROME) {
+        outputImage.miColorSpec == JICTConstants.I_RGBCOLOR ||
+        outputImage.miColorSpec == JICTConstants.I_ONEBITMONOCHROME) {
             Globals.statusPrint("MemImage.unPack: Output image colorSpec must be REDCOLOR, GREENCOLOR, or BLUECOLOR");
             return 3;
         }
@@ -2202,7 +2165,7 @@ public:
                         if((packedByte >> (7-bitCounter)) & 0x1) {
                             outputImage.setMPixel(xCounter, miImageHeight-(y-1), 255);
                         } else {
-                            outputImage.setMPixel(xCounter, miImageHeight-(y-1), CHROMAVALUE);
+                            outputImage.setMPixel(xCounter, miImageHeight-(y-1), (byte)JICTConstants.I_CHROMAVALUE);
                         }
                     }
                 } // for bitCounter
@@ -2216,6 +2179,8 @@ public:
     
 
     // This method came from BLEND.CPP
+    // Called from:
+    //     MorphDlg.onOK
     public int adjustImageBorder(String outPath) {
         // Find the size of the chromakey border around an image and
         // create a new image in which the border has been removed.
@@ -2234,15 +2199,15 @@ public:
         int maxX = 1;
         int minY = imHeight;
         int maxY = 1;
-        byte aRed, aGreen, aBlue;
+        Byte bytRed = (byte)0, bytGreen = (byte)0, bytBlue = (byte)0;
       
         for (row = 1; row <= imHeight; row++) {
             for (col = 1; col <= imWidth; col++) {
-                getMPixelRGB(col, row, aRed, aGreen, aBlue);
+                getMPixelRGB(col, row, bytRed, bytGreen, bytBlue);
                 if(
-                aRed != CHROMARED || 
-                aGreen != CHROMAGREEN ||
-                aBlue != CHROMABLUE) {
+                bytRed != JICTConstants.I_CHROMARED || 
+                bytGreen != JICTConstants.I_CHROMAGREEN ||
+                bytBlue != JICTConstants.I_CHROMABLUE) {
                     if(row < minY) minY = row;
                     if(col < minX) minX = col;
                     if(row > maxY) maxY = row;
@@ -2265,8 +2230,8 @@ public:
         for (row = minY; row <= maxY; row++) {
             outCol = 1;
             for (col = minX; col <= maxX; col++) {
-                getMPixelRGB(col, row, aRed, aGreen, aBlue);
-                outImage.setMPixelRGB(outCol, outRow, aRed, aGreen, aBlue);
+                getMPixelRGB(col, row, bytRed, bytGreen, bytBlue);
+                outImage.setMPixelRGB(outCol, outRow, bytRed, bytGreen, bytBlue);
                 outCol++;
             }
 
@@ -2286,25 +2251,21 @@ public:
         MemImage inImage  = this;
         MemImage outImage = this;
 
-        if(inImage.getHeight() == outImage.getHeight() && 
-        inImage.getWidth() == outImage.getWidth()) {
-            // do nothing?
-        } else {
+        if(inImage.getHeight() != outImage.getHeight() || 
+        inImage.getWidth() != outImage.getWidth()) {
             Globals.statusPrint("MemImage.alphaSmooth3: Images must have equal size.");
             return -1;
         }
 
         // Each image must have 8 bit pixels.
         if(
-        (inImage.getBitsPerPixel() == outImage.getBitsPerPixel()) && 
-        (inImage.getBitsPerPixel() == 8)) {
-            // do nothing?
-        } else {
+        (inImage.getBitsPerPixel() != outImage.getBitsPerPixel()) ||  
+        (inImage.getBitsPerPixel() != 8)) {
             Globals.statusPrint("MemImage.alphaSmooth3: Images must have 8 bit pixels.");
             return -2;
         }
 
-        int bpp = inImage.getBitsPerPixel();
+        // int bpp = inImage.getBitsPerPixel(); // not used
         /* Not used
         float[][] weight = new float[5][5];
         weight[0][0] = 0.05f;    // impulse function
@@ -2370,6 +2331,8 @@ public:
 
     // This method came from IWARP.CPP
     // Called from:
+    //     Globals.createCutout
+    //     MainFrame.onToolsCreateAlphaImage
     //     RenderObject.renderMeshz
     public int alphaSmooth5() {
         //
@@ -2379,25 +2342,21 @@ public:
         MemImage outImage = this;
 
         if(
-        inImage.getHeight() == outImage.getHeight() && 
-        inImage.getWidth() == outImage.getWidth()) {
-            // do nothing?
-        } else {
+        inImage.getHeight() != outImage.getHeight() || 
+        inImage.getWidth() != outImage.getWidth()) {
             Globals.statusPrint("MemImage.alphaSmooth5: Images must have equal size.");
             return -1;
         }
 
         // Each image must have 8 bit pixels.
         if(
-        (inImage.getBitsPerPixel() == outImage.getBitsPerPixel()) && 
-        (inImage.getBitsPerPixel() == 8)) {
-            // do nothing?
-        } else {
+        (inImage.getBitsPerPixel() != outImage.getBitsPerPixel()) || 
+        (inImage.getBitsPerPixel() != 8)) {
             Globals.statusPrint("MemImage.alphaSmooth5: Images must have 8 bit pixels.");
             return -2;
         }
 
-        int bpp = inImage.getBitsPerPixel();
+        // int bpp = inImage.getBitsPerPixel(); // not used
         /* Not used
         float[][] weight = new float[5][5];
         weight[0][0] = 0.05f;    // impulse function
@@ -2484,31 +2443,28 @@ public:
     
 
     // This method came from IWARP.CPP
+    // Could not find where this method is called from.
     public int alphaSmooth7() {
         // Each image must be the same size.
         MemImage inImage  = this;
         MemImage outImage = this;
 
         if(
-        inImage.getHeight() == outImage.getHeight() && 
-        inImage.getWidth()  == outImage.getWidth() ) {
-            // do nothing?
-        } else {
+        inImage.getHeight() != outImage.getHeight() ||
+        inImage.getWidth()  != outImage.getWidth() ) {
             Globals.statusPrint("MemImage.alphaSmooth7: Images must have equal size.");
             return -1;
         }
 
         // Each image must have 8 bit pixels.
         if(
-        (inImage.getBitsPerPixel() == outImage.getBitsPerPixel()) && 
-        (inImage.getBitsPerPixel() == 8)) {
-            // do nothing?
-        } else {
+        (inImage.getBitsPerPixel() != outImage.getBitsPerPixel()) || 
+        (inImage.getBitsPerPixel() != 8)) {
             Globals.statusPrint("MemImage.alphaSmooth7: Images must have 8 bit pixels.");
             return -2;
         }
 
-        int bpp = inImage.getBitsPerPixel();
+        // int bpp = inImage.getBitsPerPixel(); not used
         int imHeight = inImage.getHeight();
         int imWidth  = inImage.getWidth();
         //float x1 = 0.0f; // not used
@@ -2628,7 +2584,7 @@ public:
         int yMax = I1y;
         int xMin = I1x;
         int yMin = I1y;
-        float totalIntensity, avgIntensity;
+        // float totalIntensity, avgIntensity; // not used
         MemImage outImage = this;  
 
         // Get the bounding box
@@ -2649,7 +2605,8 @@ public:
         if(I4y < yMin) yMin = I4y;
 
         // Handle quadrangles that consist of: a single point, horizontal or vertical line
-        float oldZ, intensity, outIntensity, distance; 
+        float oldZ, intensity, distance; 
+        // float outIntensity; // not used
         int bpp = outImage.getBitsPerPixel();
 
         // Single point
@@ -2680,10 +2637,10 @@ public:
             return 0;
         }
 
-        int minX, minY, maxX, maxY, j;
-        float minI, maxI, minD, maxD;
-        float nSteps, intensityStep, distanceStep;
-        int row, col, denominator;
+        // int minX, minY, maxX, maxY, j; // not used
+        // float minI, maxI, minD, maxD; // not used
+        // float nSteps, intensityStep, distanceStep; // not used
+        // int row, col, denominator; // not used
 
         // Handle larger quadrangles
         int xCent = (int)(((float)xMin + ((float)xMax - (float)xMin) / 2.0f) + 0.5f);
@@ -2733,37 +2690,4 @@ public:
             outImage, zBuffer);
         return 0;
     } // fillPolyz
-
-
-    public int sizeofLowerLimit() {
-        int mySize = 0;
-        int booleanFieldsSizeInBits = 0;
-        int booleanFieldsSize = 0;
-        int intFieldsSize = 0;
-        int floatFieldsSize = 0;
-        int referenceFieldsSize = 0;
-
-        /*
-        protected boolean valid;
-        protected int imageHeight;
-        protected int imageWidth;
-        protected int bitsPerPixel;
-        protected int paddedWidth;
-        protected int pads;
-        protected int accessMode;
-        protected int theColorSpec;
-        protected byte[] bytes;
-        protected HANDLE fp;
-        protected String savedFileName;
-        */
-
-        booleanFieldsSizeInBits = 1; // 1 booleans
-        booleanFieldsSize = 1; // 1 bit fits in a byte
-        intFieldsSize = 7*4; // 7 ints
-        floatFieldsSize = 0*4; // 0 floats
-        referenceFieldsSize = 3*4; // 3 references to objects
-        mySize = booleanFieldsSize + intFieldsSize + floatFieldsSize + referenceFieldsSize;
-
-        return mySize;
-    }
 } // class MemImage
