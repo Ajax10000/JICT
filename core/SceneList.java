@@ -489,7 +489,7 @@ public class SceneList implements ISceneList {
                     modelSE.mbWarpIndicator == false &&
                     modelSE.mbBlendIndicator == false) {
                         // Display a MemImage object in the indicated BufferedImage
-                        mBkgndPlateMImage.display(pBuffImg, iOutputColumns, iOutputRows);
+                        mBkgndPlateMImage.display(iOutputColumns, iOutputRows);
                     } else {
                         // Draw the object
                         modelSE.mScreenRdrObject.drawSequence(pBuffImg, modelSE.msModelName, 
@@ -682,7 +682,7 @@ public class SceneList implements ISceneList {
                     modelSE.mbWarpIndicator == false &&
                     modelSE.mbBlendIndicator == false) {
                         // Display a MemImage object in the indicated BufferedImage
-                        mBkgndPlateMImage.display(pBuffImg, iOutputColumns, iOutputRows);
+                        mBkgndPlateMImage.display(iOutputColumns, iOutputRows);
                     } else {
                         // Draw the model boundary
                         if(modelSE.miModelType != JICTConstants.I_COMPOUND) {
@@ -729,8 +729,9 @@ public class SceneList implements ISceneList {
     public int render(ImageView pDisplayWindow, TMatrix pViewMatrix,
     boolean pbDepthSortingEnabled, boolean pbZBufferEnabled, boolean pbAntiAliasEnabled, 
     boolean pbHazeFogEnabled) {
-        String sOutputFileName, sSceneName = "";
-        String sRedFileName, sGreenFileName, sBlueFileName, sRGBFileName, sCurrentColor;
+        String sOutputFileName = "", sSceneName = "";
+        String sRedFileName = "", sGreenFileName = "", sBlueFileName = "", sRGBFileName = "";
+        String sCurrentColor = "";
         Integer iEffectType = 0;
         Integer iColorMode = 0;
         Integer iOutputRows = 0, iOutputColumns = 0;
@@ -738,11 +739,12 @@ public class SceneList implements ISceneList {
         int iFrameCounter;
         Float fVx = 0.0f, fVy = 0.0f, fVz = 0.0f;    // Viewpoint
         Float vrx = 0.0f, vry = 0.0f, vrz = 0.0f;       
-        MotionNode motnNode;                    // Current model location and orientation if moving.
-        Bundle xfrm;           // Create a bundle of transforms
+        MotionNode motnNode = new MotionNode();      // Current model location and orientation if moving.
+        Bundle xfrm = new Bundle();                  // Create a bundle of transforms
         Instant timeStart, timeEnd;
         timeStart = Instant.now();
-        TMatrix forwardMatrix, viewModelMatrix;
+        TMatrix forwardMatrix = new TMatrix();
+        TMatrix viewModelMatrix = new TMatrix();
 
         // The following method sets all the parameters
         // but we will not use sSceneName
@@ -762,7 +764,7 @@ public class SceneList implements ISceneList {
         SceneElement[] models = new SceneElement[JICTConstants.I_MAXMODELS];
         float[] fDistances = new float[JICTConstants.I_MAXMODELS];
         Integer iNumModels = 0; 
-        int iStatus;
+        int iStatus = 0;
         iFirstFrame = iLastFrame = 0;
 
         // Open the zBuffer if necessary
@@ -980,7 +982,7 @@ public class SceneList implements ISceneList {
 
                         // Processing of one model is complete
                         // Update the display
-                        outputMImage.display(pBuffImg, iOutputColumns, iOutputRows);
+                        outputMImage.display(iOutputColumns, iOutputRows);
                     } // if theModel.statusIndicator == 0
                 } // for currentModel
 
