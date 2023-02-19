@@ -553,8 +553,10 @@ protected:
 
             inImageB.adjustImageBorder(secondImage);
 
-            inImageB = new MemImage(firstImage, 0, 0, JICTConstants.I_RANDOM, 'R', JICTConstants.I_RGBCOLOR);
-            inImageA = new MemImage(secondImage, 0, 0, JICTConstants.I_RANDOM, 'R', JICTConstants.I_RGBCOLOR);
+            inImageB = new MemImage(firstImage, 0, 0, 
+                JICTConstants.I_RANDOM, 'R', JICTConstants.I_RGBCOLOR);
+            inImageA = new MemImage(secondImage, 0, 0, 
+                JICTConstants.I_RANDOM, 'R', JICTConstants.I_RGBCOLOR);
             aFraction = 0.0f;
             increment = 1.0f/(float)(m_numFrames - 1.0f);
 
@@ -593,11 +595,13 @@ protected:
             bpp = 8;
             switch (bpp) {
             case 8:
-                aTexture = new MemImage(aTexPath, 0, 0, JICTConstants.I_RANDOM, 'R', JICTConstants.I_GREENCOLOR);
+                aTexture = new MemImage(aTexPath, 0, 0, 
+                    JICTConstants.I_RANDOM, 'R', JICTConstants.I_GREENCOLOR);
                 break;
 
             case 24:
-                aTexture = new MemImage(aTexPath, 0, 0, JICTConstants.I_RANDOM, 'R', JICTConstants.I_RGBCOLOR);
+                aTexture = new MemImage(aTexPath, 0, 0, 
+                    JICTConstants.I_RANDOM, 'R', JICTConstants.I_RGBCOLOR);
                 break;
 
             default:
@@ -605,9 +609,12 @@ protected:
                 return;
             } // switch
 
-            aX = new MemImage(aXPath, 0, 0, JICTConstants.I_RANDOM, 'R', JICTConstants.I_A32BIT);
-            aY = new MemImage(aYPath, 0, 0, JICTConstants.I_RANDOM, 'R', JICTConstants.I_A32BIT);
-            aZ = new MemImage(aZPath, 0, 0, JICTConstants.I_RANDOM, 'R', JICTConstants.I_A32BIT);
+            aX = new MemImage(aXPath, 0, 0, 
+                JICTConstants.I_RANDOM, 'R', JICTConstants.I_A32BIT);
+            aY = new MemImage(aYPath, 0, 0, 
+                JICTConstants.I_RANDOM, 'R', JICTConstants.I_A32BIT);
+            aZ = new MemImage(aZPath, 0, 0, 
+                JICTConstants.I_RANDOM, 'R', JICTConstants.I_A32BIT);
 
             bTexPath = new String(secondImage);
             FileUtils.constructPathName(bXPath, bTexPath, 'x');
@@ -616,11 +623,13 @@ protected:
         
             switch (bpp) {
             case 8:
-                bTexture = new MemImage(aTexPath, 0, 0, JICTConstants.I_RANDOM, 'R', JICTConstants.I_GREENCOLOR);
+                bTexture = new MemImage(aTexPath, 0, 0, 
+                    JICTConstants.I_RANDOM, 'R', JICTConstants.I_GREENCOLOR);
                 break;
 
             case 24:
-                bTexture = new MemImage(aTexPath, 0, 0, JICTConstants.I_RANDOM, 'R', JICTConstants.I_RGBCOLOR);
+                bTexture = new MemImage(aTexPath, 0, 0, 
+                    JICTConstants.I_RANDOM, 'R', JICTConstants.I_RGBCOLOR);
                 break;
 
             default:
@@ -628,9 +637,12 @@ protected:
                 return;
             } // switch
 
-            bX = new MemImage(bXPath, 0, 0, JICTConstants.I_RANDOM, 'R', JICTConstants.I_A32BIT);
-            bY = new MemImage(bYPath, 0, 0, JICTConstants.I_RANDOM, 'R', JICTConstants.I_A32BIT);
-            bZ = new MemImage(bZPath, 0, 0, JICTConstants.I_RANDOM, 'R', JICTConstants.I_A32BIT);
+            bX = new MemImage(bXPath, 0, 0, 
+                JICTConstants.I_RANDOM, 'R', JICTConstants.I_A32BIT);
+            bY = new MemImage(bYPath, 0, 0, 
+                JICTConstants.I_RANDOM, 'R', JICTConstants.I_A32BIT);
+            bZ = new MemImage(bZPath, 0, 0, 
+                JICTConstants.I_RANDOM, 'R', JICTConstants.I_A32BIT);
 
             int imHeight = aTexture.getHeight();
             int imWidth  = aTexture.getWidth();
