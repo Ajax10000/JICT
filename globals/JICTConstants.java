@@ -71,6 +71,9 @@ public class JICTConstants {
     public static final int I_MAXMODELS = 256;     //size of model array for depth sorting
     //increase if > MAXMODELS are to be used in a scene
 
+    // Originally definedin SHAPE3D.H
+    public static final int I_MAXVERTICES = 1024;
+
     // Originally defined in SCENELST.H
     public static final int I_RED   = 1;
     public static final int I_GREEN = 2;
