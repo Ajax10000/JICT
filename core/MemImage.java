@@ -109,8 +109,8 @@ public:
     //     SceneList.previewStill
     //     SceneList.render
     //     MainFrame.onToolsWarpImage
-    public MemImage(String psFileName, int imHeight, int imWidth, int imAccessMode, 
-    char rw, int piColorSpec) {
+    public MemImage(String psFileName, int piImHeight, int piImWidth, int piImAccessMode, 
+    char pcRW, int piColorSpec) {
         String msgBuffer;
 
         if (
@@ -128,24 +128,24 @@ public:
             return;
         }
 
-        if((rw != 'R') && (rw != 'r') && (rw != 'W') && (rw != 'w')) {
-            msgBuffer = "MemImage Constructor 1: rw must be R or W - " + rw;
+        if((pcRW != 'R') && (pcRW != 'r') && (pcRW != 'W') && (pcRW != 'w')) {
+            msgBuffer = "MemImage Constructor 1: pcRW must be R or W - " + pcRW;
             Globals.statusPrint(msgBuffer);
             this.valid = false;
             return;
         }
 
         if(
-        (imAccessMode != JICTConstants.I_RANDOM) && 
-        (imAccessMode != JICTConstants.I_SEQUENTIAL)) {
-            msgBuffer = "MemImage Constructor 1: accessMode must be RANDOM or SEQUENTIAL - " + imAccessMode;
+        (piImAccessMode != JICTConstants.I_RANDOM) && 
+        (piImAccessMode != JICTConstants.I_SEQUENTIAL)) {
+            msgBuffer = "MemImage Constructor 1: accessMode must be RANDOM or SEQUENTIAL - " + piImAccessMode;
             Globals.statusPrint(msgBuffer);
             this.valid = false;
             return;
         }
         if(
-        (rw == 'W' || rw == 'w') && 
-        (imHeight <= 0 || imWidth <= 0 || piColorSpec == 0)) {
+        (pcRW == 'W' || pcRW == 'w') && 
+        (piImHeight <= 0 || piImWidth <= 0 || piColorSpec == 0)) {
             Globals.statusPrint("MemImage Constructor 1: length, width and colorSpec must be > 0 for write access");
             this.valid = false;
             return;
@@ -159,7 +159,7 @@ public:
 
         // Get a preview of the file 
         Integer myHeight = 0, myWidth = 0;
-        if(imHeight == 0 || imWidth == 0 || piColorSpec == 0) {
+        if(piImHeight == 0 || piImWidth == 0 || piColorSpec == 0) {
             iStatus = Globals.readBMPHeader(psFileName, myHeight, myWidth, myBitsPerPixel);
             if(iStatus != 0) {
                 this.valid = false;
@@ -167,21 +167,21 @@ public:
                 return;
             }
 
-            imHeight = myHeight;
-            imWidth = myWidth;
+            piImHeight = myHeight;
+            piImWidth = myWidth;
             if(piColorSpec == 0) {
                 piColorSpec = mapBitsPerPixelToColorSpec(myBitsPerPixel);
             }
         }
 
         //  Assign the MemImage properties
-        this.miImageHeight = imHeight;
-        this.miImageWidth = imWidth;
+        this.miImageHeight = piImHeight;
+        this.miImageWidth = piImWidth;
         this.miBitsPerPixel = myBitsPerPixel;
         this.miColorSpec = piColorSpec;
-        this.miAccessMode = imAccessMode;
+        this.miAccessMode = piImAccessMode;
 
-        if((rw == 'W') || (rw == 'w')) {
+        if((pcRW == 'W') || (pcRW == 'w')) {
             int numRows = this.miImageHeight;
             if (this.miAccessMode == JICTConstants.I_SEQUENTIAL) {
                 numRows = 1;
@@ -195,11 +195,11 @@ public:
 
         if(this.miAccessMode == JICTConstants.I_SEQUENTIAL) {
             //  Write or Read the BMP header
-            if(rw == 'W' || rw == 'w') {
+            if(pcRW == 'W' || pcRW == 'w') {
                 iStatus = writeBMP(psFileName);
             }
 
-            if(rw == 'R' || rw == 'r') {
+            if(pcRW == 'R' || pcRW == 'r') {
                 iStatus = readBMP(psFileName, piColorSpec);
             }
 
@@ -210,19 +210,19 @@ public:
 
         if(this.miAccessMode == JICTConstants.I_RANDOM) {
             if(
-            (rw == 'W' || rw == 'w') && 
+            (pcRW == 'W' || pcRW == 'w') && 
             (piColorSpec == JICTConstants.I_RGBCOLOR)) {
                 Globals.statusPrint("MemImage Constructor 1: RANDOM 24 bit BMPs not supported for writing");
                 this.valid = false;
                 return;
             }
             if(
-            (rw == 'W' || rw == 'w') && 
+            (pcRW == 'W' || pcRW == 'w') && 
             (piColorSpec != JICTConstants.I_RGBCOLOR)) {
                 iStatus = writeBMP(psFileName);
             }
 
-            if(rw == 'R' || rw == 'r') {
+            if(pcRW == 'R' || pcRW == 'r') {
                 iStatus = Globals.readBMPHeader(psFileName, myHeight, myWidth, myBitsPerPixel);
                 if(iStatus != 0) {
                     this.valid = false; // Indicate that the file could not be opened
@@ -251,17 +251,17 @@ public:
     //     MainFrame.onToolsWarpImage
     //     RenderObject.renderMeshz
     //     Texture.createTexture
-    public MemImage(int height, int width, int aBitsPerPixel) {
+    public MemImage(int piHeight, int piWidth, int piBitsPerPixel) {
         //  Allocates a memory resident 8 bit image by default.
         this.valid = false;
         this.miAccessMode    = JICTConstants.I_RANDOM;
-        this.miImageHeight   = height;
-        this.miImageWidth    = width;
+        this.miImageHeight   = piHeight;
+        this.miImageWidth    = piWidth;
         this.miColorSpec     = JICTConstants.I_EIGHTBITMONOCHROME;
         this.msSavedFileName = "No Image File Name";
-        this.miBitsPerPixel  = aBitsPerPixel;
-        this.miColorSpec  = mapBitsPerPixelToColorSpec(this.miBitsPerPixel);
-        allocate(height, width);
+        this.miBitsPerPixel  = piBitsPerPixel;
+        this.miColorSpec     = mapBitsPerPixelToColorSpec(this.miBitsPerPixel);
+        allocate(piHeight, piWidth);
 
         if (ictdebug) {
             Globals.statusPrint("MemImage Constructor 2");
@@ -274,21 +274,23 @@ public:
     //     RenderObject.renderMeshz
     //     SceneList.preview
     //     SceneList.render
-    public MemImage(int height, int width) {
-        this(height, width, 8);
+    public MemImage(int piHeight, int piWidth) {
+        this(piHeight, piWidth, 8);
     } // MemImage ctor
 
 
-    public MemImage(MemImage m) {
-        this.miImageHeight   = m.miImageHeight;
-        this.miImageWidth    = m.miImageWidth;
-        this.miBitsPerPixel  = m.miBitsPerPixel;
-        this.miAccessMode    = m.miAccessMode;
-        this.miColorSpec     = m.miColorSpec;
-        this.msSavedFileName = m.msSavedFileName;
+    // Called from:
+    //     ScnFileParser.readList (twice)
+    public MemImage(MemImage pMImage) {
+        this.miImageHeight   = pMImage.miImageHeight;
+        this.miImageWidth    = pMImage.miImageWidth;
+        this.miBitsPerPixel  = pMImage.miBitsPerPixel;
+        this.miAccessMode    = pMImage.miAccessMode;
+        this.miColorSpec     = pMImage.miColorSpec;
+        this.msSavedFileName = pMImage.msSavedFileName;
 
-        if(m.valid == true) {
-            allocate(m.miImageHeight, m.miImageWidth);
+        if(pMImage.valid == true) {
+            allocate(pMImage.miImageHeight, pMImage.miImageWidth);
         }
 
         if (ictdebug) {
@@ -337,6 +339,8 @@ public:
 
     // Called from:
     //     allocate
+    //     GPipe.reset
+    //     MorphDlg.onOK
     public void clear() {
         int x, y;
         int rows = this.miImageHeight;
@@ -355,7 +359,8 @@ public:
     } // clear
 
 
-    public int clearRGB(byte red, byte green, byte blue) {
+    // Could not find where this is called from
+    public int clearRGB(byte pbytRed, byte pbytGreen, byte pbytBlue) {
         // Clear all pixels whose colors match the specified color
         // Use the fastest image traversal method
         if (this.miBitsPerPixel != 24) {
@@ -378,9 +383,9 @@ public:
         for (y = 1; y <= rows; y++) {
             for (x = 1; x <= this.miImageWidth; x++) {
                 if(
-                (bytes[iBytesIdx]     == blue)  && 
-                (bytes[iBytesIdx + 1] == green) && 
-                (bytes[iBytesIdx + 2] == red)) {
+                (bytes[iBytesIdx]     == pbytBlue)  && 
+                (bytes[iBytesIdx + 1] == pbytGreen) && 
+                (bytes[iBytesIdx + 2] == pbytRed)) {
                     bytes[iBytesIdx]     = 0;
                     bytes[iBytesIdx + 1] = 0;
                     bytes[iBytesIdx + 2] = 0;
@@ -401,7 +406,11 @@ public:
     } // clearRGB
 
 
-    public int clearRGBRange(byte redLow, byte redHigh, byte greenLow, byte greenHigh, byte blueLow, byte blueHigh) {
+    // Called from:
+    //     ImageView.onLButtonDown
+    public int clearRGBRange(byte pbytRedLow, byte pbytRedHigh, 
+    byte pbytGreenLow, byte pbytGreenHigh, 
+    byte pbytBlueLow, byte pbytBlueHigh) {
         // Clear all pixels whose colors match the specified color
         // Use the fastest traversal method
         if (this.miBitsPerPixel != 24) {
@@ -425,9 +434,9 @@ public:
         for (y = 1; y <= rows; y++) {
             for (x = 1; x <= this.miImageWidth; x++) {
                 if(
-                (bytes[iBytesIdx]   >= blueLow)  && (bytes[iBytesIdx]   <= blueHigh)  && 
-                (bytes[iBytesIdx+1] >= greenLow) && (bytes[iBytesIdx+1] <= greenHigh) && 
-                (bytes[iBytesIdx+2] >= redLow)   && (bytes[iBytesIdx+2] <= redHigh)) {
+                (bytes[iBytesIdx]   >= pbytBlueLow)  && (bytes[iBytesIdx]   <= pbytBlueHigh)  && 
+                (bytes[iBytesIdx+1] >= pbytGreenLow) && (bytes[iBytesIdx+1] <= pbytGreenHigh) && 
+                (bytes[iBytesIdx+2] >= pbytRedLow)   && (bytes[iBytesIdx+2] <= pbytRedHigh)) {
                     bytes[iBytesIdx]   = 0;		   // each color component must be erased
                     bytes[iBytesIdx+1] = 0;
                     bytes[iBytesIdx+2] = 0;
@@ -452,12 +461,15 @@ public:
     // See p 104 of the book Visual Special Effects Toolkit in C++, 
     // by Tim Wittenburg.
     // Called from:
+    //     Globals.renderMesh
+    //     GPipe.initialize
+    //     GPipe.reset
     //     RenderObject.renderMeshz
     //     SceneList.render
     public void init32(float pfValue) {
         //  Initialize a 32 bit image by setting each pixel to a designated value
         int ix, iy;
-        float *fTemp;
+        float[] fTemp;
         fTemp = (float *)bytes;
 
         // Don't need paddedWidth here because each row
@@ -483,7 +495,8 @@ public:
     // Visual Special Effects Toolkit in C++, by Tim Wittenburg.
     // Called from:
     //     saveAs8
-    public int scaleTo8(MemImage pScaledImage) {
+    //     Globals.createQMeshModel
+    public int scaleTo8(MemImage pScaledMImage) {
         // Scale a 32 bit memimage to 8 bits and copy it to the memImage passed in.
         // This version scales to the maximum dynamic range permitted by 8 bits of resolution
         // Consequently, depending on the range of values in the 32 bit image, contrast stretching
@@ -494,12 +507,12 @@ public:
         String sMsgText;
         boolean IGNOREMAXVALUE = true;
 
-        if((pScaledImage.miBitsPerPixel != 8) || (this.miBitsPerPixel != 32)) {
+        if((pScaledMImage.miBitsPerPixel != 8) || (this.miBitsPerPixel != 32)) {
             Globals.statusPrint("MemImage.scaleTo8: Bits per pixel mismatch");
             return 1;
         }
         
-        if((pScaledImage.getHeight() != getHeight()) || (pScaledImage.getWidth() != getWidth())) {
+        if((pScaledMImage.getHeight() != getHeight()) || (pScaledMImage.getWidth() != getWidth())) {
             Globals.statusPrint("MemImage.scaleTo8: Image sizes must be equal");
             return 2;
         }
@@ -559,12 +572,12 @@ public:
                     if(actValue != JICTConstants.F_ZBUFFERMAXVALUE) {
                         desValue = ((actValue - fActMin) * fsFactor) + fDesMin;
                         scaledValue = (byte)(desValue + 0.5f);
-                        pScaledImage.setMPixel(ix, iy, scaledValue);
+                        pScaledMImage.setMPixel(ix, iy, scaledValue);
                     }
                 } else {
                     desValue = ((actValue - fActMin) * fsFactor) + fDesMin;
                     scaledValue = (byte)(desValue + 0.5f);
-                    pScaledImage.setMPixel(ix, iy, scaledValue);
+                    pScaledMImage.setMPixel(ix, iy, scaledValue);
                 }
                 
                 fTemp++;
@@ -656,7 +669,7 @@ public:
     // Called from:
     //     RenderObject.maskFromShape
     //     RenderObject.prepareCutout
-    public int drawMask(Point2d[] thePoints, int numVertices) {
+    public int drawMask(Point2d[] paPoint2ds, int piNumVertices) {
         BufferedImage buffImage = this.mBuffImg;
         // TODO: Rewrite this
         return 0;
@@ -710,10 +723,10 @@ public:
     // Called from:
     //     Globals.tweenImage
     //     SceneList.render
-    public int copy(MemImage outImage, int piXoffset, int piYoffset) {
+    public int copy(MemImage pOutMImage, int piXoffset, int piYoffset) {
         int x, y;
 
-        if(outImage.miBitsPerPixel != this.miBitsPerPixel) {
+        if(pOutMImage.miBitsPerPixel != this.miBitsPerPixel) {
             Globals.statusPrint("MemImage.copy: Destination image does not have matching pixel depth");
             return -1;
         }
@@ -731,13 +744,13 @@ public:
                 case 8:
                     thePixel = getMPixel(x, y);
                     if(thePixel != 0) {
-                        outImage.setMPixel(x + piXoffset, y + piYoffset, thePixel);
+                        pOutMImage.setMPixel(x + piXoffset, y + piYoffset, thePixel);
                     }
                     break;
 
                 case 24:
                     getMPixelRGB(x, y, bytRed, bytGreen, bytBlue);
-                    outImage.setMPixelRGB(x + piXoffset, y + piYoffset, bytRed, bytGreen, bytBlue);
+                    pOutMImage.setMPixelRGB(x + piXoffset, y + piYoffset, bytRed, bytGreen, bytBlue);
                     break;
                 }
             }
@@ -747,8 +760,10 @@ public:
     } // copy
 
 
-    public int fastCopy(MemImage outImage, int piXOffset, int piYOffset) {
-        if(outImage.miBitsPerPixel != this.miBitsPerPixel) {
+    // Not called from within this file.
+    // Could not find where this is being called from.
+    public int fastCopy(MemImage pOutMImage, int piXOffset, int piYOffset) {
+        if(pOutMImage.miBitsPerPixel != this.miBitsPerPixel) {
             Globals.statusPrint("MemImage.fastCopy: Destination image does not have matching pixel depth");
             return -1;
         }
@@ -758,17 +773,17 @@ public:
             return -2;
         }
 
-        if ((piXOffset > outImage.miImageWidth) || (piYOffset > outImage.miImageHeight)) {
+        if ((piXOffset > pOutMImage.miImageWidth) || (piYOffset > pOutMImage.miImageHeight)) {
             Globals.statusPrint("MemImage.fastCopy: 1 or more offsets are larger than the output image");
             return -3;
         }
 
-        int a = outImage.miImageWidth  - piXOffset;
-        int b = outImage.miImageHeight - piYOffset;
-        int c = piXOffset + this.miImageWidth - outImage.miImageWidth;
+        int a = pOutMImage.miImageWidth  - piXOffset;
+        int b = pOutMImage.miImageHeight - piYOffset;
+        int c = piXOffset + this.miImageWidth - pOutMImage.miImageWidth;
 
         // Now we will copy a portion of array this.bytes to array outImage.bytes
-        int outLoc = ((piYOffset * outImage.miImageWidth) + piXOffset); // not used
+        int outLoc = ((piYOffset * pOutMImage.miImageWidth) + piXOffset); // not used
 
         // copy b rows of image data
         int i, j;
@@ -779,7 +794,7 @@ public:
             for (i = 1; i <= a; i++) {
                 if(bytes[currentPix] != 0) {
                     // *outLoc = *currentPix;
-                    outImage.bytes[outLoc] = bytes[currentPix];
+                    pOutMImage.bytes[outLoc] = bytes[currentPix];
                 }
 
                 outLoc++; 
@@ -788,17 +803,19 @@ public:
 
             // if image is over the edge, skip those pixels then add the pad
             currentPix = currentPix + c + miPads;
-            outLoc += (outImage.miPads + piXOffset); 
+            outLoc += (pOutMImage.miPads + piXOffset); 
         } // for j
 
         return 0;
     } // fastCopy
 
 
-    public int copy8To24(MemImage outImage) {
+    // Not called from within this file
+    // Could not find where this is called from.
+    public int copy8To24(MemImage pOutMImage) {
         int x, y;
 
-        if(outImage.miBitsPerPixel != 24) {
+        if(pOutMImage.miBitsPerPixel != 24) {
             Globals.statusPrint("MemImage.copy8To24: Destination image must have 24 bit pixels");
             return -1;
         }
@@ -812,7 +829,7 @@ public:
         for (x = 1; x <= this.miImageWidth; x++) {
             for (y = 1; y < this.miImageHeight; y++) {
                 intensity = getMPixel(x, y);
-                outImage.setMPixelRGB(x, y, intensity, intensity, intensity);
+                pOutMImage.setMPixelRGB(x, y, intensity, intensity, intensity);
             } // for y
         } // for x
 
@@ -820,24 +837,24 @@ public:
     } // copy8To24
 
 
-    public byte getMPixel(int x, int y, char aColor) {
-        // Inputs x and y are assumed to be 1 relative
+    public byte getMPixel(int piX, int piY, char pcColor) {
+        // Inputs piX and piY are assumed to be 1 relative
         // Returns the desired pixel from a color image
         int addr;
         // byte *thePixel;
         // byte *myTemp = bytes;
 
         if(this.miAccessMode == JICTConstants.I_SEQUENTIAL) {
-            y = 1;
+            piY = 1;
         }
 
         if (
-        (y < 1) || (y > this.miImageHeight) || 
-        (x < 1) || (x > this.miImageWidth)) {
+        (piY < 1) || (piY > this.miImageHeight) || 
+        (piX < 1) || (piX > this.miImageWidth)) {
             return -1;
         }
 
-        addr = ((y - 1) * (int)miPaddedWidth) + ((x - 1)*3);  // 3 bytes/color pixel
+        addr = ((piY - 1) * (int)miPaddedWidth) + ((piX - 1)*3);  // 3 bytes/color pixel
         /*
         myTemp = myTemp + addr;
         thePixel = myTemp;
@@ -845,9 +862,9 @@ public:
         if(aColor == 'G') return *(thePixel + 1);
         if(aColor == 'R') return *(thePixel + 2);
         */
-        if(aColor == 'B') return bytes[addr];
-        if(aColor == 'G') return bytes[addr + 1];
-        if(aColor == 'R') return bytes[addr + 2];
+        if(pcColor == 'B') return bytes[addr];
+        if(pcColor == 'G') return bytes[addr + 1];
+        if(pcColor == 'R') return bytes[addr + 2];
 
         Globals.statusPrint("MemImage.getMPixel: Unknown color value");
         return 0;
@@ -862,8 +879,8 @@ public:
     //     Globals.motionBlur
     //     Globals.tweenImage
     //     Globals.tweenMesh
-    public int getMPixelRGB(int x, int y, Byte red, Byte green, Byte blue) {
-        //  Inputs x and y are assumed to be 1 relative
+    public int getMPixelRGB(int piX, int piY, Byte pbytRed, Byte pbytGreen, Byte pbytBlue) {
+        //  Inputs piX and piY are assumed to be 1 relative
         //  Returns the desired pixel from a color image
         if(this.miBitsPerPixel != 24) {
             Globals.statusPrint("MemImage.getMPixelRGB: Image must be 24 bits per pixel");
@@ -873,21 +890,21 @@ public:
         int addr;
 
         if(this.miAccessMode == JICTConstants.I_SEQUENTIAL) {
-            y = 1;
+            piY = 1;
         }
 
         if (
-        (y < 1) || (y > this.miImageHeight) || 
-        (x < 1) || (x > this.miImageWidth)) {
+        (piY < 1) || (piY > this.miImageHeight) || 
+        (piX < 1) || (piX > this.miImageWidth)) {
             return -1;
         }
 
-        addr = ((y - 1) * this.miPaddedWidth) + ((x - 1)*(this.miBitsPerPixel/8));  // 3 bytes/color pixel
+        addr = ((piY - 1) * this.miPaddedWidth) + ((piX - 1)*(this.miBitsPerPixel/8));  // 3 bytes/color pixel
 
         // Set the output parameters
-        blue  = bytes[addr];
-        green = bytes[addr + 1];
-        red   = bytes[addr + 2];
+        pbytBlue  = bytes[addr];
+        pbytGreen = bytes[addr + 1];
+        pbytRed   = bytes[addr + 2];
 
         return 0;
     } // getMPixelRGB
@@ -901,8 +918,8 @@ public:
     //     Globals.motionBlur
     //     Globals.tweenImage
     //     Globals.tweenMesh
-    public int setMPixelRGB(int x, int y, byte red, byte green, byte blue) {
-        // Inputs x and y are assumed to be 1 relative
+    public int setMPixelRGB(int piX, int piY, byte pbytRed, byte pbytGreen, byte pbytBlue) {
+        // Inputs piX and piY are assumed to be 1 relative
         // Returns the desired pixel from a color image
         if(this.miBitsPerPixel != 24) {
             Globals.statusPrint("MemImage.setMPixelRGB: Image must be 24 bits per pixel");
@@ -912,20 +929,20 @@ public:
         int addr;
 
         if(this.miAccessMode == JICTConstants.I_SEQUENTIAL) {
-            y = 1;
+            piY = 1;
         }
 
         if (
-        (y < 1) || (y > this.miImageHeight) || 
-        (x < 1) || (x > this.miImageWidth)) {
+        (piY < 1) || (piY > this.miImageHeight) || 
+        (piX < 1) || (piX > this.miImageWidth)) {
             return -1;
         }
 
-        addr = ((y - 1) * miPaddedWidth) + ((x - 1)*(this.miBitsPerPixel/8));  // 3 bytes/color pixel
+        addr = ((piY - 1) * miPaddedWidth) + ((piX - 1)*(this.miBitsPerPixel/8));  // 3 bytes/color pixel
 
-        bytes[addr] = blue;
-        bytes[addr + 1] = green;
-        bytes[addr + 2] = red;
+        bytes[addr]     = pbytBlue;
+        bytes[addr + 1] = pbytGreen;
+        bytes[addr + 2] = pbytRed;
 
         return 0;
     } // setMPixelRGB
@@ -941,43 +958,43 @@ public:
     //     Globals.tweenMesh
     //     Texture.createPlasma
     //     Texture.createTexture
-    public int setMPixel(int x, int y, byte value) {
-        // Inputs x and y are assumed to be 1 relative
+    public int setMPixel(int piX, int piY, byte pbytValue) {
+        // Inputs piX and piY are assumed to be 1 relative
         int addr;
 
         if(this.miAccessMode == JICTConstants.I_SEQUENTIAL) {
-            y = 1;
+            piY = 1;
         }
 
         // If setMPixel is called with coordinates that are located outside 
-        // the bounds of the associted image array, no action is taken.
+        // the bounds of the associated image array, no action is taken.
         // See p 119 of Visual Special Effects Toolkit in C++.
         if (
-        (y < 1) || (y > this.miImageHeight) || 
-        (x < 1) || (x > this.miImageWidth)) {
+        (piY < 1) || (piY > this.miImageHeight) || 
+        (piX < 1) || (piX > this.miImageWidth)) {
             return -1;
         }
 
-        addr = ((y - 1) * miPaddedWidth) + x - 1;
-        bytes[addr] = value;
+        addr = ((piY - 1) * miPaddedWidth) + piX - 1;
+        bytes[addr] = pbytValue;
 
-        return value;
+        return pbytValue;
     } // setMPixel
 
 
-    public int setMPixelA(float x, float y, byte value) {
-        // Inputs x and y are assumed to be 1 relative
+    public int setMPixelA(float pfX, float pfY, byte value) {
+        // Inputs pfX and pfY are assumed to be 1 relative
         int addr;
         // byte *myTemp = this.bytes;
         int myTemp;
 
         if(this.miAccessMode == JICTConstants.I_SEQUENTIAL) {
-            y = 1;
+            pfY = 1;
         }
 
         if (
-        (y < 1) || (y > (float)this.miImageHeight) || 
-        (x < 1) || (x > (float)this.miImageWidth)) {
+        (pfY < 1) || (pfY > (float)this.miImageHeight) || 
+        (pfX < 1) || (pfX > (float)this.miImageWidth)) {
             return -1;
         }
 
@@ -985,16 +1002,16 @@ public:
         float xa, xb, ya, yb, valaa, valba, valab, valbb;
         byte chromaColor = 0;
 
-        xa = x - (int)x;
+        xa = pfX - (int)pfX;
         xb = 1.0f - xa;
-        ya = y - (int)y;
+        ya = pfY - (int)pfY;
         yb = 1.0f - ya;
         valaa = (byte)((xa * ya * (float)value) + 0.5f);
         valba = (byte)((xb * ya * (float)value) + 0.5f);
         valab = (byte)((xa * yb * (float)value) + 0.5f);
         valbb = (byte)((xb * yb * (float)value) + 0.5f);
 
-        addr = (((int)y - 1) * miPaddedWidth) + (int)x - 1;
+        addr = (((int)pfY - 1) * miPaddedWidth) + (int)pfX - 1;
 
         // Set the pixel value if this is the first contribution, else add this
         // pixel to what is already present.
@@ -1055,18 +1072,18 @@ public:
     } // setMPixelA
 
 
-    public byte getMPixelA(float x, float y) {
-        // Inputs x and y must be 1 relative
+    public byte getMPixelA(float pfX, float pfY) {
+        // Inputs pfX and pfY must be 1 relative
         int addr;
-        byte *myTemp = this.bytes;
+        byte[] myTemp = this.bytes;
 
         if(this.miAccessMode == JICTConstants.I_SEQUENTIAL) {
-            y = (byte)1;
+            pfY = (byte)1;
         }
 
         if (
-        (y < 1) || (y > (float)this.miImageHeight) || 
-        (x < 1) || (x > (float)this.miImageWidth)) {
+        (pfY < 1) || (pfY > (float)this.miImageHeight) || 
+        (pfX < 1) || (pfX > (float)this.miImageWidth)) {
             return (byte)0;
         }
 
@@ -1075,20 +1092,20 @@ public:
         float valaa, valab, valba, valbb;
         float bucket = 0.0f;
         byte chromaColor = (byte)0;
-        xa = x - (int)x;
+        xa = pfX - (int)pfX;
         xb = 1.0f - xa;
-        ya = y - (int)y;
+        ya = pfY - (int)pfY;
         yb = 1.0f - ya;
         waa = xa * ya;
         wba = xb * ya;
         wab = xa * yb;
         wbb = xb * yb;
 
-        addr = (((int)y - 1) * (int)miPaddedWidth) + (int)x - 1;
-        valaa = *(myTemp + addr);
-        valab = *(myTemp + addr + (int)miPaddedWidth);
-        valba = *(myTemp + addr + 1);
-        valbb = *(myTemp + addr + (int)miPaddedWidth + 1);
+        addr = (((int)pfY - 1) * (int)miPaddedWidth) + (int)pfX - 1;
+        valaa = myTemp[addr]; // TODO: Not done yet, need to assign 4 bytes
+        valab = myTemp[addr + (int)miPaddedWidth]; // TODO: Not done yet, need to assign 4 bytes
+        valba = myTemp[addr + 1]; // TODO: Not done yet, need to assign 4 bytes
+        valbb = myTemp[addr + (int)miPaddedWidth + 1]; // TODO: Not done yet, need to assign 4 bytes
 
         if(valaa != chromaColor) {
             bucket += (valaa * waa);
@@ -1120,25 +1137,25 @@ public:
     //     Globals.tweenImage
     //     Globals.tweenMesh
     //     Texture.plasma
-    public byte getMPixel(int x, int y) {
-        // Inputs x and y are assumed to be 1 relative
+    public byte getMPixel(int piX, int piY) {
+        // Inputs piX and piY are assumed to be 1 relative
         int addr;
         int iBytesIdx = 0; // index into this.bytes
 
         if(this.miAccessMode == JICTConstants.I_SEQUENTIAL) {
-            y = 1;
+            piY = 1;
         }
 
         // If getMPixel is called with coordinates that are located outside 
         // the bounds of the associted image array, no action is taken.
         // See p 119 of Visual Special Effects Toolkit in C++.
         if (
-        (y < 1) || (y > this.miImageHeight) || 
-        (x < 1) || (x > this.miImageWidth)) {
+        (piY < 1) || (piY > this.miImageHeight) || 
+        (piX < 1) || (piX > this.miImageWidth)) {
             return 0;
         }
 
-        addr = ((y - 1) * miPaddedWidth) + x - 1;
+        addr = ((piY - 1) * miPaddedWidth) + piX - 1;
         iBytesIdx = iBytesIdx + addr;
 
         return this.bytes[iBytesIdx];
@@ -1150,26 +1167,26 @@ public:
     //     Globals.iwarpz
     //     Globals.tweenMesh
     //     Texture.createTexture
-    public int setMPixel32(int x, int y, float aValue) {
-        // Inputs x and y are assumed to be 1 relative
+    public int setMPixel32(int piX, int piY, float pfValue) {
+        // Inputs piX and piY are assumed to be 1 relative
         int addr;
-        byte *myTemp = this.bytes;
-        float *pPixel;
+        byte[] myTemp = this.bytes;
 
         if(this.miAccessMode == JICTConstants.I_SEQUENTIAL) {
-            y = 1;
+            piY = 1;
         }
 
         if (
-        (y < 1) || (y > this.miImageHeight) || 
-        (x < 1) || (x > this.miImageWidth)) {
+        (piY < 1) || (piY > this.miImageHeight) || 
+        (piX < 1) || (piX > this.miImageWidth)) {
             return -1;
         }
 
-        addr = ((y - 1) * (int)miPaddedWidth) + ((x - 1) * (this.miBitsPerPixel/8));
-        myTemp = myTemp + addr;
-        pPixel = (float *)myTemp;
-        *(pPixel) = aValue;
+        addr = ((piY - 1) * (int)miPaddedWidth) + ((piX - 1) * (this.miBitsPerPixel/8));
+        // myTemp = myTemp + addr;
+        // pPixel = (float *)myTemp;
+        // *(pPixel) = pfValue;
+        myTemp[addr] = pfValue; // TODO: Not done yet, need to assign 4 bytes
 
         return 0;
     } // setMPixel32
@@ -1179,27 +1196,27 @@ public:
     //     Globals.iwarpz
     //     Globals.tweenMesh
     //     RenderObject.renderMeshz
-    public float getMPixel32(int x, int y) {
+    public float getMPixel32(int piX, int piY) {
         // Inputs x and y are assumed to be 1 relative
         int addr;
-        byte *myTemp = this.bytes;
-        float *pPixel;
+        byte[] myTemp = this.bytes;
+        float pPixel;
 
         if(this.miAccessMode == JICTConstants.I_SEQUENTIAL) {
-            y = 1;
+            piY = 1;
         }
 
         if (
-        (y < 1) || (y > this.miImageHeight) || 
-        (x < 1) || (x > this.miImageWidth)) {
+        (piY < 1) || (piY > this.miImageHeight) || 
+        (piX < 1) || (piX > this.miImageWidth)) {
             return -1.0f;
         }
 
-        addr = ((y - 1) * miPaddedWidth) + ((x - 1) * (this.miBitsPerPixel/8));
-        myTemp = myTemp + addr;
-        pPixel = (float *)myTemp;
+        addr = ((piY - 1) * miPaddedWidth) + ((piX - 1) * (this.miBitsPerPixel/8));
+        // myTemp = myTemp + addr;
+        pPixel = (float)myTemp[addr]; // TODO:Not done yet, need to assign 4 bytes to pPixel
 
-        return *pPixel;
+        return pPixel;
     } // getMPixel32
 
 
@@ -1283,7 +1300,7 @@ public:
     //     MainFrame.onToolsWarpImage
     //     SceneList.render
     //     Texture.createTexture
-    public int writeBMP(String fileName) {
+    public int writeBMP(String psFileName) {
         // TODO: Rewrite this
         // TODO: Here we need to set fp, of type File
         return 0;
@@ -1587,7 +1604,7 @@ public:
     } // writeNextRow
 
 
-    // TODO: Not a method
+    // TODO: Not a method of MemImage in the original C++ code
     // Called from:
     //     The MemImage constructor that takes 6 parameters
     //     readBMP
@@ -1617,7 +1634,7 @@ public:
     } // mapColorSpecToBitsPerPixel
 
 
-    // TODO: Not a method
+    // TODO: Not a method of MemImage in the original C++ code
     // Called from:
     //     The MemImage constructor that takes 6 parameters
     //     The MemImage constructor that takes 3 parameters
@@ -1721,7 +1738,8 @@ public:
     // Visual Special Effects Toolkits in C++
     // Sets pMidRed, pMidGreen and pMidBlue
     public int adjustColor(int piDesiredRed, int piDesiredGreen, int piDesiredBlue,
-    Byte pMidRed, Byte pMidGreen, Byte pMidBlue, MemImage pOutImage, 
+    Byte pbytMidRed, Byte pbytMidGreen, Byte pbytMidBlue, 
+    MemImage pOutMImage, 
     String psAdjustmentType, int piInputImageColor) {
         // Calculate the average color in the image excluding zeros
         // Compute the color difference vector between the average color and the desired color
@@ -1780,9 +1798,9 @@ public:
             fRedBucket   /= (float)iTotalPixels;
             fGreenBucket /= (float)iTotalPixels;
             fBlueBucket  /= (float)iTotalPixels;
-            pMidRed   = (byte)(fRedBucket   + 0.5f);
-            pMidGreen = (byte)(fGreenBucket + 0.5f);
-            pMidBlue  = (byte)(fBlueBucket  + 0.5f);
+            pbytMidRed   = (byte)(fRedBucket   + 0.5f);
+            pbytMidGreen = (byte)(fGreenBucket + 0.5f);
+            pbytMidBlue  = (byte)(fBlueBucket  + 0.5f);
 
             // Calculate the color difference vector
             switch(iBpp) {
@@ -1845,7 +1863,7 @@ public:
                         if (iNewBlue < 1)    iNewBlue  = 1;
                         if (iNewBlue > 255)  iNewBlue  = 255;
 
-                        pOutImage.setMPixelRGB(iCol, iRow, 
+                        pOutMImage.setMPixelRGB(iCol, iRow, 
                             (byte)iNewRed, (byte)iNewGreen, (byte)iNewBlue);
                     }
                     break;
@@ -1860,7 +1878,7 @@ public:
                         if (newValue > 255) {
                             newValue = 255;
                         }
-                        pOutImage.setMPixel(iCol, iRow, (byte)newValue);
+                        pOutMImage.setMPixel(iCol, iRow, (byte)newValue);
                     }
                     break;
                 } // switch
@@ -1877,7 +1895,7 @@ public:
                             iNewRed   = red   + piDesiredRed;
                             iNewGreen = green + piDesiredGreen;
                             iNewBlue  = blue  + piDesiredBlue;
-                            pOutImage.setMPixelRGB(iCol, iRow, (byte)iNewRed, (byte)iNewGreen, (byte)iNewBlue);
+                            pOutMImage.setMPixelRGB(iCol, iRow, (byte)iNewRed, (byte)iNewGreen, (byte)iNewBlue);
                         }
                         break;
 
@@ -1885,7 +1903,7 @@ public:
                         aValue = getMPixel(iCol, iRow);
                         if (aValue != 0) {
                             iNewGreen = aValue + piDesiredGreen;
-                            pOutImage.setMPixel(iCol, iRow, (byte)iNewGreen);
+                            pOutMImage.setMPixel(iCol, iRow, (byte)iNewGreen);
                         }
                         break;
                     } // switch
@@ -1897,7 +1915,7 @@ public:
     } // adjustColor
     
 
-    public int printValue(int x, int y) {
+    public int printValue(int piX, int piY) {
         String sMsgBuffer;
         int iBpp = getBitsPerPixel();
 
@@ -1906,8 +1924,8 @@ public:
             return -1;
         }
 
-        if((x > getWidth()) || (y > getHeight())) {
-            sMsgBuffer = "MemImage.printValue: Either x or y are > image bounds. x: " + x + "  y: " + y;
+        if((piX > getWidth()) || (piY > getHeight())) {
+            sMsgBuffer = "MemImage.printValue: Either x or y are > image bounds. x: " + piX + "  y: " + piY;
             Globals.statusPrint(sMsgBuffer);
             return -1;
         }
@@ -1918,42 +1936,42 @@ public:
         sMsgBuffer = "MemImage.printValue: Display of " + msSavedFileName;
         Globals.statusPrint(sMsgBuffer);
         sMsgBuffer = String.format("   %6d %6d %6d %6d %6d %6d %6d %6d %6d %6d %6d %6d",
-                x,     x + 1, x +  2, x +  3, 
-                x + 4, x + 5, x +  6, x +  7, 
-                x + 8, x + 9, x + 10, x + 11);
+                piX,     piX + 1, piX +  2, piX +  3, 
+                piX + 4, piX + 5, piX +  6, piX +  7, 
+                piX + 8, piX + 9, piX + 10, piX + 11);
         Globals.statusPrint(sMsgBuffer);
 
         int i, j;
         int iNumRows = 10;
         int iNumCols = 12;
-        if ((y + iNumRows) > getHeight()) {
-            iNumRows = getHeight() - y;
+        if ((piY + iNumRows) > getHeight()) {
+            iNumRows = getHeight() - piY;
         }
 
-        if ((x + iNumCols) > getWidth()) {
-            iNumCols = getWidth() - x;
+        if ((piX + iNumCols) > getWidth()) {
+            iNumCols = getWidth() - piX;
         }
 
-        for (i = y; i <= y + iNumRows; i++) {
+        for (i = piY; i <= piY + iNumRows; i++) {
             // display the image row to the ict log
             switch(iBpp) {
             case 8:
                 for(j = 0; j <= iNumCols; j++) {
-                    lineBuffer[j] = getMPixel(x + j, i);
+                    lineBuffer[j] = getMPixel(piX + j, i);
                 }
 
                 sMsgBuffer = String.format("%3d: %4d %4d %4d %4d %4d %4d %4d %4d %4d %4d %4d %4d",
                     i, 
-                    lineBuffer[0], lineBuffer[1], lineBuffer[2],
-                    lineBuffer[3], lineBuffer[4], lineBuffer[5], 
-                    lineBuffer[6], lineBuffer[7], lineBuffer[8], 
+                    lineBuffer[0], lineBuffer[ 1], lineBuffer[ 2],
+                    lineBuffer[3], lineBuffer[ 4], lineBuffer[ 5], 
+                    lineBuffer[6], lineBuffer[ 7], lineBuffer[ 8], 
                     lineBuffer[9], lineBuffer[10], lineBuffer[11]);
                 Globals.statusPrint(sMsgBuffer);
                 break;
 
             case 32:
                 for(j = 0; j <= iNumCols; j++) {
-                    fLineBuffer[j] = getMPixel32(x + j, i);
+                    fLineBuffer[j] = getMPixel32(piX + j, i);
                 }
 
                 sMsgBuffer = String.format("%3d: %6g %6g %6g %6g %6g %6g %6g %6g %6g %6g %6g %6g",
@@ -2010,7 +2028,7 @@ public:
 
 
     // This method will set parameters xBeg, xEnd, yBeg and yEnd
-    public int getBoundingBox(Integer xBeg, Integer xEnd, Integer yBeg, Integer yEnd) {
+    public int getBoundingBox(Integer pIXBeg, Integer pIXEnd, Integer pIYBeg, Integer pIYEnd) {
         int x, y;
         if((this.miBitsPerPixel != 8) && (this.miBitsPerPixel != 24)) {
             Globals.statusPrint("MemImage.getBoundingBox: Only 8 or 24 bit images are supported");
@@ -2019,10 +2037,10 @@ public:
 
         byte thePixel;
         Byte bytRed = (byte)0, bytGreen = (byte)0, bytBlue = (byte)0;
-        xBeg = Math.max(this.miImageWidth, this.miImageHeight);
-        yBeg = Math.max(this.miImageWidth, this.miImageHeight);
-        xEnd = 1;
-        yEnd = 1;
+        pIXBeg = Math.max(this.miImageWidth, this.miImageHeight);
+        pIYBeg = Math.max(this.miImageWidth, this.miImageHeight);
+        pIXEnd = 1;
+        pIYEnd = 1;
 
         for (x = 1; x <= this.miImageWidth; x++) {
             for (y = 1; y < this.miImageHeight; y++) {
@@ -2030,39 +2048,39 @@ public:
                 case 8:
                     thePixel = getMPixel(x, y);
                     if(thePixel != JICTConstants.I_CHROMAVALUE) {
-                        if(x < xBeg) xBeg = x;
-                        if(x > xEnd) xEnd = x;
-                        if(y < yBeg) yBeg = x;
-                        if(y > yEnd) yEnd = x;
+                        if(x < pIXBeg) pIXBeg = x;
+                        if(x > pIXEnd) pIXEnd = x;
+                        if(y < pIYBeg) pIYBeg = x;
+                        if(y > pIYEnd) pIYEnd = x;
                     }
                     break;
 
                 case 24:
                     getMPixelRGB(x, y, bytRed, bytGreen, bytBlue);
                     if(bytRed != JICTConstants.I_CHROMARED) {
-                        if(x < xBeg) xBeg = x;
-                        if(x > xEnd) xEnd = x;
-                        if(y < yBeg) yBeg = x;
-                        if(y > yEnd) yEnd = x;
+                        if(x < pIXBeg) pIXBeg = x;
+                        if(x > pIXEnd) pIXEnd = x;
+                        if(y < pIYBeg) pIYBeg = x;
+                        if(y > pIYEnd) pIYEnd = x;
                     }
                     if(bytGreen != JICTConstants.I_CHROMAGREEN) {
-                        if(x < xBeg) xBeg = x;
-                        if(x > xEnd) xEnd = x;
-                        if(y < yBeg) yBeg = x;
-                        if(y > yEnd) yEnd = x;
+                        if(x < pIXBeg) pIXBeg = x;
+                        if(x > pIXEnd) pIXEnd = x;
+                        if(y < pIYBeg) pIYBeg = x;
+                        if(y > pIYEnd) pIYEnd = x;
                     }
                     if(bytBlue != JICTConstants.I_CHROMABLUE) {
-                        if(x < xBeg) xBeg = x;
-                        if(x > xEnd) xEnd = x;
-                        if(y < yBeg) yBeg = x;
-                        if(y > yEnd) yEnd = x;
+                        if(x < pIXBeg) pIXBeg = x;
+                        if(x > pIXEnd) pIXEnd = x;
+                        if(y < pIYBeg) pIYBeg = x;
+                        if(y > pIYEnd) pIYEnd = x;
                     }
                     break;
                 } // switch
             } // for y
 
             Globals.statusPrint(msSavedFileName);
-            String msgText = "MemImage.getBoundingBox: xBeg: " + xBeg + "  xEnd: " + xEnd + " yBeg: " + yBeg + "  yEnd: " + yEnd; 
+            String msgText = "MemImage.getBoundingBox: xBeg: " + pIXBeg + "  xEnd: " + pIXEnd + " yBeg: " + pIYBeg + "  yEnd: " + pIYEnd; 
             Globals.statusPrint(msgText);
         } // for x
 
@@ -2074,12 +2092,12 @@ public:
     // Called from:
     //     Globals.tweenImage
     //     RenderObject.renderMeshz
-    public int createAlphaImage(MemImage pOutImage) {
+    public int createAlphaImage(MemImage pOutMImage) {
         int ix, iy;
         byte thePixel;
         Byte aRed = (byte)0, aGreen = (byte)0, aBlue = (byte)0;
 
-        if(pOutImage.miBitsPerPixel != 8) {
+        if(pOutMImage.miBitsPerPixel != 8) {
             Globals.statusPrint("MemImage.createAlphaImage: Output image must be 8 bits per pixel");
             return -1;
         }
@@ -2105,7 +2123,7 @@ public:
                 } // switch
 
                 if(thePixel != JICTConstants.I_CHROMAVALUE) {
-                    pOutImage.setMPixel(ix, iy, (byte)255);
+                    pOutMImage.setMPixel(ix, iy, (byte)255);
                 }
             } // for ix
         } // for iy
@@ -2115,8 +2133,11 @@ public:
     
 
     // This method came from BLEND.CPP
-    public int unPack(MemImage outputImage) {
-        // Convert a one bit memImage to an 8 bit memImage
+    // Called from:
+    //     RenderObject.maskFromShape
+    //     RenderObject.prepareCutout
+    public int unPack(MemImage pOutputMImage) {
+        // Convert a one bit MemImage to an 8 bit MemImage
         //
         // The input image must be one bit per pixel
         // The output image must be 8 bits per pixel
@@ -2126,14 +2147,14 @@ public:
             return 1;
         }
       
-        if(outputImage.miAccessMode != JICTConstants.I_RANDOM) {
+        if(pOutputMImage.miAccessMode != JICTConstants.I_RANDOM) {
             Globals.statusPrint("MemImage.unPack: Output image access mode must be RANDOM");
             return 2;
         }
 
         if (
-        outputImage.miColorSpec == JICTConstants.I_RGBCOLOR ||
-        outputImage.miColorSpec == JICTConstants.I_ONEBITMONOCHROME) {
+        pOutputMImage.miColorSpec == JICTConstants.I_RGBCOLOR ||
+        pOutputMImage.miColorSpec == JICTConstants.I_ONEBITMONOCHROME) {
             Globals.statusPrint("MemImage.unPack: Output image colorSpec must be REDCOLOR, GREENCOLOR, or BLUECOLOR");
             return 3;
         }
@@ -2163,9 +2184,9 @@ public:
                     xCounter++;
                     if(xCounter <= miImageWidth) {
                         if((packedByte >> (7-bitCounter)) & 0x1) {
-                            outputImage.setMPixel(xCounter, miImageHeight-(y-1), 255);
+                            pOutputMImage.setMPixel(xCounter, miImageHeight-(y-1), 255);
                         } else {
-                            outputImage.setMPixel(xCounter, miImageHeight-(y-1), (byte)JICTConstants.I_CHROMAVALUE);
+                            pOutputMImage.setMPixel(xCounter, miImageHeight-(y-1), (byte)JICTConstants.I_CHROMAVALUE);
                         }
                     }
                 } // for bitCounter
@@ -2181,7 +2202,7 @@ public:
     // This method came from BLEND.CPP
     // Called from:
     //     MorphDlg.onOK
-    public int adjustImageBorder(String outPath) {
+    public int adjustImageBorder(String psOutPath) {
         // Find the size of the chromakey border around an image and
         // create a new image in which the border has been removed.
         //
@@ -2238,7 +2259,7 @@ public:
             outRow++;
         }
 
-        outImage.writeBMP(outPath);
+        outImage.writeBMP(psOutPath);
         return 0;
     } // adjustImageBorder
 
@@ -2442,7 +2463,7 @@ public:
     } // alphaSmooth5
     
 
-    // This method came from IWARP.CPP
+    // This method originally came from IWARP.CPP
     // Could not find where this method is called from.
     public int alphaSmooth7() {
         // Each image must be the same size.
