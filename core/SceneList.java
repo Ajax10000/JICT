@@ -74,8 +74,77 @@ public class SceneList implements ISceneList {
     public Scene mSceneListHead;       // Points to the head of the list
     public Scene mCurrentScene;        // Points to the current Scene
     public MemImage mBkgndPlateMImage;  // An optional background plate image
+/*
+public:
+  sceneList(); - implemented
+  ~sceneList(); - implemented, as method finalize
+  void display(); - implemented
+  int readList(char *errorText, char *pathName); - implemented in ScnFileParser.java
+  int writeList(char *errorText, char *pathName); - implemented
+  sceneElement *setCurrentModel(char *desiredModel); - implemented
+
+  void setCurrentModelTransform(float rx, float ry, float rz,
+  float sx, float sy, float sz, float tx, float ty, float tz); - implemented
+
+  void getCurrentModelTransform(float *rx, float *ry, float *rz,
+  float *sx, float *sy, float *sz, float *tx, float *ty, float *tz); - implemented
+ 
+  int getViewTransform(float *viewX, float *viewY, float *viewZ,
+  float *rotateX, float *rotateY, float *rotateZ); - implemented
+  
+  int setViewTransform(float viewX, float viewY, float viewZ,
+  float rotateX, float rotateY, float rotateZ); - implemented
+
+  int getViewPoint(float *viewX, float *viewY, float *viewZ,
+  float *rotateX, float *rotateY, float *rotateZ); - implemented
+
+  int addScene (char *theSceneName, int theSequence, int outImageCols,
+    int outImageRows, int theColorMode,
+    point3d *rt, point3d *tr, char *theMotionPath); - implemented
+
+  int addSceneElement(char *mdName, char *fName,  int blendI, int theType,
+    int warpI, float aScale, point3d *rt,point3d *sc, point3d *tr,
+    char *motionPath, char *alphaPath, int sortLayer, 
+    RGBTRIPLE anAdjustment, char *adjustmentType, char *colorAdjustedPath,
+	int definedRefpoint, point3d *pointOfReference); - implemented
+
+  void showModels(CComboBox *theCombo); - implemented
+  int getSceneInfo(char *name,  int *type,
+    int *cMode, int *outRows, int *outCols); - implemented
+
+  int setSceneOutImageSize(int outRows, int outCols); - implemented
+  int setModelReferencePoint(char *modelName, float centroidX, float centroidY, 
+	  float centroidZ); - implemented
+
+  int setCompoundRefPoints(); - implemented
+  int copyRefPoints(); - implemented
 
 
+  int listLength(); - implemented
+  void clear(); - implemented
+
+  int preview(HWND displayWindow, tMatrix *modelMatrix,
+    tMatrix *viewMatrix); - implemented
+
+  int previewStill(HWND displayWindow, tMatrix *modelMatrix,
+    tMatrix *viewMatrix); - implemented
+
+  int render (imageView *displayWindow, tMatrix *viewMatrix,
+    int depthSortingEnabled, int zBufferEnabled, int antiAliasEnabled, 
+  int hazeFogEnabled); - implemented
+
+  int depthSort(sceneElement *Models[], float distances[], int *numModels,
+     int depthSortingEnabled); - implemented
+
+  void adjustTransforms(int effectType, sceneElement *theModel,
+    motionNode *aMotion, bundle *xfrm); - implemented
+
+  int calcCompoundModelRefPoint(sceneElement *theModel, int outputRows, int outputCols, 
+								  float *cmCentroidx, float *cmCentroidy, float *cmCentroidz); - implemented
+
+  void sceneList::getViewMatrix(
+    tMatrix *viewMatrix, int frameCounter, scene *theScene); - implemented
+*/
     public SceneList() {
         if (bIctDebug) {
             Globals.statusPrint("SceneList Constructor 1.");
@@ -98,6 +167,10 @@ public class SceneList implements ISceneList {
     } // finalize
 
 
+    // setCurrentModel sets the mCurrentSceneElement field of the current 
+    // SceneList object to the model whose name is passed in as the agument 
+    // psDesiredModel.
+    //
     // Called from:
     //     ScenePreviewDlg.onSelChangeCmbModels
     public SceneElement setCurrentModel(String psDesiredModel) {
@@ -119,6 +192,10 @@ public class SceneList implements ISceneList {
     } // setCurrentModel
 
 
+    // setCurrentModelTransform sets the rotation, scale, and translation transformations 
+    // (i.e., mRotation, mScale, and mTranslation fields) of the current model using the 
+    // nine parameters supplied.
+    //
     // Called from:
     //     ScenePreviewDlg.onCmdPlus
     public void setCurrentModelTransform(float pfRx, float pfRy, float pfRz,
@@ -143,6 +220,9 @@ public class SceneList implements ISceneList {
     } // setCurrentModelTransform
 
 
+    // getCurrentModelTransform returns the rotation, scale, and translation 
+    // transformations of the curent model in the nine parameters.
+    // 
     // Called from:
     //     ScenePreviewDlg.chooseModel
     //     ScenePreviewDlg.onSelChangeCmbModels
@@ -169,12 +249,16 @@ public class SceneList implements ISceneList {
     } // getCurrentModelTransform
 
 
+    // showModels places a list of all the model names contained in a 
+    // scene list into the combo box object whose reference is supplied.
+    //
     // Not called from within this file.
     // Called from:
     //     ScnPreviewDlg.onInitDialog
     public void showModels(JComboBox<String> pComboBox) {
         Scene scene = this.mSceneListHead;
         int iNumItems = pComboBox.getItemCount(); // Clear the present contents ofthe comboBox
+        // TODO: Review, this for loop seems wrong!
         for(int i = 1; i <= iNumItems; i++) {
             pComboBox.setSelectedIndex(0);
             pComboBox.removeAllItems();
@@ -192,6 +276,10 @@ public class SceneList implements ISceneList {
     } // showModels
 
 
+    // listLength returns as its value the one-relative number of models 
+    // in the scene list object. If the scene list has no objects, it 
+    // returns 0.
+    //
     // Called from:
     //     MainFrame.onToolsCreateASceneList
     public int listLength() {
@@ -211,6 +299,9 @@ public class SceneList implements ISceneList {
     } // listLength
 
 
+    // getSceneInfo eturns the scene name, special effect type (scene or sequence), 
+    // color mode (color or monochrome), and the output image size.
+    //
     // Called from:
     //     preview
     //     previewStill
@@ -234,6 +325,8 @@ public class SceneList implements ISceneList {
     } // getSceneInfo
 
 
+    // setSceneOutImageSize sets the height and width of the output image.
+    //
     // Called from:
     //     readList
     public int setSceneOutImageSize(int piOutRows, int piOutCols) {
@@ -249,6 +342,11 @@ public class SceneList implements ISceneList {
     } // setSceneOutImageSize
 
 
+    // getViewTransform returns the translation and rotation transformations 
+    // (i.e., mTranslationPt and mRotationPt fields) of the current 
+    // scene (not model - ie., not SceneElement) using the nine parameters 
+    // supplied.
+    //
     // Called from:
     //     depthSort
     //     MainFrame.onToolsCreateASceneList
@@ -275,6 +373,11 @@ public class SceneList implements ISceneList {
     } // getViewTransform
 
 
+    // setViewTransform sets the translation and rotation transformations 
+    // (i.e., mTranslationPt and mRotationPt fields) of the current 
+    // scene (not model - ie., not SceneElement) using the nine parameters 
+    // supplied.
+    //
     // Called from:
     //     ScenePreviewDlg.onOK
     public int setViewTransform(float pfViewX, float pfViewY, float pfViewZ,
@@ -297,6 +400,9 @@ public class SceneList implements ISceneList {
     } // setViewTransform
 
 
+    // getViewPoint returns the viewer location (pFViewX, pFViewY, pFViewZ) 
+    // and orientation using the six parameters supplied
+    //
     // Called from:
     //     render
     private int getViewPoint(Float pFViewX, Float pFViewY, Float pFViewZ,
@@ -326,7 +432,8 @@ public class SceneList implements ISceneList {
     } // getViewPoint
 
 
-    // Writes the contents of the SceneList to a .scn file.
+    // writeList writes the contents of the SceneList to a .scn file.
+    //
     // Called from:
     //     ScenePreviewDlg.onOK
     public int writeList(String psErrorText, String psFileName) {
@@ -723,6 +830,10 @@ public class SceneList implements ISceneList {
     } // previewStill
 
 
+    // Method render traverses the list of models (SceneElements) in the scene list
+    // appropriately rendering each photo-based model and placing it into the 
+    // output image.
+    //
     // Called from:
     //     MainFrame.onRenderScene
     //     MainFrame.onRenderSequence
@@ -738,7 +849,7 @@ public class SceneList implements ISceneList {
         int iFirstFrame, iLastFrame;
         int iFrameCounter;
         Float fVx = 0.0f, fVy = 0.0f, fVz = 0.0f;    // Viewpoint
-        Float vrx = 0.0f, vry = 0.0f, vrz = 0.0f;       
+        Float fVRx = 0.0f, fVRy = 0.0f, fVRz = 0.0f;       
         MotionNode motnNode = new MotionNode();      // Current model location and orientation if moving.
         Bundle xfrm = new Bundle();                  // Create a bundle of transforms
         Instant timeStart, timeEnd;
@@ -758,8 +869,8 @@ public class SceneList implements ISceneList {
         }
 
         // The following method sets fVx, fVy, fVz, 
-        // and vrx, vry, and vrz as well
-        getViewPoint(fVx, fVy, fVz, vrx, vry, vrz);
+        // and fVRx, fVRy, and fVRz as well
+        getViewPoint(fVx, fVy, fVz, fVRx, fVRy, fVRz);
         SceneElement modelSE = scene.mHead;
         SceneElement[] models = new SceneElement[JICTConstants.I_MAXMODELS];
         float[] fDistances = new float[JICTConstants.I_MAXMODELS];
@@ -773,7 +884,7 @@ public class SceneList implements ISceneList {
         if(pbZBufferEnabled) {
             zBuffMImage = new MemImage(iOutputRows, iOutputColumns, 32);
             if (!zBuffMImage.isValid()) {
-                Globals.statusPrint("SceneList.render: Not enough memory to open Z Buffer");
+                Globals.statusPrint("SceneList.render: Could not open Z Buffer");
                 return -1;
             }
 
@@ -799,16 +910,16 @@ public class SceneList implements ISceneList {
 
             // Setup the Color Mode
             int iFirstColor = JICTConstants.I_GREEN;
-            int iLastColor = JICTConstants.I_GREEN;
+            int iLastColor  = JICTConstants.I_GREEN;
             if (iColorMode == JICTConstants.I_COLOR) {
                 iFirstColor = JICTConstants.I_RED;
-                iLastColor = JICTConstants.I_BLUE;
+                iLastColor  = JICTConstants.I_BLUE;
             }
 
             for (int iColor = iFirstColor; iColor <= iLastColor; iColor++) {
                 MemImage outputMImage = new MemImage(iOutputRows, iOutputColumns);
-                if (outputMImage == null) {
-                    Globals.statusPrint("SceneList.render: Not enough memory to open output image");
+                if (!outputMImage.isValid()) {
+                    Globals.statusPrint("SceneList.render: Could not create output image");
                     return -1;
                 }
 
@@ -983,8 +1094,8 @@ public class SceneList implements ISceneList {
                         // Processing of one model is complete
                         // Update the display
                         outputMImage.display(iOutputColumns, iOutputRows);
-                    } // if theModel.statusIndicator == 0
-                } // for currentModel
+                    } // if modelSE.statusIndicator == 0
+                } // for iCurrentModel
 
                 // One color channel of the scene is complete! Save it in the proper location
                 String sOutputDir, sOutputPath;
@@ -1013,7 +1124,7 @@ public class SceneList implements ISceneList {
                 if(pbZBufferEnabled) {
                     zBuffMImage.init32(JICTConstants.F_ZBUFFERMAXVALUE);
                 }
-            } // for theColor
+            } // for iColor
 
             // Combine the color channels together
             iStatus = 0;
@@ -1039,6 +1150,7 @@ public class SceneList implements ISceneList {
     } // render
 
 
+    // TODO: Not a method of SceneList in the original C++ code.
     // Called from:
     //     render
     private void getSequenceFileName(String psTheInputPath, int piFrameCounter) {
@@ -1048,10 +1160,10 @@ public class SceneList implements ISceneList {
 
         _splitpath(sTempPath, sDrive, sDir, sFile, sExt);
         
-        int theLength = sFile.length();
+        int iLength = sFile.length();
         int iCurrentFrameNum, iNewFrameNum;
-        if(theLength > 0) {
-            String sFrameNum = sFile.substring(theLength - 4);
+        if(iLength > 0) {
+            String sFrameNum = sFile.substring(iLength - 4);
             iCurrentFrameNum = Integer.parseInt(sFrameNum);
         }
 
@@ -1061,15 +1173,16 @@ public class SceneList implements ISceneList {
             Globals.statusPrint("getSequenceFileName: Frame counter exceeded 9999.");
         }
         String sPrefix, sOutFile;
-        sPrefix = sFile.substring(theLength - 4);
-        char colorChar = sFile.charAt(theLength - 1);
+        sPrefix = sFile.substring(iLength - 4);
+        char cColorChar = sFile.charAt(iLength - 1);
 
         //sprintf(sOutFile, "%.16s%#04d%c\0", sPrefix, iNewFrameNum, colorChar);
-        sOutFile = String.format("%.16s%#04d%c", sPrefix, iNewFrameNum, colorChar);
+        sOutFile = String.format("%.16s%#04d%c", sPrefix, iNewFrameNum, cColorChar);
         _makepath(psTheInputPath, sDrive, sDir, sOutFile, sExt);
     } // getSequenceFileName
 
 
+    // Not a method of SceneList in the original C++ code
     // Called from:
     //     render
     public void getFileName(String psOutputFileName, String psPrefix, 
@@ -1357,6 +1470,9 @@ public class SceneList implements ISceneList {
     } // display
 
 
+    // Method clear removes all models from the scenelist as well as the scene 
+    // node.
+    //
     // Called from:
     //     finalize
     public void clear() {
@@ -1534,7 +1650,15 @@ public class SceneList implements ISceneList {
     } // copyRefPoints
 
 
-    // This method came from DEPTHSRT.CPP
+    // This method originally came from DEPTHSRT.CPP
+    //
+    // depthSort determines the order in which the models (SceneElements)
+    // are to be rendered. It calculates the distance from the center of
+    // each model to the viewpoint. It then sorts the distances and causes
+    // the models that are farthest away from the viewpoint to be rendered
+    // first. It assumes the total number of models in the scene list will
+    // not exceed the constant I_MAXMODELS defined in JICTConstants.java.
+    // 
     // Called from:
     //     render
     // which in turn is called from either
