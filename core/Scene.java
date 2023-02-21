@@ -24,7 +24,7 @@ public class Scene {
     // Affects SceneList.getViewMatrix
     public MotionPath mSensorMotion;
 
-    // 1 = Still, 2 = sequence
+    // 1 = Still, 2 = Sequence
     // Changed from private to public as it is used by SceneList
     public int miSequenceType;
 
@@ -36,7 +36,7 @@ public class Scene {
     // Changed from private to public as it is used by SceneList
     public int miOutputRows;
 
-    // Number of columns(X) in output image
+    // Number of columns (x) in output image
     // Changed from private to public as it is used by SceneList
     public int miOutputColumns;
 
@@ -58,16 +58,16 @@ public class Scene {
     //     SceneList.setViewTransform
     public Point3d mTranslationPt;
 
-    // points to last Scene element
+    // Points to last Scene element
     // Changed from private to public as it is used 
     // by SceneList in method addSceneElement
     public SceneElement mTail;
 
-    // points to first Scene element
+    // Points to first Scene element
     // Changed from private to public as it is accessed by SceneList
     public SceneElement mHead;
     
-    // points to current scene element
+    // Points to current scene element
     // Changed from private to public as it is accessed by SceneList
     // Set in SceneList.setCurrentModel
     public SceneElement mCurrentSceneElement; 
@@ -78,8 +78,8 @@ public class Scene {
     // Changed from private to public as it is accessed by SceneList
     public Scene mNextEntry;
 
-    // 1 if constructor successful
     // I changed this from int to boolean
+    // Value is returned by isValid
     private boolean mbIsValid;  
     // friend class sceneList;
 
@@ -151,6 +151,7 @@ public class Scene {
     // Class SceneElement also has a writeFile method. 
     // Both Scene.writeFile and SceneElement.writeFile are called from 
     // SceneList.writeList.
+    //
     // Called from:
     //     SceneList.writeList
     public void writeFile(BufferedWriter pFileout) {
@@ -182,6 +183,7 @@ public class Scene {
 
     // This method came from SCENELST.H
     // Apparently used for debugging purposes.
+    //
     // Called from:
     //     SceneList.display
     public void display() {
