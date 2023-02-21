@@ -25,6 +25,8 @@ import structs.FaceSet;
 import structs.Point3d;
 import structs.VertexSet;
 
+// The Shape3d class is discussed in the book Visual Special Effects Toolkit in C++
+// in pages 81 - 84
 public class Shape3d {
     private boolean bIctDebug = false;
     private int miNumVertices;
@@ -355,6 +357,7 @@ public:
     //     Globals.iwarpz
     //     Globals.tweenImage
     //     Globals.tweenShape
+    //     ImageView.onLButtonDown
     //     RenderObject ctor that takes 4 Point3d parameters
     //     RenderObject ctor that takes 4 parameters: a String, int, boolean and Point3d
     public Shape3d(int piNumVerts) {
@@ -1105,6 +1108,7 @@ public:
     // Called from:
     //     Globals.iwarpz
     //     Globals.tweenShape
+    //     ImageView.onLButtonUp
     public int addWorldVertex(float pfX, float pfY, float pfZ) {
         if (this.miNumVertices == this.miNumAllocatedVertices) {
             Globals.statusPrint("addWorldVertex: Not enough memory to add vertex");
@@ -1142,6 +1146,9 @@ public:
     } // addTransformedVertex
 
 
+    // Called from:
+    //     ImageView.onLButtonDblClk
+    //     ImageView.onRButtonDown
     public int deleteLastWorldVertex() {
         if(this.miNumVertices < 1) {
             return -1;
@@ -1154,6 +1161,8 @@ public:
     } // deleteLastWorldVertex
 
 
+    // Called from:
+    //     ImageView.onRButtonDown
     public int getLastWorldVertex(Float pFX, Float pFY, Float pFZ) {
       if(miNumVertices < 1) {
           return -1;
@@ -1173,6 +1182,9 @@ public:
     } // getLastWorldVertex
 
 
+    // Called from:
+    //     ImageView.onLButtonUp
+    //     ImageView.onRButtonDown
     public int getPreviousWorldVertex(Float pFX, Float pFY, Float pFZ) {
         if(this.miNumVertices < 2) {
             return -1;
@@ -1193,6 +1205,7 @@ public:
 
 
     // Called from:
+    //     RenderObject.drawSequence
     //     RenderObject.drawStill
     public float averageX() {
         screenBoundingBox();
@@ -1200,6 +1213,9 @@ public:
     } // averageX
 
 
+    // Called from:
+    //     RenderObject.drawSequence
+    //     RenderObject.drawStill
     public float averageY() {
         screenBoundingBox();
         return((this.mfMaxY - this.mfMinY)/2.0f);
