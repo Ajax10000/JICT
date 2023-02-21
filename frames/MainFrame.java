@@ -252,7 +252,7 @@ protected:
     //     onToolsCreateCutout - flips the value
     //     onToolsSampleImage - set to false
     // Read in:
-    //     ImageView.onInitialUpdate
+    //     ImageView.onInitialUpdate - where it sets ImageView.mbCutoutEnabled
     //     ImageView.onLButtonDown
     public boolean mbCutoutEnabled;         // Menu control variables
 
@@ -295,6 +295,10 @@ protected:
 
     // Changed from int to boolean
     // Initialized to false in initFields
+    // This field controls whether SceneList.depthSort will call Globals.insertionSort2
+    // or not. This happens when either MainFrame.onRenderScene or MainFrame.onRenderSequence
+    // call SceneList.render, which in turn calls SceneList.depthSort.
+    //
     // Read in:
     //     onRenderStillScene - passed as a parameter to SceneList.render
     //     onRenderSequence - passed as a parameter to SceneList.render
@@ -347,7 +351,7 @@ protected:
     // Changed from int to boolean
     // Initialized to false in the constructor when it calls method initFields.
     // Modified in: 
-    //     onPreviewStillScene
+    //     onPreviewStillScene (set to true at top of method, and to false at bottom of method)
     // Read in:
     //     ImageView.onDraw
     public boolean mbPreviewingScene;
@@ -405,6 +409,8 @@ protected:
     //     onPreviewStillScene
     //     onRenderSequence
     //     onRenderStillScene
+    // Read in:
+    //     ScenePreviewDlg.onCmdPlus
     public ImageView mPreviewWindowHandle;	 
 
 
@@ -1479,7 +1485,7 @@ POPUP "Tools"
     // ON_COMMAND(ID_PREVIEW_SCENE, OnPreviewScene)
     public void onPreviewStillScene() {
         closeAllChildren();
-        if(mbIsDirty) {         //if the client window has been drawn on, erase it
+        if(mbIsDirty) {         // If the client window has been drawn on, erase it
             mbIsDirty = false;
             repaint();
         }
