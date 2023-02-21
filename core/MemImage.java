@@ -1312,6 +1312,7 @@ public:
     //     saveAs8
     //     Globals.motionBlur
     //     Globals.tweenImage
+    //     ImageView.onRButtonDown
     //     MainFrame.onToolsWarpImage
     //     SceneList.render
     //     Texture.createTexture
@@ -1750,7 +1751,10 @@ public:
     
 
     // For more information on this method, see pages 110 - 118 of the book
-    // Visual Special Effects Toolkits in C++
+    // Visual Special Effects Toolkits in C++. This method handles the color
+    // adjustment specified in a .scn file indicated by the line with format
+    // adjustColor [Target|Relative] R G B
+    //
     // Sets pMidRed, pMidGreen and pMidBlue
     public int adjustColor(int piDesiredRed, int piDesiredGreen, int piDesiredBlue,
     Byte pbytMidRed, Byte pbytMidGreen, Byte pbytMidBlue, 
@@ -1837,7 +1841,7 @@ public:
                 }
                 break;
             } // switch
-        } 
+        } // if(psAdjustmentType.equalsIgnoreCase("Target"))
 
         if(psAdjustmentType.equalsIgnoreCase("Relative")) {
             switch(iBpp) {
@@ -1859,8 +1863,9 @@ public:
                 }
                 break;
             } // switch
-        } // if(strcmpi(adjustmentType, "Relative") == 0)
+        } // if(psAdjustmentType.equalsIgnoreCase("Relative"))
 
+        // This code executes for both adjustment types "Target" and "Relative"
         for(iRow = 1; iRow <= iNumRows; iRow++) {
             for(iCol = 1; iCol <= iNumCols; iCol++) {
                 switch(iBpp) {
@@ -1897,9 +1902,11 @@ public:
                     }
                     break;
                 } // switch
-            } // for col
-        } // for row
+            } // for iCol
+        } // for iRow
 
+        // TODO: The following code appears to be a new feature that 
+        // was planned but not finished.
         if(psAdjustmentType.equalsIgnoreCase("Delta")) {
             for(iRow = 1; iRow <= iNumRows; iRow++) {
                 for(iCol = 1; iCol <= iNumCols; iCol++) {
@@ -1922,8 +1929,8 @@ public:
                         }
                         break;
                     } // switch
-                } // for col
-            } // for row
+                } // for iCol
+            } // for iRow
         }
 
         return 0;
