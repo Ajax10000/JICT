@@ -36,19 +36,22 @@ public class FileUtils {
     //     Globals.motionBlur
     public static int getPathPieces(String psFirstImagePath, String psDirectory, 
     String psFileName, String psPrefix, Integer pIFrameNum, String psInSuffix) {
-        String sDdrive, sDext; // destination drive and destination extension
-        String sFrameNum, sTempDirectory;
-        char aDot;
-        aDot = '.';
+        String sFrameNum;
       
-        // The following sets output parameter psFileName
-       _splitpath(psFirstImagePath, sDdrive, psDirectory, psFileName, sDext);
+        // _splitpath(psFirstImagePath, sDdrive, psDirectory, psFileName, sDext);
+        File inputName = new File(psFirstImagePath);
 
+        // sFileWExt = file name with extension at end of path psFirstImagePath
+        String sFileWExt = inputName.getName();
+
+        // Now strip the extension from sFileWExt
+        // Note the following sets output parameter psFileName
+        psFileName = sFileWExt.substring(0, sFileWExt.lastIndexOf('.'));
+
+        // Set output parameter psDirectory
+        psDirectory = inputName.getParent();
+        
        // Assumed input:   xxxxx0000c
-       // Set output parameter psDirectory
-       sTempDirectory = sDdrive + psDirectory;
-       psDirectory = sTempDirectory;
-       
        // Set output parameter psInSuffix (to c, assuming input xxxxx0000c)
        psInSuffix = psFileName.substring(psFileName.length() - 1);
       
