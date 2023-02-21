@@ -10,6 +10,7 @@ import fileUtils.FileUtils;
 import globals.JICTConstants;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.LineNumberReader;
 import java.util.Random;
 
@@ -24,7 +25,7 @@ import structs.Point3d;
 public class Globals {
     private static JLabel lblStatus = null;
 
-    private static boolean ictdebug = false;
+    private static boolean bIctDebug = false;
 
     // This variable came from ICT20.CPP
     public static Preference ictPreference = new Preference();  // declare a global preference object
@@ -63,41 +64,49 @@ public class Globals {
     // This method came from DEPTHSRT.CPP
     // Called from:
     //     SceneList.depthSort
-    public static void insertionSort2(float theItems[], SceneElement itemData[], int numItems) {
+    // which in turn is called from SceneList.render, 
+    // which in turn is called from either
+    // MainFrame.onRenderScene or MainFrame.onRenderSequence
+    public static void insertionSort2(float pafItems[], SceneElement paItemDataSEs[], int piNumItems) {
         float itemTemp, theValue;
         SceneElement itemDataTemp;
         int index, indexTmp;
 
         // Sort theItems array into decending order for depth sorting
-        for(index = 0; index < numItems; index++) {
-            itemTemp     = theItems[index];
-            itemDataTemp = itemData[index];
-            theValue     = theItems[index];
+        for(index = 0; index < piNumItems; index++) {
+            itemTemp     = pafItems[index];
+            itemDataTemp = paItemDataSEs[index];
+            theValue     = pafItems[index];
 
             for(indexTmp = index; indexTmp > 0; indexTmp--) {
-                if(theItems[indexTmp - 1] < theValue) {
-                    theItems[indexTmp] = theItems[indexTmp - 1];
-                    itemData[indexTmp] = itemData[indexTmp - 1];
+                if(pafItems[indexTmp - 1] < theValue) {
+                    pafItems[indexTmp] = pafItems[indexTmp - 1];
+                    paItemDataSEs[indexTmp] = paItemDataSEs[indexTmp - 1];
                 } else {
                     break;
                 }
             } // for indexTmp
 
             // Insert the original item in the temporary position.
-            theItems[indexTmp] = itemTemp;
-            itemData[indexTmp] = itemDataTemp;
+            pafItems[indexTmp] = itemTemp;
+            paItemDataSEs[indexTmp] = itemDataTemp;
         } // for index
     } // insertionSort2
 
 
     // This method came from BLEND.CPP
-    public static int blend(MemImage pInImage, MemImage pMaskImage, MemImage pOutImage, 
+    // Called from:
+    //     iRender
+    // However, I could not find where iRender is being called from (or if it is being called).
+    public static int blend(MemImage pInMImage, MemImage pMaskMImage, MemImage pOutMImage, 
     float pfAlphaScale) {
         // Blend over the common area in input and mask images
-        int iInputRows  = pInImage.getHeight();
-        int iInputCols  = pInImage.getWidth();
-        int iMaskRows   = pMaskImage.getHeight();
-        int iMaskCols   = pMaskImage.getWidth();
+        int iInputRows  = pInMImage.getHeight();
+        int iInputCols  = pInMImage.getWidth();
+
+        int iMaskRows   = pMaskMImage.getHeight();
+        int iMaskCols   = pMaskMImage.getWidth();
+
         int iCommonRows = Math.min(iInputRows, iMaskRows);
         int iCommonCols = Math.min(iInputCols, iMaskCols);
 
@@ -108,10 +117,10 @@ public class Globals {
 
         for(iy = 1; iy <= iCommonRows; iy++) {
             for(ix = 1; ix <= iCommonCols; ix++) {
-                maskPixel = pMaskImage.getMPixel(ix, iy);
-                inPixel   = pInImage.getMPixel(ix, iy);
+                maskPixel = pMaskMImage.getMPixel(ix, iy);
+                inPixel   = pInMImage.getMPixel(ix, iy);
                 if(maskPixel > 0 && inPixel > 0) {
-                    outPixel = pOutImage.getMPixel(ix, iy);
+                    outPixel = pOutMImage.getMPixel(ix, iy);
                     fInWeight = (float)maskPixel / 255.0f * pfAlphaScale;
                     fOutWeight = 1.0f - fInWeight;
 
@@ -133,7 +142,7 @@ public class Globals {
                         addedPixel = (byte)0;
                     }
 
-                    pOutImage.setMPixel(ix, iy, addedPixel);
+                    pOutMImage.setMPixel(ix, iy, addedPixel);
                 }
             } // for ix
         } // for iy
@@ -148,10 +157,13 @@ public class Globals {
     // Visual Special Effects Toolkit in C++, by Tim Wittenburg
     // Called from:
     //     tweenImage
+    // which in turn is called from MorphDlg.onOK (when morph type = JICTConstants.I_TWOD)
     //     RenderObject.renderMeshz
-    public static int blendz(MemImage pInImage, MemImage pMatteImage, 
-    MemImage pZImage, MemImage pZBuffer,
-    MemImage pOutImage,
+    // and renderMeshz in turn is called from SceneList.render,
+    // which in turn is called from MainFrame.onRenderScene and MainFrame.onRenderSequence
+    public static int blendz(MemImage pInMImage, MemImage pMatteMImage, 
+    MemImage pZMImage, MemImage pZBufMImage,
+    MemImage pOutMImage,
     float pfAlphaScale) {
         // pZImage is the rendered model's zBuffer image
         // pZBuffer is the effect frame's zBuffer image
@@ -159,22 +171,24 @@ public class Globals {
         // model contributes to the rendered effect frame's zBuffer
         //
         // Blend over the common area in input and matte images
-        int iInputRows  = pInImage.getHeight();
-        int iInputCols  = pInImage.getWidth();
-        int iMatteRows  = pMatteImage.getHeight();
-        int iMatteCols  = pMatteImage.getWidth();
+        int iInputRows  = pInMImage.getHeight();
+        int iInputCols  = pInMImage.getWidth();
+
+        int iMatteRows  = pMatteMImage.getHeight();
+        int iMatteCols  = pMatteMImage.getWidth();
+
         int iCommonRows = Math.min(iInputRows, iMatteRows);
         int iCommonCols = Math.min(iInputCols, iMatteCols);
 
-        int iBpp = pInImage.getBitsPerPixel();
-        int iOutBPP = pOutImage.getBitsPerPixel();
+        int iBpp = pInMImage.getBitsPerPixel();
+        int iOutBPP = pOutMImage.getBitsPerPixel();
         if(iOutBPP != iBpp) {
             String sMsgText = "blendz: inImage bpp: " + iBpp + " must match outImage bpp: " + iOutBPP;
             statusPrint(sMsgText);
             return -1;
         }
 
-        int iMatteBPP = pMatteImage.getBitsPerPixel();
+        int iMatteBPP = pMatteMImage.getBitsPerPixel();
         if(iMatteBPP != 8) {
             statusPrint("blendz: Matte image must be 8 bits per pixel");
             return -2;
@@ -189,18 +203,18 @@ public class Globals {
         float fInWeight, fOutWeight;
     
         boolean usingZBuffer = false;
-        if((pZImage != null) && (pZBuffer != null)) {
+        if((pZMImage != null) && (pZBufMImage != null)) {
             usingZBuffer = true;
         }
     
         for(iy = 1; iy <= iCommonRows; iy++) {
             for(ix = 1; ix <= iCommonCols; ix++) {
-                mattePixel = pMatteImage.getMPixel(ix, iy);
+                mattePixel = pMatteMImage.getMPixel(ix, iy);
                 switch(iBpp) {  // Optionally blend in color or monochrome
                 case 8:
-                    inPixel = pInImage.getMPixel(ix, iy);
+                    inPixel = pInMImage.getMPixel(ix, iy);
                     if((mattePixel > JICTConstants.I_CHROMAVALUE) && (inPixel > JICTConstants.I_CHROMAVALUE)) {
-                        outPixel = pOutImage.getMPixel(ix, iy );
+                        outPixel = pOutMImage.getMPixel(ix, iy );
                         fInWeight = (float)mattePixel / 255.0f * pfAlphaScale;
                         fOutWeight = 1.0f - fInWeight;
 
@@ -222,20 +236,20 @@ public class Globals {
                         }
 
                         if(usingZBuffer) {
-                            if(pZImage.getMPixel32(ix, iy) < pZBuffer.getMPixel32(ix, iy)) { 
-                                pZBuffer.setMPixel32(ix, iy, pZImage.getMPixel32(ix, iy));
-                                pOutImage.setMPixel(ix, iy, addedPixel);
+                            if(pZMImage.getMPixel32(ix, iy) < pZBufMImage.getMPixel32(ix, iy)) { 
+                                pZBufMImage.setMPixel32(ix, iy, pZMImage.getMPixel32(ix, iy));
+                                pOutMImage.setMPixel(ix, iy, addedPixel);
                             }
                         } else {
-                            pOutImage.setMPixel(ix, iy, addedPixel);
+                            pOutMImage.setMPixel(ix, iy, addedPixel);
                         }
                     } // end if non-zero values
                     break;
         
                 case 24:                           // RGB Blend with Z-Buffer
-                    pInImage.getMPixelRGB(ix, iy, inRed, inGreen, inBlue);
+                    pInMImage.getMPixelRGB(ix, iy, inRed, inGreen, inBlue);
                     if((mattePixel > JICTConstants.I_CHROMAVALUE) && (inGreen > JICTConstants.I_CHROMAVALUE)) {
-                        outPixel = (byte)pOutImage.getMPixelRGB(ix, iy, outRed, outGreen, outBlue);
+                        outPixel = (byte)pOutMImage.getMPixelRGB(ix, iy, outRed, outGreen, outBlue);
                         fInWeight  = (float)mattePixel / 255.0f * pfAlphaScale;
                         fOutWeight = 1.0f - fInWeight;
 
@@ -264,12 +278,12 @@ public class Globals {
                         }
 
                         if(usingZBuffer) {
-                            if(pZImage.getMPixel32(ix, iy) < pZBuffer.getMPixel32(ix, iy)) { 
-                                pZBuffer.setMPixel32(ix, iy, pZImage.getMPixel32(ix, iy));
-                                pOutImage.setMPixelRGB(ix, iy, addedRed, addedGreen, addedBlue);
+                            if(pZMImage.getMPixel32(ix, iy) < pZBufMImage.getMPixel32(ix, iy)) { 
+                                pZBufMImage.setMPixel32(ix, iy, pZMImage.getMPixel32(ix, iy));
+                                pOutMImage.setMPixelRGB(ix, iy, addedRed, addedGreen, addedBlue);
                             }
                         } else {
-                            pOutImage.setMPixelRGB(ix, iy, addedRed, addedGreen, addedBlue);
+                            pOutMImage.setMPixelRGB(ix, iy, addedRed, addedGreen, addedBlue);
                         }
                     } // end if non zero values
                     break;
@@ -284,7 +298,7 @@ public class Globals {
     // This method came from BLEND.CPP
     // Called from:
     //     RenderObject.prepareCutout
-    public static int createCutout(MemImage pOriginalImage, MemImage pMaskImage,
+    public static int createCutout(MemImage pOrigMImage, MemImage pMaskMImage,
     String psCutoutName, Shape3d pShape) {
         String sMsgText;
 
@@ -292,12 +306,12 @@ public class Globals {
         // Assumes the mask image is an unpacked (8 bit) mask image opened RANDOM,
         // The original must be opened for sequential access.
         // cutoutName: name of cutout image and shape file without the suffix
-        if(pOriginalImage.getAccessMode() != JICTConstants.I_SEQUENTIAL) {
+        if(pOrigMImage.getAccessMode() != JICTConstants.I_SEQUENTIAL) {
             statusPrint("createCutout: original image access mode must be SEQUENTIAL");
             return 1;
         }
 
-        if (pOriginalImage.getColorSpec() == JICTConstants.I_ONEBITMONOCHROME) {
+        if (pOrigMImage.getColorSpec() == JICTConstants.I_ONEBITMONOCHROME) {
             statusPrint("createCutout: original image colorSpec cannot be ONEBITMONOCHROME");
             return 2;
         }
@@ -322,8 +336,8 @@ public class Globals {
         sMaskPath   = sMaskDir + sCutoutMImage;
     
         int iMaskHeight, iMaskWidth;
-        iMaskHeight = pMaskImage.getHeight();
-        iMaskWidth  = pMaskImage.getWidth();
+        iMaskHeight = pMaskMImage.getHeight();
+        iMaskWidth  = pMaskMImage.getWidth();
         int iy, iMinX, iMaxX, iMinY, iMaxY;
     
         if ((pShape != null) && (pShape.getNumVertices() > 0)) {
@@ -385,9 +399,9 @@ public class Globals {
         }
 
         // Open two new output images
-        boolean color = false;
-        if(pOriginalImage.getColorSpec() == JICTConstants.I_RGBCOLOR) {
-            color = true;
+        boolean bColor = false;
+        if(pOrigMImage.getColorSpec() == JICTConstants.I_RGBCOLOR) {
+            bColor = true;
         }
 
         MemImage cutoutMImg = new MemImage(iCutoutHeight, iCutoutWidth);
@@ -406,7 +420,7 @@ public class Globals {
 
         MemImage cutoutRImg = new MemImage(1, 1);
         MemImage cutoutBImg = new MemImage(1, 1);
-        if(color) {
+        if(bColor) {
             cutoutRImg = new MemImage(iCutoutHeight, iCutoutWidth);
             if (!cutoutRImg.isValid()) {
                 sMsgText = "createCutout: Unable to open cutout r image: " + sCutoutRImage;
@@ -423,33 +437,33 @@ public class Globals {
         }
     
         for(iy = 1; iy < iMaskHeight - iNewMaxY; iy++) {
-            pOriginalImage.readNextRow();
+            pOrigMImage.readNextRow();
         }
 
         int iyCounter = 1;
         for (iy = iMaskHeight - iNewMaxY; iy <= iMaskHeight - iNewMinY; iy++) {
-            pOriginalImage.readNextRow();
+            pOrigMImage.readNextRow();
             int ixCounter = 0;
 
             for(int ix = iNewMinX; ix <= iNewMaxX; ix++) {
                 ixCounter++;
-                byte theMaskValue = pMaskImage.getMPixel(ix, iy);
+                byte theMaskValue = pMaskMImage.getMPixel(ix, iy);
 
                 if(theMaskValue > 0) {
                     cutoutMImg.setMPixel(ixCounter, iyCounter, theMaskValue);
-                    if(!color) {
-                        cutoutGImg.setMPixel(ixCounter, iyCounter, pOriginalImage.getMPixel(ix, 1));
+                    if(!bColor) {
+                        cutoutGImg.setMPixel(ixCounter, iyCounter, pOrigMImage.getMPixel(ix, 1));
                     }
             
-                    if(color) {
-                        cutoutRImg.setMPixel(ixCounter, iyCounter, pOriginalImage.getMPixel(ix, 1, 'R'));
-                        cutoutGImg.setMPixel(ixCounter, iyCounter, pOriginalImage.getMPixel(ix, 1, 'G'));
-                        cutoutBImg.setMPixel(ixCounter, iyCounter, pOriginalImage.getMPixel(ix, 1, 'B'));
+                    if(bColor) {
+                        cutoutRImg.setMPixel(ixCounter, iyCounter, pOrigMImage.getMPixel(ix, 1, 'R'));
+                        cutoutGImg.setMPixel(ixCounter, iyCounter, pOrigMImage.getMPixel(ix, 1, 'G'));
+                        cutoutBImg.setMPixel(ixCounter, iyCounter, pOrigMImage.getMPixel(ix, 1, 'B'));
                     }
                 } else {
                     cutoutMImg.setMPixel(ixCounter, iyCounter, (byte)0);
                     cutoutGImg.setMPixel(ixCounter, iyCounter, (byte)0);
-                    if(color) {
+                    if(bColor) {
                         cutoutRImg.setMPixel(ixCounter, iyCounter, (byte)0);
                         cutoutBImg.setMPixel(ixCounter, iyCounter, (byte)0);
                     }
@@ -468,7 +482,7 @@ public class Globals {
         statusPrint(sMsgText);
         cutoutMImg.writeBMP(sMaskPath);
     
-        if(color) {
+        if(bColor) {
             cutoutRImg.writeBMP(sCutoutRImage);
             cutoutBImg.writeBMP(sCutoutBImage);
             sMsgText = "createCutout: Saving color cutout image: " + sCutoutPath;
@@ -495,21 +509,17 @@ public class Globals {
     //   only points in which the direction changes from the previous point.
     //
 
-    /*	these are the direction values:
+    // These are the direction values:
+    // 0	right
+    // 1	right and up
+    // 2	up
+    // 3	left and up
+    // 4	left
+    // 5	left and down
+    // 6	down
+    // 7	right and down		
 
-        0	right
-        1	right and up
-        2	up
-        3	left and up
-        4	left
-        5	left and down
-        6	down
-        7	right and down		
-    */
-
-
-
-    // This method came from BLEND.CPP
+    // This method originally came from BLEND.CPP
     //
     // in_boundary(x, y)
     //
@@ -522,19 +532,22 @@ public class Globals {
     // 
     // Called from:
     //     probe
-    public static boolean in_boundary(MemImage pImage, int piX, int piY) {
-        int imHeight = pImage.getHeight();
-        int imWidth  = pImage.getWidth();
-        int iBpp     = pImage.getBitsPerPixel();
-        Byte red = 0, green = 0, blue = 0;
+    //     shapeFromImage
+    public static boolean in_boundary(MemImage pMImage, int piX, int piY) {
+        int iImHeight = pMImage.getHeight();
+        int iImWidth  = pMImage.getWidth();
+        int iBpp      = pMImage.getBitsPerPixel();
+        Byte bytRed = 0, bytGreen = 0, bytBlue = 0;
 
-        if ((piX < 1) || (piX > imWidth) || (piY < 1) || (piY > imHeight)) {
+        if (
+        (piX < 1) || (piX > iImWidth) || 
+        (piY < 1) || (piY > iImHeight)) {
             return false;
         }
 
         switch(iBpp) {
         case 8:
-            if (pImage.getMPixel(piX, piY) != JICTConstants.I_CHROMAVALUE) {
+            if (pMImage.getMPixel(piX, piY) != JICTConstants.I_CHROMAVALUE) {
                 return true;
             } else {
                 return false;
@@ -542,11 +555,11 @@ public class Globals {
 
         case 24:
             // The following method sets parameters red, green, and blue
-            pImage.getMPixelRGB(piX, piY, red, green, blue);
+            pMImage.getMPixelRGB(piX, piY, bytRed, bytGreen, bytBlue);
             if (
-            (red   != JICTConstants.I_CHROMARED) || 
-            (green != JICTConstants.I_CHROMAGREEN) ||
-            (blue  != JICTConstants.I_CHROMABLUE)) {
+            (bytRed   != JICTConstants.I_CHROMARED) || 
+            (bytGreen != JICTConstants.I_CHROMAGREEN) ||
+            (bytBlue  != JICTConstants.I_CHROMABLUE)) {
                 return true;
             } else {
                 return false;
@@ -569,7 +582,11 @@ public class Globals {
     //
     // Returns 0 if the neighbor is not in the boundary.
     // Returns 1 if the neighbor is     in the boundary.
-    public static boolean probe(MemImage pImage, int piX, int piY, int piDir, 
+    //
+    // Called from:
+    //     neighbor
+    //     shapeFromImage
+    public static boolean probe(MemImage pMImage, int piX, int piY, int piDir, 
     Integer pINewX, Integer pINewY) {
         // Figure out coordinates of neighbor
         if ((piDir < 2) || (piDir > 6)) {
@@ -593,11 +610,11 @@ public class Globals {
         pINewY = piY;
 
         // Determine if the new sample point is in the boundary
-        return (in_boundary(pImage, piX, piY));
+        return (in_boundary(pMImage, piX, piY));
     } // probe
 
 
-    // This method came from BLEND.CPP
+    // This method originally came from BLEND.CPP
     //
     // neighbor(x, y, last_dir, new_x, new_y)
     //
@@ -611,63 +628,68 @@ public class Globals {
     // least one neighbor in the same boundary.
     //
     // Returns the direction to the neighbor.
-    public static int neighbor(MemImage anImage, int x, int y, int last_dir, 
-    Integer new_x, Integer new_y) {
-        int	n;
-        int	new_dir;
+    // Called from:
+    //     shapeFromImage
+    public static int neighbor(MemImage pMImage, 
+    int piX, int piY, // these two are only used as parameters to method probe
+    int piLastDir, // last direction
+    Integer pINewX, Integer pINewY) {
+        int	i;
+        int	iNewDir; // new direction
 
-        /*	figure out where to start looking for a neighbor --
-            always look ahead and to the left of the last direction
+        // Figure out where to start looking for a neighbor --
+        // always look ahead and to the left of the last direction
 
-            if the last vector was 0
-            then start looking at  1
+        // if the last vector was 0
+        // then start looking at  1
 
-            if the last vector was 1
-            then start looking at  3
+        // if the last vector was 1
+        // then start looking at  3
 
-            if the last vector was 2
-            then start looking at  3
+        // if the last vector was 2
+        // then start looking at  3
 
-            if the last vector was 3
-            then start looking at  5
+        // if the last vector was 3
+        // then start looking at  5
 
-            if the last vector was 4
-            then start looking at  5
+        // if the last vector was 4
+        // then start looking at  5
 
-            if the last vector was 5
-            then start looking at  7
+        // if the last vector was 5
+        // then start looking at  7
 
-            if the last vector was 6
-            then start looking at  7
+        // if the last vector was 6
+        // then start looking at  7
 
-            if the last vector was 7
-            then start looking at  1	*/
+        // if the last vector was 7
+        // then start looking at  1
 
-        if ((last_dir & 0x01) != 0) {
+        if ((piLastDir & 0x01) != 0) {
             // last dir is odd -- add 2 to it
-            new_dir = last_dir + 2;
+            iNewDir = piLastDir + 2;
         } else {
             // last dir is even -- add 1 to it
-            new_dir = last_dir + 1;
+            iNewDir = piLastDir + 1;
         }
 
-        // Keep new_dir in the range 0 through 7
-        if (new_dir > 7) {
-            new_dir -= 8;
+        // Keep iNewDir in the range 0 through 7
+        if (iNewDir > 7) {
+            iNewDir -= 8;
         }
 
         // Probe the neighbors, looking for one on the edge
-        for (n = 0; n < 8; n++) {
-            if (probe(anImage, x, y, new_dir, new_x, new_y)) {
+        for (i = 0; i < 8; i++) {
+            // The following method sets parameters pINewX and PINewY
+            if (probe(pMImage, piX, piY, iNewDir, pINewX, pINewY)) {
                 // Found the next clockwise edge neighbor --
                 // its coordinates have already been
-                // stuffed into new_x, new_y
+                // stuffed into piNewX, piNewY
 
-                return(new_dir);
+                return(iNewDir);
             } else {
                 // Check the next clockwise neighbor
-                if (--new_dir < 0) {
-                    new_dir += 8;
+                if (--iNewDir < 0) {
+                    iNewDir += 8;
                 }
             }
         }
@@ -690,75 +712,76 @@ public class Globals {
     //
     // Called from:
     //     tweenImage
-    public static int shapeFromImage(MemImage anImage, Shape3d aShape) {
-        int	x, y;
-        Integer	new_x, new_y;
-        int	dir, last_dir;
-        int start_x = 1;
-        int start_y = 1;
-        int row, col;
-        int counter = 0;
+    // which in turn is called from MorphDlg.onOK (when morph type = JICTConstants.I_TWOD)
+    public static int shapeFromImage(MemImage pMImage, Shape3d pShape) {
+        int	iX, iY;
+        Integer	iNewX = 0, iNewY = 0;
+        int	iDir, iLastDir;
+        int iStartX = 1;
+        int iStartY = 1;
+        int iRow, iCol;
+        // int counter = 0; // this variable is not used
 
-        int imHeight = anImage.getHeight();
-        int imWidth  = anImage.getWidth();
-        int bpp      = anImage.getBitsPerPixel();
-        if((bpp != 8) && (bpp != 24)) {
+        int iImHeight = pMImage.getHeight();
+        int iImWidth  = pMImage.getWidth();
+        int iBpp      = pMImage.getBitsPerPixel();
+        if((iBpp != 8) && (iBpp != 24)) {
             statusPrint("shapeFromImage: Binary image must have 8 or 24 bit pixels.");
             return -1;
         }
 
         // Find the first point on the boundary
-        start_x = -1;
-        start_y = -1;
+        iStartX = -1;
+        iStartY = -1;
 
         // Start at the left-top corner of the image, scanning from left to right
-        for (row = imHeight; row >= 1; row--) {
-            for (col = 1; col <= imWidth; col++) {
-                if(in_boundary(anImage, col, row)) {
-                    start_x = col;
-                    start_y = row;
-                    goto nextStep;
+        for (iRow = iImHeight; iRow >= 1; iRow--) {
+            for (iCol = 1; iCol <= iImWidth; iCol++) {
+                if(in_boundary(pMImage, iCol, iRow)) {
+                    iStartX = iCol;
+                    iStartY = iRow;
+                    // goto nextStep;
+                    break;
                 }
             }
         }
 
-        nextStep:
-        if((start_x < 0) || (start_y < 0)) {
+        if((iStartX < 0) || (iStartY < 0)) {
             statusPrint("shapeFromImage: Binary image has no non-zero pixels");
             return -1;
         }
 
         // Go left in the starting row until out of the boundary
-        while (in_boundary(anImage, start_x, start_y)) {
-            --start_x;
+        while (in_boundary(pMImage, iStartX, iStartY)) {
+            --iStartX;
         }
         
         // Move back right one point, to the leftmost edge
         // in the boundary, in that row
-        start_x++;
+        iStartX++;
 
         // Check if the starting point has no neighbors in the boundary --
         // the starting direction to check is arbitrary	*/
-        x = start_x;
-        y = start_y;
+        iX = iStartX;
+        iY = iStartY;
 
-        dir = 0;
+        iDir = 0;
 
         for ( ; ; ) {
-            if (probe(anImage, x, y, dir, new_x, new_y)) {
-                // Found a neighbor in that direction (its coordinates are in new_x, new_y
+            if (probe(pMImage, iX, iY, iDir, iNewX, iNewY)) {
+                // Found a neighbor in that direction (its coordinates are in iNewX, iNewY
                 // but we don't use them here)
 
                 break;
             }
 
             // Try next direction
-            if (++dir == 8) {
+            if (++iDir == 8) {
                 // Starting point has no neighbors -- make the chain one vector long
                 
                 // Fill in the vector -- the direction is arbitrary,
                 // since the point is isolated
-                aShape.addWorldVertex((float)new_x, (float)new_y, 0.0f);
+                pShape.addWorldVertex((float)iNewX, (float)iNewY, 0.0f);
 
                 return 0;
             }
@@ -766,30 +789,28 @@ public class Globals {
 
         // Get ready to follow the edge -- since we are at the left edge,
         // force initial probe to be to upper left by initializing last_dir to 1
-        last_dir = 1;
+        iLastDir = 1;
 
         // Follow the edge clockwise
         for ( ; ; ) {
             // Get the next point on the edge and the vector to it
-            dir = neighbor(anImage, x, y, last_dir, new_x, new_y);
+            iDir = neighbor(pMImage, iX, iY, iLastDir, iNewX, iNewY);
 
             // Add the new point
-            if(dir != last_dir) {
-                aShape.addWorldVertex((float)new_x, (float)new_y, 0.0f);
+            if(iDir != iLastDir) {
+                pShape.addWorldVertex((float)iNewX, (float)iNewY, 0.0f);
             }
 
             // Maybe done with boundary
-            if ( (new_x == start_x) && (new_y == start_y) ) {
+            if ( (iNewX == iStartX) && (iNewY == iStartY) ) {
                 return 0;
             }
 
             // Else get ready to continue following the edge
-            x = new_x;
-            y = new_y;
-            last_dir = dir;
-        }
-
-        return 0;
+            iX = iNewX;
+            iY = iNewY;
+            iLastDir = iDir;
+        } // for
     } // shapeFromImage
 
 
@@ -797,140 +818,160 @@ public class Globals {
     // TODO: Replace parameter filein with a FileStream
     // Called from:
     //     MotionPath.readMotion
-    public static String getNextMotionLine(String theText, Integer lineNumber, 
+    public static String getNextMotionLine(String psText, Integer pILineNumber, 
     LineNumberReader filein) {
-        boolean aComment = true;
-        int theLength = 80;
-        String theKeyWord;
+        boolean bComment = true;
+        // int theLength = 80; // This variable is no longer used
+        String sKeyWord;
       
-        while (aComment) {
-            filein.getline(theText, theLength);  // Ignore comments and near empty lines
-            if(filein.eof()) {
-                theText = "EOF";
-                theKeyWord = theText;
-                return(theKeyWord);
+        while (bComment) {
+            // filein.getline(psText, theLength);  // Ignore comments and near empty lines
+            try {
+                psText = filein.readLine();
+            } catch (IOException ioe) {
+                Globals.statusPrint("getNextMotionLine: IOException while reading from file");
             }
 
-            lineNumber++;
-            if (theText.startsWith("//") || theText.length() < 2) // Single C/R
-                aComment = true;
+            if(psText == null) {
+                psText = "EOF";
+                sKeyWord = psText;
+                return(sKeyWord);
+            }
+
+            pILineNumber++;
+            if (psText.startsWith("//") || psText.length() < 2) // Single C/R
+                bComment = true;
             else
-                aComment = false;
+                bComment = false;
         }
 
-        theKeyWord = theText;
-        return(theKeyWord);
+        sKeyWord = psText;
+        return(sKeyWord);
     } // getNextMotionLine
 
 
-    // This method came from MOTION.CPP
-    public static int motionBlur(String firstImagePath, String outputDir, 
-    int numFrames, int blurDepth) {
-        String msgText;
-        MemImage[] images = new MemImage[32]; 
-        MemImage outImage;
-        String directory = "", fileName = "", prefix = "", inSuffix = "";
-        String currentPath = "";
+    // This method originally came from MOTION.CPP
+    // Called from:
+    //     MotionBlur.onOK
+    public static int motionBlur(String psFirstImagePath, String psOutputDir, 
+    int piNumFrames, int piBlurDepth) {
+        String sMsgText;
+        MemImage[] aMImages = new MemImage[32]; 
+        MemImage outMImage;
+        String sDirectory = "", sFileName = "", sPrefix = "", sInSuffix = "";
+        String sCurrentPath = "";
         // String inPath; // This variable is not used
-        String outPath = "", outSuffix;
-        byte red = (byte)0, green = (byte)0, blue = (byte)0;
-        int blur, numOpenImages, bucket, redBucket, greenBucket, blueBucket;
-        int frameNum = 0, i, j, status;
-        Integer imHeight = 0, imWidth = 0, bpp = 0;
-        int frameCounter, row, col;
+        String sOutPath = "", sOutSuffix;
+        byte bytRed = (byte)0, bytGreen = (byte)0, bytBlue = (byte)0;
+        int iBlur, iNumOpenImages, iBucket, iRedBucket, iGreenBucket, iBlueBucket;
+        int iFrameNum = 0, i, j, iStatus;
+        Integer iImHeight = 0, iImWidth = 0, iBpp = 0;
+        int iFrameCounter, iRow, iCol;
 
-        if(blurDepth > 15) {
+        if(piBlurDepth > 15) {
             statusPrint("motionBlur: blurDepth cannot be > 15");
             return -1;
         }
 
         // The directory includes the drive letter
-        status = FileUtils.getPathPieces(firstImagePath, directory, fileName, prefix, 
-            frameNum, inSuffix);
-        if(status != 0) {
+        iStatus = FileUtils.getPathPieces(psFirstImagePath, sDirectory, sFileName, sPrefix, 
+            iFrameNum, sInSuffix);
+        if(iStatus != 0) {
             statusPrint("motionBlur: Check the first image pathname");
             return -2;
         }
 
-        status = readBMPHeader(firstImagePath, imHeight, imWidth, bpp);
-        if(status != 0) {
-            msgText = "motionBlur: Cannot open: " + firstImagePath;
-            statusPrint(msgText);
+        // The following method reads the bmp file psFirstImagePath and sets 
+        // parameters imHeight, imWidth, and iBpp
+        // We assume iBpp will have the value 8 or 24
+        iStatus = readBMPHeader(psFirstImagePath, iImHeight, iImWidth, iBpp);
+        if(iStatus != 0) {
+            sMsgText = "motionBlur: Cannot open: " + psFirstImagePath;
+            statusPrint(sMsgText);
             return -3;
         }
 
-        numOpenImages = 2 * blurDepth + 1;
+        iNumOpenImages = 2 * piBlurDepth + 1;
 
-        for (frameCounter = frameNum + blurDepth; frameCounter <=frameNum + numFrames - blurDepth; frameCounter++) {
+        for (iFrameCounter = iFrameNum + piBlurDepth; iFrameCounter <= iFrameNum + piNumFrames - piBlurDepth; iFrameCounter++) {
             // Open and close the appropriate images
-            if(frameCounter == frameNum + blurDepth) {
-                for(i = -blurDepth; i <= blurDepth; i++) { // open the first blurDepth images
-                    FileUtils.makePath(currentPath, directory, prefix, frameCounter + i, inSuffix);
-                    switch(bpp) {
+            if(iFrameCounter == iFrameNum + piBlurDepth) {
+                for(i = -piBlurDepth; i <= piBlurDepth; i++) { // open the first blurDepth images
+                    // The following method sets parameter sCurrentPath
+                    FileUtils.makePath(sCurrentPath, sDirectory, sPrefix, iFrameCounter + i, sInSuffix);
+                    switch(iBpp) {
                     case 8:
-                        images[i + blurDepth] = new MemImage(currentPath, 0, 0, JICTConstants.I_RANDOM, 'R', JICTConstants.I_EIGHTBITMONOCHROME);
+                        aMImages[i + piBlurDepth] = new MemImage(sCurrentPath, 0, 0, 
+                            JICTConstants.I_RANDOM, 'R', JICTConstants.I_EIGHTBITMONOCHROME);
                         break;
 
                     case 24:
-                        images[i + blurDepth] = new MemImage(currentPath, 0, 0, JICTConstants.I_RANDOM, 'R', JICTConstants.I_RGBCOLOR);
+                        aMImages[i + piBlurDepth] = new MemImage(sCurrentPath, 0, 0, 
+                            JICTConstants.I_RANDOM, 'R', JICTConstants.I_RGBCOLOR);
                         break;
                     } // switch
 
-                    if(!images[i + blurDepth].isValid()) {
-                        msgText = "motionBlur: Unable to open image: " + currentPath;
-                        statusPrint(msgText);
+                    if(!aMImages[i + piBlurDepth].isValid()) {
+                        sMsgText = "motionBlur: Unable to open image: " + sCurrentPath;
+                        statusPrint(sMsgText);
                         return -4;
                     }
                 }
             } else {
-                for (j = 0; j < numOpenImages - 1; j++) { // Move the image pointers
-                    images[j] = images[j + 1];
+                for (j = 0; j < iNumOpenImages - 1; j++) { // Move the image pointers
+                    aMImages[j] = aMImages[j + 1];
                 }
 
                 // Open new image
-                FileUtils.makePath(currentPath, directory, prefix, frameCounter + blurDepth, inSuffix);
-                switch(bpp) {
+                // The following method sets parameter sCurrentPath
+                FileUtils.makePath(sCurrentPath, sDirectory, sPrefix, iFrameCounter + piBlurDepth, sInSuffix);
+                switch(iBpp) {
                 case 8:
-                    images[numOpenImages - 1] = new MemImage(currentPath, 0, 0, JICTConstants.I_RANDOM, 'R', JICTConstants.I_EIGHTBITMONOCHROME);
+                    aMImages[iNumOpenImages - 1] = new MemImage(sCurrentPath, 0, 0, 
+                        JICTConstants.I_RANDOM, 'R', JICTConstants.I_EIGHTBITMONOCHROME);
                     break;
 
                 case 24:
-                    images[numOpenImages - 1] = new MemImage(currentPath, 0, 0, JICTConstants.I_RANDOM, 'R', JICTConstants.I_RGBCOLOR);
+                    aMImages[iNumOpenImages - 1] = new MemImage(sCurrentPath, 0, 0, 
+                        JICTConstants.I_RANDOM, 'R', JICTConstants.I_RGBCOLOR);
                     break;
                 } // switch
 
-                if(!images[numOpenImages - 1].isValid()) {
-                    msgText = "motionBlur: Unable to open image 2: " + currentPath;
-                    statusPrint(msgText);
+                if(!aMImages[iNumOpenImages - 1].isValid()) {
+                    sMsgText = "motionBlur: Unable to open image 2: " + sCurrentPath;
+                    statusPrint(sMsgText);
                     return -4;
                 }
             }
 
             // Blur the images
-            float avgBucket, avgRedBucket, avgGreenBucket, avgBlueBucket;
+            float fAvgBucket, fAvgRedBucket, fAvgGreenBucket, fAvgBlueBucket;
 
-            outSuffix = "b";
-            FileUtils.makePath(outPath, outputDir, prefix, frameCounter, outSuffix);
-            outImage = new MemImage(imHeight, imWidth, bpp);
+            sOutSuffix = "b";
+            // The following method sets parameter sOutPath
+            FileUtils.makePath(sOutPath, psOutputDir, sPrefix, iFrameCounter, sOutSuffix);
+            outMImage = new MemImage(iImHeight, iImWidth, iBpp);
 
-            for (row = 1; row < imHeight; row++) {
-                for (col = 1; col < imWidth; col++) {
-                    bucket = 0;
-                    redBucket   = 0;
-                    greenBucket = 0;
-                    blueBucket  = 0;
+            // We will now read from aMImages[iBlur] and with the avg data we collect, 
+            // write to outMImage
+            for (iRow = 1; iRow < iImHeight; iRow++) {
+                for (iCol = 1; iCol < iImWidth; iCol++) {
+                    iBucket = 0;
+                    iRedBucket   = 0;
+                    iGreenBucket = 0;
+                    iBlueBucket  = 0;
 
-                    for (blur = 0; blur < numOpenImages; blur++) {
-                        switch (bpp) {
+                    for (iBlur = 0; iBlur < iNumOpenImages; iBlur++) {
+                        switch (iBpp) {
                         case 8:
-                            bucket += images[blur].getMPixel(col, row);
+                            iBucket += aMImages[iBlur].getMPixel(iCol, iRow);
                             break;
 
                         case 24:
-                            images[blur].getMPixelRGB(col, row, red, green, blue);
-                            redBucket   += red;
-                            greenBucket += green;
-                            blueBucket  += blue;
+                            aMImages[iBlur].getMPixelRGB(iCol, iRow, bytRed, bytGreen, bytBlue);
+                            iRedBucket   += bytRed;
+                            iGreenBucket += bytGreen;
+                            iBlueBucket  += bytBlue;
                             break;
 
                         default:
@@ -939,30 +980,30 @@ public class Globals {
                         }  // switch
                     } // for blur
 
-                    switch(bpp) {
+                    switch(iBpp) {
                     case 8:
-                        avgBucket = bucket / numOpenImages;
-                        outImage.setMPixel(col, row, (byte)(avgBucket + 0.5));
+                        fAvgBucket = iBucket / iNumOpenImages;
+                        outMImage.setMPixel(iCol, iRow, (byte)(fAvgBucket + 0.5));
                         break;
 
                     case 24:
-                        avgRedBucket   = redBucket / numOpenImages;
-                        avgGreenBucket = greenBucket / numOpenImages;
-                        avgBlueBucket  = blueBucket / numOpenImages;
-                        outImage.setMPixelRGB(col, row, 
-                            (byte)(avgRedBucket + 0.5f),
-                            (byte)(avgGreenBucket + 0.5f),
-                            (byte)(avgBlueBucket + 0.5f));
+                        fAvgRedBucket   = iRedBucket   / iNumOpenImages;
+                        fAvgGreenBucket = iGreenBucket / iNumOpenImages;
+                        fAvgBlueBucket  = iBlueBucket  / iNumOpenImages;
+                        outMImage.setMPixelRGB(iCol, iRow, 
+                            (byte)(fAvgRedBucket   + 0.5f),
+                            (byte)(fAvgGreenBucket + 0.5f),
+                            (byte)(fAvgBlueBucket  + 0.5f));
                         break;
                     } // switch
-                } // for col
-            } // for row
+                } // for iCol
+            } // for iRow
 
             // Save the blurred image
-            msgText = "Saving: " + outPath;
-            statusPrint(msgText);
-            outImage.writeBMP(outPath);
-        } // for frameCounter
+            sMsgText = "Saving: " + sOutPath;
+            statusPrint(sMsgText);
+            outMImage.writeBMP(sOutPath);
+        } // for iFrameCounter
 
         return 0;
     } // motionBlur
@@ -970,179 +1011,186 @@ public class Globals {
 
     // This method performs planar texture mapping.
     // See p 157 - 160 of Visual Special Effects Toolkit in C++.
-    // This method came from IWARP.CPP
+    // This method originally came from IWARP.CPP
     // Called from:
-    //     Globals.tweenImage
+    //     iwarpz
+    //     tweenImage
+    // which in turn is called by MorphDlg.onOK (when morph type = JICTConstants.I_TWOD)
     //     MainFrame.onToolsWarpImage
-    public static int iwarpz(MemImage inImage, MemImage outImage, MemImage zImage,
+    public static int iwarpz(MemImage pInMImage, MemImage pOutMImage, MemImage pZMImage,
     float rx, float ry, float rz, 
     float sx, float sy, float sz,
     float tx, float ty, float tz, 
     float vx, float vy, float vz,
-    TMatrix viewMatrix,
+    TMatrix pViewMatrix,
     float pfRefPointX, float pfRefPointY, float pfRefPointZ) {
         // To use this function without a zBuffer, call with zImage = null.
         // in this case, vx, vy, and vz are ignored
-        String msgText;
+        String sMsgText;
         int x, y;
-        int myStatus;
-        Integer numXCoordsFound;
-        int[] screenXCoords = new int[JICTConstants.I_MAXWVERTICES];
+        int iStatus;
+        Integer iNumXCoordsFound;
+        int[] iaScreenXCoords = new int[JICTConstants.I_MAXWVERTICES];
         float[] tZCoords = new float[JICTConstants.I_MAXWVERTICES]; 
         float[] tXCoords = new float[JICTConstants.I_MAXWVERTICES]; 
         float[] tYCoords = new float[JICTConstants.I_MAXWVERTICES];
 
         // The shape object contains the projected 4 sided polygon and a z coordinate
         // at each of the projected vertices.
-        if(ictdebug) {
+        if(bIctDebug) {
             statusPrint("iwarpz input arguments");
 
-            msgText = String.format("rx: %6.2f  ry: %6.2f  rz: %6.2f", rx, ry, rz);
-            statusPrint(msgText);
+            sMsgText = String.format("rx: %6.2f  ry: %6.2f  rz: %6.2f", rx, ry, rz);
+            statusPrint(sMsgText);
 
-            msgText = String.format("sx: %6.2f  sy: %6.2f  sz: %6.2f", sx, sy, sz);
-            statusPrint(msgText);
+            sMsgText = String.format("sx: %6.2f  sy: %6.2f  sz: %6.2f", sx, sy, sz);
+            statusPrint(sMsgText);
 
-            msgText = String.format("tx: %6.2f  ty: %6.2f  tz: %6.2f", tx, ty, tz);
-            statusPrint(msgText);
+            sMsgText = String.format("tx: %6.2f  ty: %6.2f  tz: %6.2f", tx, ty, tz);
+            statusPrint(sMsgText);
 
-            msgText = String.format("refx: %6.2f  refy: %6.2f  refz: %6.2f", 
+            sMsgText = String.format("refx: %6.2f  refy: %6.2f  refz: %6.2f", 
                 pfRefPointX, pfRefPointY, pfRefPointZ);
-            statusPrint(msgText);
+            statusPrint(sMsgText);
         }
 
         //  Build the forward and inverse transformation matrices
         TMatrix forwardMatrix = new TMatrix();
 
         // F_DTR = floating-point degree to radian conversion factor
-        float XRadians = rx * JICTConstants.F_DTR;
-        float YRadians = ry * JICTConstants.F_DTR;
-        float ZRadians = rz * JICTConstants.F_DTR;
+        float fXRadians = rx * JICTConstants.F_DTR;
+        float fYRadians = ry * JICTConstants.F_DTR;
+        float fZRadians = rz * JICTConstants.F_DTR;
 
         forwardMatrix.scale(sx, sy, sz);
-        forwardMatrix.rotate(XRadians, YRadians, ZRadians);
+        forwardMatrix.rotate(fXRadians, fYRadians, fZRadians);
         forwardMatrix.translate(tx, ty, tz);
 
         TMatrix viewModelMatrix = new TMatrix();
-        viewModelMatrix.multiply(viewMatrix, forwardMatrix);
+        viewModelMatrix.multiply(pViewMatrix, forwardMatrix);
 
         TMatrix inverseMatrix = new TMatrix(viewModelMatrix);  // copy the forward transform
         inverseMatrix.invertg();                               // and invert it
 
-        if(ictdebug) {
+        if(bIctDebug) {
             forwardMatrix.display("Forward Matrix:");
             inverseMatrix.display("Inverse Matrix:");
         }
 
-        int bpp       = inImage.getBitsPerPixel();
-        int inHeight  = inImage.getHeight();
-        int inWidth   = inImage.getWidth();
-        int outHeight = outImage.getHeight();
-        int outWidth  = outImage.getWidth();
-        float halfInHeight = inHeight / 2.0f;
-        float halfInWidth  = inWidth / 2.0f;
+        int iBpp       = pInMImage.getBitsPerPixel();
+        int iInHeight  = pInMImage.getHeight();
+        int iInWidth   = pInMImage.getWidth();
+        int iOutHeight = pOutMImage.getHeight();
+        int iOutWidth  = pOutMImage.getWidth();
+        float fHalfInHeight = iInHeight / 2.0f;
+        float fHalfInWidth  = iInWidth / 2.0f;
 
-        float xCentOffset = (outWidth - inWidth) / 2.0f;
-        float yCentOffset = (outHeight - inHeight) / 2.0f;
+        float fXCentOffset = (iOutWidth - iInWidth) / 2.0f;
+        float fYCentOffset = (iOutHeight - iInHeight) / 2.0f;
 
-        if(ictdebug) {
-            msgText = "iWarpz: Viewer location: vx: " + vx + ", vy: " + vy + ", vz: " + vz;
-            statusPrint(msgText);
+        if(bIctDebug) {
+            sMsgText = "iWarpz: Viewer location: vx: " + vx + ", vy: " + vy + ", vz: " + vz;
+            statusPrint(sMsgText);
         }
 
         // iwarpz uses a reference point defined in pixel space.
         // Convert it now.
-        float intRefPointX = pfRefPointX + halfInWidth;
-        float intRefPointY = pfRefPointY + halfInHeight;
-        float intRefPointZ = pfRefPointZ;
+        float fIntRefPointX = pfRefPointX + fHalfInWidth;
+        float fIntRefPointY = pfRefPointY + fHalfInHeight;
+        float fIntRefPointZ = pfRefPointZ;
 
         // Load a shape object with the original image boundary coordinates
-        Shape3d aShape = new Shape3d(4);
-        aShape.addWorldVertex(          1.0f,            1.0f, 0.0f);
-        aShape.addWorldVertex((float)inWidth,            1.0f, 0.0f);
-        aShape.addWorldVertex((float)inWidth, (float)inHeight, 0.0f);
-        aShape.addWorldVertex(          1.0f, (float)inHeight, 0.0f);
+        Shape3d shape = new Shape3d(4);
+        shape.addWorldVertex(          1.0f,            1.0f, 0.0f);
+        shape.addWorldVertex((float)iInWidth,            1.0f, 0.0f);
+        shape.addWorldVertex((float)iInWidth, (float)iInHeight, 0.0f);
+        shape.addWorldVertex(          1.0f, (float)iInHeight, 0.0f);
 
         // Transform and project the image coords, taking into account the reference point
-        viewModelMatrix.transformAndProject(aShape, outHeight, outWidth, 
-            true, intRefPointX, intRefPointY, intRefPointZ);
+        viewModelMatrix.transformAndProject(shape, iOutHeight, iOutWidth, 
+            true, fIntRefPointX, fIntRefPointY, fIntRefPointZ);
 
-        if(ictdebug) {
-            aShape.printShape("Transformed Image Boundary:");
+        if(bIctDebug) {
+            shape.printShape("Transformed Image Boundary:");
         }
 
-        aShape.screenBoundingBox();
-        float minY = aShape.mfMinY;
-        float maxY = aShape.mfMaxY;
-        float minX = aShape.mfMinX;
-        float maxX = aShape.mfMaxX;
+        shape.screenBoundingBox();
+        float fMinY = shape.mfMinY;
+        float fMaxY = shape.mfMaxY;
+        // float fMinX = shape.mfMinX; // this variable is not used
+        // float fMaxX = shape.mfMaxX; // this variable is not used
         
-        aShape.transformBoundingBox();
+        shape.transformBoundingBox();
 
-        if (ictdebug) {
+        if (bIctDebug) {
             // Inverse check. Map transformed shape cornerpoints into original image
-            aShape.initCurrentVertex();
+            shape.initCurrentVertex();
             float xo, yo, zo;
 
-            for (int index = 1; index <= aShape.getNumVertices(); index++) {
-                float anX = aShape.mCurrentVertex.tx;
-                float anY = aShape.mCurrentVertex.ty;
-                float anZ = aShape.mCurrentVertex.tz;
+            for (int index = 1; index <= shape.getNumVertices(); index++) {
+                float anX = shape.mCurrentVertex.tx;
+                float anY = shape.mCurrentVertex.ty;
+                float anZ = shape.mCurrentVertex.tz;
                 inverseMatrix.transformPoint (anX, anY, anZ, xo, yo, zo);
                 // aShape.iCurrVtxIdx++;
-                aShape.incCurrentVertex();
+                shape.incCurrentVertex();
 
-                msgText = String.format("transformed: %6.2f %6.2f %6.2f texture: %6.2f %6.2f %6.2f",
+                sMsgText = String.format("transformed: %6.2f %6.2f %6.2f texture: %6.2f %6.2f %6.2f",
                     anX, anY, anZ, 
-                    xo + halfInWidth, yo + halfInHeight, zo);
-                statusPrint(msgText);
+                    xo + fHalfInWidth, yo + fHalfInHeight, zo);
+                statusPrint(sMsgText);
             }
 
-            msgText = "read offsets: halfInWidth: " + halfInWidth + "  halfInHeight: " + halfInHeight;
-            statusPrint(msgText);
+            sMsgText = "read offsets: halfInWidth: " + fHalfInWidth + "  halfInHeight: " + fHalfInHeight;
+            statusPrint(sMsgText);
 
-            msgText = "write offsets: xCentOffset: " + xCentOffset + "  yCentOffset: " + yCentOffset;
-            statusPrint(msgText);
+            sMsgText = "write offsets: xCentOffset: " + fXCentOffset + "  yCentOffset: " + fYCentOffset;
+            statusPrint(sMsgText);
         }
 
-        float xIn, yIn, zIn, xOut, yOut, zOut;
-        float xOut1, yOut1, zOut1, xOut2, yOut2, zOut2;
-        float xOut3, yOut3, zOut3, xOut4, yOut4, zOut4;
-        float fIntensity, xIncrement, yIncrement, zIncrement;
+        float fXIn, fYIn, fZIn;
+        float fXOut, fYOut, fZOut;
+        // float xOut1, yOut1, zOut1; // these variables are not used
+        // float xOut2, yOut2, zOut2; // these variables are not used
+        // float xOut3, yOut3, zOut3; // these variables are not used
+        // float xOut4, yOut4, zOut4; // these variables are not used
+        float fIntensity, fXIncrement, fYIncrement, fZIncrement;
         float dx, dy, dz;
-        float d, w, theZ, aDist;
+        float d, w, theZ, fDist;
         d = -512.0f;
-        byte intensity, red, green, blue;
-        int xMin, xMax, yMin, yMax, zMin, zMax;
-        int numSteps;
+        byte bytIntensity, bytRed, bytGreen, bytBlue;
+        //int xMin, xMax; // these variables are not used
+        //int yMin, yMax; // these variables are not used
+        //int zMin, zMax; // these variables are not used
+        int iNumSteps;
 
         // Loop through the screen coordinates, filling in with inverse mapped pixels
-        for (y = (int)minY; y <= (int)maxY; y++) {
-            myStatus = getIntervals(aShape, y, numXCoordsFound, JICTConstants.I_MAXWVERTICES,
-                screenXCoords, tXCoords, tYCoords, tZCoords);
+        for (y = (int)fMinY; y <= (int)fMaxY; y++) {
+            iStatus = getIntervals(shape, y, iNumXCoordsFound, JICTConstants.I_MAXWVERTICES,
+                iaScreenXCoords, tXCoords, tYCoords, tZCoords);
 
-            if (myStatus != 0) {
-                msgText = "iwarp: getInterval error: " + myStatus;
-                statusPrint(msgText);
+            if (iStatus != 0) {
+                sMsgText = "iwarp: getInterval error: " + iStatus;
+                statusPrint(sMsgText);
                 return 2;
             }
 
-            if (ictdebug) {
+            if (bIctDebug) {
                 statusPrint("y:\tsx  \ttx  \tty  \ttz");
-                for(int i = 0; i < numXCoordsFound; i++) {
-                    msgText = String.format("%d\t%d\t%6.2f\t%6.2f\t%6.2f" , y, screenXCoords[i],
+                for(int i = 0; i < iNumXCoordsFound; i++) {
+                    sMsgText = String.format("%d\t%d\t%6.2f\t%6.2f\t%6.2f" , y, iaScreenXCoords[i],
                         tXCoords[i], tYCoords[i], tZCoords[i]);
-                    statusPrint(msgText);
+                    statusPrint(sMsgText);
                 }
             }
 
-            if (numXCoordsFound != 2) {
-                msgText = "iWarp: numCoords <> 2. y: " + y + " numCoords " + numXCoordsFound;
-                statusPrint(msgText);
-                for(int i = 0; i < numXCoordsFound; i++) {
-                    msgText = String.format("%d\t%d\t%6.2f\t%6.2f\t%6.2f" , y, screenXCoords[i],
+            if (iNumXCoordsFound != 2) {
+                sMsgText = "iWarp: numCoords <> 2. y: " + y + " numCoords " + iNumXCoordsFound;
+                statusPrint(sMsgText);
+                for(int i = 0; i < iNumXCoordsFound; i++) {
+                    sMsgText = String.format("%d\t%d\t%6.2f\t%6.2f\t%6.2f" , y, iaScreenXCoords[i],
                         tXCoords[i], tYCoords[i], tZCoords[i]);
-                    statusPrint(msgText);
+                    statusPrint(sMsgText);
                     goto nextScanLine;
                 }
             }
@@ -1150,25 +1198,25 @@ public class Globals {
             dx = tXCoords[1] - tXCoords[0];
             dy = tYCoords[1] - tYCoords[0];
             dz = tZCoords[1] - tZCoords[0];
-            numSteps = (int)screenXCoords[1] - (int)screenXCoords[0] + 1;
+            iNumSteps = (int)iaScreenXCoords[1] - (int)iaScreenXCoords[0] + 1;
             
             // Initialize xIncrement, yIncrement, and zIncrement
             // xIncrement will be used to modify xIn
             // yIncrement will be used to modify yIn
             // zIncrement will be used to modify zIn
-            if (numSteps - 1.0 > 0.0) {
-                xIncrement = dx/(float)(numSteps - 1);
-                yIncrement = dy/(float)(numSteps - 1);
-                zIncrement = dz/(float)(numSteps - 1);
+            if (iNumSteps - 1.0 > 0.0) {
+                fXIncrement = dx/(float)(iNumSteps - 1);
+                fYIncrement = dy/(float)(iNumSteps - 1);
+                fZIncrement = dz/(float)(iNumSteps - 1);
             } else {
-                xIncrement = 0.0f;
-                yIncrement = 0.0f;
-                zIncrement = 0.0f;
+                fXIncrement = 0.0f;
+                fYIncrement = 0.0f;
+                fZIncrement = 0.0f;
             }
 
-            xIn = tXCoords[0];
-            yIn = tYCoords[0];
-            zIn = tZCoords[0];
+            fXIn = tXCoords[0];
+            fYIn = tYCoords[0];
+            fZIn = tZCoords[0];
 
             float dpx, dpy;
             dpx = 1.0f / sx;
@@ -1177,81 +1225,81 @@ public class Globals {
             if(dpy > 0.5f) dpy = 0.5f;
 
             // Loop through a single scan line
-            for(x = (int)screenXCoords[0];x <= (int)screenXCoords[1]; x++) {
+            for(x = (int)iaScreenXCoords[0];x <= (int)iaScreenXCoords[1]; x++) {
                 // Determine the transformed x, y by inverting the true perspective
                 // projection
-                w = (zIn + d) / d;
-                xIn = (x - halfInWidth) * w;
-                yIn = (y - halfInHeight)* w;
+                w = (fZIn + d) / d;
+                fXIn = (x - fHalfInWidth) * w;
+                fYIn = (y - fHalfInHeight)* w;
 
                 // The following method sets xOut, yOut and zOut
-                inverseMatrix.transformPoint(xIn, yIn, zIn, xOut, yOut, zOut);
+                inverseMatrix.transformPoint(fXIn, fYIn, fZIn, fXOut, fYOut, fZOut);
 
-                if(ictdebug) {
+                if(bIctDebug) {
                     if(
-                    (x == (int)screenXCoords[0]) || 
-                    (x == (int)screenXCoords[1])) {
-                        msgText = String.format("scanLine: %2d xi: %6.2f yi: %6.2f zi: %6.2f xo: %6.2f yo: %6.2f zo: %6.2f",
-                            y, xIn, yIn, zIn, xOut, yOut, zOut);
-                        statusPrint(msgText);
+                    (x == (int)iaScreenXCoords[0]) || 
+                    (x == (int)iaScreenXCoords[1])) {
+                        sMsgText = String.format("scanLine: %2d xi: %6.2f yi: %6.2f zi: %6.2f xo: %6.2f yo: %6.2f zo: %6.2f",
+                            y, fXIn, fYIn, fZIn, fXOut, fYOut, fZOut);
+                        statusPrint(sMsgText);
                     }
                 }
 
                 // if (TRUE) // no super-sampling
                 // if (sx <= 1.0 && sy <= 1.0 && sz <= 1.0) {  // super-sample expansions only
-                switch(bpp) {
+                switch(iBpp) {
                 case 8:
-                    intensity = inImage.getMPixel((int)(xOut + halfInWidth + 1),
-                        (int)(yOut + halfInHeight + 1));
+                    bytIntensity = pInMImage.getMPixel((int)(fXOut + fHalfInWidth + 1),
+                        (int)(fYOut + fHalfInHeight + 1));
                     break;
 
                 case 24:
-                    inImage.getMPixelRGB((int)(xOut + halfInWidth + 1),
-                        (int)(yOut + halfInHeight + 1), red, green, blue);
+                    pInMImage.getMPixelRGB((int)(fXOut + fHalfInWidth + 1),
+                        (int)(fYOut + fHalfInHeight + 1), bytRed, bytGreen, bytBlue);
                     break;
                 }
 
-                if(zImage != null) {
-                    theZ = zImage.getMPixel32((int)(x + xCentOffset), (int)(y + yCentOffset));
-                    aDist = MathUtils.getDistance3d(xIn, yIn, zIn, vx, vy, vz);
+                if(pZMImage != null) {
+                    theZ = pZMImage.getMPixel32((int)(x + fXCentOffset), (int)(y + fYCentOffset));
+                    fDist = MathUtils.getDistance3d(fXIn, fYIn, fZIn, vx, vy, vz);
 
                     // Update the zbuffer if a smaller distance and non transparent color
-                    if((aDist < theZ) && ((int)intensity != JICTConstants.I_CHROMAVALUE)) {
-                        zImage.setMPixel32((int)(x + xCentOffset), (int)(y + yCentOffset), aDist);
-                        switch(bpp) {
+                    if((fDist < theZ) && ((int)bytIntensity != JICTConstants.I_CHROMAVALUE)) {
+                        pZMImage.setMPixel32((int)(x + fXCentOffset), (int)(y + fYCentOffset), fDist);
+                        switch(iBpp) {
                         case 8:
-                            outImage.setMPixel((int)(x + xCentOffset), (int)(y + yCentOffset), intensity);
+                            pOutMImage.setMPixel((int)(x + fXCentOffset), (int)(y + fYCentOffset), bytIntensity);
                             break;
 
                         case 24:
-                            outImage.setMPixelRGB((int)(x + xCentOffset), (int)(y + yCentOffset), red, green, blue);
+                            pOutMImage.setMPixelRGB((int)(x + fXCentOffset), (int)(y + fYCentOffset), bytRed, bytGreen, bytBlue);
                             break;
                         }
                     }
                 } else {
-                    switch(bpp) {
+                    switch(iBpp) {
                     case 8:
-                        outImage.setMPixel((int)(x + xCentOffset), (int)(y + yCentOffset), intensity);
+                        pOutMImage.setMPixel((int)(x + fXCentOffset), (int)(y + fYCentOffset), bytIntensity);
                         break;
 
                     case 24:
-                        outImage.setMPixelRGB((int)(x + xCentOffset), (int)(y + yCentOffset), red, green, blue);
+                        pOutMImage.setMPixelRGB((int)(x + fXCentOffset), (int)(y + fYCentOffset), bytRed, bytGreen, bytBlue);
                         break;
                     }
                 }
 
-                xIn += xIncrement;
-                yIn += yIncrement;
-                zIn += zIncrement;
+                fXIn += fXIncrement;
+                fYIn += fYIncrement;
+                fZIn += fZIncrement;
             }  //  end of column loop
 
             nextScanLine:  continue;
         } //  end of scan line loop
 
-        if(ictdebug) {
-            if(zImage != null) {
+        if(bIctDebug) {
+            if(pZMImage != null) {
                 statusPrint("iwarpz: Writing zBuffer -  d:\\ict20\\output\\rawWarpz.bmp");
-                zImage.saveAs8("d:\\ict20\\output\\Warpz8.bmp");
+                pZMImage.saveAs8("d:\\ict20\\output\\Warpz8.bmp");
             }
         }
 
@@ -1262,6 +1310,9 @@ public class Globals {
     // This method came from IWARP.CPP
     // Called from: 
     //     iwarpz
+    // and iwarpz in turn is called from tweenImage
+    // which in turn is called by MorphDlg.onOK (when morph type = JICTConstants.I_TWOD)
+    // and iwarpz is also called from MainFrame.onWarpParamDlgClosed
     public static int getIntervals(Shape3d theShape, int y, Integer numCoords,
     int numAllocatedXCoords, int[] screenXCoords,
     float[] tXCoords, float[] tYCoords, float[] tZCoords) {
@@ -1337,7 +1388,7 @@ public class Globals {
             }
             newX = (int)theX;
             
-            if(ictdebug) {
+            if(bIctDebug) {
                 msgText = "getIntervals: sx1: " + sx1 + "  sx2: " + sx2 + 
                     "  sy1: " + sy1 + " sy2: " + sy2;
                 statusPrint(msgText);
@@ -1366,7 +1417,7 @@ public class Globals {
                     tXCoords[tXCoordsIdx] = tx2 + (ratio * (tx1 - tx2));
                     tYCoords[tYCoordsIdx] = ty2 + (ratio * (ty1 - ty2));	
                     tZCoords[tZCoordsIdx] = tz2 + (ratio * (tz1 - tz2));
-                    if(ictdebug) {
+                    if(bIctDebug) {
                         statusPrint("diagPoint");
                     }
 
@@ -1386,7 +1437,7 @@ public class Globals {
                     intDistance[tempIndex] = MathUtils.intervalDistance(minx, maxx, (int)theX);
                     tempIndex++;
 
-                    if(ictdebug) {
+                    if(bIctDebug) {
                         statusPrint("non diagPoint");
                     }
                 }
@@ -1416,7 +1467,7 @@ public class Globals {
                         tXCoordsIdx++;
                         intDistance[index-1] = MathUtils.intervalDistance(miny, maxy, y);
                         numCoords++;
-                        if(ictdebug) {
+                        if(bIctDebug) {
                             statusPrint("vertPoint");
                         }
                     } else {
@@ -1471,7 +1522,7 @@ public class Globals {
             }
         } // if numCoords == 1
 
-        if(ictdebug) {
+        if(bIctDebug) {
             statusPrint("getIntervals Found: intdist\t sx  \t tx  \t ty  \t tz");
             for(i = 0; i < numCoords; i++) {
                 msgText = String.format("\t%d\t%d\t%6.2f\t%6.2f\t%6.2f", 
@@ -1484,7 +1535,9 @@ public class Globals {
     } // getIntervals
 
 
-    // This method came from IWARP.CPP
+    // This method originally came from IWARP.CPP
+    // There is another method named insertionSort that takes 6 parameters.
+    // This method here takes 5 parameters.
     // Called from:
     //     getIntervals
     public static void insertionSort(int theItems[], 
@@ -1523,7 +1576,9 @@ public class Globals {
     } // insertionSort
 
 
-    // This method came from IWARP.CPP
+    // This method originally came from IWARP.CPP
+    // There is another method named insertionSort that takes 5 parameters.
+    // This method here takes 6 parameters.
     public static void insertionSort(int theItems[], 
     int itemData1[], float itemData2[], float itemData3[], float itemData4[], 
     int numItems) {
@@ -1564,7 +1619,9 @@ public class Globals {
     } // insertionSort
 
 
-    // This method came from IWARP.CPP
+    // This method originally came from IWARP.CPP
+    // There is another method named removeDuplicates that takes 6 parameters.
+    // This method here takes 5 parameters.
     // Called from:
     //     getIntervals
     public static int removeDuplicates(int theList[], 
@@ -1599,7 +1656,9 @@ public class Globals {
     } // removeDuplicates
 
 
-    // This method came from IWARP.CPP
+    // This method originally came from IWARP.CPP
+    // There is another method named removeDuplicates that takes 5 parameters.
+    // This method here takes 6 parameters.
     public static int removeDuplicates(int theList[], int theItemData1[], 
     float theItemData2[], float theItemData3[], float theItemData4[], 
     Integer listLength) {
@@ -1669,6 +1728,7 @@ public class Globals {
 
 
     // This method came from IWARP.CPP
+    // Could not find where this is being called from.
     public static int iRender(MemImage outImage, MemImage maskImage, MemImage inImage,
     float rx, float ry, float rz, 
     float sx, float sy, float sz,
@@ -1754,7 +1814,8 @@ public class Globals {
     // This method came from IWARP.CPP
     // Called from:
     //     SceneList.render
-    public static int iRenderz(MemImage outImage, MemImage matteImage, MemImage inImage,
+    public static int iRenderz(
+    MemImage outImage, MemImage matteImage, MemImage inImage,
     MemImage zImage, MemImage zBuffer,
     float rx, float ry, float rz, 
     float sx, float sy, float sz,
@@ -1954,15 +2015,16 @@ public class Globals {
             for (col = 2; col <= imWidth - 1; col++) {
                 switch(bpp) {
                 case 8:
+                    // This case is similar to MemImage.alphaSmooth3
                     q00 = inImage.getMPixel(col - 1, row - 1) * weight[0][0];
-                    q10 = inImage.getMPixel(col,     row - 1) * weight[1][0];
-                    q20 = inImage.getMPixel(col + 1, row - 1) * weight[2][0];
+                    q10 = inImage.getMPixel(col,     row - 1) * weight[1][0]; // used twice
+                    q20 = inImage.getMPixel(col + 1, row - 1) * weight[2][0]; // used twice
 
-                    q01 = inImage.getMPixel(col - 1, row)     * weight[0][1];
+                    q01 = inImage.getMPixel(col - 1, row)     * weight[0][1]; // not used
                     q11 = inImage.getMPixel(col,     row)     * weight[1][1];
                     q21 = inImage.getMPixel(col + 1, row)     * weight[2][1];
 
-                    q02 = inImage.getMPixel(col - 1, row + 1) * weight[0][2];
+                    q02 = inImage.getMPixel(col - 1, row + 1) * weight[0][2]; // not used
                     q12 = inImage.getMPixel(col,     row + 1) * weight[1][2];
                     q22 = inImage.getMPixel(col + 1, row + 1) * weight[2][2];
 
@@ -1985,17 +2047,30 @@ public class Globals {
                     q10g = (float)green * weight[1][0];
                     q10b = (float)blue  * weight[1][0];
 
+                    // The following values for the variables q20, q01, q11, q21 are not used
                     q20 = inImage.getMPixel(col + 1, row - 1) * weight[2][0];
                     q01 = inImage.getMPixel(col - 1, row)     * weight[0][1];
                     q11 = inImage.getMPixel(col,     row)     * weight[1][1];
                     q21 = inImage.getMPixel(col + 1, row)     * weight[2][1];
 
+                    // The following values for the variables q02, q12, and q22 are not used
                     q02 = inImage.getMPixel(col - 1, row + 1) * weight[0][2];
                     q12 = inImage.getMPixel(col,     row + 1) * weight[1][2];
                     q22 = inImage.getMPixel(col + 1, row + 1) * weight[2][2];
 
+                    // I believe the following line has a few errors.
+                    // It uses q10r twice and q20r twice.
+                    // Also only q00r and q10r have non-zero values.
                     sumr = q00r + q10r + q20r + q10r + q11r + q12r + q20r + q21r + q22r;
+
+                    // I believe the following line has a few errors.
+                    // It uses q10g twice and q20g twice.
+                    // Also only q00g and q10g have non-zero values.
                     sumg = q00g + q10g + q20g + q10g + q11g + q12g + q20g + q21g + q22g;
+
+                    // I believe the following line as a few errors.
+                    // It uses q10b twice and q20b twice.
+                    // Also only q00b and q10b have non-zero values.
                     sumb = q00b + q10b + q20b + q10b + q11b + q12b + q20b + q21b + q22b;
 
                     sumr = MathUtils.bound(sumr, 0.0f, 255.0f);
@@ -2013,7 +2088,7 @@ public class Globals {
     } // antiAlias
 
 
-    // This method came from IWARP.CPP
+    // This method originally came from IWARP.CPP
     public static int fWarp1(MemImage inImage, MemImage outImage,
     float rx, float ry, float rz, 
     float sx, float sy, float sz,
@@ -2039,7 +2114,7 @@ public class Globals {
 
         // The shape object contains the projected 4 sided polygon and a z coordinate
         // at each of the projected vertices.
-        if (ictdebug) {
+        if (bIctDebug) {
             statusPrint("fWarp inputs:");
             msgText = String.format("rx: %6.2f  ry: %6.2f  rz: %6.2f", rx, ry, rz);
             statusPrint(msgText);
@@ -2065,7 +2140,7 @@ public class Globals {
         TMatrix viewModelMatrix = new TMatrix();
         viewModelMatrix.multiply(viewMatrix, forwardMatrix);
     
-        if (ictdebug) {
+        if (bIctDebug) {
             forwardMatrix.display("Forward Matrix:");
         }
     
@@ -2123,7 +2198,7 @@ public class Globals {
             }
         }
     
-        if (ictdebug) {
+        if (bIctDebug) {
             statusPrint("fWarp1: Writing output -  d:\\ict20\\output\\rawfWarp.bmp");
             outImage.writeBMP("d:\\ict20\\output\\rawfWarp.bmp");
         }
@@ -2158,7 +2233,7 @@ public class Globals {
 
         // The shape object contains the projected 4 sided polygon and a z coordinate
         // at each of the projected vertices.
-        if (ictdebug) {
+        if (bIctDebug) {
             statusPrint("fWarp inputs:");
             msgText = String.format("rx: %6.2f  ry: %6.2f  rz: %6.2f", rx, ry, rz);
             statusPrint(msgText);
@@ -2184,7 +2259,7 @@ public class Globals {
         forwardMatrix.translate(tx, ty, tz);
         viewModelMatrix.multiply(viewMatrix, forwardMatrix);
     
-        if (ictdebug) {
+        if (bIctDebug) {
             forwardMatrix.display("Forward Matrix:");
         }
     
@@ -2288,7 +2363,7 @@ public class Globals {
             }
         }
     
-        if (ictdebug) {
+        if (bIctDebug) {
             zImage.writeBMP("d:\\ict20\\output\\zBuffer32.bmp");
             statusPrint("fWarp3: Writing z output - d:\\ict20\\output\\zBuffer32.bmp");
 
@@ -2341,7 +2416,7 @@ public class Globals {
         TMatrix viewModelMatrix = new TMatrix();
         viewModelMatrix.multiply(viewMatrix, forwardMatrix);
     
-        if (ictdebug) {
+        if (bIctDebug) {
             forwardMatrix.display("Forward Matrix:");
         }
     
@@ -3043,6 +3118,7 @@ public class Globals {
     // This method came from TWEEN.CPP
     // Called from:
     //     tweenImage
+    // which in turn is called from MorphDlg.onOK (when morph type = JICTConstants.I_TWOD)
     public static int getRowIntervals(MemImage anImage, int row, 
     int[] intervalList, Integer numIntervals) {
         int imWidth = anImage.getWidth();
@@ -3098,6 +3174,7 @@ public class Globals {
     // This method came from TWEEN.CPP
     // Called from:
     //     tweenImage
+    // which in turn is called from MorphDlg.onOK (when morph type = JICTConstants.I_TWOD)
     public static int getTotalIntervalLength(int[] intervalList, int numIntervals) {
         int totalLength = 0;
         int i;
@@ -3117,6 +3194,7 @@ public class Globals {
     // This method came from TWEEN.CPP
     // Called from:
     //     tweenImage
+    // which in turn is called from MorphDlg.onOK (when morph type = JICTConstants.I_TWOD)
     public static int indexToCoord(int index, int[] intervalList, int numIntervals) {
         // Map index into the interval list
         String msgText;
@@ -3540,7 +3618,7 @@ public class Globals {
         // float ip2, ic1, ic2;		// these local variables are not used  
         Point3d lightSource = new Point3d();
         
-        if(ictdebug) {
+        if(bIctDebug) {
             statusPrint("-----------------getLight-------------------");
             p1.display("p1");
             p2.display("p2");
@@ -3921,6 +3999,8 @@ public class Globals {
 
     // This method came from TWEEN.CPP
     // Morph two rotoscoped images
+    // Called from:
+    //     MorphDlg.onOK (when morph type = JICTConstants.I_TWOD)
     public static int tweenImage(float aFraction, 
     MemImage inImageA, MemImage inImageB, 
     String imagePath, String shapePath) {
@@ -4248,6 +4328,7 @@ public class Globals {
     // This method came from TWEEN.CPP
     // Called from:
     //     tweenImage
+    // which in turn is called from MorphDlg.onOK (when morph type = JICTConstants.I_TWOD)
     public static int tweenShape(float fraction, Shape3d pOutShape, 
     Shape3d shape1, Shape3d shape2) {
         // tween shape1 into shape2. 
@@ -4295,6 +4376,7 @@ public class Globals {
     // This method came from TWEEN.CPP
     // Called from:
     //     tweenImage
+    // which in turn is called from MorphDlg.onOK (when morph type = JICTConstants.I_TWOD)
     public static int createTweenableShapes(Shape3d inShape1, Shape3d inShape2, 
     Shape3d outShapeA, Shape3d outShapeB) {
         int numVertices1 = inShape1.getNumVertices();
@@ -4336,6 +4418,8 @@ public class Globals {
 
 
     // This method came from TWEEN.CPP
+    // Called from:
+    //     MorphDlg.onOK (when morph type = JICTConstants.I_THREED)
     public static int tweenMesh(float aFraction, 
     MemImage aTexture, MemImage aX, MemImage aY, MemImage aZ,
     MemImage bTexture, MemImage bX, MemImage bY, MemImage bZ, 
