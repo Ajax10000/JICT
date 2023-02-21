@@ -5,7 +5,6 @@ import fileUtils.FileUtils;
 import globals.Globals;
 import globals.JICTConstants;
 
-import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -15,10 +14,8 @@ import math.MathUtils;
 import math.TMatrix;
 import math.Vect;
 
-import structs.FaceSet;
 import structs.Point2d;
 import structs.Point3d;
-import structs.VertexSet;
 
 public class RenderObject {
     private boolean bIctDebug = false;
@@ -94,6 +91,7 @@ protected:
 */
 
 
+    // Could not find where this constructor is being called from.
     public RenderObject(Point3d pULPt, Point3d pURPt, Point3d pLRPt, Point3d pLLPt) {
         this.mCurrentShape = null;
         this.mLastShape = null;
@@ -103,6 +101,7 @@ protected:
 
         this.mCurrentShape = new Shape3d(pULPt, pURPt, pLRPt, pLLPt);
         Float fCentroidX = 0f, fCentroidY = 0f, fCentroidZ = 0f;
+        // The following method sets all 3 parameters
         this.mCurrentShape.getWCentroid(fCentroidX, fCentroidY, fCentroidZ);
 
         // Make certain the shape is centered in the X-Y plane.
@@ -399,6 +398,7 @@ protected:
     // TODO: a method?
     // Called from:
     //     SceneList.previewStill
+    // which in turn is called from ImageView.onDraw
     public void drawStill(BufferedImage pBuffImg, String psModelName, 
     int piScreenHeight, int piScreenWidth) {
         Graphics2D graphics2D = pBuffImg.createGraphics();
@@ -632,7 +632,7 @@ protected:
     //
     // Called from:
     //     ImageView.onLButtonDblClk
-    public static int prepareCutout(Shape3d pShape, HWND HWindow, String psImageFileName,
+    public static int prepareCutout(Shape3d pShape, BufferedImage pBuffImg, String psImageFileName,
     String psCutoutName, int piImageWidth, int piImageHeight) {
         // Creates a cutout image, alpha image, and shape file from
         // a boundary traced by the user
@@ -678,14 +678,12 @@ protected:
             Globals.statusPrint("RenderObject.prepareCutout: Not Enough memory to create unpacked mask image");
             return 1;
         }
-
         // Unpack the 1-bit Windows bitmap to create an 8-bit Windows bitmap
         maskMImage.unPack(unpackedMaskMImage);
         if(!unpackedMaskMImage.isValid()) {
             Globals.statusPrint("RenderObject.prepareCutout: unpack image operation was aborted");
             return 1;
         }
-
         maskMImage.close();
         // Delete the file we created earlier for maskImage
         FileUtils.deleteFile("OneBit.bmp");
@@ -750,8 +748,6 @@ protected:
             return 1;
         }
 
-        // HDC memoryDC = CreateCompatibleDC();
-
         // Use the Graphics2D.drawPolygon method to draw the points
         int iStatus = tempMaskMImage.drawMask(thePoints, iNumVertices);
 
@@ -784,19 +780,24 @@ protected:
     // Called from:
     //     Ctor that takes 4 parameters: a String, int, boolean and Point3d
     void assembleName(String psInputName, char pcSuffix, String psOutputName) {
-        String sDrive, sDir, sFile, sExt;
+        File inputName = new File(psInputName);
 
-        // Break a pathname into its components, add a suffix then put it back together again
-        _splitpath(psInputName, sDrive, sDir, sFile, sExt);
-        int iFileNameLength = sFile.length();
+        // sFileWExt = file name with extension at end of path psInputName
+        String sFileWExt = inputName.getName();
+        // Now strip the extension from sFileWExt
+        String sBaseFile = sFileWExt.substring(0, sFileWExt.lastIndexOf('.'));
+        String sExt = sFileWExt.substring(sFileWExt.lastIndexOf('.'));
+
+        int iFileNameLength = sBaseFile.length();
         if(iFileNameLength > 0) {
             char[] charArray = new char[1];
             charArray[0] = pcSuffix;
-            sFile.concat(new String(charArray)); // Substitute a suffix
+            sBaseFile.concat(new String(charArray)); // Substitute a suffix
         }
 
         // Set the output parameter psOutputName
-        _makepath(psOutputName, sDrive, sDir, sFile, sExt);
+        psOutputName = inputName.getParent();
+        psOutputName = psOutputName.concat(sBaseFile).concat(sExt);
     } // assembleName
 
 
