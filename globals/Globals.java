@@ -1940,28 +1940,24 @@ public class Globals {
     // Called from:
     //     MainFrame.onToolsWarpImage
     //     SceneList.render
-    public static int antiAlias(MemImage inImage, MemImage outImage) {
+    public static int antiAlias(MemImage pInMImage, MemImage pOutMImage) {
         // Each image must be the same size.
         if(
-        inImage.getHeight() == outImage.getHeight() && 
-        inImage.getWidth() == outImage.getWidth() ) {
-            // do nothing?
-        } else {
+        pInMImage.getHeight() != pOutMImage.getHeight() || 
+        pInMImage.getWidth() != pOutMImage.getWidth() ) {
             statusPrint("antiAlias: Images must have equal size.");
             return -1;
         }
 
         // Each image must have 8 bit pixels.
         if(
-        (inImage.getBitsPerPixel() == outImage.getBitsPerPixel()) && 
-        (inImage.getBitsPerPixel() == 8)) {
-            // do nothing?
-        } else {
+        (pInMImage.getBitsPerPixel() != pOutMImage.getBitsPerPixel()) || 
+        (pInMImage.getBitsPerPixel() != 8)) {
             statusPrint("antiAlias: images must have 8 or 24 bit pixels.");
             return -2;
         }
 
-        int bpp = inImage.getBitsPerPixel();
+        int iBpp = pInMImage.getBitsPerPixel();
         float[][] weight = new float[3][3];
         weight[0][0] = 0.05f;    // impulse function
         weight[0][1] = 0.05f;
@@ -1984,117 +1980,117 @@ public class Globals {
         weight[2][1] = -0.01;
         weight[2][2] = -0.01;
     */
-        int imHeight = inImage.getHeight();
-        int imWidth  = inImage.getWidth();
+        int iImHeight = pInMImage.getHeight();
+        int iImWidth  = pInMImage.getWidth();
         /* These variables are not used
         float x1 = 0.0f;
         float y1 = 0.0f;
         float z1 = 0.0f;
         float totalCells = 0.0f;
         */
-        int row, col;
-        float sum;
-        float q00, q10, q20;
-        float q01, q11, q21;
-        float q02, q12, q22;
-        float sumr;
-        float q00r, q10r, q20r = 0.0f;
-        float q11r = 0.0f, q21r = 0.0f;
-        float q12r = 0.0f, q22r = 0.0f;
-        float sumg;
-        float q00g, q10g, q20g = 0.0f;
-        float q11g = 0.0f, q21g = 0.0f;
-        float q12g = 0.0f, q22g = 0.0f;
-        float sumb;
-        float q00b, q10b, q20b = 0.0f;
-        float q11b = 0.0f, q21b = 0.0f;
-        float q12b = 0.0f, q22b = 0.0f;
-        Byte red = (byte)0, green = (byte)0, blue = (byte)0;
+        int iRow, iCol;
+        float fSum;
+        float fq00, fq10, fq20;
+        float fq01, fq11, fq21;
+        float fq02, fq12, fq22;
+        float fSumR;
+        float fq00r, fq10r, fq20r = 0.0f;
+        float fq11r = 0.0f, fq21r = 0.0f; // fq01r?
+        float fq12r = 0.0f, fq22r = 0.0f; // fq02r?
+        float fSumG;
+        float fq00g, fq10g, fq20g = 0.0f;
+        float fq11g = 0.0f, fq21g = 0.0f; // fq01g?
+        float fq12g = 0.0f, fq22g = 0.0f; // fq02g?
+        float fSumB;
+        float fq00b, fq10b, fq20b = 0.0f;
+        float fq11b = 0.0f, fq21b = 0.0f; // fq01b?
+        float fq12b = 0.0f, fq22b = 0.0f; // fq02b?
+        Byte bytRed = (byte)0, bytGreen = (byte)0, bytBlue = (byte)0;
 
-        for (row = 2; row <= imHeight - 1; row++) {
-            for (col = 2; col <= imWidth - 1; col++) {
-                switch(bpp) {
+        for (iRow = 2; iRow <= iImHeight - 1; iRow++) {
+            for (iCol = 2; iCol <= iImWidth - 1; iCol++) {
+                switch(iBpp) {
                 case 8:
                     // This case is similar to MemImage.alphaSmooth3
-                    q00 = inImage.getMPixel(col - 1, row - 1) * weight[0][0];
-                    q10 = inImage.getMPixel(col,     row - 1) * weight[1][0]; // used twice
-                    q20 = inImage.getMPixel(col + 1, row - 1) * weight[2][0]; // used twice
+                    fq00 = pInMImage.getMPixel(iCol - 1, iRow - 1) * weight[0][0];
+                    fq10 = pInMImage.getMPixel(iCol,     iRow - 1) * weight[1][0]; // used twice
+                    fq20 = pInMImage.getMPixel(iCol + 1, iRow - 1) * weight[2][0]; // used twice
 
-                    q01 = inImage.getMPixel(col - 1, row)     * weight[0][1]; // not used
-                    q11 = inImage.getMPixel(col,     row)     * weight[1][1];
-                    q21 = inImage.getMPixel(col + 1, row)     * weight[2][1];
+                    fq01 = pInMImage.getMPixel(iCol - 1, iRow)     * weight[0][1]; // not used
+                    fq11 = pInMImage.getMPixel(iCol,     iRow)     * weight[1][1];
+                    fq21 = pInMImage.getMPixel(iCol + 1, iRow)     * weight[2][1];
 
-                    q02 = inImage.getMPixel(col - 1, row + 1) * weight[0][2]; // not used
-                    q12 = inImage.getMPixel(col,     row + 1) * weight[1][2];
-                    q22 = inImage.getMPixel(col + 1, row + 1) * weight[2][2];
+                    fq02 = pInMImage.getMPixel(iCol - 1, iRow + 1) * weight[0][2]; // not used
+                    fq12 = pInMImage.getMPixel(iCol,     iRow + 1) * weight[1][2];
+                    fq22 = pInMImage.getMPixel(iCol + 1, iRow + 1) * weight[2][2];
 
                     // TODO: I believe the following line has a few errors.
-                    // It adds q10 twice (probably meant to use q10 once and q01 once)
-                    // It adds q20 twice (probably meant to use q20 once and q02 once)
-                    sum = q00 + q10 + q20 + q10 + q11 + q12 + q20 + q21 + q22;
-                    sum = MathUtils.bound(sum, 0.0f, 255.0f);
-                    outImage.setMPixel(col, row, (byte)(sum + 0.5f));
+                    // It adds fq10 twice (probably meant to use fq10 once and fq01 once)
+                    // It adds fq20 twice (probably meant to use fq20 once and fq02 once)
+                    fSum = fq00 + fq10 + fq20 + fq10 + fq11 + fq12 + fq20 + fq21 + fq22;
+                    fSum = MathUtils.bound(fSum, 0.0f, 255.0f);
+                    pOutMImage.setMPixel(iCol, iRow, (byte)(fSum + 0.5f));
                     break;
 
                 case 24:
-                    inImage.getMPixelRGB(col - 1, row - 1, red, green, blue);
-                    q00r = (float)red   * weight[0][0];
-                    q00g = (float)green * weight[0][0];
-                    q00b = (float)blue  * weight[0][0];
+                    pInMImage.getMPixelRGB(iCol - 1, iRow - 1, bytRed, bytGreen, bytBlue);
+                    fq00r = (float)bytRed   * weight[0][0];
+                    fq00g = (float)bytGreen * weight[0][0];
+                    fq00b = (float)bytBlue  * weight[0][0];
 
-                    inImage.getMPixelRGB(col, row - 1, red, green, blue);
-                    q10r = (float)red   * weight[1][0];
-                    q10g = (float)green * weight[1][0];
-                    q10b = (float)blue  * weight[1][0];
+                    pInMImage.getMPixelRGB(iCol, iRow - 1, bytRed, bytGreen, bytBlue);
+                    fq10r = (float)bytRed   * weight[1][0];
+                    fq10g = (float)bytGreen * weight[1][0];
+                    fq10b = (float)bytBlue  * weight[1][0];
 
-                    // The following values for the variables q20, q01, q11, q21 are not used
-                    q20 = inImage.getMPixel(col + 1, row - 1) * weight[2][0];
-                    q01 = inImage.getMPixel(col - 1, row)     * weight[0][1];
-                    q11 = inImage.getMPixel(col,     row)     * weight[1][1];
-                    q21 = inImage.getMPixel(col + 1, row)     * weight[2][1];
+                    // The following values for the variables fq20, fq01, fq11, fq21 are not used
+                    fq20 = pInMImage.getMPixel(iCol + 1, iRow - 1) * weight[2][0];
+                    fq01 = pInMImage.getMPixel(iCol - 1, iRow)     * weight[0][1];
+                    fq11 = pInMImage.getMPixel(iCol,     iRow)     * weight[1][1];
+                    fq21 = pInMImage.getMPixel(iCol + 1, iRow)     * weight[2][1];
 
-                    // The following values for the variables q02, q12, and q22 are not used
-                    q02 = inImage.getMPixel(col - 1, row + 1) * weight[0][2];
-                    q12 = inImage.getMPixel(col,     row + 1) * weight[1][2];
-                    q22 = inImage.getMPixel(col + 1, row + 1) * weight[2][2];
+                    // The following values for the variables fq02, fq12, and fq22 are not used
+                    fq02 = pInMImage.getMPixel(iCol - 1, iRow + 1) * weight[0][2];
+                    fq12 = pInMImage.getMPixel(iCol,     iRow + 1) * weight[1][2];
+                    fq22 = pInMImage.getMPixel(iCol + 1, iRow + 1) * weight[2][2];
 
                     // I believe the following line has a few errors.
                     // It uses q10r twice and q20r twice.
                     // Also only q00r and q10r have non-zero values.
-                    sumr = q00r + q10r + q20r + q10r + q11r + q12r + q20r + q21r + q22r;
+                    fSumR = fq00r + fq10r + fq20r + fq10r + fq11r + fq12r + fq20r + fq21r + fq22r;
 
                     // I believe the following line has a few errors.
-                    // It uses q10g twice and q20g twice.
-                    // Also only q00g and q10g have non-zero values.
-                    sumg = q00g + q10g + q20g + q10g + q11g + q12g + q20g + q21g + q22g;
+                    // It uses fq10g twice and fq20g twice.
+                    // Also only fq00g and fq10g have non-zero values.
+                    fSumG = fq00g + fq10g + fq20g + fq10g + fq11g + fq12g + fq20g + fq21g + fq22g;
 
                     // I believe the following line as a few errors.
-                    // It uses q10b twice and q20b twice.
-                    // Also only q00b and q10b have non-zero values.
-                    sumb = q00b + q10b + q20b + q10b + q11b + q12b + q20b + q21b + q22b;
+                    // It uses fq10b twice and fq20b twice.
+                    // Also only fq00b and fq10b have non-zero values.
+                    fSumB = fq00b + fq10b + fq20b + fq10b + fq11b + fq12b + fq20b + fq21b + fq22b;
 
-                    sumr = MathUtils.bound(sumr, 0.0f, 255.0f);
-                    sumg = MathUtils.bound(sumg, 0.0f, 255.0f);
-                    sumb = MathUtils.bound(sumb, 0.0f, 255.0f);
+                    fSumR = MathUtils.bound(fSumR, 0.0f, 255.0f);
+                    fSumG = MathUtils.bound(fSumG, 0.0f, 255.0f);
+                    fSumB = MathUtils.bound(fSumB, 0.0f, 255.0f);
 
-                    outImage.setMPixelRGB(col, row, 
-                        (byte)(sumr + 0.5f), (byte)(sumg + 0.5f), (byte)(sumb + 0.5f));
+                    pOutMImage.setMPixelRGB(iCol, iRow, 
+                        (byte)(fSumR + 0.5f), (byte)(fSumG + 0.5f), (byte)(fSumB + 0.5f));
                     break;
                 } // switch
-            } // for col
-        } // for row
+            } // for iCol
+        } // for iRow
 
         return 0;
     } // antiAlias
 
 
     // This method originally came from IWARP.CPP
-    public static int fWarp1(MemImage inImage, MemImage outImage,
-    float rx, float ry, float rz, 
-    float sx, float sy, float sz,
-    float tx, float ty, float tz, 
-    TMatrix viewMatrix,
-    float refPointX, float refPointY, float refPointZ) {
+    public static int fWarp1(MemImage pInMImage, MemImage pOutMImage,
+    float pfRx, float pfRy, float pfRz, 
+    float pfSx, float pfSy, float pfSz,
+    float pfTx, float pfTy, float pfTz, 
+    TMatrix pViewMatrix,
+    float pfRefPointX, float pfRefPointY, float pfRefPointZ) {
         // Project the points to the screen and copy from the input image 
         //
         // The reference point is a point in the texture image's 
@@ -2102,8 +2098,8 @@ public class Globals {
         // about which the image is rotated and scaled.
         // For example, the reference point 0,0,0 is the center of the 
         // texture image.
-        String msgText;
-        float x, y;
+        String sMsgText;
+        float fX, fY;
         /* These variables are not used
         int myStatus, numXCoordsFound;
         int[] screenXCoords = new int[I_MAXWVERTICES];
@@ -2116,113 +2112,113 @@ public class Globals {
         // at each of the projected vertices.
         if (bIctDebug) {
             statusPrint("fWarp inputs:");
-            msgText = String.format("rx: %6.2f  ry: %6.2f  rz: %6.2f", rx, ry, rz);
-            statusPrint(msgText);
+            sMsgText = String.format("rx: %6.2f  ry: %6.2f  rz: %6.2f", pfRx, pfRy, pfRz);
+            statusPrint(sMsgText);
 
-            msgText = String.format("sx: %6.2f  sy: %6.2f  sz: %6.2f", sx, sy, sz);
-            statusPrint(msgText);
+            sMsgText = String.format("sx: %6.2f  sy: %6.2f  sz: %6.2f", pfSx, pfSy, pfSz);
+            statusPrint(sMsgText);
 
-            msgText = String.format("tx: %6.2f  ty: %6.2f  tz: %6.2f", tx, ty, tz);
-            statusPrint(msgText);
+            sMsgText = String.format("tx: %6.2f  ty: %6.2f  tz: %6.2f", pfTx, pfTy, pfTz);
+            statusPrint(sMsgText);
 
-            msgText = String.format("refx: %6.2f  refy: %6.2f  refz: %6.2f", refPointX, refPointY, refPointZ);
-            statusPrint(msgText);
+            sMsgText = String.format("refx: %6.2f  refy: %6.2f  refz: %6.2f", pfRefPointX, pfRefPointY, pfRefPointZ);
+            statusPrint(sMsgText);
         }
 
         // Build the forward transformation matrix
         TMatrix forwardMatrix = new TMatrix();
-        float XRadians = rx * JICTConstants.F_DTR;
-        float YRadians = ry * JICTConstants.F_DTR;
-        float ZRadians = rz * JICTConstants.F_DTR;
-        forwardMatrix.scale(sx, sy, sz);
-        forwardMatrix.rotate(XRadians, YRadians, ZRadians);
-        forwardMatrix.translate(tx, ty, tz);
+        float fXRadians = pfRx * JICTConstants.F_DTR;
+        float fYRadians = pfRy * JICTConstants.F_DTR;
+        float fZRadians = pfRz * JICTConstants.F_DTR;
+        forwardMatrix.scale(pfSx, pfSy, pfSz);
+        forwardMatrix.rotate(fXRadians, fYRadians, fZRadians);
+        forwardMatrix.translate(pfTx, pfTy, pfTz);
         TMatrix viewModelMatrix = new TMatrix();
-        viewModelMatrix.multiply(viewMatrix, forwardMatrix);
+        viewModelMatrix.multiply(pViewMatrix, forwardMatrix);
     
         if (bIctDebug) {
             forwardMatrix.display("Forward Matrix:");
         }
     
-        int inHeight  = inImage.getHeight();
-        int inWidth   = inImage.getWidth();
-        int outHeight = outImage.getHeight();
-        int outWidth  = outImage.getWidth();
+        int iInHeight  = pInMImage.getHeight();
+        int iInWidth   = pInMImage.getWidth();
+        int iOutHeight = pOutMImage.getHeight();
+        int iOutWidth  = pOutMImage.getWidth();
         
-        float halfHeight = inHeight / 2.0f;
-        float halfWidth  = inWidth / 2.0f;
+        float fHalfHeight = iInHeight / 2.0f;
+        float fHalfWidth  = iInWidth / 2.0f;
 
         // This algorithm actually uses a reference point defined in pixel space
         // therefore we convert it now.
-        float intRefPointX = refPointX + halfWidth;
-        float intRefPointY = refPointY + halfHeight;
+        float fIntRefPointX = pfRefPointX + fHalfWidth;
+        float fIntRefPointY = pfRefPointY + fHalfHeight;
         // float intRefPointZ = refPointZ; // this variable is not used
-        halfWidth  -= (halfWidth - intRefPointX);
-        halfHeight -= (halfHeight - intRefPointY);
+        fHalfWidth  -= (fHalfWidth  - fIntRefPointX);
+        fHalfHeight -= (fHalfHeight - fIntRefPointY);
 
         // Calculate offsets that will center the warped image in the output image
-        int xOffset = (int)(outWidth / 2.0);
-        int yOffset = (int)(outHeight/ 2.0);
+        int iXOffset = (int)(iOutWidth / 2.0);
+        int iYOffset = (int)(iOutHeight/ 2.0);
         
         // Shortcut: if no rotation or scale, just copy the image
         if(
-        rx == 0.0f && ry == 0.0f && rz == 0.0f && 
-        sx == 1.0f && sy == 1.0f && sz == 1.0f && 
-        tz == 0.0f) {
-            inImage.copy(outImage, (int)tx + xOffset, (int)ty + yOffset);
+        pfRx == 0.0f && pfRy == 0.0f && pfRz == 0.0f && 
+        pfSx == 1.0f && pfSy == 1.0f && pfSz == 1.0f && 
+        pfTz == 0.0f) {
+            pInMImage.copy(pOutMImage, (int)pfTx + iXOffset, (int)pfTy + iYOffset);
             statusPrint("fWarp: shortcut");
             return 0;
         }
         
-        float xIn, yIn, zIn; 
+        float fXIn, fYIn, fZIn; 
         Integer xOut = 0, yOut = 0;
-        byte intensity;
+        byte bytIntensity;
 
         // Loop through the texture coordinates, projecting to the screen
-        zIn = 0.0f;
-        float atx = 0.0f, aty = 0.0f, atz = 0.0f;
-        float increment = 1.0f;
+        fZIn = 0.0f;
+        float fAtx = 0.0f, fAty = 0.0f, fAtz = 0.0f;
+        float fIncrement = 1.0f;
     
-        for (y = 1; y <= inHeight; y += increment) {
-            yIn = y - halfHeight;
+        for (fY = 1; fY <= iInHeight; fY += fIncrement) {
+            fYIn = fY - fHalfHeight;
         
-            for(x = 1; x < inWidth; x += increment) {
-                intensity = inImage.getMPixel((int)x, (int)y);
-                xIn = x - halfWidth;
-                forwardMatrix.transformAndProjectPoint(xIn, yIn, zIn, xOut, yOut, 
-                    refPointX, refPointY, refPointZ, 
-                    outHeight, outWidth, 
-                    atx, aty, atz);
+            for(fX = 1; fX < iInWidth; fX += fIncrement) {
+                bytIntensity = pInMImage.getMPixel((int)fX, (int)fY);
+                fXIn = fX - fHalfWidth;
+                forwardMatrix.transformAndProjectPoint(fXIn, fYIn, fZIn, xOut, yOut, 
+                    pfRefPointX, pfRefPointY, pfRefPointZ, 
+                    iOutHeight, iOutWidth, 
+                    fAtx, fAty, fAtz);
         
-                outImage.setMPixel((int)xOut, (int)yOut, intensity);
-            }
-        }
+                pOutMImage.setMPixel((int)xOut, (int)yOut, bytIntensity);
+            } // for fX
+        } // for fY
     
         if (bIctDebug) {
             statusPrint("fWarp1: Writing output -  d:\\ict20\\output\\rawfWarp.bmp");
-            outImage.writeBMP("d:\\ict20\\output\\rawfWarp.bmp");
+            pOutMImage.writeBMP("d:\\ict20\\output\\rawfWarp.bmp");
         }
     
         return 0;
     } // fWarp1
   
   
-    // This method came from IWARP.CPP
-    public static int fwarpz(MemImage inImage, MemImage outImage, MemImage zImage,
-    float rx, float ry, float rz, 
-    float sx, float sy, float sz,
-    float tx, float ty, float tz, 
-    float vx, float vy, float vz, 
-    TMatrix viewMatrix,
-    float refPointX, float refPointY, float refPointZ) {
+    // This method originally came from IWARP.CPP
+    public static int fwarpz(MemImage pInMImage, MemImage pOutMImage, MemImage pZMImage,
+    float pfRx, float pfRy, float pfRz, 
+    float pfSx, float pfSy, float pfSz,
+    float pfTx, float pfTy, float pfTz, 
+    float pfVx, float pfVy, float pfVz, 
+    TMatrix pViewMatrix,
+    float pfRefPointX, float pfRefPointY, float pfRefPointZ) {
         // The reference point is a point in the texture image's 
         // original (i.e. initial, default) position in Cartesian space,
         // about which the image is rotated and scaled.
         // For example, the reference point 0,0,0 is the center of the 
         // texture image.
 
-        String msgText;
-        float x, y;
+        String sMsgText;
+        float fX, fY;
         /* These variables are not used
         int myStatus, numXCoordsFound;
         int[] screenXCoords = new int[I_MAXWVERTICES];
@@ -2235,143 +2231,163 @@ public class Globals {
         // at each of the projected vertices.
         if (bIctDebug) {
             statusPrint("fWarp inputs:");
-            msgText = String.format("rx: %6.2f  ry: %6.2f  rz: %6.2f", rx, ry, rz);
-            statusPrint(msgText);
+            sMsgText = String.format("rx: %6.2f  ry: %6.2f  rz: %6.2f", pfRx, pfRy, pfRz);
+            statusPrint(sMsgText);
 
-            msgText = String.format("sx: %6.2f  sy: %6.2f  sz: %6.2f", sx, sy, sz);
-            statusPrint(msgText);
+            sMsgText = String.format("sx: %6.2f  sy: %6.2f  sz: %6.2f", pfSx, pfSy, pfSz);
+            statusPrint(sMsgText);
 
-            msgText = String.format("tx: %6.2f  ty: %6.2f  tz: %6.2f", tx, ty, tz);
-            statusPrint(msgText);
+            sMsgText = String.format("tx: %6.2f  ty: %6.2f  tz: %6.2f", pfTx, pfTy, pfTz);
+            statusPrint(sMsgText);
 
-            msgText = String.format("refx: %6.2f  refy: %6.2f  refz: %6.2f", refPointX, refPointY, refPointZ);
-            statusPrint(msgText);
+            sMsgText = String.format("refx: %6.2f  refy: %6.2f  refz: %6.2f", pfRefPointX, pfRefPointY, pfRefPointZ);
+            statusPrint(sMsgText);
         }
 
         // Build the forward transformation matrix
         TMatrix forwardMatrix = new TMatrix();
         TMatrix viewModelMatrix = new TMatrix();
-        float XRadians = rx * JICTConstants.F_DTR;
-        float YRadians = ry * JICTConstants.F_DTR;
-        float ZRadians = rz * JICTConstants.F_DTR;
-        forwardMatrix.scale(sx, sy, sz);
-        forwardMatrix.rotate(XRadians, YRadians, ZRadians);
-        forwardMatrix.translate(tx, ty, tz);
-        viewModelMatrix.multiply(viewMatrix, forwardMatrix);
+        float fXRadians = pfRx * JICTConstants.F_DTR;
+        float fYRadians = pfRy * JICTConstants.F_DTR;
+        float fZRadians = pfRz * JICTConstants.F_DTR;
+        forwardMatrix.scale(pfSx, pfSy, pfSz);
+        forwardMatrix.rotate(fXRadians, fYRadians, fZRadians);
+        forwardMatrix.translate(pfTx, pfTy, pfTz);
+        viewModelMatrix.multiply(pViewMatrix, forwardMatrix);
     
         if (bIctDebug) {
             forwardMatrix.display("Forward Matrix:");
         }
     
-        int inHeight  = inImage.getHeight();
-        int inWidth   = inImage.getWidth();
-        int outHeight = outImage.getHeight();
-        int outWidth  = outImage.getWidth();
+        int iInHeight  = pInMImage.getHeight();
+        int iInWidth   = pInMImage.getWidth();
+        int iOutHeight = pOutMImage.getHeight();
+        int iOutWidth  = pOutMImage.getWidth();
     
-        float halfHeight = inHeight / 2.0f;
-        float halfWidth = inWidth / 2.0f;
-        int bpp = inImage.getBitsPerPixel();
+        float fHalfHeight = iInHeight / 2.0f;
+        float fHalfWidth  = iInWidth / 2.0f;
+        int iBpp = pInMImage.getBitsPerPixel();
 
         // int xOffset = (int)(outWidth / 2.0); // this variable is not used
         // int yOffset = (int)(outHeight/ 2.0); // this variable is not used
     
         // Shortcut: if no rotation or scale, just copy the image
         if(
-        rx == 0.0f && ry == 0.0f && rz == 0.0f && 
-        sx == 1.0f && sy == 1.0f && sz == 1.0f && 
-        tz == 0.0f) {
-            inImage.copy(outImage, (int)(tx + halfWidth), (int)(ty + halfHeight));
+        pfRx == 0.0f && pfRy == 0.0f && pfRz == 0.0f && 
+        pfSx == 1.0f && pfSy == 1.0f && pfSz == 1.0f && 
+        pfTz == 0.0f) {
+            pInMImage.copy(pOutMImage, (int)(pfTx + fHalfWidth), (int)(pfTy + fHalfHeight));
             statusPrint("fWarpz: shortcut");
             return 0;
         }
         
-        float xIn, yIn, zIn; 
-        Integer xOut1 = 0, yOut1 = 0;
-        Integer xOut2 = 0, yOut2 = 0;
-        Integer xOut3 = 0, yOut3 = 0;
-        Integer xOut4 = 0, yOut4 = 0;
-        byte intensity1 = (byte)0, intensity2 = (byte)0, intensity3 = (byte)0, intensity4 = (byte)0;
+        float fXIn, fYIn, fZIn; 
+        Integer iXOut1 = 0, iYOut1 = 0;
+        Integer iXOut2 = 0, iYOut2 = 0;
+        Integer iXOut3 = 0, iYOut3 = 0;
+        Integer iXOut4 = 0, iYOut4 = 0;
+        Byte bytIntensity1 = (byte)0;
+        Byte bytIntensity2 = (byte)0;
+        Byte bytIntensity3 = (byte)0;
+        Byte bytIntensity4 = (byte)0;
 
         // Loop through the texture coordinates, projecting to the screen
-        zIn = 0.0f;
-        Float atx = 0.0f, aty = 0.0f, atz = 0.0f;
-        float increment = 0.5f;                  // oversample 2:1
-        float inverseInc = 1.0f / increment;
-        float d1 = 0.0f, d2 = 0.0f, d3 = 0.0f, d4 = 0.0f;
-        byte red1  = (byte)0;
-        byte red2  = (byte)0;
-        byte red3  = (byte)0;
-        byte red4  = (byte)0;
-        byte blue1 = (byte)0;
-        byte blue2 = (byte)0;
-        byte blue3 = (byte)0;
-        byte blue4 = (byte)0;
+        fZIn = 0.0f;
+        Float fAtx = 0.0f, fAty = 0.0f, fAtz = 0.0f;
+        float fIncr = 0.5f;                  // oversample 2:1
+        float fInvIncr = 1.0f / fIncr;
+        float fD1 = 0.0f, fD2 = 0.0f, fD3 = 0.0f, fD4 = 0.0f;
+        Byte bytRed1  = (byte)0;
+        Byte bytRed2  = (byte)0;
+        Byte bytRed3  = (byte)0;
+        Byte bytRed4  = (byte)0;
+        Byte bytBlue1 = (byte)0;
+        Byte bytBlue2 = (byte)0;
+        Byte bytBlue3 = (byte)0;
+        Byte bytBlue4 = (byte)0;
         
-        for (y = inverseInc * increment; y <= inHeight; y += increment) {
-            yIn = y - halfHeight;
+        // Note fInvIncr * fIncr = 1.0f
+        for (fY = fInvIncr * fIncr; fY <= iInHeight; fY += fIncr) {
+            fYIn = fY - fHalfHeight;
         
-            for(x = inverseInc * increment; x <= inWidth; x += increment) {
-                if(bpp == 8) intensity1 = inImage.getMPixel((int)(x - increment), (int)y);
-                if(bpp == 8) intensity2 = inImage.getMPixel(              (int)x, (int)y);
-                if(bpp == 8) intensity3 = inImage.getMPixel(              (int)x, (int)(y - increment));
-                if(bpp == 8) intensity4 = inImage.getMPixel((int)(x - increment), (int)(y - increment));
-            
-                if(bpp == 24) inImage.getMPixelRGB((int)(x - increment),               (int)y, red1, intensity1, blue1);
-                if(bpp == 24) inImage.getMPixelRGB(              (int)x,               (int)y, red2, intensity2, blue2);
-                if(bpp == 24) inImage.getMPixelRGB(              (int)x, (int)(y - increment), red3, intensity3, blue3);
-                if(bpp == 24) inImage.getMPixelRGB((int)(x - increment), (int)(y - increment), red4, intensity4, blue4);
+            for(fX = fInvIncr * fIncr; fX <= iInWidth; fX += fIncr) {
+                if(iBpp == 8) {
+                    // We'll use bytIntensity1, bytIntensity2, bytIntensity3, and bytIntensity4, 
+                    // later on, as parameters to pOutMImage.fillPolyz
+                    bytIntensity1 = pInMImage.getMPixel((int)(fX - fIncr), (int)fY);
+                    bytIntensity2 = pInMImage.getMPixel(          (int)fX, (int)fY);
+                    bytIntensity3 = pInMImage.getMPixel(          (int)fX, (int)(fY - fIncr));
+                    bytIntensity4 = pInMImage.getMPixel((int)(fX - fIncr), (int)(fY - fIncr));
+                } else if (iBpp == 24) {
+                    // From the method calls below, we will only use the output parameters 
+                    // bytIntensity1, bytIntensity2, bytIntensity3, and bytIntensity4, 
+                    // later on, as parameters to pOutMImage.fillPolyz
+                    pInMImage.getMPixelRGB((int)(fX - fIncr),           (int)fY, bytRed1, bytIntensity1, bytBlue1);
+                    pInMImage.getMPixelRGB(          (int)fX,           (int)fY, bytRed2, bytIntensity2, bytBlue2);
+                    pInMImage.getMPixelRGB(          (int)fX, (int)(fY - fIncr), bytRed3, bytIntensity3, bytBlue3);
+                    pInMImage.getMPixelRGB((int)(fX - fIncr), (int)(fY - fIncr), bytRed4, bytIntensity4, bytBlue4);
+                }
 
-                xIn = x - halfWidth;
-                forwardMatrix.transformAndProjectPoint(xIn - increment, yIn, zIn, 
-                    xOut1, yOut1, 
-                    refPointX, refPointY, refPointZ, outHeight, outWidth, 
-                    atx, aty, atz);
-                if(zImage != null) {
-                    d1 = MathUtils.getDistance3d(vx, vy, vz, atx, aty, atz);
+                fXIn = fX - fHalfWidth;
+                // Note that 4 calls to forwardMatrix.transformAndProjectPoint follow.
+                // All of them use the same parameters except for the first two and 
+                // the fourth and fifth parameters.
+                // Note also that the last 3 parameters (fAtx, fAty, and fAtz) are 
+                // output parameters.
+                forwardMatrix.transformAndProjectPoint(fXIn - fIncr, fYIn, fZIn, 
+                    iXOut1, iYOut1, 
+                    pfRefPointX, pfRefPointY, pfRefPointZ, 
+                    iOutHeight, iOutWidth, 
+                    fAtx, fAty, fAtz);
+                if(pZMImage != null) {
+                    fD1 = MathUtils.getDistance3d(pfVx, pfVy, pfVz, fAtx, fAty, fAtz);
                 }
             
-                forwardMatrix.transformAndProjectPoint(xIn, yIn, zIn, 
-                    xOut2, yOut2, 
-                    refPointX, refPointY, refPointZ, outHeight, outWidth, 
-                    atx, aty, atz);
-                if(zImage != null) {
-                    d2 = MathUtils.getDistance3d(vx, vy, vz, atx, aty, atz);
+                forwardMatrix.transformAndProjectPoint(fXIn, fYIn, fZIn, 
+                    iXOut2, iYOut2, 
+                    pfRefPointX, pfRefPointY, pfRefPointZ, 
+                    iOutHeight, iOutWidth, 
+                    fAtx, fAty, fAtz);
+                if(pZMImage != null) {
+                    fD2 = MathUtils.getDistance3d(pfVx, pfVy, pfVz, fAtx, fAty, fAtz);
                 }
             
-                forwardMatrix.transformAndProjectPoint(xIn, yIn - increment, zIn, 
-                    xOut3, yOut3, 
-                    refPointX, refPointY, refPointZ, outHeight, outWidth, 
-                    atx, aty, atz);
-                if(zImage != null) {
-                    d3 = MathUtils.getDistance3d(vx, vy, vz, atx, aty, atz);
+                forwardMatrix.transformAndProjectPoint(fXIn, fYIn - fIncr, fZIn, 
+                    iXOut3, iYOut3, 
+                    pfRefPointX, pfRefPointY, pfRefPointZ, 
+                    iOutHeight, iOutWidth, 
+                    fAtx, fAty, fAtz);
+                if(pZMImage != null) {
+                    fD3 = MathUtils.getDistance3d(pfVx, pfVy, pfVz, fAtx, fAty, fAtz);
                 }
             
-                forwardMatrix.transformAndProjectPoint(xIn-increment, yIn - increment, zIn, 
-                    xOut4, yOut4, 
-                    refPointX, refPointY, refPointZ, outHeight, outWidth, 
-                    atx, aty, atz);
-                if(zImage != null) {
-                    d4 = MathUtils.getDistance3d(vx, vy, vz, atx, aty, atz);
+                forwardMatrix.transformAndProjectPoint(fXIn - fIncr, fYIn - fIncr, fZIn, 
+                    iXOut4, iYOut4, 
+                    pfRefPointX, pfRefPointY, pfRefPointZ, 
+                    iOutHeight, iOutWidth, 
+                    fAtx, fAty, fAtz);
+                if(pZMImage != null) {
+                    fD4 = MathUtils.getDistance3d(pfVx, pfVy, pfVz, fAtx, fAty, fAtz);
                 }
             
-                outImage.fillPolyz(
-                    xOut1, yOut1, intensity1, d1, 
-                    xOut2, yOut2, intensity2, d2, 
-                    xOut3, yOut3, intensity3, d3, 
-                    xOut4, yOut4, intensity4, d4, 
-                    zImage);
+                pOutMImage.fillPolyz(
+                    iXOut1, iYOut1, bytIntensity1, fD1, 
+                    iXOut2, iYOut2, bytIntensity2, fD2, 
+                    iXOut3, iYOut3, bytIntensity3, fD3, 
+                    iXOut4, iYOut4, bytIntensity4, fD4, 
+                    pZMImage);
             }
         }
     
         if (bIctDebug) {
-            zImage.writeBMP("d:\\ict20\\output\\zBuffer32.bmp");
+            pZMImage.writeBMP("d:\\ict20\\output\\zBuffer32.bmp");
             statusPrint("fWarp3: Writing z output - d:\\ict20\\output\\zBuffer32.bmp");
 
-            zImage.saveAs8("d:\\ict20\\output\\zBuffer8.bmp");
+            pZMImage.saveAs8("d:\\ict20\\output\\zBuffer8.bmp");
             statusPrint("fWarp3: Writing z output - d:\\ict20\\output\\zBuffer8.bmp");
         
             statusPrint("fWarp3: Writing output -  c:\\ict\\output\\rawfWarp.bmp");
-            outImage.writeBMP("c:\\ict\\output\\rawfWarp.bmp");
+            pOutMImage.writeBMP("c:\\ict\\output\\rawfWarp.bmp");
         }
     
         return 0;
