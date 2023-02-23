@@ -36,6 +36,7 @@ import java.awt.event.KeyEvent;
 import java.io.File;
 
 import javax.swing.BoxLayout;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -258,18 +259,24 @@ protected:
 
     // Changed from int to boolean
     // Initialized to false in initFields
+    // Determines whether the Preview|Still menu item is enabled or not
+    //
     // Modified in:
     //     onToolsCreateASceneList - set to false at end of method
     public boolean mbPreviewSceneEnabled;
 
     // Changed from int to boolean
     // Initialized to false in initFields
+    // Determines whether the Preview|Sequence menu item is enabled or not.
+    //
     // Modified in:
     //     onToolsCreateASceneList - set to true or false depending on value of effectType
     public boolean mbPreviewSequenceEnabled;
 
     // Changed from int to boolean
     // Initialized to false in initFields
+    // Determines whether the Render|Still menu item is enabled or not.
+    //
     // Modified in:
     //     onPreviewStillScene - set to true at end of method
     //     onRenderStillScene - set to false at end of method
@@ -278,6 +285,8 @@ protected:
 
     // Changed from int to boolean
     // Initialized to false in initFields
+    // Determines whether the Render|Sequence menu item is enabled or not.
+    //
     // Modified in:
     //     onPreviewSequenceEnabled - set to true at end of method
     //     onRenderSequence - set to false at end of method
@@ -316,7 +325,7 @@ protected:
     //     onRenderZBuffer - toggled from true to false or false to true
     public boolean mbZBufferEnabled;
 
-    // Chanaged from int to boolean
+    // Changed from int to boolean
     // Initialized to false in initFields
     // Read in:
     //     ImageView.onLButtonDown
@@ -413,6 +422,17 @@ protected:
     //     ScenePreviewDlg.onCmdPlus
     public ImageView mPreviewWindowHandle;	 
 
+    // These two Preview menu items are fields because
+    // they can be enabled or disabled, via which type of SceneList
+    // the user opens
+    private JMenuItem prvwMimStill;
+    private JMenuItem prvwMimSequence;
+
+    // These two Render menu items are fields because
+    // they can be enabled or disabled, via which type of SceneList
+    // the user has previewed.
+    private JMenuItem rndrMimStill;
+    private JMenuItem rndrMimSequence;
 
     public MainFrame(IctApp ictApp) {
         this.ictApp = ictApp;
@@ -471,10 +491,10 @@ protected:
 
         this.mbIsDirty = false;
         this.mbCutoutEnabled = false;
-        this.mbPreviewSceneEnabled = false;
-        this.mbPreviewSequenceEnabled = false;
-        this.mbRenderSceneEnabled = false;
-        this.mbRenderSequenceEnabled = false;
+        this.mbPreviewSceneEnabled = false;    // Preview|Still menu item is disabled
+        this.mbPreviewSequenceEnabled = false; // Preview|Sequene menu item is disabled
+        this.mbRenderSceneEnabled = false;     // Render|Still menu item is disabled
+        this.mbRenderSequenceEnabled = false;  // Render|Sequence menu item is disabled
         this.mbRemoveSampleColorsEnabled = false;
         this.mbDepthSortingEnabled = false;
         this.mbMotionBlurEnabled = false;
@@ -667,13 +687,13 @@ POPUP "Tools"
         JMenuItem mimCrtTextureImage   = new JMenuItem("Create Texture Image...");
         JMenuItem mimCrtAMeshModel     = new JMenuItem("Create a Mesh Model...");
         // MENUITEM SEPARATOR
-        JMenuItem mimCrtCutout         = new JMenuItem("Create Cutout");
+        JCheckBoxMenuItem mimCrtCutout = new JCheckBoxMenuItem("Create Cutout");
         JMenuItem mimCrtAlphaImage     = new JMenuItem("Create Alpha Image...");
         // MENUITEM SEPARATOR
         JMenuItem mimWarpImage         = new JMenuItem("Warp Image...");
         // MENUITEM SEPARATOR
-        JMenuItem mimSampleImage       = new JMenuItem("Sample Image");
-        JMenuItem mimRemoveSampledColors = new JMenuItem("Remove Sampled Colors");
+        JCheckBoxMenuItem mimSampleImage = new JCheckBoxMenuItem("Sample Image");
+        JCheckBoxMenuItem mimRemoveSampledColors = new JCheckBoxMenuItem("Remove Sampled Colors");
         // MENUITEM SEPARATOR
         JMenuItem mimMotionBlur        = new JMenuItem("Motion Blur...");
         // MENUITEM SEPARATOR
@@ -683,29 +703,40 @@ POPUP "Tools"
         // MENUITEM SEPARATOR
         JMenuItem mimTest              = new JMenuItem("Test");
 
+        mimCrtASceneList.setActionCommand("Tools|Create a Scene List...");
         mimCrtASceneList.addActionListener(this);
+        
+        mimCrtTextureImage.setActionCommand("Tools|Create Texture Image...");
         mimCrtTextureImage.addActionListener(this);
+
+        mimCrtAMeshModel.setActionCommand("Tools|Create a Mesh Model...");
         mimCrtAMeshModel.addActionListener(this);
+
+        mimCrtCutout.setActionCommand("Tools|Create Cutout");
         mimCrtCutout.addActionListener(this);
+
+        mimCrtAlphaImage.setActionCommand("Tools|Create Alpha Image...");
         mimCrtAlphaImage.addActionListener(this);
+
+        mimWarpImage.setActionCommand("Tools|Warp Image...");
         mimWarpImage.addActionListener(this);
+
+        mimSampleImage.setActionCommand("Tools|Sample Image");
         mimSampleImage.addActionListener(this);
+
+        mimRemoveSampledColors.setActionCommand("Tools|Remove Sampled Colors");
         mimRemoveSampledColors.addActionListener(this);
+
+        mimMotionBlur.setActionCommand("Tools|Motion Blur...");
         mimMotionBlur.addActionListener(this);
+
+        mimCrtAMorphSequence.setActionCommand("Tools|Create a Morph Sequence...");
         mimCrtAMorphSequence.addActionListener(this);
+
+        mimRenderVRMLFile.setActionCommand("Tools|Render VRML File...");
         mimRenderVRMLFile.addActionListener(this);
-        mimTest.addActionListener(this);
-        mimCrtASceneList.addActionListener(this);
-        mimCrtTextureImage.addActionListener(this);
-        mimCrtAMeshModel.addActionListener(this);
-        mimCrtCutout.addActionListener(this);
-        mimCrtAlphaImage.addActionListener(this);
-        mimWarpImage.addActionListener(this);
-        mimSampleImage.addActionListener(this);
-        mimRemoveSampledColors.addActionListener(this);
-        mimMotionBlur.addActionListener(this);
-        mimCrtAMorphSequence.addActionListener(this);
-        mimRenderVRMLFile.addActionListener(this);
+
+        mimTest.setActionCommand("Tools|Test");
         mimTest.addActionListener(this);
 
         pToolsMenu.add(mimCrtASceneList);
@@ -742,16 +773,27 @@ POPUP "Tools"
     END
  */
 
-        JMenuItem mimStill    = new JMenuItem("Still");
-        JMenuItem mimSequence = new JMenuItem("Sequence");
+        prvwMimStill    = new JMenuItem("Still");
+        prvwMimStill.setEnabled(mbPreviewSceneEnabled);
 
-        mimStill.addActionListener(this);
-        mimSequence.addActionListener(this);
+        prvwMimSequence = new JMenuItem("Sequence");
+        prvwMimSequence.setEnabled(mbPreviewSequenceEnabled);
 
-        pPreviewMenu.add(mimStill);
-        pPreviewMenu.add(mimSequence);
+        prvwMimStill.setActionCommand("Preview|Still");
+        prvwMimStill.addActionListener(this);
+
+        prvwMimSequence.setActionCommand("Preview|Sequence");
+        prvwMimSequence.addActionListener(this);
+
+        pPreviewMenu.add(prvwMimStill);
+        pPreviewMenu.add(prvwMimSequence);
     } // createPreviewMenu
 
+
+    private void updatePreviewMenu() {
+        prvwMimStill.setEnabled(mbPreviewSceneEnabled);
+        prvwMimSequence.setEnabled(mbPreviewSequenceEnabled);
+    }
 
     // Called from:
     //     createMenu
@@ -769,16 +811,35 @@ POPUP "Tools"
     END
  */
 
-        JMenuItem mimStill        = new JMenuItem("Still");
-        JMenuItem mimSequence     = new JMenuItem("Sequence");
-        // MENUITEM SEPARATOR
-        JMenuItem mimZBuffer      = new JMenuItem("Z Buffer");
-        JMenuItem mimDepthSorting = new JMenuItem("Depth Sorting");
-        // MENUITEM SEPARATOR
-        JMenuItem mimAntiAlias    = new JMenuItem("Anti-Alias");
+        rndrMimStill                      = new JMenuItem("Still");
+        rndrMimStill.setEnabled(mbRenderSceneEnabled);
 
-        pRenderMenu.add(mimStill);
-        pRenderMenu.add(mimSequence);
+        rndrMimSequence                   = new JMenuItem("Sequence");
+        rndrMimSequence.setEnabled(mbRenderSequenceEnabled);
+
+        // MENUITEM SEPARATOR
+        JCheckBoxMenuItem mimZBuffer      = new JCheckBoxMenuItem("Z Buffer");
+        JCheckBoxMenuItem mimDepthSorting = new JCheckBoxMenuItem("Depth Sorting");
+        // MENUITEM SEPARATOR
+        JCheckBoxMenuItem mimAntiAlias    = new JCheckBoxMenuItem("Anti-Alias");
+
+        rndrMimStill.setActionCommand("Render|Still");
+        rndrMimStill.addActionListener(this);
+
+        rndrMimSequence.setActionCommand("Render|Sequence");
+        rndrMimSequence.addActionListener(this);
+
+        mimZBuffer.setActionCommand("Render|Z Buffer");
+        mimZBuffer.addActionListener(this);
+
+        mimDepthSorting.setActionCommand("Render|Depth Sorting");
+        mimDepthSorting.addActionListener(this);
+
+        mimAntiAlias.setActionCommand("Render|Anti-Alias");
+        mimAntiAlias.addActionListener(this);
+
+        pRenderMenu.add(rndrMimStill);
+        pRenderMenu.add(rndrMimSequence);
         pRenderMenu.addSeparator();
         pRenderMenu.add(mimZBuffer);
         pRenderMenu.add(mimDepthSorting);
@@ -786,6 +847,10 @@ POPUP "Tools"
         pRenderMenu.add(mimAntiAlias);
     } // createRenderMenu
 
+    private void updateRenderMenu() {
+        rndrMimStill.setEnabled(mbPreviewSceneEnabled);
+        rndrMimSequence.setEnabled(mbPreviewSequenceEnabled);
+    }
 
     // Called from:
     //     createMenu
@@ -844,8 +909,9 @@ POPUP "Tools"
     END
  */
 
-        JMenuItem mimAbout = new JMenuItem("About ICT 2.0...", KeyEvent.VK_A); // "&About ICT 2.0..."
+        JMenuItem mimAbout = new JMenuItem("About JICT 2.0...", KeyEvent.VK_A); // "&About ICT 2.0..."
 
+        mimAbout.setActionCommand("Help|About JICT 2.0...");
         mimAbout.addActionListener(this);
 
         pHelpMenu.add(mimAbout);
@@ -894,74 +960,74 @@ POPUP "Tools"
         // Was it an Edit menu item?
 
         // Was it a Tools menu item?
-        if (sActionCmd.equals("Create a Scene List...")) {
-            onToolsCreateASceneList();
-            return;
-        } else if (sActionCmd.equals("Create Texture Image...")) {
-            onToolsCreateTextureImage();
-            return;
-        } else if (sActionCmd.equals("Create a Mesh Model...")) {
-            onToolsCreateMesh();
-            return;
-        } else if (sActionCmd.equals("Create Cutout")) {
-            onToolsCreateCutout();
-        } else if (sActionCmd.equals("Create Alpha Image...")) {
-            onToolsCreateAlphaImage();
-            return;
-        } else if (sActionCmd.equals("Warp Image...")) {
-            onToolsWarpImage();
-            return;
-        } else if (sActionCmd.equals("Sample Image")) {
-            onToolsSampleImage();
-            return;
-        } else if (sActionCmd.equals("Remove Sampled Colors")) {
-            onToolsRemoveSampleColors();
-            return;
-        } else if (sActionCmd.equals("Motion Blur...")) {
-            onToolsMotionBlur();
-            return;
-        } else if (sActionCmd.equals("Create a Morph Sequence...")) {
-            onToolsMorphSequence();
-            return;
-        } else if (sActionCmd.equals("Render VRML File...")) {
-            onToolsRenderVrmlFile();
-            return;
-        } else if (sActionCmd.equals("Test")) {
-            onToolsTest();
-            return;
-        }
-        
-        // Was it a Preview menu item?
-        if (sActionCmd.equals("Still")) {
-            onPreviewStillScene();
-            return;
-        } else if (sActionCmd.equals("Sequence")) {
-            onPreviewSequenceScene();
-            return;
-        }
-
-        // Was it a Render menu item?
-        if (sActionCmd.equals("Still")) {
-            onRenderStillScene();
-            return;
-        } else if (sActionCmd.equals("Sequence")) {
-            onRenderSequence();
-            return;
-        } else if (sActionCmd.equals("Z Buffer")) {
-            onRenderZBuffer();
-            return;
-        } else if (sActionCmd.equals("Depth Sorting")) {
-            onRenderDepthSorting();
-            return;
-        } else if (sActionCmd.equals("Anti-Alias")) {
-            onRenderAntiAlias();
-            return;
+        if (sActionCmd.startsWith("Tools|")) {
+            if (sActionCmd.equals("Tools|Create a Scene List...")) {
+                onToolsCreateASceneList();
+                return;
+            } else if (sActionCmd.equals("Tools|Create Texture Image...")) {
+                onToolsCreateTextureImage();
+                return;
+            } else if (sActionCmd.equals("Tools|Create a Mesh Model...")) {
+                onToolsCreateMesh();
+                return;
+            } else if (sActionCmd.equals("Tools|Create Cutout")) {
+                onToolsCreateCutout();
+            } else if (sActionCmd.equals("Tools|Create Alpha Image...")) {
+                onToolsCreateAlphaImage();
+                return;
+            } else if (sActionCmd.equals("Tools|Warp Image...")) {
+                onToolsWarpImage();
+                return;
+            } else if (sActionCmd.equals("Tools|Sample Image")) {
+                onToolsSampleImage();
+                return;
+            } else if (sActionCmd.equals("Tools|Remove Sampled Colors")) {
+                onToolsRemoveSampleColors();
+                return;
+            } else if (sActionCmd.equals("Tools|Motion Blur...")) {
+                onToolsMotionBlur();
+                return;
+            } else if (sActionCmd.equals("Tools|Create a Morph Sequence...")) {
+                onToolsMorphSequence();
+                return;
+            } else if (sActionCmd.equals("Tools|Render VRML File...")) {
+                onToolsRenderVrmlFile();
+                return;
+            } else if (sActionCmd.equals("Tools|Test")) {
+                onToolsTest();
+                return;
+            }
+        } else if (sActionCmd.startsWith("Preview|")) { // Was it a Preview menu item?
+            if (sActionCmd.equals("Preview|Still")) {
+                onPreviewStillScene();
+                return;
+            } else if (sActionCmd.equals("Preview|Sequence")) {
+                onPreviewSequenceScene();
+                return;
+            }
+        } else if (sActionCmd.startsWith("Render|")) { // Was it a Render menu item?
+            if (sActionCmd.equals("Render|Still")) {
+                onRenderStillScene();
+                return;
+            } else if (sActionCmd.equals("Render|Sequence")) {
+                onRenderSequence();
+                return;
+            } else if (sActionCmd.equals("Render|Z Buffer")) {
+                onRenderZBuffer();
+                return;
+            } else if (sActionCmd.equals("Render|Depth Sorting")) {
+                onRenderDepthSorting();
+                return;
+            } else if (sActionCmd.equals("Render|Anti-Alias")) {
+                onRenderAntiAlias();
+                return;
+            }
         }
 
         // Was it a View menu item?
 
         // Was it a Help menu item?
-        if (sActionCmd.equals("About ICT 2.0...")) {
+        if (sActionCmd.equals("Help|About ICT 2.0...")) {
             onAppAbout();
             return;
         }
