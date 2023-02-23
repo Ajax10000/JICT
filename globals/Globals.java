@@ -862,7 +862,7 @@ public class Globals {
         String sCurrentPath = "";
         // String inPath; // This variable is not used
         String sOutPath = "", sOutSuffix;
-        byte bytRed = (byte)0, bytGreen = (byte)0, bytBlue = (byte)0;
+        Byte bytRed = (byte)0, bytGreen = (byte)0, bytBlue = (byte)0;
         int iBlur, iNumOpenImages, iBucket, iRedBucket, iGreenBucket, iBlueBucket;
         int iFrameNum = 0, i, j, iStatus;
         Integer iImHeight = 0, iImWidth = 0, iBpp = 0;
@@ -1018,35 +1018,35 @@ public class Globals {
     // which in turn is called by MorphDlg.onOK (when morph type = JICTConstants.I_TWOD)
     //     MainFrame.onToolsWarpImage
     public static int iwarpz(MemImage pInMImage, MemImage pOutMImage, MemImage pZMImage,
-    float rx, float ry, float rz, 
-    float sx, float sy, float sz,
-    float tx, float ty, float tz, 
-    float vx, float vy, float vz,
+    float pfRx, float pfRy, float pfRz, 
+    float pfSx, float pfSy, float pfSz,
+    float pfTx, float pfTy, float pfTz, 
+    float pfVx, float pfVy, float pfVz,
     TMatrix pViewMatrix,
     float pfRefPointX, float pfRefPointY, float pfRefPointZ) {
         // To use this function without a zBuffer, call with zImage = null.
         // in this case, vx, vy, and vz are ignored
         String sMsgText;
-        int x, y;
+        int iX, iY;
         int iStatus;
         Integer iNumXCoordsFound;
         int[] iaScreenXCoords = new int[JICTConstants.I_MAXWVERTICES];
-        float[] tZCoords = new float[JICTConstants.I_MAXWVERTICES]; 
-        float[] tXCoords = new float[JICTConstants.I_MAXWVERTICES]; 
-        float[] tYCoords = new float[JICTConstants.I_MAXWVERTICES];
+        float[] faZCoords = new float[JICTConstants.I_MAXWVERTICES]; 
+        float[] faXCoords = new float[JICTConstants.I_MAXWVERTICES]; 
+        float[] faYCoords = new float[JICTConstants.I_MAXWVERTICES];
 
         // The shape object contains the projected 4 sided polygon and a z coordinate
         // at each of the projected vertices.
         if(bIctDebug) {
             statusPrint("iwarpz input arguments");
 
-            sMsgText = String.format("rx: %6.2f  ry: %6.2f  rz: %6.2f", rx, ry, rz);
+            sMsgText = String.format("rx: %6.2f  ry: %6.2f  rz: %6.2f", pfRx, pfRy, pfRz);
             statusPrint(sMsgText);
 
-            sMsgText = String.format("sx: %6.2f  sy: %6.2f  sz: %6.2f", sx, sy, sz);
+            sMsgText = String.format("sx: %6.2f  sy: %6.2f  sz: %6.2f", pfSx, pfSy, pfSz);
             statusPrint(sMsgText);
 
-            sMsgText = String.format("tx: %6.2f  ty: %6.2f  tz: %6.2f", tx, ty, tz);
+            sMsgText = String.format("tx: %6.2f  ty: %6.2f  tz: %6.2f", pfTx, pfTy, pfTz);
             statusPrint(sMsgText);
 
             sMsgText = String.format("refx: %6.2f  refy: %6.2f  refz: %6.2f", 
@@ -1058,13 +1058,13 @@ public class Globals {
         TMatrix forwardMatrix = new TMatrix();
 
         // F_DTR = floating-point degree to radian conversion factor
-        float fXRadians = rx * JICTConstants.F_DTR;
-        float fYRadians = ry * JICTConstants.F_DTR;
-        float fZRadians = rz * JICTConstants.F_DTR;
+        float fXRadians = pfRx * JICTConstants.F_DTR;
+        float fYRadians = pfRy * JICTConstants.F_DTR;
+        float fZRadians = pfRz * JICTConstants.F_DTR;
 
-        forwardMatrix.scale(sx, sy, sz);
+        forwardMatrix.scale(pfSx, pfSy, pfSz);
         forwardMatrix.rotate(fXRadians, fYRadians, fZRadians);
-        forwardMatrix.translate(tx, ty, tz);
+        forwardMatrix.translate(pfTx, pfTy, pfTz);
 
         TMatrix viewModelMatrix = new TMatrix();
         viewModelMatrix.multiply(pViewMatrix, forwardMatrix);
@@ -1089,7 +1089,7 @@ public class Globals {
         float fYCentOffset = (iOutHeight - iInHeight) / 2.0f;
 
         if(bIctDebug) {
-            sMsgText = "iWarpz: Viewer location: vx: " + vx + ", vy: " + vy + ", vz: " + vz;
+            sMsgText = "iWarpz: Viewer location: vx: " + pfVx + ", vy: " + pfVy + ", vz: " + pfVz;
             statusPrint(sMsgText);
         }
 
@@ -1101,10 +1101,10 @@ public class Globals {
 
         // Load a shape object with the original image boundary coordinates
         Shape3d shape = new Shape3d(4);
-        shape.addWorldVertex(          1.0f,            1.0f, 0.0f);
-        shape.addWorldVertex((float)iInWidth,            1.0f, 0.0f);
+        shape.addWorldVertex(      1.0f,         1.0f, 0.0f);
+        shape.addWorldVertex((float)iInWidth,        1.0f, 0.0f);
         shape.addWorldVertex((float)iInWidth, (float)iInHeight, 0.0f);
-        shape.addWorldVertex(          1.0f, (float)iInHeight, 0.0f);
+        shape.addWorldVertex(       1.0f, (float)iInHeight, 0.0f);
 
         // Transform and project the image coords, taking into account the reference point
         viewModelMatrix.transformAndProject(shape, iOutHeight, iOutWidth, 
@@ -1125,19 +1125,21 @@ public class Globals {
         if (bIctDebug) {
             // Inverse check. Map transformed shape cornerpoints into original image
             shape.initCurrentVertex();
-            float xo, yo, zo;
+            Float fXo = 0.0f, fYo = 0.0f, fZo = 0.0f;
 
             for (int index = 1; index <= shape.getNumVertices(); index++) {
-                float anX = shape.mCurrentVertex.tx;
-                float anY = shape.mCurrentVertex.ty;
-                float anZ = shape.mCurrentVertex.tz;
-                inverseMatrix.transformPoint (anX, anY, anZ, xo, yo, zo);
+                float fAnX = shape.mCurrentVertex.tx;
+                float fAnY = shape.mCurrentVertex.ty;
+                float fAnZ = shape.mCurrentVertex.tz;
+
+                // The following method sets fXo, fYo, and fZo
+                inverseMatrix.transformPoint (fAnX, fAnY, fAnZ, fXo, fYo, fZo);
                 // aShape.iCurrVtxIdx++;
                 shape.incCurrentVertex();
 
                 sMsgText = String.format("transformed: %6.2f %6.2f %6.2f texture: %6.2f %6.2f %6.2f",
-                    anX, anY, anZ, 
-                    xo + fHalfInWidth, yo + fHalfInHeight, zo);
+                    fAnX, fAnY, fAnZ, 
+                    fXo + fHalfInWidth, fYo + fHalfInHeight, fZo);
                 statusPrint(sMsgText);
             }
 
@@ -1155,9 +1157,9 @@ public class Globals {
         // float xOut3, yOut3, zOut3; // these variables are not used
         // float xOut4, yOut4, zOut4; // these variables are not used
         float fIntensity, fXIncrement, fYIncrement, fZIncrement;
-        float dx, dy, dz;
-        float d, w, theZ, fDist;
-        d = -512.0f;
+        float fDx, fDy, fDz;
+        float fD, fW, theZ, fDist;
+        fD = -512.0f;
         byte bytIntensity, bytRed, bytGreen, bytBlue;
         //int xMin, xMax; // these variables are not used
         //int yMin, yMax; // these variables are not used
@@ -1165,9 +1167,9 @@ public class Globals {
         int iNumSteps;
 
         // Loop through the screen coordinates, filling in with inverse mapped pixels
-        for (y = (int)fMinY; y <= (int)fMaxY; y++) {
-            iStatus = getIntervals(shape, y, iNumXCoordsFound, JICTConstants.I_MAXWVERTICES,
-                iaScreenXCoords, tXCoords, tYCoords, tZCoords);
+        for (iY = (int)fMinY; iY <= (int)fMaxY; iY++) {
+            iStatus = getIntervals(shape, iY, iNumXCoordsFound, JICTConstants.I_MAXWVERTICES,
+                iaScreenXCoords, faXCoords, faYCoords, faZCoords);
 
             if (iStatus != 0) {
                 sMsgText = "iwarp: getInterval error: " + iStatus;
@@ -1178,69 +1180,74 @@ public class Globals {
             if (bIctDebug) {
                 statusPrint("y:\tsx  \ttx  \tty  \ttz");
                 for(int i = 0; i < iNumXCoordsFound; i++) {
-                    sMsgText = String.format("%d\t%d\t%6.2f\t%6.2f\t%6.2f" , y, iaScreenXCoords[i],
-                        tXCoords[i], tYCoords[i], tZCoords[i]);
+                    sMsgText = String.format("%d\t%d\t%6.2f\t%6.2f\t%6.2f" , 
+                        iY, iaScreenXCoords[i],
+                        faXCoords[i], faYCoords[i], faZCoords[i]);
                     statusPrint(sMsgText);
                 }
             }
 
             if (iNumXCoordsFound != 2) {
-                sMsgText = "iWarp: numCoords <> 2. y: " + y + " numCoords " + iNumXCoordsFound;
+                sMsgText = "iWarp: numCoords <> 2. y: " + iY + " numCoords " + iNumXCoordsFound;
                 statusPrint(sMsgText);
                 for(int i = 0; i < iNumXCoordsFound; i++) {
-                    sMsgText = String.format("%d\t%d\t%6.2f\t%6.2f\t%6.2f" , y, iaScreenXCoords[i],
-                        tXCoords[i], tYCoords[i], tZCoords[i]);
+                    sMsgText = String.format("%d\t%d\t%6.2f\t%6.2f\t%6.2f", 
+                        iY, iaScreenXCoords[i],
+                        faXCoords[i], faYCoords[i], faZCoords[i]);
                     statusPrint(sMsgText);
                     goto nextScanLine;
                 }
             }
 
-            dx = tXCoords[1] - tXCoords[0];
-            dy = tYCoords[1] - tYCoords[0];
-            dz = tZCoords[1] - tZCoords[0];
+            fDx = faXCoords[1] - faXCoords[0];
+            fDy = faYCoords[1] - faYCoords[0];
+            fDz = faZCoords[1] - faZCoords[0];
             iNumSteps = (int)iaScreenXCoords[1] - (int)iaScreenXCoords[0] + 1;
             
-            // Initialize xIncrement, yIncrement, and zIncrement
-            // xIncrement will be used to modify xIn
-            // yIncrement will be used to modify yIn
-            // zIncrement will be used to modify zIn
+            // Initialize fXIncrement, fYIncrement, and fZIncrement
+            // fXIncrement will be used to modify fXIn
+            // fYIncrement will be used to modify fYIn
+            // fZIncrement will be used to modify fZIn
             if (iNumSteps - 1.0 > 0.0) {
-                fXIncrement = dx/(float)(iNumSteps - 1);
-                fYIncrement = dy/(float)(iNumSteps - 1);
-                fZIncrement = dz/(float)(iNumSteps - 1);
+                fXIncrement = fDx/(float)(iNumSteps - 1);
+                fYIncrement = fDy/(float)(iNumSteps - 1);
+                fZIncrement = fDz/(float)(iNumSteps - 1);
             } else {
                 fXIncrement = 0.0f;
                 fYIncrement = 0.0f;
                 fZIncrement = 0.0f;
             }
 
-            fXIn = tXCoords[0];
-            fYIn = tYCoords[0];
-            fZIn = tZCoords[0];
+            fXIn = faXCoords[0];
+            fYIn = faYCoords[0];
+            fZIn = faZCoords[0];
 
-            float dpx, dpy;
-            dpx = 1.0f / sx;
-            dpy = 1.0f / sy;
+            /* These variables are not actually used
+            float dpx, dpy; 
+            dpx = 1.0f / pfSx;
+            dpy = 1.0f / pfSy;
             if(dpx > 0.5f) dpx = 0.5f;
             if(dpy > 0.5f) dpy = 0.5f;
+            */
 
             // Loop through a single scan line
-            for(x = (int)iaScreenXCoords[0];x <= (int)iaScreenXCoords[1]; x++) {
+            for(iX = (int)iaScreenXCoords[0]; iX <= (int)iaScreenXCoords[1]; iX++) {
                 // Determine the transformed x, y by inverting the true perspective
                 // projection
-                w = (fZIn + d) / d;
-                fXIn = (x - fHalfInWidth) * w;
-                fYIn = (y - fHalfInHeight)* w;
+                fW = (fZIn + fD) / fD;
+                fXIn = (iX - fHalfInWidth) * fW;
+                fYIn = (iY - fHalfInHeight)* fW;
 
-                // The following method sets xOut, yOut and zOut
+                // The following method sets fXOut, fYOut and fZOut
                 inverseMatrix.transformPoint(fXIn, fYIn, fZIn, fXOut, fYOut, fZOut);
 
                 if(bIctDebug) {
                     if(
-                    (x == (int)iaScreenXCoords[0]) || 
-                    (x == (int)iaScreenXCoords[1])) {
-                        sMsgText = String.format("scanLine: %2d xi: %6.2f yi: %6.2f zi: %6.2f xo: %6.2f yo: %6.2f zo: %6.2f",
-                            y, fXIn, fYIn, fZIn, fXOut, fYOut, fZOut);
+                    (iX == (int)iaScreenXCoords[0]) || 
+                    (iX == (int)iaScreenXCoords[1])) {
+                        sMsgText = String.format(
+                            "scanLine: %2d xi: %6.2f yi: %6.2f zi: %6.2f xo: %6.2f yo: %6.2f zo: %6.2f",
+                            iY, fXIn, fYIn, fZIn, fXOut, fYOut, fZOut);
                         statusPrint(sMsgText);
                     }
                 }
@@ -1249,41 +1256,45 @@ public class Globals {
                 // if (sx <= 1.0 && sy <= 1.0 && sz <= 1.0) {  // super-sample expansions only
                 switch(iBpp) {
                 case 8:
-                    bytIntensity = pInMImage.getMPixel((int)(fXOut + fHalfInWidth + 1),
-                        (int)(fYOut + fHalfInHeight + 1));
+                    bytIntensity = pInMImage.getMPixel((int)(fXOut + fHalfInWidth + 1), (int)(fYOut + fHalfInHeight + 1));
                     break;
 
                 case 24:
-                    pInMImage.getMPixelRGB((int)(fXOut + fHalfInWidth + 1),
-                        (int)(fYOut + fHalfInHeight + 1), bytRed, bytGreen, bytBlue);
+                    pInMImage.getMPixelRGB((int)(fXOut + fHalfInWidth + 1), (int)(fYOut + fHalfInHeight + 1), 
+                        bytRed, bytGreen, bytBlue);
                     break;
                 }
 
                 if(pZMImage != null) {
-                    theZ = pZMImage.getMPixel32((int)(x + fXCentOffset), (int)(y + fYCentOffset));
-                    fDist = MathUtils.getDistance3d(fXIn, fYIn, fZIn, vx, vy, vz);
+                    theZ = pZMImage.getMPixel32((int)(iX + fXCentOffset), (int)(iY + fYCentOffset));
+                    fDist = MathUtils.getDistance3d(fXIn, fYIn, fZIn, pfVx, pfVy, pfVz);
 
                     // Update the zbuffer if a smaller distance and non transparent color
                     if((fDist < theZ) && ((int)bytIntensity != JICTConstants.I_CHROMAVALUE)) {
-                        pZMImage.setMPixel32((int)(x + fXCentOffset), (int)(y + fYCentOffset), fDist);
+                        pZMImage.setMPixel32((int)(iX + fXCentOffset), (int)(iY + fYCentOffset), 
+                            fDist);
                         switch(iBpp) {
                         case 8:
-                            pOutMImage.setMPixel((int)(x + fXCentOffset), (int)(y + fYCentOffset), bytIntensity);
+                            pOutMImage.setMPixel((int)(iX + fXCentOffset), (int)(iY + fYCentOffset), 
+                                bytIntensity);
                             break;
 
                         case 24:
-                            pOutMImage.setMPixelRGB((int)(x + fXCentOffset), (int)(y + fYCentOffset), bytRed, bytGreen, bytBlue);
+                            pOutMImage.setMPixelRGB((int)(iX + fXCentOffset), (int)(iY + fYCentOffset), 
+                                bytRed, bytGreen, bytBlue);
                             break;
                         }
                     }
                 } else {
                     switch(iBpp) {
                     case 8:
-                        pOutMImage.setMPixel((int)(x + fXCentOffset), (int)(y + fYCentOffset), bytIntensity);
+                        pOutMImage.setMPixel((int)(iX + fXCentOffset), (int)(iY + fYCentOffset), 
+                            bytIntensity);
                         break;
 
                     case 24:
-                        pOutMImage.setMPixelRGB((int)(x + fXCentOffset), (int)(y + fYCentOffset), bytRed, bytGreen, bytBlue);
+                        pOutMImage.setMPixelRGB((int)(iX + fXCentOffset), (int)(iY + fYCentOffset), 
+                            bytRed, bytGreen, bytBlue);
                         break;
                     }
                 }
@@ -1291,10 +1302,10 @@ public class Globals {
                 fXIn += fXIncrement;
                 fYIn += fYIncrement;
                 fZIn += fZIncrement;
-            }  //  end of column loop
+            } // for iX, end of column loop
 
             nextScanLine:  continue;
-        } //  end of scan line loop
+        } // for iY, end of scan line loop
 
         if(bIctDebug) {
             if(pZMImage != null) {
@@ -1307,135 +1318,141 @@ public class Globals {
     } // iwarpz
 
 
-    // This method came from IWARP.CPP
+    // This method originally came from IWARP.CPP
+    //
     // Called from: 
     //     iwarpz
     // and iwarpz in turn is called from tweenImage
     // which in turn is called by MorphDlg.onOK (when morph type = JICTConstants.I_TWOD)
     // and iwarpz is also called from MainFrame.onWarpParamDlgClosed
-    public static int getIntervals(Shape3d theShape, int y, Integer numCoords,
-    int numAllocatedXCoords, int[] screenXCoords,
-    float[] tXCoords, float[] tYCoords, float[] tZCoords) {
+    public static int getIntervals(Shape3d pShape, int piY, Integer piNumCoords,
+    int piNumAllocatedXCoords, // this parameter is not used
+    int[] piaScreenXCoords,
+    float[] pfaXCoords, float[] pfaYCoords, float[] pfaZCoords) {
         // Scan Conversion. 
         // For the indicated scan line y, find all screen x coords
         // where the shape crosses scan line y.  
         // Sort the resulting screen x coordinate array.
         // For each screen x, find the corresponding tx, ty, and tz by interpolating 
         // from the two cornerpoints.
-        String msgText;
-        int[] tempScreenXCoords = new int[4];
+        String sMsgText;
+        int[] iaTempScreenXCoords = new int[4];
         int[] intDistance = new int[4];
-        float[] tempXCoords = new float[4];
-        float[] tempYCoords = new float[4];
-        float[] tempZCoords = new float[4];
-        int tempIndex = 0;
+        float[] faTempXCoords = new float[4];
+        float[] faTempYCoords = new float[4];
+        float[] faTempZCoords = new float[4];
+        int iTempIndex = 0;
 
-        int numShapeVertices = theShape.getNumVertices();
-        if(numShapeVertices != 4) {
+        int iNumShapeVertices = pShape.getNumVertices();
+        if(iNumShapeVertices != 4) {
             statusPrint("getIntervals: numShapeVertices must = 4");
             return -1;
         }
 
-        Float m = 0f, b = 0f;
-        int i, index, newX;
-        Boolean horzFlag = false, vertFlag = false;
+        Float fM = 0f, fB = 0f;
+        int i, index, iNewX;
+        Boolean bHorzFlag = false, bVertFlag = false;
         int iCurrentScreenXIdx; // index into array screenXCoords
         // float *currenttX, *currenttY, *currenttZ; 
-        int tXCoordsIdx, tYCoordsIdx, tZCoordsIdx;
-        float theX;
+        int iTxCoordsIdx, iTyCoordsIdx, iTzCoordsIdx;
+        float fX;
         iCurrentScreenXIdx = 0;
-        tXCoordsIdx = 0;
-        tYCoordsIdx = 0;
-        tZCoordsIdx = 0;
-        numCoords   = 0;
-        int sx1, sy1, sx2, sy2, minx, maxx, miny, maxy;
-        float tx1, ty1, tz1, tx2, ty2, tz2;
-        float partialDistance, totalDistance, ratio;
+        iTxCoordsIdx = 0;
+        iTyCoordsIdx = 0;
+        iTzCoordsIdx = 0;
+        piNumCoords   = 0;
+        int iSx1, iSy1, iSx2, iSy2;
+        int iMinX, iMaxX, iMinY, iMaxY;
+        float fTx1, fTy1, fTz1;
+        float fTx2, fTy2, fTz2;
+        float fPartialDistance, fTotalDistance, fRatio;
 
-        theShape.initCurrentVertex();
-        for (index = 1; index <= numShapeVertices; index++) {
-            sx1 = (int)theShape.mCurrentVertex.sx;
-            sy1 = (int)theShape.mCurrentVertex.sy;
+        pShape.initCurrentVertex();
+        for (index = 1; index <= iNumShapeVertices; index++) {
+            iSx1 = (int)pShape.mCurrentVertex.sx;
+            iSy1 = (int)pShape.mCurrentVertex.sy;
             
-            tx1 = theShape.mCurrentVertex.tx;
-            ty1 = theShape.mCurrentVertex.ty;
-            tz1 = theShape.mCurrentVertex.tz;
+            fTx1 = pShape.mCurrentVertex.tx;
+            fTy1 = pShape.mCurrentVertex.ty;
+            fTz1 = pShape.mCurrentVertex.tz;
             // theShape.currentVertex++;
-            theShape.incCurrentVertex();
+            pShape.incCurrentVertex();
 
             // If this is the last line segment, circle around to the beginning
-            if(index == numShapeVertices) {
-                theShape.initCurrentVertex();
+            if(index == iNumShapeVertices) {
+                pShape.initCurrentVertex();
             }
-            sx2 = (int)theShape.mCurrentVertex.sx;  // Can't use (currentVertex+1).x
-            sy2 = (int)theShape.mCurrentVertex.sy;
+            iSx2 = (int)pShape.mCurrentVertex.sx;  // Can't use (currentVertex+1).x
+            iSy2 = (int)pShape.mCurrentVertex.sy;
             
-            tx2 = theShape.mCurrentVertex.tx;
-            ty2 = theShape.mCurrentVertex.ty;	 
-            tz2 = theShape.mCurrentVertex.tz;
-            theShape.decCurrentVertex();
+            fTx2 = pShape.mCurrentVertex.tx;
+            fTy2 = pShape.mCurrentVertex.ty;	 
+            fTz2 = pShape.mCurrentVertex.tz;
+            pShape.decCurrentVertex();
 
-            minx = Math.min(sx1, sx2);
-            maxx = Math.max(sx1, sx2);
-            miny = Math.min(sy1, sy2);
-            maxy = Math.max(sy1, sy2);
+            iMinX = Math.min(iSx1, iSx2);
+            iMaxX = Math.max(iSx1, iSx2);
+            iMinY = Math.min(iSy1, iSy2);
+            iMaxY = Math.max(iSy1, iSy2);
 
-            // The following method sets variables m, b, horzFlag and vertFlag
-            MathUtils.getLineEquation(sx1, sy1, sx2, sy2, m, b, horzFlag, vertFlag);
-            theX = 0.0f;
-            if(m != 0.0f) {
-                theX = ((float)y - b) / m;
+            // The following method sets variables fM, fB, bHorzFlag and bVertFlag
+            MathUtils.getLineEquation(iSx1, iSy1, iSx2, iSy2, fM, fB, bHorzFlag, bVertFlag);
+            fX = 0.0f;
+            if(fM != 0.0f) {
+                fX = ((float)piY - fB) / fM;
             }
-            newX = (int)theX;
+            iNewX = (int)fX;
             
             if(bIctDebug) {
-                msgText = "getIntervals: sx1: " + sx1 + "  sx2: " + sx2 + 
-                    "  sy1: " + sy1 + " sy2: " + sy2;
-                statusPrint(msgText);
+                sMsgText = "getIntervals: sx1: " + iSx1 + "  sx2: " + iSx2 + 
+                    "  sy1: " + iSy1 + " sy2: " + iSy2;
+                statusPrint(sMsgText);
 
-                msgText = "getIntervals: index: " + index + " newX: " + newX + 
-                    "  Horz: " + horzFlag + "  vert: " + vertFlag; 
-                statusPrint(msgText);
+                sMsgText = "getIntervals: index: " + index + " newX: " + iNewX + 
+                    "  Horz: " + bHorzFlag + "  vert: " + bVertFlag; 
+                statusPrint(sMsgText);
             }
             
-            if (!(horzFlag || vertFlag)) {
+            if (!(bHorzFlag || bVertFlag)) {
                 // Determine z by interpolating between screen line segment endpoints
-                totalDistance   = MathUtils.getDistance2d(sx1, sy1, sx2, sy2);
-                partialDistance = MathUtils.getDistance2d(newX,  y, sx1, sy1);
+                fTotalDistance   = MathUtils.getDistance2d(iSx1,  iSy1, iSx2, iSy2);
+                fPartialDistance = MathUtils.getDistance2d(iNewX, piY, iSx1, iSy1);
                 // This is a ratio of screen coordinates
-                if(totalDistance != 0.0f) {
-                    ratio = partialDistance/totalDistance; // 0 <= ratio <= 1
+                if(fTotalDistance != 0.0f) {
+                    fRatio = fPartialDistance/fTotalDistance; // 0 <= ratio <= 1
                 } else {
                     statusPrint("getIntervals: totalDistance cannot equal 0");
                     return -1;
                 }
                 
-                ratio = 1.0f - ratio;
+                fRatio = 1.0f - fRatio;
                 
-                if ((newX >= minx && newX <= maxx) && (y >= miny && y <= maxy)) {
-                    screenXCoords[iCurrentScreenXIdx] = newX;
-                    tXCoords[tXCoordsIdx] = tx2 + (ratio * (tx1 - tx2));
-                    tYCoords[tYCoordsIdx] = ty2 + (ratio * (ty1 - ty2));	
-                    tZCoords[tZCoordsIdx] = tz2 + (ratio * (tz1 - tz2));
+                if (
+                (iNewX >= iMinX && iNewX <= iMaxX) && 
+                (piY >= iMinY && piY <= iMaxY)) {
+                    piaScreenXCoords[iCurrentScreenXIdx] = iNewX;
+                    pfaXCoords[iTxCoordsIdx] = fTx2 + (fRatio * (fTx1 - fTx2));
+                    pfaYCoords[iTyCoordsIdx] = fTy2 + (fRatio * (fTy1 - fTy2));	
+                    pfaZCoords[iTzCoordsIdx] = fTz2 + (fRatio * (fTz1 - fTz2));
                     if(bIctDebug) {
                         statusPrint("diagPoint");
                     }
 
-                    tXCoordsIdx++;
-                    tYCoordsIdx++;
-                    tZCoordsIdx++;
+                    iTxCoordsIdx++;
+                    iTyCoordsIdx++;
+                    iTzCoordsIdx++;
                     iCurrentScreenXIdx++;
-                    intDistance[index-1] = MathUtils.intervalDistance(minx, maxx, (int)theX);
-                    numCoords++;
+                    intDistance[index-1] = MathUtils.intervalDistance(iMinX, iMaxX, (int)fX);
+                    piNumCoords++;
                     // end if between sx1 and sx2
                 } else { 
                     // Store the point for possible later use
-                    tempScreenXCoords[tempIndex] = (int)theX;
-                    tempXCoords[tempIndex] = tx2 + (ratio * (tx1 - tx2));
-                    tempYCoords[tempIndex] = ty2 + (ratio * (ty1 - ty2));	
-                    tempZCoords[tempIndex] = tz2 + (ratio * (tz1 - tz2));
-                    intDistance[tempIndex] = MathUtils.intervalDistance(minx, maxx, (int)theX);
-                    tempIndex++;
+                    iaTempScreenXCoords[iTempIndex] = (int)fX;
+                    faTempXCoords[iTempIndex] = fTx2 + (fRatio * (fTx1 - fTx2));
+                    faTempYCoords[iTempIndex] = fTy2 + (fRatio * (fTy1 - fTy2));	
+                    faTempZCoords[iTempIndex] = fTz2 + (fRatio * (fTz1 - fTz2));
+                    intDistance[iTempIndex] = MathUtils.intervalDistance(iMinX, iMaxX, (int)fX);
+                    iTempIndex++;
 
                     if(bIctDebug) {
                         statusPrint("non diagPoint");
@@ -1444,90 +1461,90 @@ public class Globals {
                 // end if not horizontal or vertical
             } else {
                 // Handle horizontal and vertical lines
-                if (vertFlag) {
-                    totalDistance   = Math.abs(sy2 - sy1);
-                    partialDistance = Math.abs(y - sy1);		
-                    if(totalDistance != 0.0f) {
-                        ratio = partialDistance/totalDistance; // 0 <= ratio <= 1
+                if (bVertFlag) {
+                    fTotalDistance   = Math.abs(iSy2 - iSy1);
+                    fPartialDistance = Math.abs(piY - iSy1);		
+                    if(fTotalDistance != 0.0f) {
+                        fRatio = fPartialDistance/fTotalDistance; // 0 <= ratio <= 1
                     } else {
                         statusPrint("getIntervals: totalDistance cannot equal 0");
                         return -1;
                     }
 
-                    ratio = 1.0f - ratio;
-                    if (y >= miny && y <= maxy) {
-                        screenXCoords[iCurrentScreenXIdx] = sx1;
-                        tXCoords[tXCoordsIdx] = tx1;
-                        tYCoords[tYCoordsIdx] = ty2 + (ratio * (ty1 - ty2));	
-                        tZCoords[tZCoordsIdx] = tz2 + (ratio * (tz1 - tz2));
+                    fRatio = 1.0f - fRatio;
+                    if (piY >= iMinY && piY <= iMaxY) {
+                        piaScreenXCoords[iCurrentScreenXIdx] = iSx1;
+                        pfaXCoords[iTxCoordsIdx] = fTx1;
+                        pfaYCoords[iTyCoordsIdx] = fTy2 + (fRatio * (fTy1 - fTy2));	
+                        pfaZCoords[iTzCoordsIdx] = fTz2 + (fRatio * (fTz1 - fTz2));
 
                         iCurrentScreenXIdx++;
-                        tXCoordsIdx++;
-                        tYCoordsIdx++;
-                        tXCoordsIdx++;
-                        intDistance[index-1] = MathUtils.intervalDistance(miny, maxy, y);
-                        numCoords++;
+                        iTxCoordsIdx++;
+                        iTyCoordsIdx++;
+                        iTzCoordsIdx++;
+                        intDistance[index-1] = MathUtils.intervalDistance(iMinY, iMaxY, piY);
+                        piNumCoords++;
                         if(bIctDebug) {
                             statusPrint("vertPoint");
                         }
                     } else {
                         // Store the point for possible later use
-                        tempScreenXCoords[tempIndex] = sx1;
-                        tempXCoords[tempIndex] = tx1;
-                        tempYCoords[tempIndex] = ty2 + (ratio * (ty1 - ty2));	
-                        tempZCoords[tempIndex] = tz2 + (ratio * (tz1 - tz2));
-                        intDistance[tempIndex] = MathUtils.intervalDistance(miny, maxy, y);
-                        tempIndex++;
+                        iaTempScreenXCoords[iTempIndex] = iSx1;
+                        faTempXCoords[iTempIndex] = fTx1;
+                        faTempYCoords[iTempIndex] = fTy2 + (fRatio * (fTy1 - fTy2));	
+                        faTempZCoords[iTempIndex] = fTz2 + (fRatio * (fTz1 - fTz2));
+                        intDistance[iTempIndex] = MathUtils.intervalDistance(iMinY, iMaxY, piY);
+                        iTempIndex++;
                     }
-                } // if vertFlag
+                } // if bVertFlag
             }
 
             // theShape.currentVertex++;
-            theShape.miCurrVtxIdx++;
+            pShape.miCurrVtxIdx++;
         }
 
         // Sort the found x coordinates in ascending order
-        insertionSort(screenXCoords, tXCoords, tYCoords, tZCoords, numCoords);
-        removeDuplicates(screenXCoords, tXCoords, tYCoords, tZCoords, numCoords);
+        insertionSort(piaScreenXCoords, pfaXCoords, pfaYCoords, pfaZCoords, piNumCoords);
+        removeDuplicates(piaScreenXCoords, pfaXCoords, pfaYCoords, pfaZCoords, piNumCoords);
 
-        if(numCoords > 2) {
-            removeSimilar(screenXCoords, tXCoords, tYCoords, tZCoords, numCoords, 2);
+        if(piNumCoords > 2) {
+            removeSimilar(piaScreenXCoords, pfaXCoords, pfaYCoords, pfaZCoords, piNumCoords, 2);
         }
 
-        int minIntDist = 999999999;
-        int aCol = 0;
+        int iMinIntDist = 999999999;
+        int iCol = 0;
 
-        if (numCoords == 1) {
-            for(i = 0; i < tempIndex; i++) {
-                if(intDistance[i] < minIntDist) {
-                    aCol = i;
-                    minIntDist = intDistance[i];
+        if (piNumCoords == 1) {
+            for(i = 0; i < iTempIndex; i++) {
+                if(intDistance[i] < iMinIntDist) {
+                    iCol = i;
+                    iMinIntDist = intDistance[i];
                 }
             } // for i
 
             // Correct missed points due to roundoff
-            if(minIntDist < 3) {
-                numCoords++;
-                tXCoords[1] = tempXCoords[aCol];
-                tYCoords[1] = tempYCoords[aCol];
-                tZCoords[1] = tempZCoords[aCol];
-                screenXCoords[1] = tempScreenXCoords[aCol];
-                insertionSort(screenXCoords, tXCoords, tYCoords, tZCoords, numCoords);
+            if(iMinIntDist < 3) {
+                piNumCoords++;
+                pfaXCoords[1] = faTempXCoords[iCol];
+                pfaYCoords[1] = faTempYCoords[iCol];
+                pfaZCoords[1] = faTempZCoords[iCol];
+                piaScreenXCoords[1] = iaTempScreenXCoords[iCol];
+                insertionSort(piaScreenXCoords, pfaXCoords, pfaYCoords, pfaZCoords, piNumCoords);
             } else {
-                numCoords++;
-                tXCoords[1] = tXCoords[0];
-                tYCoords[1] = tYCoords[0];
-                tZCoords[1] = tZCoords[0];
-                screenXCoords[1] = screenXCoords[0];
+                piNumCoords++;
+                pfaXCoords[1] = pfaXCoords[0];
+                pfaYCoords[1] = pfaYCoords[0];
+                pfaZCoords[1] = pfaZCoords[0];
+                piaScreenXCoords[1] = piaScreenXCoords[0];
             }
         } // if numCoords == 1
 
         if(bIctDebug) {
             statusPrint("getIntervals Found: intdist\t sx  \t tx  \t ty  \t tz");
-            for(i = 0; i < numCoords; i++) {
-                msgText = String.format("\t%d\t%d\t%6.2f\t%6.2f\t%6.2f", 
-                    intDistance[i], screenXCoords[i], tXCoords[i], tYCoords[i], tZCoords[i]);
-                statusPrint(msgText);
+            for(i = 0; i < piNumCoords; i++) {
+                sMsgText = String.format("\t%d\t%d\t%6.2f\t%6.2f\t%6.2f", 
+                    intDistance[i], piaScreenXCoords[i], pfaXCoords[i], pfaYCoords[i], pfaZCoords[i]);
+                statusPrint(sMsgText);
             }
         }
         
@@ -1936,7 +1953,8 @@ public class Globals {
     } // iRenderz
 
 
-    // This method came from IWARP.CPP
+    // This method originally came from IWARP.CPP
+    //
     // Called from:
     //     MainFrame.onToolsWarpImage
     //     SceneList.render
@@ -1963,7 +1981,7 @@ public class Globals {
         weight[0][1] = 0.05f;
         weight[0][2] = 0.05f;
         weight[1][0] = 0.05f;
-        weight[1][1] = 0.60f;
+        weight[1][1] = 0.60f; // Notice that this has the largest weight
         weight[1][2] = 0.05f;
         weight[2][0] = 0.05f;
         weight[2][1] = 0.05f;
@@ -2017,7 +2035,7 @@ public class Globals {
                     fq20 = pInMImage.getMPixel(iCol + 1, iRow - 1) * weight[2][0]; // used twice
 
                     fq01 = pInMImage.getMPixel(iCol - 1, iRow)     * weight[0][1]; // not used
-                    fq11 = pInMImage.getMPixel(iCol,     iRow)     * weight[1][1];
+                    fq11 = pInMImage.getMPixel(iCol,     iRow)     * weight[1][1]; // this has the largest weight
                     fq21 = pInMImage.getMPixel(iCol + 1, iRow)     * weight[2][1];
 
                     fq02 = pInMImage.getMPixel(iCol - 1, iRow + 1) * weight[0][2]; // not used
@@ -2027,8 +2045,13 @@ public class Globals {
                     // TODO: I believe the following line has a few errors.
                     // It adds fq10 twice (probably meant to use fq10 once and fq01 once)
                     // It adds fq20 twice (probably meant to use fq20 once and fq02 once)
+                    // Notice that fSum is the sum of 9 color values, one for each 
+                    // cell in a 3x3 matrix
                     fSum = fq00 + fq10 + fq20 + fq10 + fq11 + fq12 + fq20 + fq21 + fq22;
+                    // Ensure that fSum has a value beween 0.0 and 255.0, inclusive
                     fSum = MathUtils.bound(fSum, 0.0f, 255.0f);
+
+                    // Set the color at iCol, iRow to our average (fSum)
                     pOutMImage.setMPixel(iCol, iRow, (byte)(fSum + 0.5f));
                     break;
 
@@ -2043,6 +2066,7 @@ public class Globals {
                     fq10g = (float)bytGreen * weight[1][0];
                     fq10b = (float)bytBlue  * weight[1][0];
 
+                    /*
                     // The following values for the variables fq20, fq01, fq11, fq21 are not used
                     fq20 = pInMImage.getMPixel(iCol + 1, iRow - 1) * weight[2][0];
                     fq01 = pInMImage.getMPixel(iCol - 1, iRow)     * weight[0][1];
@@ -2053,6 +2077,7 @@ public class Globals {
                     fq02 = pInMImage.getMPixel(iCol - 1, iRow + 1) * weight[0][2];
                     fq12 = pInMImage.getMPixel(iCol,     iRow + 1) * weight[1][2];
                     fq22 = pInMImage.getMPixel(iCol + 1, iRow + 1) * weight[2][2];
+                    */
 
                     // I believe the following line has a few errors.
                     // It uses q10r twice and q20r twice.
@@ -2204,9 +2229,13 @@ public class Globals {
   
   
     // This method originally came from IWARP.CPP
+    // 
+    // Called from:
+    //     iRender (called twice, but I couldn't find where iRender is being called from)
+    //     iRenderz (called twice)
     public static int fwarpz(MemImage pInMImage, MemImage pOutMImage, MemImage pZMImage,
     float pfRx, float pfRy, float pfRz, 
-    float pfSx, float pfSy, float pfSz,
+    float pfSx, float pfSy, float pfSz, 
     float pfTx, float pfTy, float pfTz, 
     float pfVx, float pfVy, float pfVz, 
     TMatrix pViewMatrix,
@@ -2394,13 +2423,13 @@ public class Globals {
     } // fwarpz
 
 
-    // This method came from IWARP.CPP
+    // This method originally came from IWARP.CPP
     public static int fwarpz2(MemImage inputImage, MemImage outputImage, MemImage zBuffer, 
     float rx, float ry, float rz, 
-    float sx, float sy, float sz,
+    float sx, float sy, float sz, 
     float tx, float ty, float tz, 
-    float vx, float vy, float vz,  
-    TMatrix viewMatrix,
+    float vx, float vy, float vz, 
+    TMatrix viewMatrix, 
     float refPointX, float refPointY, float refpointZ) {
         String msgText;
 
@@ -4341,7 +4370,8 @@ public class Globals {
 
 
     // This method sets parameter pOutShape
-    // This method came from TWEEN.CPP
+    // This method originally came from TWEEN.CPP
+    //
     // Called from:
     //     tweenImage
     // which in turn is called from MorphDlg.onOK (when morph type = JICTConstants.I_TWOD)
@@ -4389,7 +4419,8 @@ public class Globals {
     } // tweenShape
 
 
-    // This method came from TWEEN.CPP
+    // This originally method came from TWEEN.CPP
+    // 
     // Called from:
     //     tweenImage
     // which in turn is called from MorphDlg.onOK (when morph type = JICTConstants.I_TWOD)
@@ -4433,7 +4464,7 @@ public class Globals {
     } // createTweenableShapes
 
 
-    // This method came from TWEEN.CPP
+    // This method originally came from TWEEN.CPP
     // Called from:
     //     MorphDlg.onOK (when morph type = JICTConstants.I_THREED)
     public static int tweenMesh(float aFraction, 
