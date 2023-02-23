@@ -27,31 +27,30 @@ public class ScnFileParser {
 
     // Method readList parses the Scene and Model-related information in a .scn file
     // specified by parameter pathName. If an error occurs while parsing, the String 
-    // errorText is set to an error message.
+    // psErrorText is set to an error message.
     // If successfully parsed, it adds the scene and model information to a 
     // doubly-linked list. The start of this list is pointed to by field sceneListHead.
     // Called from:
     //     MainFrame.onToolsCreateASceneList
-    public int readList(String errorText, String pathName) {
-        String TheText = "", TheKeyWord;
-        String theModelName = "", theFileName, theMotionPath;
-        String theSceneName = "", theAlphaPath, msgBuffer;
-        String colorAdjustedPath = "";
-        int lineCounter, numScenes;
-        int outImageCols = 0, outImageRows = 0;
-        int notFound; // = TRUE, FALSE, or THREE_NUMBERS_NOT_FOUND
-        boolean theBlend, theWarp;
-        int theSequence = 0, theColorMode = 0, theType,
-        compoundMMember;
-        boolean compoundMember = false; // changed from int to boolean
-        boolean getOutImageSizeFlag = false; // changed from int to boolean
-        boolean definedRefPoint = false; // changed from int to boolean
-        float theAlpha;
-        Point3d rt, sc, tr, pointOfReference;
-        Color anAdjustment = new Color(0, 0, 0);
-        String adjustmentType;
-        int myStatus, minLineSize = 4;
-        byte midRed = (byte)0, midGreen = (byte)0, midBlue = (byte)0;
+    public int readList(String psErrorText, String psPathName) {
+        String sText = "", sKeyWord;
+        String theModelName = "", sFileName, sMotionPath;
+        String sSceneName = "", sAlphaPath, sMsgBuffer;
+        String sColorAdjustedPath = "";
+        int iLineCounter, iNumScenes;
+        int iOutImageCols = 0, iOutImageRows = 0;
+        int iNotFound; // = TRUE, FALSE, or THREE_NUMBERS_NOT_FOUND
+        boolean bBlend, bWarp;
+        int iSequence = 0, iColorMode = 0, iType, iCompoundMMember;
+        boolean bCompoundMember = false; // changed from int to boolean
+        boolean bGetOutImageSizeFlag = false; // changed from int to boolean
+        boolean bDefinedRefPoint = false; // changed from int to boolean
+        float fAlpha;
+        Point3d rtPt, scPt, trPt, pointOfReference;
+        Color adjustmentColor = new Color(0, 0, 0);
+        String sAdjustmentType;
+        int iStatus, iMinLineSize = 4;
+        Byte bytMidRed = (byte)0, bytMidGreen = (byte)0, bytMidBlue = (byte)0;
         final int FALSE = 0;
         final int TRUE = 1;
         final int THREE_NUMBERS_NOT_FOUND = 2;
@@ -61,92 +60,90 @@ public class ScnFileParser {
         final String BLANK = " ";
         // final int DUPLICATESCENE = 3; // This variable is not used
 
-        File scnFile = new File(pathName);
+        File scnFile = new File(psPathName);
         FileReader fileReader;
         try {
             fileReader = new FileReader(scnFile);
         } catch(FileNotFoundException fnfe) {
-            errorText = "Could not find file.";
-            // errorText will be printed with Global.statusPrint by the caller.
+            psErrorText = "Could not find file.";
+            // psErrorText will be printed with Global.statusPrint by the caller.
 
             return -1;
         }
         LineNumberReader filein = new LineNumberReader(fileReader);
 
-        theMotionPath = "None";
-        adjustmentType = "None";
-        theAlphaPath = "Default";
-        lineCounter = 0;
-        numScenes = 0; 
-        compoundMMember = 0;
-        compoundMember = false;
-        rt = new Point3d();
-        sc = new Point3d();
-        tr = new Point3d();
+        sMotionPath = "None";
+        sAdjustmentType = "None";
+        sAlphaPath = "Default";
+        iLineCounter = 0;
+        iNumScenes = 0; 
+        iCompoundMMember = 0;
+        bCompoundMember = false;
+        rtPt = new Point3d();
+        scPt = new Point3d();
+        trPt = new Point3d();
         pointOfReference = new Point3d();
-        // Assume no problems will occur and initialize errorText accordingly.
-        errorText = "Scene file read successfully";
+        // Assume no problems will occur and initialize psErrorText accordingly.
+        psErrorText = "Scene file read successfully";
         
-        definedRefPoint = false;
+        bDefinedRefPoint = false;
 
         // Start parsing the .scn file. 
         // We exit the following "forever" loop via return statements.
         // We return -1 if we encounter an error.
         // We return 0 if no error occurs and we encounter the EOF keyword.
         while(true) {  // Get the scene components
-            TheKeyWord = Shape3d.getNextLine(TheText, lineCounter, filein, minLineSize);
+            sKeyWord = Shape3d.getNextLine(sText, iLineCounter, filein, iMinLineSize);
             // As long as we haven't encountered line that indicates 
             // the start of a Model description ...
-            while(!TheKeyWord.equalsIgnoreCase("MODEL")) {
+            while(!sKeyWord.equalsIgnoreCase("MODEL")) {
                 // Each iteration through this loop will parse one line.
                 // Note that we call Shape3d.getNextLine again at the end of this loop.
-                String aBase, aSceneName, effectType, aColorMode;
-                String tempImageSize;
-                notFound = TRUE;
+                String sBase, sEffectType, sColorMode;
+                String sTempImageSize;
+                iNotFound = TRUE;
 
                 // We have just read a new line from the .scn file.
                 // We expect to find one of the following keywords:
                 // "SCENE", "MOTIONPATH", "ROTATION", "TRANSLATION", "END", or "EOF".
                 // "EOF" is a keyword generated by method Shape3d.getNextLine when
                 // it finds the end of the file.
-                if (TheKeyWord.equalsIgnoreCase("SCENE")) {
+                if (sKeyWord.equalsIgnoreCase("SCENE")) {
                     // We have found the start of a Scene description, 
                     // so we will parse it. It has the following format:
                     // scene <sceneName> [Sequence|Still] <outHeight>, <outWidth> [Color|Mono]
                     // Rotation <Rx>, <Ry>, <Rz>
                     // Translation <Tx>, <Ty>, <Tz>
                     // MotionPath [None]
-                    notFound = FALSE;
+                    iNotFound = FALSE;
                     // Skip over the word "SCENE"
-                    aBase = TheText.substring(6);
+                    sBase = sText.substring(6);
 
                     // After the token "SCENE" we should have the scene name
                     // scene <sceneName> [Sequence|Still] <outHeight>, <outWidth> [Color|Mono]
-                    strtok = new StringTokenizer(aBase, BLANK);
-                    aSceneName = strtok.nextToken();
-                    if(aSceneName != null) {
-                        theSceneName = aSceneName;
-                    } else {
-                        errorText = "A Scene must have a name. Line " + lineCounter;
-                        // errorText will be printed with Global.statusPrint by the caller.
+                    strtok = new StringTokenizer(sBase, BLANK);
+                    sSceneName = strtok.nextToken();
+                    if(sSceneName == null) {
+                        psErrorText = "A Scene must have a name. Line " + iLineCounter;
+                        // psErrorText will be printed with Global.statusPrint by the caller.
                         
                         return -1;
                     }
 
                     // Parse the effect type (i.e., [Sequence|Still])
                     // scene <sceneName> [Sequence|Still] <outHeight>, <outWidth> [Color|Mono]
-                    effectType = strtok.nextToken();
-                    theSequence = 1;
-                    if(effectType != null) {
-                        if(effectType.equalsIgnoreCase("SEQUENCE")) {
-                            theSequence = JICTConstants.I_SEQUENCE;
+                    sEffectType = strtok.nextToken();
+                    iSequence = 1;
+                    if(sEffectType != null) {
+                        if(sEffectType.equalsIgnoreCase("SEQUENCE")) {
+                            iSequence = JICTConstants.I_SEQUENCE;
                         }
-                        if(effectType.equalsIgnoreCase("MORPH")) {
-                            theSequence = JICTConstants.I_MORPH;
+                        if(sEffectType.equalsIgnoreCase("MORPH")) {
+                            iSequence = JICTConstants.I_MORPH;
                         }
                     } else {
-                        errorText = "A Sequence must have a name. Line " + lineCounter;
-                        // errorText will be printed with Global.statusPrint by the caller.
+                        psErrorText = "A Sequence must have a name. Line " + iLineCounter;
+                        // psErrorText will be printed with Global.statusPrint by the caller.
 
                         closeLineNumberReader(filein);
                         return -1;
@@ -154,24 +151,24 @@ public class ScnFileParser {
 
                     // Now parse the image dimensions (i.e., <outHeight>, <outWidth>)
                     // scene <sceneName> [Sequence|Still] <outHeight>, <outWidth> [Color|Mono]
-                    // tempImageSize is equal to the string starting with <outHeight>:
+                    // sTempImageSize is equal to the string starting with <outHeight>:
                     // <outHeight>, <outWidth> [Color|Mono]
-                    tempImageSize = strtok.nextToken();
+                    sTempImageSize = strtok.nextToken();
 
                     // Now looking for Color or Mono:
                     // scene <sceneName> [Sequence|Still] <outHeight>, <outWidth> [Color|Mono]
-                    aColorMode = strtok.nextToken();
+                    sColorMode = strtok.nextToken();
                     // Assume "Mono"
-                    theColorMode = JICTConstants.I_MONOCHROME;
-                    if(aColorMode != null) {
-                        if(aColorMode.equalsIgnoreCase("COLOR")) { 
+                    iColorMode = JICTConstants.I_MONOCHROME;
+                    if(sColorMode != null) {
+                        if(sColorMode.equalsIgnoreCase("COLOR")) { 
                             // We assumed wrong, so we correct our assumption.
-                            theColorMode = JICTConstants.I_COLOR;
+                            iColorMode = JICTConstants.I_COLOR;
                         }
                     } else {
                         // We expected Color or Mono. We didn't find anything.
-                        errorText = "Expected: Color or Monochrome. Line " + lineCounter;
-                        // errorText will be printed with Global.statusPrint by the caller.
+                        psErrorText = "Expected: Color or Monochrome. Line " + iLineCounter;
+                        // psErrorText will be printed with Global.statusPrint by the caller.
 
                         closeLineNumberReader(filein);
                         return -1;
@@ -180,156 +177,153 @@ public class ScnFileParser {
                     // Now parse outHeight and outWidth values (i.e., <outHeight>, <outWidth>)
                     // These should be integers.
                     // scene <sceneName> [Sequence|Still] <outHeight>, <outWidth> [Color|Mono]
-                    if(tempImageSize != null) { // Output Image Height, Width
-                        numtok = new StringTokenizer(tempImageSize, ",");
-                        outImageRows = Integer.parseInt(numtok.nextToken());
-                        outImageCols = Integer.parseInt(numtok.nextToken());
-                        getOutImageSizeFlag = false;
-                        if(outImageCols == 0 || outImageRows == 0) { 
-                            getOutImageSizeFlag = true;
+                    if(sTempImageSize != null) { // Output Image Height, Width
+                        numtok = new StringTokenizer(sTempImageSize, ",");
+                        iOutImageRows = Integer.parseInt(numtok.nextToken());
+                        iOutImageCols = Integer.parseInt(numtok.nextToken());
+                        bGetOutImageSizeFlag = false;
+                        if(iOutImageCols == 0 || iOutImageRows == 0) { 
+                            bGetOutImageSizeFlag = true;
                         }
                     } else {
-                        errorText = "Expected Image Height, Image Width. Line " + lineCounter;
-                        // errorText will be printed with Global.statusPrint by the caller.
+                        psErrorText = "Expected Image Height, Image Width. Line " + iLineCounter;
+                        // psErrorText will be printed with Global.statusPrint by the caller.
 
                         closeLineNumberReader(filein);
                         return -1;
                     }
-                } // end scene processing
+                } // end scene line processing
 
-                if(TheKeyWord.equalsIgnoreCase("MOTIONPATH")) {
+                if(sKeyWord.equalsIgnoreCase("MOTIONPATH")) {
                     // Found a MOTIONPATH line. So we parse it. 
-                    // It should have the followng format:
+                    // It should have the following format:
                     // MotionPath [None|<pathName>]
-                    theMotionPath = TheText.substring(11);
-                    if(theMotionPath.length() == 0) {
-                        errorText = "MotionPath file missing on Line " + lineCounter;
-                        // errorText will be printed with Global.statusPrint by the caller.
+                    sMotionPath = sText.substring(11);
+                    if(sMotionPath.length() == 0) {
+                        psErrorText = "MotionPath file missing on Line " + iLineCounter;
+                        // psErrorText will be printed with Global.statusPrint by the caller.
 
                         closeLineNumberReader(filein);
                         return -1;
                     }
-                    notFound = FALSE;
+                    iNotFound = FALSE;
                 }
 
-                if(TheKeyWord.equalsIgnoreCase("ROTATION")) {
+                if(sKeyWord.equalsIgnoreCase("ROTATION")) {
                     // Found a ROTATION line. So we parse it. 
                     // It should have the following format:
                     // ROTATION <Rx>, <Ry>, <Rz>
                     // where Rx, Ry and Rz represent angles 
                     // expressed as floating-point numbers.
-                    String theRt, localRt;
+                    String sRt;
                     // theRt = strtok(TheText + 9, BLANK);
-                    theRt = strtok.nextToken();
-                    localRt = theRt;
-                    if(checkFor3(localRt) == 0) {
-                        notFound = THREE_NUMBERS_NOT_FOUND;
+                    sRt = strtok.nextToken();
+                    if(checkFor3(sRt) == 0) {
+                        iNotFound = THREE_NUMBERS_NOT_FOUND;
                     } else {
-                        numtok = new StringTokenizer(localRt, ",");
-                        rt.x = Float.parseFloat(numtok.nextToken());
-                        rt.y = Float.parseFloat(numtok.nextToken());
-                        rt.z = Float.parseFloat(numtok.nextToken());
-                        notFound = FALSE;
+                        numtok = new StringTokenizer(sRt, ",");
+                        rtPt.x = Float.parseFloat(numtok.nextToken());
+                        rtPt.y = Float.parseFloat(numtok.nextToken());
+                        rtPt.z = Float.parseFloat(numtok.nextToken());
+                        iNotFound = FALSE;
                     }
                 }
 
-                if(TheKeyWord.equalsIgnoreCase("TRANSLATION")) {
+                if(sKeyWord.equalsIgnoreCase("TRANSLATION")) {
                     // Found a TRANSLATION line. So we parse it. 
                     // It should have the following format:
                     // TRANSLATION <Tx>, <Ty>, <Tz>
                     // where Tx, Ty, and Tz represent translation values 
                     // expressed as floating-point numbers.
-                    String theTr, localTr;
+                    String sTr;
                     // theTr = strtok(TheText + 12, BLANK);
-                    theTr = strtok.nextToken();
-                    localTr = theTr;
-                    if(checkFor3(localTr) == 0) {
-                        notFound = THREE_NUMBERS_NOT_FOUND;
+                    sTr = strtok.nextToken();
+                    if(checkFor3(sTr) == 0) {
+                        iNotFound = THREE_NUMBERS_NOT_FOUND;
                     } else {
-                        numtok = new StringTokenizer(localTr, ",");
-                        tr.x = Float.parseFloat(numtok.nextToken());
-                        tr.y = Float.parseFloat(numtok.nextToken());
-                        tr.z = Float.parseFloat(numtok.nextToken());
-                        notFound = FALSE;
+                        numtok = new StringTokenizer(sTr, ",");
+                        trPt.x = Float.parseFloat(numtok.nextToken());
+                        trPt.y = Float.parseFloat(numtok.nextToken());
+                        trPt.z = Float.parseFloat(numtok.nextToken());
+                        iNotFound = FALSE;
                     }
                 }
               
-                if(TheKeyWord.equalsIgnoreCase("END")) {
-                    String theToken, localToken;
+                if(sKeyWord.equalsIgnoreCase("END")) {
+                    String sToken;
                     // theToken = strtok(TheText + 4, BLANK);
-                    theToken = strtok.nextToken();
-                    localToken = theToken;
-                    if(localToken.equalsIgnoreCase("COMPOUND")) {
-                        compoundMMember = 0;
-                        notFound = FALSE;
+                    sToken = strtok.nextToken();
+                    if(sToken.equalsIgnoreCase("COMPOUND")) {
+                        iCompoundMMember = 0;
+                        iNotFound = FALSE;
                     }
                 }
 
-                if (TheKeyWord.equalsIgnoreCase("EOF")) {
-                    errorText = "sceneFile may be corrupted or has no models";
-                    // errorText will be printed with Global.statusPrint by the caller.
+                if (sKeyWord.equalsIgnoreCase("EOF")) {
+                    psErrorText = "sceneFile may be corrupted or has no models";
+                    // psErrorText will be printed with Global.statusPrint by the caller.
 
                     closeLineNumberReader(filein);
                     return -1;
                 }
 
-                // notFound = TRUE (1), FALSE (0), or THREE_NUMBERS_NOT_FOUND (2)
-                if (notFound != 0) {
-                    if(notFound == 1) {
-                        errorText = "Unknown Keyword: " + TheKeyWord + ". Line  " + lineCounter;
+                // iNotFound = TRUE (1), FALSE (0), or THREE_NUMBERS_NOT_FOUND (2)
+                if (iNotFound != 0) {
+                    if(iNotFound == 1) {
+                        psErrorText = "Unknown Keyword: " + sKeyWord + ". Line  " + iLineCounter;
                     }
-                    if(notFound == THREE_NUMBERS_NOT_FOUND) {
-                        errorText = "Expected 3 numeric values separated by commas: " + TheKeyWord + 
-                            "  Line " + lineCounter;
+                    if(iNotFound == THREE_NUMBERS_NOT_FOUND) {
+                        psErrorText = "Expected 3 numeric values separated by commas: " + sKeyWord + 
+                            "  Line " + iLineCounter;
                     }
-                    // // errorText will be printed with Global.statusPrint by the caller.
+                    // psErrorText will be printed with Global.statusPrint by the caller.
 
                     closeLineNumberReader(filein);
                     return -1;
                 }
 
-                TheKeyWord = Shape3d.getNextLine(TheText, lineCounter, filein, minLineSize);
+                sKeyWord = Shape3d.getNextLine(sText, iLineCounter, filein, iMinLineSize);
             }  // while(!TheKeyWord.equalsIgnoreCase("MODEL"))
 
             // Add the scene to the sceneList and read its elements.
-            numScenes++;
-            if (numScenes > 1) {
-                errorText = "Only 1 scene definition permitted per scene file";
-                // errorText will be printed with Global.statusPrint by the caller.
+            iNumScenes++;
+            if (iNumScenes > 1) {
+                psErrorText = "Only 1 scene definition permitted per scene file";
+                // psErrorText will be printed with Global.statusPrint by the caller.
 
                 closeLineNumberReader(filein);
                 return -1;
             }
 
-            myStatus = mSceneList.addScene(theSceneName, theSequence, 
-                outImageCols, outImageRows, theColorMode, 
-                rt, tr, theMotionPath);
-            if(myStatus != 0) {
-                errorText = "Could not add Scene to Scene List. Line " + lineCounter;
-                // errorText will be printed with Global.statusPrint by the caller.
+            iStatus = mSceneList.addScene(sSceneName, iSequence, 
+                iOutImageCols, iOutImageRows, iColorMode, 
+                rtPt, trPt, sMotionPath);
+            if(iStatus != 0) {
+                psErrorText = "Could not add Scene to Scene List. Line " + iLineCounter;
+                // psErrorText will be printed with Global.statusPrint by the caller.
 
                 closeLineNumberReader(filein);
                 return -1;
             }
 
-            theType = JICTConstants.I_IMAGE;
-            theMotionPath = "";
-            theFileName = "";
-            int nModels = 0;
+            iType = JICTConstants.I_IMAGE;
+            sMotionPath = "";
+            sFileName = "";
+            int iNumModels = 0;
             String sModelName, sBlend, sWarp, sScale, sScaleValue, sType;
-            theBlend = true;
-            theWarp = true;
-            theAlpha = 1.0f;
+            bBlend = true;
+            bWarp = true;
+            fAlpha = 1.0f;
             
             // Until we find the start of another SCENE attribute, we'll look for 
             // MODEL lines and parse the model information.
-            while(!TheKeyWord.equalsIgnoreCase("SCENE")) {
+            while(!sKeyWord.equalsIgnoreCase("SCENE")) {
                 // Each iteration through this loop will parse one line.
                 // Note that we call Shape3d.getNextLine at the end of this loop.
-                notFound = TRUE;
+                iNotFound = TRUE;
 
                 // We expect MODEL, ROTATION, SCALE, TRANSLATION, ADJUSTCOLOR, or MOTIONPATH
-                if (TheKeyWord.equalsIgnoreCase("MODEL")) {
+                if (sKeyWord.equalsIgnoreCase("MODEL")) {
                     // The Model attributes in a scene file have the following format:
                     // Model <modelName> [Blend|NoBlend] [Warp|NoWarp] AlphaScale <alpha> [Image|Shape|QuadMesh|Sequence]
                     // FileName <pathName>
@@ -339,68 +333,74 @@ public class ScnFileParser {
                     // Rotation <rx>, <ry>, <rz>
                     // Scale <sx>, <sy>, <sz>
                     // Translation <tx>, <ty>, <tz>
-                    nModels++;
+                    iNumModels++;
 
-                    if (nModels > 1) {
+                    if (iNumModels > 1) {
                         // If the color is to be adjusted, adjust it now and change the input image
                         // file name to point to the color corrected image.
                         // AdjustColor [Target|Relative] <R> <G> <B>
-                        if(adjustmentType.equalsIgnoreCase("None")) {
-                            MemImage inputImage = new MemImage(theFileName, 0, 0, 
+                        if(sAdjustmentType.equalsIgnoreCase("None")) {
+                            // In the following line, sFileName is the name of the model, i.e., the name that
+                            // follows the Model keyword in the line
+                            // Model modelName ...
+                            MemImage inputMImage = new MemImage(sFileName, 0, 0, 
                                 JICTConstants.I_RANDOM, 'R', JICTConstants.I_RGBCOLOR);
-                            if (!inputImage.isValid()) {
-                                msgBuffer = "sceneList.readList: Can't open image for color correction: " + theFileName;
-                                Globals.statusPrint(msgBuffer);
+                            if (!inputMImage.isValid()) {
+                                sMsgBuffer = "sceneList.readList: Can't open image for color correction: " + sFileName;
+                                Globals.statusPrint(sMsgBuffer);
                                 return -1;
                             }
 
-                            MemImage correctedImage = new MemImage(inputImage);
+                            // Create MemImage correctedImage, which will contain the adjusted colors.
+                            // Later we will save it to a file.
+                            MemImage correctedMImage = new MemImage(inputMImage);
                             Globals.statusPrint("Adjusting color image");	    
-                            inputImage.adjustColor(anAdjustment.getRed(), anAdjustment.getGreen(), anAdjustment.getBlue(),
-                                midRed, midGreen, midBlue, 
-                                correctedImage, adjustmentType, 0);
+                            inputMImage.adjustColor(adjustmentColor.getRed(), adjustmentColor.getGreen(), adjustmentColor.getBlue(),
+                                bytMidRed, bytMidGreen, bytMidBlue, 
+                                correctedMImage, sAdjustmentType, 0);
 
-                            FileUtils.constructPathName(colorAdjustedPath, theFileName, 'j');     
-                            msgBuffer = "sceneList.readList: Saving adjusted color image: " + colorAdjustedPath;
-                            Globals.statusPrint(msgBuffer);
+                            // The following method sets colorAdjustedPath
+                            FileUtils.constructPathName(sColorAdjustedPath, sFileName, 'j');     
+                            sMsgBuffer = "sceneList.readList: Saving adjusted color image: " + sColorAdjustedPath;
+                            Globals.statusPrint(sMsgBuffer);
             
-                            correctedImage.writeBMP(colorAdjustedPath);
+                            correctedMImage.writeBMP(sColorAdjustedPath);
                         }
 
-                        if(compoundMMember == 1 && theType == JICTConstants.I_COMPOUND) compoundMember = false;
-                        if(compoundMMember == 1 && theType != JICTConstants.I_COMPOUND) compoundMember = true;
+                        if(iCompoundMMember == 1 && iType == JICTConstants.I_COMPOUND) bCompoundMember = false;
+                        if(iCompoundMMember == 1 && iType != JICTConstants.I_COMPOUND) bCompoundMember = true;
 
-                        myStatus = mSceneList.addSceneElement(theModelName, theFileName, 
-                            theBlend, theType,
-                            theWarp, theAlpha, 
-                            rt, sc, tr, 
-                            theMotionPath, theAlphaPath,
-                            compoundMember, 
-                            anAdjustment, adjustmentType, 
-                            colorAdjustedPath,
-                            definedRefPoint, pointOfReference);
-                        if(compoundMMember == 0) {
-                            compoundMember = false;
+                        iStatus = mSceneList.addSceneElement(theModelName, sFileName, 
+                            bBlend, iType,
+                            bWarp, fAlpha, 
+                            rtPt, scPt, trPt, 
+                            sMotionPath, sAlphaPath,
+                            bCompoundMember, 
+                            adjustmentColor, sAdjustmentType, 
+                            sColorAdjustedPath,
+                            bDefinedRefPoint, pointOfReference);
+                        if(iCompoundMMember == 0) {
+                            bCompoundMember = false;
                         }
 
-                        if(myStatus != 0) {
-                            errorText = "Could not add model to scene list. Line " + lineCounter;
-                            // errorText will be printed with Global.statusPrint by the caller.
+                        if(iStatus != 0) {
+                            psErrorText = "Could not add model to scene list. Line " + iLineCounter;
+                            // psErrorText will be printed with Global.statusPrint by the caller.
 
                             closeLineNumberReader(filein);
                             return -1;
                         }
 
                         // Reset the variables used to store values parsed from the .scn file
-                        theBlend = true; 
-                        theWarp = true; 
-                        theAlpha = 1.0f; 
-                        theType = JICTConstants.I_IMAGE;
-                        definedRefPoint = false;
-                        theMotionPath = "";
-                        theFileName = "";
-                        adjustmentType = "None";
-                        colorAdjustedPath = "None";
+                        bBlend = true; 
+                        bWarp = true; 
+                        fAlpha = 1.0f; 
+                        iType = JICTConstants.I_IMAGE;
+                        bDefinedRefPoint = false;
+                        sMotionPath = "";
+                        sFileName = "";
+                        sAdjustmentType = "None";
+                        sColorAdjustedPath = "None";
                     } // if (nModels > 1)
 
                     // Look for the model name:
@@ -433,40 +433,40 @@ public class ScnFileParser {
                     // Model <modelName> [Blend|NoBlend] [Warp|NoWarp] AlphaScale <alpha> [Image|Shape|QuadMesh|Sequence]
                     sType       = strtok.nextToken();
 
-                    theBlend = true;
+                    bBlend = true;
                     if(sBlend != null) {
                         if(sBlend.equalsIgnoreCase("NOBLEND")) { 
-                            theBlend = false;
+                            bBlend = false;
                         }
                     } else {
-                        errorText = "Missing value or term on Line " + lineCounter;
-                        // errorText will be printed with Global.statusPrint by the caller.
+                        psErrorText = "Missing value or term on Line " + iLineCounter;
+                        // psErrorText will be printed with Global.statusPrint by the caller.
 
                         closeLineNumberReader(filein);
                         return -1;
                     }
 
-                    theWarp = true;
+                    bWarp = true;
                     if(sWarp != null) {
                         if(sWarp.equalsIgnoreCase("NOWARP")) { 
-                            theWarp = false;
+                            bWarp = false;
                         }
                     } else {
-                        errorText = "Missing value or term on Line " + lineCounter;
-                        // errorText will be printed with Global.statusPrint by the caller.
+                        psErrorText = "Missing value or term on Line " + iLineCounter;
+                        // psErrorText will be printed with Global.statusPrint by the caller.
 
                         closeLineNumberReader(filein);
                         return -1;
                     }
 
-                    theAlpha = 1.0f;
+                    fAlpha = 1.0f;
                     if(sScale != null) {
                         if(sScale.equalsIgnoreCase("ALPHASCALE")) {
-                            theAlpha = Float.parseFloat(sScaleValue);
+                            fAlpha = Float.parseFloat(sScaleValue);
                         }
                     } else {
-                        errorText = "Missing value or term on Line " + lineCounter;
-                        // errorText will be printed with Global.statusPrint by the caller.
+                        psErrorText = "Missing value or term on Line " + iLineCounter;
+                        // psErrorText will be printed with Global.statusPrint by the caller.
 
                         closeLineNumberReader(filein);
                         return -1;
@@ -474,120 +474,115 @@ public class ScnFileParser {
 
                     // Look for the model type (i.e., [Image|Shape|QuadMesh|Sequence]):
                     // Model <modelName> [Blend|NoBlend] [Warp|NoWarp] AlphaScale <alpha> [Image|Shape|QuadMesh|Sequence]
-                    theType = JICTConstants.I_IMAGE;
+                    iType = JICTConstants.I_IMAGE;
                     if(sType != null) {
-                        if(sType.equalsIgnoreCase("SHAPE"))    theType = JICTConstants.I_SHAPE;
-                        if(sType.equalsIgnoreCase("QUADMESH")) theType = JICTConstants.I_QUADMESH;
-                        if(sType.equalsIgnoreCase("SEQUENCE")) theType = JICTConstants.I_SEQUENCE;
+                        if(sType.equalsIgnoreCase("SHAPE"))    iType = JICTConstants.I_SHAPE;
+                        if(sType.equalsIgnoreCase("QUADMESH")) iType = JICTConstants.I_QUADMESH;
+                        if(sType.equalsIgnoreCase("SEQUENCE")) iType = JICTConstants.I_SEQUENCE;
                         if(sType.equalsIgnoreCase("COMPOUND")) {
-                            theType = JICTConstants.I_COMPOUND;
-                            compoundMMember = 1;
+                            iType = JICTConstants.I_COMPOUND;
+                            iCompoundMMember = 1;
                         }
                     } else {
-                        errorText = "Expected a model type on Line " + lineCounter;
-                        // errorText will be printed with Global.statusPrint by the caller.
+                        psErrorText = "Expected a model type on Line " + iLineCounter;
+                        // psErrorText will be printed with Global.statusPrint by the caller.
 
                         closeLineNumberReader(filein);
                         return -1;
                     }
 
-                    notFound = FALSE;
+                    iNotFound = FALSE;
                 } // if (strcmpi (TheKeyWord, "MODEL")
 
-                if(TheKeyWord.equalsIgnoreCase("REFERENCEPOINT")) {
-                    String theRef, localRef;
+                if(sKeyWord.equalsIgnoreCase("REFERENCEPOINT")) {
+                    String sRef;
                     // Skip over the word "REFERENCEPOINT"
                     // theRef = strtok(TheText + 15, BLANK);
-                    int idxRefPt = TheText.indexOf("REFERENCEPOINT");
-                    theRef = TheText.substring(idxRefPt + 15);
-                    localRef = theRef;
+                    int idxRefPt = sText.indexOf("REFERENCEPOINT");
+                    sRef = sText.substring(idxRefPt + 15);
 
-                    if(checkFor3(localRef) == 0) {
-                        notFound = THREE_NUMBERS_NOT_FOUND;
+                    if(checkFor3(sRef) == 0) {
+                        iNotFound = THREE_NUMBERS_NOT_FOUND;
                     } else {
-                        numtok = new StringTokenizer(localRef, ",");
+                        numtok = new StringTokenizer(sRef, ",");
                         pointOfReference.x = Float.parseFloat(numtok.nextToken());
                         pointOfReference.y = Float.parseFloat(numtok.nextToken());
                         pointOfReference.z = Float.parseFloat(numtok.nextToken());
-                        definedRefPoint = true;
-                        notFound = FALSE;
+                        bDefinedRefPoint = true;
+                        iNotFound = FALSE;
                     }
                 }
 
-                if(TheKeyWord.equalsIgnoreCase("ROTATION")) {
+                if(sKeyWord.equalsIgnoreCase("ROTATION")) {
                     // Found a ROTATION line. So we parse it. 
                     // It should have the following format:
                     // ROTATION <rx>, <ry>, <rz>
                     // where rx, ry and rz are rotation degrees, 
                     // expressed as floating-point numbers.
-                    String theRt;
-                    String localRt;
+                    String sRt;
                     // Skip over the word "ROTATION"
                     // theRt = strtok(TheText + 9, BLANK);
-                    int rtIdx = TheText.indexOf("ROTATION");
-                    theRt = TheText.substring(rtIdx + 9);
-                    localRt = theRt;
+                    int rtIdx = sText.indexOf("ROTATION");
+                    sRt = sText.substring(rtIdx + 9);
 
-                    if(checkFor3(localRt) == 0) {
-                        notFound = THREE_NUMBERS_NOT_FOUND;
+                    if(checkFor3(sRt) == 0) {
+                        iNotFound = THREE_NUMBERS_NOT_FOUND;
                     } else {
-                        numtok = new StringTokenizer(localRt, ",");
-                        rt.x = Float.parseFloat(strtok.nextToken());
-                        rt.y = Float.parseFloat(strtok.nextToken());
-                        rt.z = Float.parseFloat(strtok.nextToken());
-                        notFound = FALSE;
+                        numtok = new StringTokenizer(sRt, ",");
+                        rtPt.x = Float.parseFloat(strtok.nextToken());
+                        rtPt.y = Float.parseFloat(strtok.nextToken());
+                        rtPt.z = Float.parseFloat(strtok.nextToken());
+                        iNotFound = FALSE;
                     }
                 }
 
-                if(TheKeyWord.equalsIgnoreCase("SCALE")) {
+                if(sKeyWord.equalsIgnoreCase("SCALE")) {
                     // Found a SCALE line. So we parse it. 
                     // It should have the following format:
                     // SCALE <sx>, <sy>, <sz>
                     // were sx, sy, and sz are scale values, 
                     // expressed as floating-point numbers.
-                    String theSc, localSc;
+                    String sSc;
                     // Skip over the word "SCALE"
                     // theSc = strtok(TheText + 6, BLANK);
-                    int scIdx = TheText.indexOf("SCALE");
-                    theSc = TheText.substring(scIdx + 6);
-                    localSc = theSc;
+                    int scIdx = sText.indexOf("SCALE");
+                    sSc = sText.substring(scIdx + 6);
 
-                    if(checkFor3(localSc) == 0) {
-                        notFound = THREE_NUMBERS_NOT_FOUND;
+                    if(checkFor3(sSc) == 0) {
+                        iNotFound = THREE_NUMBERS_NOT_FOUND;
                     } else {
-                        numtok = new StringTokenizer(localSc, ",");
-                        sc.x = Float.parseFloat(numtok.nextToken());
-                        sc.y = Float.parseFloat(numtok.nextToken());
-                        sc.z = Float.parseFloat(numtok.nextToken());
-                        notFound = FALSE;
+                        numtok = new StringTokenizer(sSc, ",");
+                        scPt.x = Float.parseFloat(numtok.nextToken());
+                        scPt.y = Float.parseFloat(numtok.nextToken());
+                        scPt.z = Float.parseFloat(numtok.nextToken());
+                        iNotFound = FALSE;
                     }
                 }
 
-                if(TheKeyWord.equalsIgnoreCase("TRANSLATION")) {
+                if(sKeyWord.equalsIgnoreCase("TRANSLATION")) {
                     // Found a TRANSLATION line. So we parse it. 
                     // It should have the following format:
                     // TRANSLATION <tx>, <ty>, <tz>
                     // where tx, ty, and tz are translation values, 
                     // expressed as floating-point numbers.
-                    String theTr, localTr;
+                    String sTr;
                     // Skip over the word "TRANSLATION"
                     // theTr = strtok(TheText + 12, BLANK);
-                    int trIdx = TheText.indexOf("TRANSLATION");
-                    theTr = TheText.substring(trIdx + 12);
-                    localTr = theTr;
+                    int trIdx = sText.indexOf("TRANSLATION");
+                    sTr = sText.substring(trIdx + 12);
 
-                    if(checkFor3(localTr) == 0) {
-                        notFound = THREE_NUMBERS_NOT_FOUND;
+                    if(checkFor3(sTr) == 0) {
+                        iNotFound = THREE_NUMBERS_NOT_FOUND;
                     } else {
-                        numtok = new StringTokenizer(localTr, ",");
-                        tr.x = Float.parseFloat(numtok.nextToken());
-                        tr.y = Float.parseFloat(numtok.nextToken());
-                        tr.z = Float.parseFloat(numtok.nextToken());
-                        notFound = FALSE;
+                        numtok = new StringTokenizer(sTr, ",");
+                        trPt.x = Float.parseFloat(numtok.nextToken());
+                        trPt.y = Float.parseFloat(numtok.nextToken());
+                        trPt.z = Float.parseFloat(numtok.nextToken());
+                        iNotFound = FALSE;
                     }
                 }
 
-                if(TheKeyWord.equalsIgnoreCase("ADJUSTCOLOR")) {
+                if(sKeyWord.equalsIgnoreCase("ADJUSTCOLOR")) {
                     // Found an ADJUSTCOLOR line. So we parse it. 
                     // It should have the following format:
                     // ADJUSTCOLOR [Target|Relative] <R>, <G>, <B>
@@ -601,30 +596,30 @@ public class ScnFileParser {
                     adjustment = strtok.nextToken();
 
                     // adjustmentType should be "TARGET" or "RELATIVE"
-                    adjustmentType = adjustment;
+                    sAdjustmentType = adjustment;
                     // int aLength = adjustment.length(); // This variable is no longer used
                     // Skip over both the words "ADJUSTCOLOR" and 
                     // "TARGET" or "RELATIVE"
                     // theColor = strtok(TheText + 12 + aLength + 1, BLANK);  // move forward to the RGB color
                     
-                    int idx = TheText.indexOf("RELATIVE");
+                    int idx = sText.indexOf("RELATIVE");
                     if (idx == -1) {
-                        idx = TheText.indexOf("TARGET");
-                        theColor = TheText.substring(idx + 6);
+                        idx = sText.indexOf("TARGET");
+                        theColor = sText.substring(idx + 6);
                     } else {
-                        theColor = TheText.substring(idx + 9);
+                        theColor = sText.substring(idx + 9);
                     }
 
                     // Parse the R, G, B color values
                     numtok = new StringTokenizer(theColor, ",");
-                    int r = Integer.parseInt(numtok.nextToken());
-                    int g = Integer.parseInt(numtok.nextToken());
-                    int b = Integer.parseInt(numtok.nextToken());
-                    anAdjustment = new Color(r, g, b);
-                    notFound = FALSE;
+                    int iR = Integer.parseInt(numtok.nextToken());
+                    int iG = Integer.parseInt(numtok.nextToken());
+                    int iB = Integer.parseInt(numtok.nextToken());
+                    adjustmentColor = new Color(iR, iG, iB);
+                    iNotFound = FALSE;
                 }
 
-                if(TheKeyWord.equalsIgnoreCase("MOTIONPATH")) {
+                if(sKeyWord.equalsIgnoreCase("MOTIONPATH")) {
                     // Found an MOTIONPATH line. So we parse it. 
                     // It should have the following format:
                     // MOTIONPATH [None|<pathName>]
@@ -632,37 +627,37 @@ public class ScnFileParser {
 
                     // Skip over the word "MOTIONPATH"
                     // Now theMotionPath should be either "None" or the path
-                    int idxMotionPath = TheText.indexOf("MOTIONPATH");
-                    theMotionPath = TheText.substring(idxMotionPath + 11);
+                    int idxMotionPath = sText.indexOf("MOTIONPATH");
+                    sMotionPath = sText.substring(idxMotionPath + 11);
 
-                    if(theMotionPath.length() == 0) {
-                        errorText = "MotionPath file missing on Line " + lineCounter;
-                        // errorText will be printed with Global.statusPrint by the caller.
+                    if(sMotionPath.length() == 0) {
+                        psErrorText = "MotionPath file missing on Line " + iLineCounter;
+                        // psErrorText will be printed with Global.statusPrint by the caller.
 
                         closeLineNumberReader(filein);
                         return -1;
                     }
-                    notFound = FALSE;
+                    iNotFound = FALSE;
                 }
 
-                if(TheKeyWord.equalsIgnoreCase("ALPHAIMAGEPATH")) {
+                if(sKeyWord.equalsIgnoreCase("ALPHAIMAGEPATH")) {
                     // Found an ALPHAIMAGEPATH line. So we parse it. 
                     // It should have the following format:
                     // ALPHAIMAGEPATH [None|<pathName>]
-                    int idxAlphaImgPath = TheText.indexOf("ALPHAIMAGEPATH");
-                    theAlphaPath = TheText.substring(idxAlphaImgPath + 15);
+                    int idxAlphaImgPath = sText.indexOf("ALPHAIMAGEPATH");
+                    sAlphaPath = sText.substring(idxAlphaImgPath + 15);
 
-                    if(theAlphaPath.length() == 0) {
-                        errorText = "Alpha Image Path file missing. Line " + lineCounter;
-                        // errorText will be printed with Global.statusPrint by the caller.
+                    if(sAlphaPath.length() == 0) {
+                        psErrorText = "Alpha Image Path file missing. Line " + iLineCounter;
+                        // psErrorText will be printed with Global.statusPrint by the caller.
 
                         closeLineNumberReader(filein);
                         return -1;
                     }
-                    notFound = FALSE;
+                    iNotFound = FALSE;
                 }
 
-                if(TheKeyWord.equalsIgnoreCase("FILENAME")) {
+                if(sKeyWord.equalsIgnoreCase("FILENAME")) {
                     // Found a FILENAME line. So we parse it. 
                     // It should have the following format:
                     // FILENAME <pathName>
@@ -671,84 +666,85 @@ public class ScnFileParser {
                     // should be the full path to a Windows bitmap (.bmp) file.
                     // If the model type is SHAPE, then pathName 
                     // should be the full path to a shape (.shp) file.
-                    int idxFileName = TheText.indexOf("FILENAME");
-                    theFileName = TheText.substring(idxFileName + 9);
+                    int idxFileName = sText.indexOf("FILENAME");
+                    sFileName = sText.substring(idxFileName + 9);
 
                     // If the user previously specified either outWidth = 0 or outHeight = 0
                     // in the SCENE line ...
-                    if(getOutImageSizeFlag == true) {
+                    if(bGetOutImageSizeFlag == true) {
                         // Read the outWidth and outHeight values from the .bmp file
-                        Integer bpp = 0;
-                        int bmpStatus;
-                        bmpStatus = Globals.readBMPHeader(theFileName, outImageRows, outImageCols, bpp);
-                        if(bmpStatus != 0) {
-                            errorText = "File name not valid. Line " + lineCounter;
-                            // errorText will be printed with Global.statusPrint by the caller.
+                        Integer iBpp = 0;
+                        int iBmpStatus;
+                        iBmpStatus = Globals.readBMPHeader(sFileName, iOutImageRows, iOutImageCols, iBpp);
+                        if(iBmpStatus != 0) {
+                            psErrorText = "File name not valid. Line " + iLineCounter;
+                            // psErrorText will be printed with Global.statusPrint by the caller.
 
                             closeLineNumberReader(filein);
                             return -1;
                         }
-                        mSceneList.setSceneOutImageSize(outImageRows, outImageCols);
-                        getOutImageSizeFlag = false;
+                        mSceneList.setSceneOutImageSize(iOutImageRows, iOutImageCols);
+                        bGetOutImageSizeFlag = false;
                     }
-                    notFound = FALSE;
+                    iNotFound = FALSE;
                 }
 
                 // Look for other keywords - not model related
-                if(TheKeyWord.equalsIgnoreCase("END")) {
-                    String theToken, localToken;
-                    int tokenIdx = TheText.indexOf("END");
-                    theToken = TheText.substring(tokenIdx + 4);
-                    localToken = theToken;
+                if(sKeyWord.equalsIgnoreCase("END")) {
+                    String sToken;
+                    int tokenIdx = sText.indexOf("END");
+                    sToken = sText.substring(tokenIdx + 4);
 
-                    if(localToken.equalsIgnoreCase("COMPOUND")) {
-                        compoundMMember = 0;
-                        notFound = FALSE;
+                    if(sToken.equalsIgnoreCase("COMPOUND")) {
+                        iCompoundMMember = 0;
+                        iNotFound = FALSE;
                     }
                 }
 
-                if (TheKeyWord.equalsIgnoreCase("EOF")) {
+                if (sKeyWord.equalsIgnoreCase("EOF")) {
                     // Save the last model
                     // If the color is to be adjusted (i.e., we previously read an ADJUSTCOLOR line), 
                     // adjust it now and change the input image
                     // file name to point to the color corrected image.
-                    if(adjustmentType.equalsIgnoreCase("None")) {
-                        MemImage inputImage = new MemImage(theFileName, 0, 0, 
+                    if(sAdjustmentType.equalsIgnoreCase("None")) {
+                        MemImage inputImage = new MemImage(sFileName, 0, 0, 
                             JICTConstants.I_RANDOM, 'R', JICTConstants.I_RGBCOLOR);
                         if (!inputImage.isValid()) {
-                            msgBuffer = "sceneList.readList: Can't open image for color correction: " + theFileName;
-                            Globals.statusPrint(msgBuffer);
+                            sMsgBuffer = "sceneList.readList: Can't open image for color correction: " + sFileName;
+                            Globals.statusPrint(sMsgBuffer);
                             return -1;
                         }
                         
                         MemImage correctedImage = new MemImage(inputImage);
                         Globals.statusPrint("Adjusting color image");	    
-                        inputImage.adjustColor(anAdjustment.getRed(), anAdjustment.getGreen(), anAdjustment.getBlue(),
-                            midRed, midGreen, midBlue, 
-                            correctedImage, adjustmentType, 0);
+                        inputImage.adjustColor(adjustmentColor.getRed(), adjustmentColor.getGreen(), adjustmentColor.getBlue(),
+                            bytMidRed, bytMidGreen, bytMidBlue, 
+                            correctedImage, sAdjustmentType, 0);
 
-                        FileUtils.constructPathName(colorAdjustedPath, theFileName, 'j');     
-                        msgBuffer = "Saving adjusted color image: " + colorAdjustedPath;
-                        Globals.statusPrint(msgBuffer);
+                        FileUtils.constructPathName(sColorAdjustedPath, sFileName, 'j');     
+                        sMsgBuffer = "Saving adjusted color image: " + sColorAdjustedPath;
+                        Globals.statusPrint(sMsgBuffer);
                   
-                        correctedImage.writeBMP(colorAdjustedPath);
+                        correctedImage.writeBMP(sColorAdjustedPath);
                     }
 
-                    if(compoundMMember == 1 && theType == JICTConstants.I_COMPOUND) compoundMember = false;
-                    if(compoundMMember == 1 && theType != JICTConstants.I_COMPOUND) compoundMember = true;
+                    if(iCompoundMMember == 1 && iType == JICTConstants.I_COMPOUND) bCompoundMember = false;
+                    if(iCompoundMMember == 1 && iType != JICTConstants.I_COMPOUND) bCompoundMember = true;
 
-                    myStatus = mSceneList.addSceneElement(theModelName, theFileName, theBlend, theType,
-                        theWarp, theAlpha, 
-                        rt, sc, tr, 
-                        theMotionPath, theAlphaPath,
-                        compoundMember, anAdjustment, adjustmentType, 
-                        colorAdjustedPath,
-                        definedRefPoint, pointOfReference);
-                    if(compoundMMember == 0) compoundMember = false;
+                    iStatus = mSceneList.addSceneElement(theModelName, sFileName, 
+                        bBlend, iType,
+                        bWarp, fAlpha, 
+                        rtPt, scPt, trPt, 
+                        sMotionPath, sAlphaPath,
+                        bCompoundMember, 
+                        adjustmentColor, sAdjustmentType, 
+                        sColorAdjustedPath,
+                        bDefinedRefPoint, pointOfReference);
+                    if(iCompoundMMember == 0) bCompoundMember = false;
 
-                    if(myStatus != 0) {
-                        errorText = "Could not add a model to scene list. Line " + lineCounter;
-                        // errorText will be printed with Global.statusPrint by the caller.
+                    if(iStatus != 0) {
+                        psErrorText = "Could not add a model to scene list. Line " + iLineCounter;
+                        // psErrorText will be printed with Global.statusPrint by the caller.
 
                         closeLineNumberReader(filein);
                         return -1;
@@ -756,23 +752,23 @@ public class ScnFileParser {
 
                     closeLineNumberReader(filein);
                     return 0;
-                } // if (TheKeyWord.equalsIgnoreCase("EOF"))
+                } // if (sKeyWord.equalsIgnoreCase("EOF"))
             
-                if (notFound != 0) {
-                    if(notFound == 1) {
-                        errorText = "Unknown Keyword: " + TheKeyWord + "  Line " + lineCounter;
+                if (iNotFound != 0) {
+                    if(iNotFound == 1) {
+                        psErrorText = "Unknown Keyword: " + sKeyWord + "  Line " + iLineCounter;
                     }
-                    if(notFound == THREE_NUMBERS_NOT_FOUND) {
-                        errorText = "Expected 3 numeric values separated by commas: " + TheKeyWord + "  Line " + lineCounter;
+                    if(iNotFound == THREE_NUMBERS_NOT_FOUND) {
+                        psErrorText = "Expected 3 numeric values separated by commas: " + sKeyWord + "  Line " + iLineCounter;
                     }
-                    Globals.statusPrint(errorText);
+                    Globals.statusPrint(psErrorText);
 
                     closeLineNumberReader(filein);
                     return -1;
                 } // if (notFound != 0)
                 
-                TheKeyWord = Shape3d.getNextLine(TheText, lineCounter, filein, minLineSize);
-            } // while(!TheKeyWord.equalsIgnoreCase("SCENE"))
+                sKeyWord = Shape3d.getNextLine(sText, iLineCounter, filein, iMinLineSize);
+            } // while(!sKeyWord.equalsIgnoreCase("SCENE"))
         } // while(true)
     } // readList
 
