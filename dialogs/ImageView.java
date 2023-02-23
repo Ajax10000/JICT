@@ -69,16 +69,61 @@ protected:
 
     private MainFrame mMainFrame;
     public HBITMAP hBitmap;
+
+    // Modified in:
+    //     associateMemImage
     public MemImage mMImage;
     public Shape3d mShape;  // used during cutout image creation
+
+    // Modified in:
+    //     onLButtonDown
+    //     onInitialUpdate
+    // Read in:
+    //     onLButtonUp
+    //     onRButtonDown
     public boolean mbCutoutEnabled;
 
     // if true then the onDraw erases the window prior to redrawing
+    // Modified in:
+    //     associateMemImage - set temporarily to true then back to false
     public boolean mbEraseMe;
 
+    // Read in:
+    //     onLButtonUp
     public boolean mbFirstPress;
+
+    // Modified in:
+    //     loadBMP
+    //     onLButtonDblClk
     public String msFileName;
 
+/*
+    protected:
+    ...
+    BOOL loadBMP(char *);
+    void getBitmap();
+    public:
+    imageView();
+    virtual ~imageView();
+    virtual void OnDraw(CDC *pDC);
+    virtual void OnUpdate();
+    virtual void OnInitialUpdate();
+    void setCaption(char *aCaption);
+    void getScrollPos(int *xPixels, int *yPixels);
+    void CmFileRead(char *);
+    BOOL imageView::associateMemImage(memImage *outImage);
+    static imageView * GetView();
+    HWND getImageWindowHandle(){return m_hWnd;};
+    protected:
+      //  Message Handlers
+      //{{AFX_MSG(imageView)
+        afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
+        afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
+        afx_msg void OnRButtonUp(UINT nFlags, CPoint point);
+        afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+        afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
+        afx_msg void OnMouseMove(UINT nFlags, CPoint point);
+*/
 
     // Called from:
     //     MainFrame.onPreviewStillScene
@@ -97,6 +142,7 @@ protected:
     } // finalize
     
 
+    // This method originally came from IMAGEVW.H
     public ImageDoc getDocument() {
         ASSERT (m_pDocument.IsKindOf(RUNTIME_CLASS(imageDoc)));
         return (ImageDoc)m_pDocument;
@@ -104,7 +150,8 @@ protected:
 
 
     public void onInitialUpdate() {
-        String anImage;
+        String sImage;
+
         ScrollView.OnInitialUpdate();
         ASSERT(getDocument() != null);
         mMImage = getDocument().getImagePointer();
@@ -112,8 +159,8 @@ protected:
             SetScrollSizes(MM_TEXT, getDocument().getDocSize());
             getBitmap();
             msFileName = getDocument().getPathName();
-            anImage = new String(msFileName);
-            setCaption(anImage);
+            sImage = new String(msFileName);
+            setCaption(sImage);
         } else {
             SetScrollSizes(MM_TEXT, CSize(1,1));
         }
@@ -124,19 +171,21 @@ protected:
     
     // Called from:
     //     MainFrame.onToolsWarpImage
-    public void setCaption(String aCaption) {
-         GetParent().SetWindowText(aCaption);
+    public void setCaption(String psCaption) {
+         GetParent().SetWindowText(psCaption);
     } // setCaption
     
 
-    public void getScrollPos(Integer xPixels, Integer yPixels) {
-        CPoint aLocation;
+    // Called from:
+    //     onLButtonUp
+    public void getScrollPos(Integer pIXPixels, Integer pIYPixels) {
+        CPoint locationPt;
 
-        aLocation = GetDeviceScrollPosition();
+        locationPt = GetDeviceScrollPosition();
 
         // Set the output parameters
-        xPixels = aLocation.x;
-        yPixels = aLocation.y;
+        pIXPixels = locationPt.x;
+        pIYPixels = locationPt.y;
     } // getScrollPos
     
 
@@ -150,19 +199,21 @@ protected:
     // Called from:
     //     associateMemImage
     public void onDraw(CDC qdc) {
-        int status;
+        int iStatus;
     
         if(mMainFrame.mbPreviewingScene) {
-            status = mMainFrame.mSceneList.previewStill(m_hWnd, mMainFrame.mModelMatrix, mMainFrame.mViewMatrix);
-            if(status != 0) { 
+            iStatus = mMainFrame.mSceneList.previewStill(m_hWnd, 
+                mMainFrame.mModelMatrix, mMainFrame.mViewMatrix);
+            if(iStatus != 0) { 
                 exit;
             }
             return;
         }
 
         if(theFrame.previewingSequence) {
-            status = mMainFrame.mSceneList.preview(m_hWnd, mMainFrame.mModelMatrix, mMainFrame.mViewMatrix);
-            if(status != 0) {
+            iStatus = mMainFrame.mSceneList.preview(m_hWnd, 
+                mMainFrame.mModelMatrix, mMainFrame.mViewMatrix);
+            if(iStatus != 0) {
                 exit;
             }
             return;
@@ -194,24 +245,25 @@ protected:
         imageRect.right = docSize.cx; imageRect.bottom = docSize.cy;
     
         CPoint scrollPos = GetDeviceScrollPosition();
-        int XPos = scrollPos.x;
-        int YPos = scrollPos.y;
-        clientRect.left   += XPos;
-        clientRect.right  += XPos;
-        clientRect.top    += YPos;
-        clientRect.bottom += YPos;
+        int iXPos = scrollPos.x;
+        int iYPos = scrollPos.y;
+        clientRect.left   += iXPos;
+        clientRect.right  += iXPos;
+        clientRect.top    += iYPos;
+        clientRect.bottom += iYPos;
         
         BitBlt(imageRect.left, imageRect.top,
           imageRect.right - imageRect.left,
           imageRect.bottom - imageRect.top,
-          memDC, imageRect.left + XPos,
-          imageRect.top + YPos, SRCCOPY);
+          memDC, imageRect.left + iXPos,
+          imageRect.top + iYPos, SRCCOPY);
     
         PatBlt(docSize.cx, 0,
             clientRect.right - docSize.cx,
             clientRect.bottom, PATCOPY);
         PatBlt(0, docSize.cy,
-            clientRect.right, clientRect.bottom - docSize.cy, PATCOPY);
+            clientRect.right, 
+            clientRect.bottom - docSize.cy, PATCOPY);
     
         SelectObject(memDC, holdBitmap);
     } // onDraw
@@ -219,9 +271,9 @@ protected:
 
     // Called from:
     //     MainFrame.onToolsWarpImage
-    public boolean associateMemImage(MemImage theImage) {
-        mMImage = theImage;                      //  set the view's image
-        getDocument().setImagePointer(theImage);  //  set the document's image
+    public boolean associateMemImage(MemImage pMImage) {
+        mMImage = pMImage;                      //  set the view's image
+        getDocument().setImagePointer(pMImage);  //  set the document's image
         getBitmap();
 
         CDC qdc;
@@ -234,17 +286,19 @@ protected:
     } // associateMemImage
     
 
+    // Called from:
+    //     associateMemImage
     public void getBitmap() {
         PBITMAPINFO pbmi;
         RGBQUAD pal = new RGBQUAD[256];
 
         pbmi = LocalLock();
         
-        for(int a = 0; a < 256; a++) {
-            pal[a].rgbRed   = a; // previously cast as (unsigned char)
-            pal[a].rgbGreen = a; // previously cast as (unsigned char)
-            pal[a].rgbBlue  = a; // previously cast as (unsigned char)
-            pal[a].rgbReserved = 0;
+        for(int i = 0; i < 256; i++) {
+            pal[i].rgbRed   = i; // previously cast as (unsigned char)
+            pal[i].rgbGreen = i; // previously cast as (unsigned char)
+            pal[i].rgbBlue  = i; // previously cast as (unsigned char)
+            pal[i].rgbReserved = 0;
         }
         
         pbmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
@@ -261,16 +315,18 @@ protected:
     } // getBitmap
     
 
-    public boolean loadBMP(String name) {
-        String msgText;
-        mMImage = new MemImage(name, 0, 0, 
+    public boolean loadBMP(String psName) {
+        String sMsgText;
+
+        mMImage = new MemImage(psName, 0, 0, 
             JICTConstants.I_RANDOM, 'R', 0);
         if(!mMImage.isValid()) {
-            msgText = "Cannot open bitmap file: " + name;
-            Globals.statusPrint(msgText);
+            sMsgText = "Cannot open bitmap file: " + psName;
+            Globals.statusPrint(sMsgText);
             return false;
         }
-        msFileName = name;
+
+        msFileName = psName;
         getBitmap();
         return true;
     } // loadBMP
@@ -303,7 +359,8 @@ protected:
     public void onLButtonDown(UINT nFlags, CPoint point) {
         // Peek into the CMainFrame window object to see if 
         // the cutout enabled option has been checked.
-        String msgText;
+        String sMsgText;
+
         mbCutoutEnabled = mMainFrame.mbCutoutEnabled;
         if(mbCutoutEnabled) {
             if (mbFirstPress == false) {
@@ -315,53 +372,59 @@ protected:
         
         if (!mbCutoutEnabled && mMainFrame.mbImageSamplingEnabled) {
             // Sample the color pixel and display the RGB values
-            byte red, green, blue;
-            byte theValue;
-            float theValue32;
-            int xOffset, yOffset;
-            getScrollPos(xOffset, yOffset);
+            Byte bytRed = 0, bytGreen = 0, bytBlue = 0;
+            byte bytValue;
+            float fValue32;
+            int iXOffset, iYOffset;
+            getScrollPos(iXOffset, iYOffset);
 
             switch(mMImage.getBitsPerPixel()) {
             case 32:
-                theValue32 = mMImage.getMPixel32(point.x + xOffset + 1, mMImage.getHeight() - point.y - yOffset);
-                msgText = "x: " + point.x + xOffset + 1 + "  y: " + mMImage.getHeight() - point.y - yOffset + 
-                    "  Value: " + theValue32;
+                fValue32 = mMImage.getMPixel32(point.x + iXOffset + 1, mMImage.getHeight() - point.y - iYOffset);
+                sMsgText = "x: " + point.x + iXOffset + 1 + 
+                         "  y: " + mMImage.getHeight() - point.y - iYOffset + 
+                     "  Value: " + fValue32;
                 break;
         
             case 24:
-                mMImage.getMPixelRGB(point.x + xOffset + 1, mMImage.getHeight() - point.y - yOffset, 
-                    red, green, blue);
-                msgText = "x: " + point.x + xOffset + 1 + "  y: " + mMImage.getHeight() - point.y - yOffset + 
-                    "  Color: red: " + red + "  green: " + green + "  blue: "  + blue;
+                mMImage.getMPixelRGB(point.x + iXOffset + 1, mMImage.getHeight() - point.y - iYOffset, 
+                    bytRed, bytGreen, bytBlue);
+                sMsgText = "x: " + point.x + iXOffset + 1 + 
+                         "  y: " + mMImage.getHeight() - point.y - iYOffset + 
+                     "  Color: red: " + bytRed + "  green: " + bytGreen + "  blue: "  + bytBlue;
                 break;
         
             case 8:
-                theValue = mMImage.getMPixel(point.x + xOffset + 1, 
-                    mMImage.getHeight() - point.y - yOffset);
-                msgText = "x: " + point.x + xOffset + 1 + "  y: " + mMImage.getHeight() - point.y - yOffset + 
-                    " Value: " + theValue;
+                bytValue = mMImage.getMPixel(point.x + iXOffset + 1, 
+                    mMImage.getHeight() - point.y - iYOffset);
+                sMsgText = "x: " + point.x + iXOffset + 1 + 
+                         "  y: " + mMImage.getHeight() - point.y - iYOffset + 
+                      " Value: " + bytValue;
                 break;
         
             default:
-                msgText = "The image must have 8, 24 or 32 bits per pixel";
+                sMsgText = "The image must have 8, 24 or 32 bits per pixel";
             } // switch
-            Globals.statusPrint(msgText);
+            Globals.statusPrint(sMsgText);
 
             // If the user wishes to remove sampled colors...do it now
             if(mMainFrame.mbRemoveSampleColorsEnabled) {
-                int redLow, redHigh;
-                int greenLow, greenHigh;
-                int blueLow, blueHigh;
+                Integer iRedLow = 0, iRedHigh = 0;
+                Integer iGreenLow = 0, iGreenHigh = 0;
+                Integer iBlueLow = 0, iBlueHigh = 0;
 
-                int status = getSampleRange(mMImage, point.x + xOffset, mMImage.getHeight() - point.y - yOffset, 
-                    redLow,  redHigh, 
-                    greenLow,  greenHigh,
-                    blueLow,  blueHigh);
+                // The following sets parameters iRedLow, iRedHigh, iGreenLow, iGreenHigh, iBlueLow and iBlueHigh
+                int iStatus = getSampleRange(mMImage, 
+                    point.x + iXOffset, mMImage.getHeight() - point.y - iYOffset, 
+                    iRedLow,    iRedHigh, 
+                    iGreenLow,  iGreenHigh,
+                    iBlueLow,   iBlueHigh);
             
-                if (status != -1) {
-                    mMImage.clearRGBRange((byte)redLow,(byte)redHigh,
-                    (byte)greenLow,(byte)greenHigh, 
-                    (byte)blueLow, (byte)blueHigh);
+                if (iStatus != -1) {
+                    mMImage.clearRGBRange(
+                        (byte)iRedLow.intValue(),   (byte)iRedHigh.intValue(),
+                        (byte)iGreenLow.intValue(), (byte)iGreenHigh.intValue(), 
+                        (byte)iBlueLow.intValue(),  (byte)iBlueHigh.intValue());
                 }
             
                 getBitmap();
@@ -375,41 +438,44 @@ protected:
 
     public void onLButtonUp(UINT nFlags, CPoint point) {
         if(mbCutoutEnabled) {
-            String msgText;
+            String sMsgText;
             if(mbFirstPress == false) {
                 return;
             }
 
-            int xOffset, yOffset;
-            getScrollPos(xOffset, yOffset);
-            msgText = "Adding point " + mShape.getNumVertices() + 
-                ": (" + point.x + xOffset + ", " + point.y - yOffset + ")";
-            Globals.statusPrint(msgText);
-            int myStatus;
-            myStatus = mShape.addWorldVertex((float)(point.x + xOffset), (float)(point.y - yOffset), 0.0f); // z = 0 at the screen
+            int iXOffset, iYOffset;
+            getScrollPos(iXOffset, iYOffset);
+            sMsgText = "Adding point " + mShape.getNumVertices() + 
+                ": (" + point.x + iXOffset + ", " + point.y - iYOffset + ")";
+            Globals.statusPrint(sMsgText);
+            int iStatus;
+            iStatus = mShape.addWorldVertex(
+                (float)(point.x + iXOffset), 
+                (float)(point.y - iYOffset), 
+                0.0f); // z = 0 at the screen
             
             HPEN hpen;
             hpen = CreatePen(PS_SOLID, 1, Color.WHITE);
             SelectObject(hpen);
 
-            float x, y, z;
-            myStatus = mShape.getPreviousWorldVertex(x, y, z);
-            if (myStatus == 0) {
-                MoveToEx((int)(x - xOffset + 0.5), (int)(y + yOffset + 0.5), 0L);
+            float fX, fY, fZ;
+            iStatus = mShape.getPreviousWorldVertex(fX, fY, fZ);
+            if (iStatus == 0) {
+                MoveToEx((int)(fX - iXOffset + 0.5), (int)(fY + iYOffset + 0.5), 0L);
                 LineTo(point.x, point.y);
             } else {
                 MoveToEx(point.x, point.y, 0L); // draw a single point
                 LineTo(point.x+1, point.y+1);
             }
-        }
+        } // if(mbCutoutEnabled)
 
         CScrollView.OnLButtonUp(nFlags, point);
     } // onLButtonUp
     
 
     public void onLButtonDblClk(UINT nFlags, CPoint point) {
-        String msgText;
-        String cutoutName, imageFileName;
+        String sMsgText;
+        String sCutoutName, sImageFileName;
         CSize docSize = getDocument().getDocSize();
 
         if(mbCutoutEnabled) {
@@ -423,12 +489,13 @@ protected:
             // May have to move this if statement to NameDlg.java
             if (dlg.DoModal() == IDOK) {
                 msFileName = getDocument().getPathName();
-                imageFileName = msFileName; 
-                cutoutName = new String(dlg.m_Name);
-                int myStatus = RenderObject.prepareCutout(mShape, m_hWnd, imageFileName, cutoutName, (int)docSize.cx, (int)docSize.cy);
-                if(myStatus != 0) {
-                    msgText = "Unable to Create Cutout. " + myStatus;
-                    Globals.statusPrint(msgText);
+                sImageFileName = msFileName; 
+                sCutoutName = new String(dlg.m_Name);
+                int iStatus = RenderObject.prepareCutout(mShape, m_hWnd, 
+                    sImageFileName, sCutoutName, (int)docSize.cx, (int)docSize.cy);
+                if(iStatus != 0) {
+                    sMsgText = "Unable to Create Cutout. " + iStatus;
+                    Globals.statusPrint(sMsgText);
                     mbCutoutEnabled = false;
                     mbFirstPress = false;
                     return;
@@ -446,36 +513,38 @@ protected:
     
     public void onRButtonDown(UINT nFlags, CPoint point) {
         if(mbCutoutEnabled) {
-            String msgText;
-            int xOffset, yOffset;
+            String sMsgText;
+            Integer iXOffset = 0, iYOffset = 0;
 
-            getScrollPos(xOffset, yOffset);
-            msgText = "Deleting: (" + point.x + xOffset + ", " + point.y - yOffset + ")";
-            Globals.statusPrint(msgText);
+            getScrollPos(iXOffset, iYOffset);
+            sMsgText = "Deleting: (" + point.x + iXOffset + ", " + point.y - iYOffset + ")";
+            Globals.statusPrint(sMsgText);
             HPEN hpen;
         
             hpen = CreatePen(PS_SOLID, 1, Color.BLACK);  
             SelectObject(hpen);
-            int theStatus;
+            int iStatus;
 
-            float x, y, z, px, py, pz;
-            mShape.getLastWorldVertex(x, y, z);
-            mShape.getPreviousWorldVertex(px, py, pz);
+            Float fX = 0.0f, fY = 0.0f, fZ = 0.0f;
+            Float fPx = 0.0f, fPy = 0.0f, fPz = 0.0f;
+            mShape.getLastWorldVertex(fX, fY, fZ);
+            mShape.getPreviousWorldVertex(fPx, fPy, fPz);
 
-            MoveToEx((int)(px + 0.5f), (int)(py + 0.5f), 0L);
-            LineTo((int)(x + 0.5f), (int)(y + 0.5f));
-            theStatus = mShape.deleteLastWorldVertex();
+            MoveToEx((int)(fPx + 0.5f), (int)(fPy + 0.5f), 0L);
+            LineTo((int)(fX + 0.5f), (int)(fY + 0.5f));
+            iStatus = mShape.deleteLastWorldVertex();
+            // TODO: We are not looking at the return value for an error status
         }
         
         if(mMainFrame.mbRemoveSampleColorsEnabled) {
             //  Ask if the user wishes to save the thresholded image which they have been creating
             // int result = MessageBox("Do you wish to save the modified image?", "Save Image As", MB_YESNO|MB_ICONQUESTION);
-            int result = JOptionPane.showConfirmDialog(null, 
+            int iResult = JOptionPane.showConfirmDialog(null, 
                 "Do you wish to save the modified image?", "Save Image As", 
                 JOptionPane.YES_NO_OPTION);
 
-            if(result == JOptionPane.YES_OPTION) {
-                String aFileName;
+            if(iResult == JOptionPane.YES_OPTION) {
+                String sFileName;
 
                 JFileChooser dlg = new JFileChooser();
                 dlg.setFileSelectionMode(JFileChooser.FILES_ONLY);
@@ -484,11 +553,11 @@ protected:
 
                 if (showDlgResult == JFileChooser.APPROVE_OPTION) {
                     File file = dlg.getSelectedFile();
-                    aFileName = file.getName();
-                    mMImage.writeBMP(aFileName);
+                    sFileName = file.getName();
+                    mMImage.writeBMP(sFileName);
                 }
-            }
-        }
+            } // if(iResult == JOptionPane.YES_OPTION)
+        } // if(mMainFrame.mbRemoveSampleColorsEnabled)
 
         CScrollView.OnRButtonDown(nFlags, point);
     } // onRButtonDown
@@ -505,14 +574,14 @@ protected:
     } // onMouseMove
 
 
-    int getSampleRange(MemImage theImage, int x, int y, 
+    int getSampleRange(MemImage pMImage, int x, int y, 
     Integer redLow, Integer redHigh, 
     Integer greenLow, Integer greenHigh,
     Integer blueLow, Integer blueHigh) {
         byte red, green, blue;
         int status;
 
-        theImage.getMPixelRGB(x, y, red, green, blue);
+        pMImage.getMPixelRGB(x, y, red, green, blue);
         if((red == 0) && (green == 0) && (blue == 0)) {
             return -1;  //a background pixel was clicked on
         }
@@ -520,7 +589,7 @@ protected:
         greenLow = greenHigh = (int)green;
         blueLow = blueHigh = (int)blue;
       
-        status = theImage.getMPixelRGB(x + 1, y + 1, red, green, blue);
+        status = pMImage.getMPixelRGB(x + 1, y + 1, red, green, blue);
         if((red != 0) && (green != 0) && (blue != 0)) {
             if(red < redLow)  redLow  = (int)red;
             if(red > redHigh) redHigh = (int)red;
@@ -532,7 +601,7 @@ protected:
             if(blue > blueHigh) blueHigh = (int)blue;
         }
     
-        status = theImage.getMPixelRGB(x , y + 1, red, green, blue);
+        status = pMImage.getMPixelRGB(x , y + 1, red, green, blue);
         if((red != 0) && (green != 0) && (blue != 0)) {
             if(red < redLow)  redLow  = (int)red;
             if(red > redHigh) redHigh = (int)red;
@@ -544,7 +613,7 @@ protected:
             if(blue > blueHigh) blueHigh = (int)blue;
         }
     
-        status = theImage.getMPixelRGB(x + 1, y, red, green, blue);
+        status = pMImage.getMPixelRGB(x + 1, y, red, green, blue);
         if((red != 0) && (green != 0) && (blue != 0)) {
             if(red < redLow)  redLow  = (int)red;
             if(red > redHigh) redHigh = (int)red;
