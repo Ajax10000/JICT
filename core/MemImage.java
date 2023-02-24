@@ -2608,76 +2608,86 @@ public:
     } // alphaSmooth7
 
 
-    // This method came from SHADERS.CPP
+    // This method originally came from SHADERS.CPP
+    // This method takes 4 projected vertices and associated intensities
+    // and then fills the four-sided polygon given by those vertices. It 
+    // decomposes the four-sided polygon into 4 triangles and then calls 
+    // the fillTriangleZ once for each of the 4 triangles. See Visual 
+    // Special Effects Toolkit in C++, p 173.
+    //
     // Called from:
+    //     Globals.fwarpz
     //     RenderObject.renderMesh
     //     RenderObject.renderMeshz
     //     RenderObject.renderShape
     //     RenderObject.renderShapez
     public int fillPolyz(
-    int I1x, int I1y, float I1p, float I1d,
-    int I2x, int I2y, float I2p, float I2d, 
-    int I3x, int I3y, float I3p, float I3d, 
-    int I4x, int I4y, float I4p, float I4d,
-    MemImage zBuffer) {
-        // this	 -	output image
-        // outImage	 - zBuffer	
-        int xMax = I1x;
-        int yMax = I1y;
-        int xMin = I1x;
-        int yMin = I1y;
+    int piI1x, int piI1y, float pfI1p, float pfI1d,
+    int piI2x, int piI2y, float pfI2p, float pfI2d, 
+    int piI3x, int piI3y, float pfI3p, float pfI3d, 
+    int piI4x, int piI4y, float pfI4p, float pfI4d,
+    MemImage pzBufMImage) {
+        int iXMax = piI1x;
+        int iYMax = piI1y;
+        int iXMin = piI1x;
+        int iYMin = piI1y;
         // float totalIntensity, avgIntensity; // not used
-        MemImage outImage = this;  
+        MemImage outMImage = this;  
 
         // Get the bounding box
-        if(I2x > xMax) xMax = I2x;
-        if(I3x > xMax) xMax = I3x;
-        if(I4x > xMax) xMax = I4x;
+        if(piI2x > iXMax) iXMax = piI2x;
+        if(piI3x > iXMax) iXMax = piI3x;
+        if(piI4x > iXMax) iXMax = piI4x;
 
-        if(I2x < xMin) xMin = I2x;
-        if(I3x < xMin) xMin = I3x;
-        if(I4x < xMin) xMin = I4x;
+        if(piI2x < iXMin) iXMin = piI2x;
+        if(piI3x < iXMin) iXMin = piI3x;
+        if(piI4x < iXMin) iXMin = piI4x;
 
-        if(I2y > yMax) yMax = I2y;
-        if(I3y > yMax) yMax = I3y;
-        if(I4y > yMax) yMax = I4y;
+        if(piI2y > iYMax) iYMax = piI2y;
+        if(piI3y > iYMax) iYMax = piI3y;
+        if(piI4y > iYMax) iYMax = piI4y;
 
-        if(I2y < yMin) yMin = I2y;
-        if(I3y < yMin) yMin = I3y;
-        if(I4y < yMin) yMin = I4y;
+        if(piI2y < iYMin) iYMin = piI2y;
+        if(piI3y < iYMin) iYMin = piI3y;
+        if(piI4y < iYMin) iYMin = piI4y;
 
         // Handle quadrangles that consist of: a single point, horizontal or vertical line
-        float oldZ, intensity, distance; 
+        float fOldZ, fIntensity, fDistance; 
         // float outIntensity; // not used
-        int bpp = outImage.getBitsPerPixel();
+        int iBpp = outMImage.getBitsPerPixel();
 
         // Single point
-        if((xMin == xMax) && (yMin == yMax)) {
-            distance  = (I1d + I2d + I3d + I4d)/4.0f;
-            intensity = (I1p + I2p + I3p + I4p)/4.0f;
+        if((iXMin == iXMax) && (iYMin == iYMax)) {
+            fDistance  = (pfI1d + pfI2d + pfI3d + pfI4d)/4.0f;
+            fIntensity = (pfI1p + pfI2p + pfI3p + pfI4p)/4.0f;
 
-            if(zBuffer != null) {
-                oldZ = zBuffer.getMPixel32(xMin, yMin);
-                if(distance <= oldZ) {
-                    intensity = (I1p + I2p + I3p + I4p)/4.0f;
-                    zBuffer.setMPixel32(xMin, yMin, distance);
+            if(pzBufMImage != null) {
+                fOldZ = pzBufMImage.getMPixel32(iXMin, iYMin);
+                if(fDistance <= fOldZ) {
+                    // why is fIntensity calculated again?
+                    fIntensity = (pfI1p + pfI2p + pfI3p + pfI4p)/4.0f;
+                    pzBufMImage.setMPixel32(iXMin, iYMin, fDistance);
 
-                    if(bpp == 8)  outImage.setMPixel(xMin, yMin, (byte)intensity);
-                    if(bpp == 24) {
-                        outImage.setMPixelRGB(xMin, yMin, (byte)intensity,
-                            (byte)intensity, (byte)intensity);
+                    if(iBpp == 8)  {
+                        outMImage.setMPixel(iXMin, iYMin, (byte)fIntensity);
+                    }
+                    if(iBpp == 24) {
+                        outMImage.setMPixelRGB(iXMin, iYMin, 
+                            (byte)fIntensity, (byte)fIntensity, (byte)fIntensity);
                     }
                 } else {   //no zBuffer
-                    if(bpp == 8)  outImage.setMPixel(xMin, yMin, (byte)intensity);
-                    if(bpp == 24) {
-                        outImage.setMPixelRGB(xMin, yMin, (byte)intensity,
-                            (byte)intensity, (byte)intensity);
+                    if(iBpp == 8) {
+                        outMImage.setMPixel(iXMin, iYMin, (byte)fIntensity);
+                    }
+                    if(iBpp == 24) {
+                        outMImage.setMPixelRGB(iXMin, iYMin, 
+                            (byte)fIntensity, (byte)fIntensity, (byte)fIntensity);
                     }
                 }
             }
 
             return 0;
-        }
+        } // if((iXMin == iXMax) && (iYMin == iYMax))
 
         // int minX, minY, maxX, maxY, j; // not used
         // float minI, maxI, minD, maxD; // not used
@@ -2685,51 +2695,70 @@ public:
         // int row, col, denominator; // not used
 
         // Handle larger quadrangles
-        int xCent = (int)(((float)xMin + ((float)xMax - (float)xMin) / 2.0f) + 0.5f);
-        int yCent = (int)(((float)yMin + ((float)yMax - (float)yMin) / 2.0f) + 0.5f);
+        int iXCent = (int)(((float)iXMin + ((float)iXMax - (float)iXMin) / 2.0f) + 0.5f);
+        int iYCent = (int)(((float)iYMin + ((float)iYMax - (float)iYMin) / 2.0f) + 0.5f);
 
         // The intensity at the centroid is the weighted sum of the intensities at each vertex
         // The weights are the normalized distances between each vertex distance and the centroid
         // fill the triangle bounded by the centroid and each successive pair of vertices
-        float totalDistance = 0.0f;
-        float d1 = MathUtils.getDistance2d((float)xCent, (float)yCent, (float)I1x, (float)I1y);
-        float d2 = MathUtils.getDistance2d((float)xCent, (float)yCent, (float)I2x, (float)I2y);
-        float d3 = MathUtils.getDistance2d((float)xCent, (float)yCent, (float)I3x, (float)I3y);
-        float d4 = MathUtils.getDistance2d((float)xCent, (float)yCent, (float)I4x, (float)I4y);
-        totalDistance = d1 + d2 + d3 + d4;
-        if(totalDistance == 0.0f) {
+        float fTotalDistance = 0.0f;
+        float fD1 = MathUtils.getDistance2d((float)iXCent, (float)iYCent, (float)piI1x, (float)piI1y);
+        float fD2 = MathUtils.getDistance2d((float)iXCent, (float)iYCent, (float)piI2x, (float)piI2y);
+        float fD3 = MathUtils.getDistance2d((float)iXCent, (float)iYCent, (float)piI3x, (float)piI3y);
+        float fD4 = MathUtils.getDistance2d((float)iXCent, (float)iYCent, (float)piI4x, (float)piI4y);
+        fTotalDistance = fD1 + fD2 + fD3 + fD4;
+
+        // Is this check necessary? fTotalDistance = 0 only if fD1 = fD2 = fD3 = fD4 = 0,
+        // because MathUtils.getDistance2d returns values >= 0
+        if(fTotalDistance == 0.0f) {
+            // We can't continue, as we will be using fTotalDistance to divide fD1, fD2, fD3 and fD4
             Globals.statusPrint("MemImage.fillPolyZ: Sum of polygon diagonals must be > 0");
             return -1;
         }
 
-        //  Normalize the distances:
-        d1 /= totalDistance;
-        d2 /= totalDistance;
-        d3 /= totalDistance;
-        d4 /= totalDistance;
+        // Normalize the distances (so that fD1 + fD2 + fD3 + fD4 = 1.0)
+        fD1 /= fTotalDistance;
+        fD2 /= fTotalDistance;
+        fD3 /= fTotalDistance;
+        fD4 /= fTotalDistance;
         
-        // Calculate the intensity at the centroid
-        float iCent = (d1 * I1p) + (d2 * I2p) + (d3 * I3p) + (d4 * I4p);
-        float dCent = (d1 * I1d) + (d2 * I2d) + (d3 * I3d) + (d4 * I4d);
+        // Calculate the intensity at the centroid (iXCent, iYCent)
+        // We'll use fD1, fD2, fD3, and fD4 as weights for calculating the intensity at the centroid
+        float fiCent = (fD1 * pfI1p) + (fD2 * pfI2p) + (fD3 * pfI3p) + (fD4 * pfI4p);
+
+        // We'll use fD1, fD2, fD3 and fD4 as weights for calculating distance from viewpoint to centroid
+        float fdCent = (fD1 * pfI1d) + (fD2 * pfI2d) + (fD3 * pfI3d) + (fD4 * pfI4d);
 
         // Fill the polygon by subdividing it into 4 triangles and interpolatively 
         // shading each one.
-        Globals.fillTrianglez(xCent, yCent, iCent, dCent, 
-            I1x, I1y, I1p, I1d, 
-            I2x, I2y, I2p, I2d, 
-            outImage, zBuffer);
-        Globals.fillTrianglez(xCent, yCent, iCent, dCent, 
-            I2x, I2y, I2p, I2d, 
-            I3x, I3y, I3p, I3d, 
-            outImage, zBuffer);
-        Globals.fillTrianglez(xCent, yCent, iCent, dCent, 
-            I3x, I3y, I3p, I3d, 
-            I4x, I4y, I4p, I4d,
-            outImage, zBuffer);
-        Globals.fillTrianglez(xCent, yCent, iCent, dCent, 
-            I4x, I4y, I4p, I4d, 
-            I1x, I1y, I1p, I1d,
-            outImage, zBuffer);
+        // Fill up the 2D triangle consisting of vertices (iXCent, iYCent), (piI1x, piI1y), and (piI2x, piI2y)
+        Globals.fillTrianglez(
+            iXCent, iYCent, fiCent, fdCent, 
+            piI1x,  piI1y,  pfI1p,  pfI1d, 
+            piI2x,  piI2y,  pfI2p,  pfI2d, 
+            outMImage, pzBufMImage);
+
+        // Fill up the 2D triangle consisting of vertices (iXCent, iYCent), (piI2x, piI2y), and (piI3x, piI3y)
+        Globals.fillTrianglez(
+            iXCent, iYCent, fiCent, fdCent, 
+            piI2x,  piI2y,  pfI2p,  pfI2d, 
+            piI3x,  piI3y,  pfI3p,  pfI3d, 
+            outMImage, pzBufMImage);
+        
+        // Fill up the 2D triangle consisting of vertices (iXCent, iYCent), (piI3x, piI3y), and (piI4x, piI4y)
+        Globals.fillTrianglez(
+            iXCent, iYCent, fiCent, fdCent, 
+            piI3x,  piI3y,  pfI3p,  pfI3d, 
+            piI4x,  piI4y,  pfI4p,  pfI4d,
+            outMImage, pzBufMImage);
+
+        // Fill up the 2D triangle consisting of vertices (iXCent, iYCent), (piI4x, piI4y), and (piI1x, piI1y)
+        Globals.fillTrianglez(
+            iXCent, iYCent, fiCent, fdCent, 
+            piI4x,  piI4y,  pfI4p,  pfI4d, 
+            piI1x,  piI1y,  pfI1p,  pfI1d,
+            outMImage, pzBufMImage);
+
         return 0;
     } // fillPolyz
 } // class MemImage
