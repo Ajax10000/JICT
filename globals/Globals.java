@@ -2369,6 +2369,8 @@ public class Globals {
                     iOutHeight, iOutWidth, 
                     fAtx, fAty, fAtz);
                 if(pZMImage != null) {
+                    // fD1 = distance between viewpoint (pfVx, pfVy, pfVz) and 
+                    // transformed/projected point (fXIn - fIncr, fYIn, fZIn) => (fAtx, fAty, fAtz)
                     fD1 = MathUtils.getDistance3d(pfVx, pfVy, pfVz, fAtx, fAty, fAtz);
                 }
             
@@ -2378,6 +2380,8 @@ public class Globals {
                     iOutHeight, iOutWidth, 
                     fAtx, fAty, fAtz);
                 if(pZMImage != null) {
+                    // fD2 = distance between viewpoint (pfVx, pfVy, pfVz) and 
+                    // transformed/projected point (fXIn, fYIn, fZIn) => (fAtx, fAty, fAtz)
                     fD2 = MathUtils.getDistance3d(pfVx, pfVy, pfVz, fAtx, fAty, fAtz);
                 }
             
@@ -2387,6 +2391,8 @@ public class Globals {
                     iOutHeight, iOutWidth, 
                     fAtx, fAty, fAtz);
                 if(pZMImage != null) {
+                    // fD3 = distance between viewpoint (pfVx, pfVy, pfVz) and 
+                    // transformed/projected point (fXIn, fYIn - fIncr, fZIn) => (fAtx, fAty, fAtz)
                     fD3 = MathUtils.getDistance3d(pfVx, pfVy, pfVz, fAtx, fAty, fAtz);
                 }
             
@@ -2396,6 +2402,8 @@ public class Globals {
                     iOutHeight, iOutWidth, 
                     fAtx, fAty, fAtz);
                 if(pZMImage != null) {
+                    // fD4 = distance between viewpoint (pfVx, pfVy, pfVz) and 
+                    // transformed/projected point (fXIn - fIncr, fYIn - fIncr, fZIn) => (fAtx, fAty, fAtz)
                     fD4 = MathUtils.getDistance3d(pfVx, pfVy, pfVz, fAtx, fAty, fAtz);
                 }
             
@@ -2424,200 +2432,221 @@ public class Globals {
 
 
     // This method originally came from IWARP.CPP
-    public static int fwarpz2(MemImage inputImage, MemImage outputImage, MemImage zBuffer, 
-    float rx, float ry, float rz, 
-    float sx, float sy, float sz, 
-    float tx, float ty, float tz, 
-    float vx, float vy, float vz, 
-    TMatrix viewMatrix, 
-    float refPointX, float refPointY, float refpointZ) {
-        String msgText;
+    public static int fwarpz2(MemImage pInputMImage, MemImage pOutputMImage, MemImage zBufMImage, 
+    float pfRx, float pfRy, float pfRz, 
+    float pfSx, float pfSy, float pfSz, 
+    Float pfTx, Float pfTy, Float pfTz, 
+    float pfVx, float pfVy, float pfVz, 
+    TMatrix pViewMatrix, 
+    float pfRefPointX, float pfRefPointY, float pfRefpointZ) { // the last 3 parameters are not used
+        String sMsgText;
 
         // Create the line buffer data structures
-        int[] xBuffer, yBuffer; 
-        int xBufferIdx, yBufferIdx;
+        int[] iaXBuffer;
+        int iXBufferIdx; // index into iaXBuffer
+        int iXPrev1Idx = 0, iXPrev2Idx = 0; // indices into iaXBuffer
+
+        int[] iaYBuffer; 
+        int iYBufferIdx; // index into iaYBuffer
+        int iYPrev1Idx = 0, iYPrev2Idx = 0; // indices into iaYBuffer
+
+        
+        float[] faDBuffer;
+        int iDBufferIdx; // index into faDBuffer
+        int iDPrev1Idx = 0, iDPrev2Idx = 0; // indices into faDBuffer
+        
+        byte[] iaIBuffer;
+        int iIBufferIdx; // index into iaIBuffer
+        int iPrev1Idx = 0, iPrev2Idx = 0; // indices into iaIBuffer
+
+        byte bytTemp1 = (byte)0, bytTemp2;
+        int iXTemp1 = 0, iYTemp1 = 0, iXTemp2 = 0, iYTemp2;
+        float fDTemp1 = 0.0f, fDTemp2 = 0.0f; // These two will stay at 0.0 unless zBufMImage != null
         // float *wxBuffer, *wyBuffer, *wzBuffer; // these variables are not used
-        float[] dBuffer;
         // float *wxTemp, *wyTemp, *wzTemp; // these variables are not used
-        byte[] iBuffer;
-        int iBufferIdx;
-        byte iTemp1, iTemp2;
-        int iPrev1Idx, iPrev2Idx; // indices into iBuffer
-        int xTemp1, yTemp1, xTemp2, yTemp2;
-        int xPrev1Idx, yPrev1Idx; // indices into xBuffer and yBuffer, respectively
-        int xPrev2Idx, yPrev2Idx; // indices into xBuffer and yBuffer, respectively
-        int dBufferIdx;
-        float dTemp1, dTemp2;
-        int dPrev1Idx, dPrev2Idx; // indices into dBuffer
         
         // Build the forward transformation matrix
         TMatrix forwardMatrix = new TMatrix();
-        float XRadians = rx * JICTConstants.F_DTR;
-        float YRadians = ry * JICTConstants.F_DTR;
-        float ZRadians = rz * JICTConstants.F_DTR;
-        forwardMatrix.scale(sx, sy, sz);
-        forwardMatrix.rotate(XRadians, YRadians, ZRadians);
-        forwardMatrix.translate(tx, ty, tz);
+        float fXRadians = pfRx * JICTConstants.F_DTR;
+        float fYRadians = pfRy * JICTConstants.F_DTR;
+        float fZRadians = pfRz * JICTConstants.F_DTR;
+        forwardMatrix.scale(pfSx, pfSy, pfSz);
+        forwardMatrix.rotate(fXRadians, fYRadians, fZRadians);
+        forwardMatrix.translate(pfTx, pfTy, pfTz);
         TMatrix viewModelMatrix = new TMatrix();
-        viewModelMatrix.multiply(viewMatrix, forwardMatrix);
+        viewModelMatrix.multiply(pViewMatrix, forwardMatrix);
     
         if (bIctDebug) {
             forwardMatrix.display("Forward Matrix:");
         }
     
-        int bpp       = inputImage.getBitsPerPixel();
-        int inHeight  = inputImage.getHeight();
-        int inWidth   = inputImage.getWidth();
-        int outHeight = outputImage.getHeight();
-        int outWidth  = outputImage.getWidth();
-        float halfHeight = inHeight / 2.0f;
-        float halfWidth  = inWidth / 2.0f;
+        int iBpp       = pInputMImage.getBitsPerPixel();
+        int iInHeight  = pInputMImage.getHeight();
+        int iInWidth   = pInputMImage.getWidth();
+        int iOutHeight = pOutputMImage.getHeight();
+        int iOutWidth  = pOutputMImage.getWidth();
+        float fHalfHeight = iInHeight / 2.0f;
+        float fHalfWidth  = iInWidth / 2.0f;
         
-        float increment = 0.5f;
-        float inverseInc = 1.0f / increment;
-        int numCalcs = (int)(inWidth * inverseInc);
+        float fIncrement = 0.5f;
+        float fInverseInc = 1.0f / fIncrement;
+        int iNumCalcs = (int)(iInWidth * fInverseInc);
     
-        xBuffer = new int[numCalcs];
-        if (xBuffer == null) {
-            statusPrint("fwarpz2: Not enough memory for xBuffer");
+        iaXBuffer = new int[iNumCalcs];
+        /* if iaXBuffer is null, the JVM would have thrown an OutOfMemoryException
+        if (iaXBuffer == null) {
+            statusPrint("fwarpz2: Not enough memory for iaXBuffer");
             return -1;
         }
+        */
 
-        yBuffer = new int[numCalcs];
-        if (yBuffer == null) {
-            statusPrint("fwarpz2: Not enough memory for yBuffer");
+        iaYBuffer = new int[iNumCalcs];
+        /* if iaYBuffer is null, the JVM would have thrown an OutOfMemoryException
+        if (iaYBuffer == null) {
+            statusPrint("fwarpz2: Not enough memory for iaYBuffer");
             return -1;
         }
+        */
     
-        dBuffer = new float[numCalcs];
-        if (dBuffer == null) {
+        faDBuffer = new float[iNumCalcs];
+        /* if faDBuffer is null, the JVM would have thrown an OutOfMemoryException
+        if (faDBuffer == null) {
             statusPrint("fwarpz2: Not enough memory for distance Buffer");
             return -1;
         }
+        */
     
-        iBuffer = new byte[numCalcs];
-        if (iBuffer == null) {
-            statusPrint("fwarpz2: Not enough memory for iBuffer");
+        iaIBuffer = new byte[iNumCalcs];
+        /* if iaBuffer is null, the JVM would have thrown an OutOfMemoryException
+        if (iaBuffer == null) {
+            statusPrint("fwarpz2: Not enough memory for iaBuffer");
             return -1;
         }
+        */
     
+        /*
         // Temporary - for testing
-        vx = (float)outWidth/2.0f;
-        vy = (float)outHeight/2.0f;
-        vz = 512.0f;
+        pfVx = (float)iOutWidth/2.0f;
+        pfVy = (float)iOutHeight/2.0f;
+        pfVz = 512.0f;
+        */
     
-        msgText = String.format("fwarpz2: Viewer location: vx: %f, vy: %f, vz: %f", vx, vy, vz);
-        statusPrint(msgText);
-        xBufferIdx = 0;
-        yBufferIdx = 0;
-        iBufferIdx = 0;
-        dBufferIdx = 0;
+        sMsgText = String.format("fwarpz2: Viewer location: vx: %f, vy: %f, vz: %f", pfVx, pfVy, pfVz);
+        statusPrint(sMsgText);
+        iXBufferIdx = 0;
+        iYBufferIdx = 0;
+        iIBufferIdx = 0;
+        iDBufferIdx = 0;
 
-        float row, col;
-        float x1, y1, z1;
-        Byte i1 = (byte)0, red1 = (byte)0, blue1 = (byte)0;
-        byte green1;
-        int sx1, sy1;
-        float refX, refY, refZ;
+        float fRow, fCol;
+        float fX1, fY1, fZ1;
+        Byte byt1 = (byte)0, bytRed1 = (byte)0, bytBlue1 = (byte)0;
+        // byte bytGreen1; // not used
+        Integer iSx1 = 0, iSy1 = 0;
+        float fRefX = 0.0f, fRefY = 0.0f, fRefZ = 0.0f;
     
-        for (row = inverseInc * increment; row <= inHeight; row+= increment) {
-            for (col = inverseInc * increment; col <= inWidth; col+= increment) {
-                x1 = col - halfWidth;
-                y1 = row - halfHeight;
-                z1 = 0.0f;
-                if(bpp == 8) {
-                    i1 = inputImage.getMPixel((int)col, (int)row);
+        // fInverseInc * fIncrement = 1.0
+        for (fRow = fInverseInc * fIncrement; fRow <= iInHeight; fRow += fIncrement) {
+            for (fCol = fInverseInc * fIncrement; fCol <= iInWidth; fCol += fIncrement) {
+                fX1 = fCol - fHalfWidth;
+                fY1 = fRow - fHalfHeight;
+                fZ1 = 0.0f;
+                if(iBpp == 8) {
+                    // The following returns the color at (fCol, fRow)
+                    byt1 = pInputMImage.getMPixel((int)fCol, (int)fRow);
                 }
-                if(bpp == 24) {
-                    i1 = (int)inputImage.getMPixelRGB((int)col, (int)row, red1, i1, blue1);
+                if(iBpp == 24) {
+                    // The following method sets bytRed1, byt1, and bytBlue1. We'll only use byt1.
+                    pInputMImage.getMPixelRGB((int)fCol, (int)fRow, bytRed1, byt1, bytBlue1);
                 }
     
                 // Project to the screen
-                viewModelMatrix.transformAndProjectPoint(x1, y1, z1, sx1, sy1, 
-                    refX, refY, refZ, outHeight, outWidth, tx, ty, tz);
-                if(row == 1.0f) {
-                    xBuffer[xBufferIdx] = sx1;
-                    xBufferIdx++;
+                // The following method sets parameters iSx1, iSy1, pfTx, pfTy, and pfTz
+                viewModelMatrix.transformAndProjectPoint(fX1, fY1, fZ1, iSx1, iSy1, 
+                    fRefX, fRefY, fRefZ, iOutHeight, iOutWidth, pfTx, pfTy, pfTz);
+                if(fRow == 1.0f) {
+                    iaXBuffer[iXBufferIdx] = iSx1.byteValue();
+                    iXBufferIdx++;
 
-                    yBuffer[yBufferIdx] = sy1;
-                    yBufferIdx++;
+                    iaYBuffer[iYBufferIdx] = iSy1.byteValue();
+                    iYBufferIdx++;
 
-                    iBuffer[iBufferIdx] = i1;
-                    iBufferIdx++;
+                    iaIBuffer[iIBufferIdx] = byt1;
+                    iIBufferIdx++;
 
-                    dBuffer[dBufferIdx] = MathUtils.getDistance3d(tx, ty, tz, vx, vy, vz);
-                    dBufferIdx++;
+                    faDBuffer[iDBufferIdx] = MathUtils.getDistance3d(pfTx, pfTy, pfTz, pfVx, pfVy, pfVz);
+                    iDBufferIdx++;
                 }
             
-                if ((row > 1.0f) && (col == 1.0f)) {
-                    xTemp1 = sx1;
-                    yTemp1 = sy1;
-                    iTemp1 = i1;
+                if ((fRow > 1.0f) && (fCol == 1.0f)) {
+                    iXTemp1 = iSx1;
+                    iYTemp1 = iSy1;
+                    bytTemp1 = byt1;
 
-                    xPrev1Idx = 0;
-                    yPrev1Idx = 0;
+                    iXPrev1Idx = 0;
+                    iYPrev1Idx = 0;
 
-                    xPrev2Idx = 0;
-                    yPrev2Idx = 0;
-                    xPrev2Idx++;
-                    yPrev2Idx++;
+                    iXPrev2Idx = 0;
+                    iYPrev2Idx = 0;
+                    iXPrev2Idx++;
+                    iYPrev2Idx++;
 
                     iPrev1Idx = 0;
                     iPrev2Idx = 0;
                     iPrev2Idx++;
         
-                    dPrev1Idx = 0;
-                    dPrev2Idx = 0;
-                    dPrev2Idx++;
+                    iDPrev1Idx = 0;
+                    iDPrev2Idx = 0;
+                    iDPrev2Idx++;
 
-                    if(zBuffer != null) {
-                        dTemp1 = MathUtils.getDistance3d(tx, ty, tz, vx, vy, vz);
+                    if(zBufMImage != null) {
+                        fDTemp1 = MathUtils.getDistance3d(pfTx, pfTy, pfTz, pfVx, pfVy, pfVz);
                     }
                 }
     
-                if ((row > 1) && (col > 1)) {
-                    xTemp2 = sx1;
-                    yTemp2 = sy1;
-                    iTemp2 = i1;
-                    if(zBuffer != null) {
-                        dTemp2 = MathUtils.getDistance3d(tx, ty, tz, vx, vy, vz);
+                if ((fRow > 1) && (fCol > 1)) {
+                    iXTemp2 = iSx1;
+                    iYTemp2 = iSy1;
+                    bytTemp2 = byt1;
+                    if(zBufMImage != null) {
+                        fDTemp2 = MathUtils.getDistance3d(pfTx, pfTy, pfTz, pfVx, pfVy, pfVz);
                     }
          
                     // Render the quadrangle intensities
                     //                     
                     // Render the quadrangle distances and update the intermediate zBuffer
-                    outputImage.fillPolyz( 
-                        xBuffer[xPrev1Idx], yBuffer[yPrev1Idx], iBuffer[iPrev1Idx], dBuffer[dPrev1Idx],
-                        xBuffer[xPrev2Idx], yBuffer[yPrev2Idx], iBuffer[iPrev2Idx], dBuffer[dPrev2Idx],
-                        xTemp2,             yTemp2,             iTemp2,             dTemp2,
-                        xTemp1,             yTemp1,             iTemp1,             dTemp1, 
-                        zBuffer);
+                    pOutputMImage.fillPolyz( 
+                        iaXBuffer[iXPrev1Idx], iaYBuffer[iYPrev1Idx], iaIBuffer[iPrev1Idx], faDBuffer[iDPrev1Idx],
+                        iaXBuffer[iXPrev2Idx], iaYBuffer[iYPrev2Idx], iaIBuffer[iPrev2Idx], faDBuffer[iDPrev2Idx],
+                        iXTemp2,               iYTemp2,               bytTemp2,             fDTemp2,
+                        iXTemp1,               iYTemp1,               bytTemp1,             fDTemp1, 
+                        zBufMImage);
         
-                    xBuffer[xPrev1Idx] = xTemp1;
-                    yBuffer[yPrev1Idx] = yTemp1;
-                    iBuffer[iPrev1Idx] = iTemp1;
+                    iaXBuffer[iXPrev1Idx] = iXTemp1;
+                    iaYBuffer[iYPrev1Idx] = iYTemp1;
+                    iaIBuffer[iPrev1Idx] = bytTemp1;
 
-                    xTemp1 = xTemp2;
-                    yTemp1 = yTemp2;
-                    iTemp1 = iTemp2;
+                    iXTemp1 = iXTemp2;
+                    iYTemp1 = iYTemp2;
+                    bytTemp1 = bytTemp2;
 
-                    xPrev1Idx++;
-                    yPrev1Idx++;
+                    iXPrev1Idx++;
+                    iYPrev1Idx++;
 
-                    xPrev2Idx++;
-                    yPrev2Idx++;
+                    iXPrev2Idx++;
+                    iYPrev2Idx++;
 
                     iPrev1Idx++;
                     iPrev2Idx++;
         
-                    dBuffer[dPrev1Idx] = dTemp1;
-                    dTemp1 = dTemp2;
+                    faDBuffer[iDPrev1Idx] = fDTemp1;
+                    fDTemp1 = fDTemp2;
 
-                    dPrev1Idx++;
-                    dPrev2Idx++;
-                }
-            }
-        }
+                    iDPrev1Idx++;
+                    iDPrev2Idx++;
+                } // if ((fRow > 1) && (fCol > 1))
+            } // for fCol
+        } // for fRow
     
         return 0;
     } // fwarpz2
