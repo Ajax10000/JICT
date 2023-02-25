@@ -2652,139 +2652,162 @@ public class Globals {
     } // fwarpz2
 
 
-    // This method came from QMESHMODEL.CPP
+    // This method originally came from QMESHMODEL.CPP
+    // 
     // Called from:
     //     QuadMeshDlg.onOK
-    public static int createQMeshModel(String inputImagePath, String destinationDir, int modelType) {  
-        float Pi = 3.1415926f;
-        int row, col; 
-        float x, y, z, sizeFactor, theDimension, yValue;
+    public static int createQMeshModel(String psInputImagePath, String psDestinationDir, 
+    int piModelType) {  
+        float fPi = 3.1415926f;
+        int iRow, iCol; 
+        float fX, fY, fZ;
+        float fSizeFactor, fYValue;
+        // float theDimension; // assigned a value, but not read
  
         // float randMax = (float)RAND_MAX; //This variable is no longer used
-        float xMagnitude = 2.4f;
-        float yMagnitude = 1.5f;
-        float zMagnitude = 5.7f;
+        // TODO: What is the significance of the following 3 values?
+        float fXMagnitude = 2.4f;
+        float fYMagnitude = 1.5f;
+        // Used later (in switch stmt, in case JICTConstants.I_WHITENOISE) as scaling factors:
+        // xMImage.setMPixel32(iCol, iRow, (float)iCol + (random.nextFloat() * fXMagnitude));
+        // yMImage.setMPixel32(iCol, iRow, (float)iRow + (random.nextFloat() * fYMagnitude));
+        // float fZMagnitude = 5.7f; // Not used
  
-        float smallerSide, cubeFaceSize;
-        int v1, v2, v3, v4;
+        // float smallerSide, cubeFaceSize; // not used
+        // int v1, v2, v3, v4; // not used
  
-        Integer imHeight = 0, imWidth = 0, bitsPerPixel = 0;
-        int aStatus;
-        aStatus = readBMPHeader(inputImagePath, imHeight, imWidth, bitsPerPixel);
-        if(aStatus != 0) {
+        Integer iImHeight = 0, iImWidth = 0, iBitsPerPixel = 0;
+        int iStatus;
+        iStatus = readBMPHeader(psInputImagePath, iImHeight, iImWidth, iBitsPerPixel);
+        if(iStatus != 0) {
             statusPrint("createQMeshModel: Unable to open texture image");
             return -1;
         }
 
-        MemImage inputImage = new MemImage(inputImagePath, 0, 0, JICTConstants.I_RANDOM, 'R', JICTConstants.I_RGBCOLOR);
-        MemImage xImage = new MemImage(imHeight, imWidth, 32);
-        MemImage yImage = new MemImage(imHeight, imWidth, 32);
-        MemImage zImage = new MemImage(imHeight, imWidth, 32);
+        MemImage inputMImage = new MemImage(psInputImagePath, 0, 0, 
+            JICTConstants.I_RANDOM, 'R', JICTConstants.I_RGBCOLOR);
+        MemImage xMImage = new MemImage(iImHeight, iImWidth, 32);
+        MemImage yMImage = new MemImage(iImHeight, iImWidth, 32);
+        MemImage zMImage = new MemImage(iImHeight, iImWidth, 32);
          
-        float radius, startTheta, stopTheta, angularInc, angleTemp, asAngle, asAngleInc;
-        float xCent, yCent, distance;
-        String msgText;
+        float fRadius;
+        // float startTheta, stopTheta; // assigned values, but not read
+        float fAngleTemp, fAngularInc; // fAngularInc is used to increment fAngleTemp
+        float fAngle, fAngleInc; // fAngleInc is used to increment fAngle
+        float fXCent, fYCent; // Used in calculating fDistance
+        float fDistance;
+        String sMsgText;
         
-        sizeFactor = (float)imWidth;
+        fSizeFactor = (float)iImWidth;
  
-        switch(modelType) {
+        switch(piModelType) {
         case JICTConstants.I_CYLINDER:
-            radius = (float)imWidth/(2.0f * Pi);
+            // Uses fX and fY
+            fRadius = (float)iImWidth/(2.0f * fPi);
+            /* startTheta and stopTheta are assigned values, but are not read
             startTheta =   0.0f;
             stopTheta  = 360.0f;
-            angularInc = 360.0f / (float)imWidth;
-            angleTemp  =   0.0f;
-            for (row = 1; row <= imHeight; row++) {
-                angleTemp = 0.0f;
+            */
+            fAngularInc = 360.0f / (float)iImWidth;
+            fAngleTemp  =   0.0f;
+            for (iRow = 1; iRow <= iImHeight; iRow++) {
+                fAngleTemp = 0.0f;
 
-                for (col = 1; col <= imWidth; col++) {
-                    x = radius * (float)Math.cos(angleTemp * JICTConstants.F_DTR);
-                    y = radius * (float)Math.sin(angleTemp * JICTConstants.F_DTR);
-                    angleTemp += angularInc;
-                    xImage.setMPixel32(col, row, x);
-                    yImage.setMPixel32(col, row, (float)row);
-                    zImage.setMPixel32(col, row, y);
-                } // for col
-            } // for row
+                for (iCol = 1; iCol <= iImWidth; iCol++) {
+                    fX = fRadius * (float)Math.cos(fAngleTemp * JICTConstants.F_DTR);
+                    fY = fRadius * (float)Math.sin(fAngleTemp * JICTConstants.F_DTR);
+                    fAngleTemp += fAngularInc;
+                    xMImage.setMPixel32(iCol, iRow, fX);
+                    yMImage.setMPixel32(iCol, iRow, (float)iRow);
+                    zMImage.setMPixel32(iCol, iRow, fY);
+                } // for iCol
+            } // for iRow
             break;
  
         case JICTConstants.I_PLANAR:
-            for (row = 1; row <= imHeight; row++) {
-                for (col = 1; col <= imWidth; col++) {
-                    x = (float)col;
-                    y = (float)row;
-                    xImage.setMPixel32(col, row, x);
-                    yImage.setMPixel32(col, row, y);
-                    zImage.setMPixel32(col, row, 0.0f);
-                } // for col
-            } // for row
+            // Uses fX and fY
+            for (iRow = 1; iRow <= iImHeight; iRow++) {
+                for (iCol = 1; iCol <= iImWidth; iCol++) {
+                    fX = (float)iCol;
+                    fY = (float)iRow;
+                    xMImage.setMPixel32(iCol, iRow, fX);
+                    yMImage.setMPixel32(iCol, iRow, fY);
+                    zMImage.setMPixel32(iCol, iRow, 0.0f);
+                } // for iCol
+            } // for iRow
             break;
  
         case JICTConstants.I_SPHERE:
+            // Uses fX and fZ
+            /* startTheta and stopTheta are assigned values, but not read
             startTheta = 0.0f;
             stopTheta = 360.0f;
-            asAngle = 0.0f;
-            theDimension = (float)imHeight;  // Set the horz and vert dims equal to the max of the rectangle sides
-            if (imWidth > imHeight) {
-                theDimension = (float)imWidth;
+            */
+            fAngle = 0.0f;
+            /* theDimension is assigned a value, but not read
+            theDimension = (float)iImHeight;  // Set the horz and vert dims equal to the max of the rectangle sides
+            if (iImWidth > iImHeight) {
+                theDimension = (float)iImWidth;
             }
+            */
 
-            asAngleInc = 180.0f / (float)imHeight; // The height traces out a hemispherical arc
-            angularInc = 360.0f / (float)imWidth;
-            angleTemp  =   0.0f;
+            fAngleInc = 180.0f / (float)iImHeight; // The height traces out a hemispherical arc
+            fAngularInc = 360.0f / (float)iImWidth;
+            fAngleTemp  =   0.0f;
 
-            for (row = 1; row <= imHeight; row++) {
-                radius = (float)Math.sin(asAngle * JICTConstants.F_DTR) * sizeFactor;
-                angleTemp = 0.0f;
+            for (iRow = 1; iRow <= iImHeight; iRow++) {
+                fRadius = (float)Math.sin(fAngle * JICTConstants.F_DTR) * fSizeFactor;
+                fAngleTemp = 0.0f;
 
-                for (col = 1; col <= imWidth; col++) {
-                    x = (radius * (float)Math.cos(angleTemp * JICTConstants.F_DTR) ) + sizeFactor; //put the left most edge in the positive quadrant
-                    z = (radius * (float)Math.sin(angleTemp * JICTConstants.F_DTR) ) + sizeFactor;
-                    xImage.setMPixel32(col, row, x);
-                    zImage.setMPixel32(col, row, z);
+                for (iCol = 1; iCol <= iImWidth; iCol++) {
+                    fX = (fRadius * (float)Math.cos(fAngleTemp * JICTConstants.F_DTR) ) + fSizeFactor; //put the left most edge in the positive quadrant
+                    fZ = (fRadius * (float)Math.sin(fAngleTemp * JICTConstants.F_DTR) ) + fSizeFactor;
+                    xMImage.setMPixel32(iCol, iRow, fX);
+                    zMImage.setMPixel32(iCol, iRow, fZ);
 
-                    yValue = (float)Math.acos(asAngle * JICTConstants.F_DTR) * sizeFactor;
-                    yImage.setMPixel32(col, row, yValue);
+                    fYValue = (float)Math.acos(fAngle * JICTConstants.F_DTR) * fSizeFactor;
+                    yMImage.setMPixel32(iCol, iRow, fYValue);
 
-                    angleTemp += angularInc;
-                } // for col
-                asAngle += asAngleInc;
-            } // for row
+                    fAngleTemp += fAngularInc;
+                } // for iCol
+                fAngle += fAngleInc;
+            } // for iRow
             break;
  
         case JICTConstants.I_SINE1D:
-            angularInc = 1.0f;
-            radius = 100.0f;
-            for (row = 1; row <= imHeight; row++) {
-                angleTemp = 0.0f;
+            // Uses fZ
+            fAngularInc = 1.0f;
+            fRadius = 100.0f;
+            for (iRow = 1; iRow <= iImHeight; iRow++) {
+                fAngleTemp = 0.0f;
 
-                for (col = 1; col <= imWidth; col++) {
-                    z = radius * (float)Math.sin(angleTemp * JICTConstants.F_DTR);
-                    xImage.setMPixel32(col, row, (float)col);
-                    yImage.setMPixel32(col, row, z);
-                    zImage.setMPixel32(col, row, (float)row);
-                    angleTemp += angularInc;
-                } // for col
-            } // for row
+                for (iCol = 1; iCol <= iImWidth; iCol++) {
+                    fZ = fRadius * (float)Math.sin(fAngleTemp * JICTConstants.F_DTR);
+                    xMImage.setMPixel32(iCol, iRow, (float)iCol);
+                    yMImage.setMPixel32(iCol, iRow, fZ);
+                    zMImage.setMPixel32(iCol, iRow, (float)iRow);
+                    fAngleTemp += fAngularInc;
+                } // for iCol
+            } // for iRow
             break;
  
         case JICTConstants.I_SINE2D:
             //  Circumference = 2*Pi*radius
-            radius = (float)(imWidth/(2.0f * Pi)/3.0f);   // Make r small enough for three sinusoidal rotations
-            angularInc = 360.0f / (float)imWidth;
-            xCent = (float)imWidth/2.0f;
-            yCent = (float)imHeight/2.0f;
+            fRadius = (float)(iImWidth/(2.0f * fPi)/3.0f);   // Make r small enough for three sinusoidal rotations
+            // fAngularInc = 360.0f / (float)iImWidth; // not needed for this case
+            fXCent = (float)iImWidth/2.0f;
+            fYCent = (float)iImHeight/2.0f;
 
-            for (row = 1; row <= imHeight; row++) {
-                angleTemp = 0.0f;
+            for (iRow = 1; iRow <= iImHeight; iRow++) {
+                // fAngleTemp = 0.0f; // not needed for this case
 
-                for (col = 1; col <= imWidth; col++) {
-                    xImage.setMPixel32(col, row, (float)col);
-                    zImage.setMPixel32(col, row, (float)row);
-                    distance = (float)Math.sqrt(((col - xCent) * (col - xCent)) + ((row - yCent) * (row - yCent)));           
-                    yImage.setMPixel32(col, row, radius * (float)Math.sin(5.0f * distance  * JICTConstants.F_DTR));
-                } // for col
-            } // for row
+                for (iCol = 1; iCol <= iImWidth; iCol++) {
+                    xMImage.setMPixel32(iCol, iRow, (float)iCol);
+                    zMImage.setMPixel32(iCol, iRow, (float)iRow);
+                    fDistance = (float)Math.sqrt(((iCol - fXCent) * (iCol - fXCent)) + ((iRow - fYCent) * (iRow - fYCent)));           
+                    yMImage.setMPixel32(iCol, iRow, fRadius * (float)Math.sin(5.0f * fDistance  * JICTConstants.F_DTR));
+                } // for iCol
+            } // for iRow
             break;
  
         case JICTConstants.I_WHITENOISE:
@@ -2793,13 +2816,13 @@ public class Globals {
             // So the numbers will be different every time we run.
             Random random = new Random();
  
-            for (row = 1; row <= imHeight; row++) {
-                for (col = 1; col <= imWidth; col++) {
-                    xImage.setMPixel32(col, row, (float)col + (random.nextFloat() * xMagnitude));
-                    yImage.setMPixel32(col, row, (float)row + (random.nextFloat() * yMagnitude));
-                    zImage.setMPixel32(col, row, 0.0f);
-                } // for col
-            } // for row
+            for (iRow = 1; iRow <= iImHeight; iRow++) {
+                for (iCol = 1; iCol <= iImWidth; iCol++) {
+                    xMImage.setMPixel32(iCol, iRow, (float)iCol + (random.nextFloat() * fXMagnitude));
+                    yMImage.setMPixel32(iCol, iRow, (float)iRow + (random.nextFloat() * fYMagnitude));
+                    zMImage.setMPixel32(iCol, iRow, 0.0f);
+                } // for iCol
+            } // for iRow
             break;
  
         default:
@@ -2810,127 +2833,130 @@ public class Globals {
         //
         // Apply a file naming convention:
         // first determine the input file name, then substitute the last letter with x, y, or z
-        String drive, dir, file, ext;
-        String ddrive, ddir, dfile, dext;
-        String outPath, xPath, yPath, zPath;
+        String sDrive, sDir, sFile, sExt;
+        String sDdrive, sDdir, sDfile, sDext;
+        String sOutPath, sXPath, sYPath, sZPath;
  
-        _splitpath(inputImagePath, drive, dir, file, ext);
-        int theLength = file.length();
+        _splitpath(psInputImagePath, sDrive, sDir, sFile, sExt);
+        // int theLength = sFile.length(); // not used
   
-        _splitpath(destinationDir, ddrive, ddir, dfile, dext);
-        _makepath(outPath, ddrive, ddir, file, ext);
+        _splitpath(psDestinationDir, sDdrive, sDdir, sDfile, sDext);
+        _makepath(sOutPath, sDdrive, sDdir, sFile, sExt);
 
         // As a matter of convenience copy the texture image to the same directory
         // in which the surface images reside, if it isn't there already.
-        if(!FileUtils.fileExists(outPath)) {
-            msgText = "Copying QMesh Model Texture Image to: " + outPath;
-            statusPrint(msgText);
-            CopyFile(inputImagePath, outPath, 1);
+        if(!FileUtils.fileExists(sOutPath)) {
+            sMsgText = "Copying QMesh Model Texture Image to: " + sOutPath;
+            statusPrint(sMsgText);
+            CopyFile(psInputImagePath, sOutPath, 1);
         }
  
-        FileUtils.constructPathName(xPath, outPath, 'x');
-        FileUtils.constructPathName(yPath, outPath, 'y');
-        FileUtils.constructPathName(zPath, outPath, 'z');
+        FileUtils.constructPathName(sXPath, sOutPath, 'x');
+        FileUtils.constructPathName(sYPath, sOutPath, 'y');
+        FileUtils.constructPathName(sZPath, sOutPath, 'z');
 
         // Insure that a generated path is not the same as the texture path
         if(
-        xPath.equalsIgnoreCase(inputImagePath) ||
-        yPath.equalsIgnoreCase(inputImagePath) ||
-        zPath.equalsIgnoreCase(inputImagePath)) {
+        sXPath.equalsIgnoreCase(psInputImagePath) ||
+        sYPath.equalsIgnoreCase(psInputImagePath) ||
+        sZPath.equalsIgnoreCase(psInputImagePath)) {
             statusPrint("createQMeshModel: A surface image may not have the same name as the texture image.");
-            msgText = "textureImage: " + inputImagePath;
-            statusPrint(msgText);
+            sMsgText = "textureImage: " + psInputImagePath;
+            statusPrint(sMsgText);
 
-            msgText = "xImage: " + xPath;
-            statusPrint(msgText);
+            sMsgText = "xImage: " + sXPath;
+            statusPrint(sMsgText);
 
-            msgText = "yImage: " + yPath;
-            statusPrint(msgText);
+            sMsgText = "yImage: " + sYPath;
+            statusPrint(sMsgText);
 
-            msgText = "zImage: " + zPath;
-            statusPrint(msgText);
+            sMsgText = "zImage: " + sZPath;
+            statusPrint(sMsgText);
 
             return -1;
         }
 
-        float x1, y1, z1, refX, refY, refZ;
-        float xBucket, yBucket, zBucket;
-        float xMin, xMax, yMin, yMax, zMin, zMax;
-        xMin = xImage.getMPixel32(1, 1);
-        xMax = xMin;
+        float fX1, fY1, fZ1;
+        float fRefX, fRefY, fRefZ;
+        float fXBucket, fYBucket, fZBucket;
 
-        yMin = yImage.getMPixel32(1, 1);
-        yMax = yMin;
+        float fXMin, fXMax, fYMin, fYMax, fZMin, fZMax;
+        fXMin = xMImage.getMPixel32(1, 1);
+        fXMax = fXMin;
 
-        zMin = zImage.getMPixel32(1, 1);
-        zMax = zMin;
+        fYMin = yMImage.getMPixel32(1, 1);
+        fYMax = fYMin;
+
+        fZMin = zMImage.getMPixel32(1, 1);
+        fZMax = fZMin;
 
         // Get an approximate model centroid, bounding box and display it.
         statusPrint("Calculating approximate mesh centroid and bounding box");
-        xBucket = 0.0f;
-        yBucket = 0.0f;
-        zBucket = 0.0f;
-        float totalCells = 0.0f;
-        int meshIncrement = 3;
+        fXBucket = 0.0f;
+        fYBucket = 0.0f;
+        fZBucket = 0.0f;
+        float fTotalCells = 0.0f; // used to calculate fRefX, fRefY, and fRefZ
+        int iMeshIncrement = 3;
  
-        for (row = 1; row <= imHeight; row += meshIncrement) {
-            for (col = 1; col <= imWidth; col += meshIncrement) {
-                x1 = xImage.getMPixel32(col, row);
-                y1 = yImage.getMPixel32(col, row);
-                z1 = zImage.getMPixel32(col, row);
+        for (iRow = 1; iRow <= iImHeight; iRow += iMeshIncrement) {
+            for (iCol = 1; iCol <= iImWidth; iCol += iMeshIncrement) {
+                fX1 = xMImage.getMPixel32(iCol, iRow);
+                fY1 = yMImage.getMPixel32(iCol, iRow);
+                fZ1 = zMImage.getMPixel32(iCol, iRow);
 
-                if(x1 > xMax) xMax = x1;
-                if(x1 < xMin) xMin = x1;
+                if(fX1 > fXMax) fXMax = fX1;
+                if(fX1 < fXMin) fXMin = fX1;
 
-                if(y1 > yMax) yMax = y1;
-                if(y1 < yMin) yMin = y1;
+                if(fY1 > fYMax) fYMax = fY1;
+                if(fY1 < fYMin) fYMin = fY1;
 
-                if(z1 > zMax) zMax = z1;
-                if(z1 < zMin) zMin = z1;
+                if(fZ1 > fZMax) fZMax = fZ1;
+                if(fZ1 < fZMin) fZMin = fZ1;
 
-                xBucket += x1;
-                yBucket += y1;
-                zBucket += z1;
-                totalCells++;
-            } // for col
-        } // for row
+                fXBucket += fX1;
+                fYBucket += fY1;
+                fZBucket += fZ1;
+                fTotalCells++;
+            } // for iCol
+        } // for iRow
 
-        refX = xBucket/totalCells;
-        refY = yBucket/totalCells;
-        refZ = zBucket/totalCells;
+        // fRefX, fRefY, and fRefZ are displayed via statusPrint, but otherwise not used
+        fRefX = fXBucket/fTotalCells;
+        fRefY = fYBucket/fTotalCells;
+        fRefZ = fZBucket/fTotalCells;
 
-        msgText = "QuadMesh centroid x: " + refX + " y: " + refY + " z: " + refZ;
-        statusPrint(msgText);
+        sMsgText = "QuadMesh centroid x: " + fRefX + " y: " + fRefY + " z: " + fRefZ;
+        statusPrint(sMsgText);
 
-        msgText = "QuadMesh BBox Mins x: " + xMin + " y: " + yMin + " z: " + xMin;
-        statusPrint(msgText);
+        sMsgText = "QuadMesh BBox Mins x: " + fXMin + " y: " + fYMin + " z: " + fZMin;
+        statusPrint(sMsgText);
 
-        msgText = "QuadMesh BBox Maxs x: " + xMax + " y: " + yMax + " z: " + xMax;
-        statusPrint(msgText);
+        sMsgText = "QuadMesh BBox Maxs x: " + fXMax + " y: " + fYMax + " z: " + fZMax;
+        statusPrint(sMsgText);
  
-        msgText = "Saving QMesh: " + xPath;
-        statusPrint(msgText);
-        xImage.writeBMP(xPath);
+        sMsgText = "Saving QMesh: " + sXPath;
+        statusPrint(sMsgText);
+        xMImage.writeBMP(sXPath);
 
-        msgText = "Saving QMesh: " + yPath;
-        statusPrint(msgText);
-        yImage.writeBMP(yPath);
+        sMsgText = "Saving QMesh: " + sYPath;
+        statusPrint(sMsgText);
+        yMImage.writeBMP(sYPath);
 
-        msgText = "Saving QMesh: " + zPath;
-        statusPrint(msgText);
-        zImage.writeBMP(zPath);
+        sMsgText = "Saving QMesh: " + sZPath;
+        statusPrint(sMsgText);
+        zMImage.writeBMP(sZPath);
         
-        MemImage xImage8 = new MemImage(imHeight, imWidth, 8);
-        MemImage yImage8 = new MemImage(imHeight, imWidth, 8);
-        MemImage zImage8 = new MemImage(imHeight, imWidth, 8);
+        MemImage xMImage8 = new MemImage(iImHeight, iImWidth, 8);
+        MemImage yMImage8 = new MemImage(iImHeight, iImWidth, 8);
+        MemImage zMImage8 = new MemImage(iImHeight, iImWidth, 8);
        
-        xImage.scaleTo8(xImage8);
-        yImage.scaleTo8(yImage8);
-        zImage.scaleTo8(zImage8);
+        xMImage.scaleTo8(xMImage8);
+        yMImage.scaleTo8(yMImage8);
+        zMImage.scaleTo8(zMImage8);
  
-        xImage8.writeBMP("d:\\ict20\\output\\meshx8.bmp");
-        yImage8.writeBMP("d:\\ict20\\output\\meshy8.bmp");
-        zImage8.writeBMP("d:\\ict20\\output\\meshz8.bmp");
+        xMImage8.writeBMP("d:\\ict20\\output\\meshx8.bmp");
+        yMImage8.writeBMP("d:\\ict20\\output\\meshy8.bmp");
+        zMImage8.writeBMP("d:\\ict20\\output\\meshz8.bmp");
  
         return 0;
     } // createQMeshModel
