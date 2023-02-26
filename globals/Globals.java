@@ -1030,7 +1030,9 @@ public class Globals {
         int iX, iY;
         int iStatus;
         Integer iNumXCoordsFound;
+        // ia => integer array
         int[] iaScreenXCoords = new int[JICTConstants.I_MAXWVERTICES];
+        // fa => float array
         float[] faZCoords = new float[JICTConstants.I_MAXWVERTICES]; 
         float[] faXCoords = new float[JICTConstants.I_MAXWVERTICES]; 
         float[] faYCoords = new float[JICTConstants.I_MAXWVERTICES];
@@ -1057,7 +1059,7 @@ public class Globals {
         //  Build the forward and inverse transformation matrices
         TMatrix forwardMatrix = new TMatrix();
 
-        // F_DTR = floating-point degree to radian conversion factor
+        // F_DTR = floating-point (F) degree to radian (DTR) conversion factor
         float fXRadians = pfRx * JICTConstants.F_DTR;
         float fYRadians = pfRy * JICTConstants.F_DTR;
         float fZRadians = pfRz * JICTConstants.F_DTR;
@@ -1196,7 +1198,7 @@ public class Globals {
                         faXCoords[i], faYCoords[i], faZCoords[i]);
                     statusPrint(sMsgText);
                     goto nextScanLine;
-                }
+                } // for i
             }
 
             fDx = faXCoords[1] - faXCoords[0];
@@ -2965,115 +2967,108 @@ public class Globals {
     // This method came from QMESHMODEL.CPP
     // Called from:
     //     RenderObject ctor that takes 4 parameters: a String, int, boolean and Point3d
-    public static int getMeshCentroid(MemImage xImage, MemImage yImage, MemImage zImage,
-    Float centroidX, Float centroidY, Float centroidZ) {
-        String msgText;
+    public static int getMeshCentroid(MemImage pxMImage, MemImage pyMImage, MemImage pzMImage,
+    Float pFCentroidX, Float pFCentroidY, Float pFCentroidZ) {
+        String sMsgText;
         statusPrint("Calculating mesh centroid");
 
         // Each image must be the same size.
         if(
-        xImage.getHeight() == yImage.getHeight() && 
-        yImage.getHeight() == zImage.getHeight() &&
-        xImage.getWidth() == yImage.getWidth() && 
-        yImage.getWidth() == zImage.getWidth()) {
-            // Do nothing cause everything's OK
-        } else {
+        pxMImage.getHeight() != pyMImage.getHeight() || 
+        pyMImage.getHeight() != pzMImage.getHeight() || 
+        pxMImage.getWidth()  != pyMImage.getWidth()  ||  
+        pyMImage.getWidth()  != pzMImage.getWidth()) {
             statusPrint("getMeshCentroid: Surface images must have equal size.");
             return -1;
         }
     
         // Each image must have 32 bit pixels.
         if(
-        xImage.getBitsPerPixel() == 32 && 
-        yImage.getBitsPerPixel() == 32 &&
-        zImage.getBitsPerPixel() == 32) {
-            // Do nothing cause everything's OK
-        } else {
+        pxMImage.getBitsPerPixel() != 32 || 
+        pyMImage.getBitsPerPixel() != 32 ||
+        pzMImage.getBitsPerPixel() != 32) {
             statusPrint("getMeshCentroid: Surface images must have 32 bit pixels.");
             return -2;
         }
     
-        int imHeight = xImage.getHeight();
-        int imWidth  = xImage.getWidth();
-        float x1 = 0.0f;
-        float y1 = 0.0f;
-        float z1 = 0.0f;
-        float totalCells = 0.0f;
-        int meshIncrement = 1;  // increase for greater speed, but less accuracy
-        int row, col;
+        int iImHeight = pxMImage.getHeight();
+        int iImWidth  = pxMImage.getWidth();
+        float fX1 = 0.0f;
+        float fY1 = 0.0f;
+        float fZ1 = 0.0f;
+        float fTotalCells = 0.0f;
+        int iMeshIncrement = 1;  // increase for greater speed, but less accuracy
+        int iRow, iCol;
     
-        for (row = 1; row <= imHeight; row += meshIncrement) {
-            for (col = 1; col <= imWidth; col += meshIncrement) {
-                x1 += xImage.getMPixel32(col, row);
-                y1 += yImage.getMPixel32(col, row);
-                z1 += zImage.getMPixel32(col, row);
-                totalCells++;
-            } // for col
-        } // for row
+        for (iRow = 1; iRow <= iImHeight; iRow += iMeshIncrement) {
+            for (iCol = 1; iCol <= iImWidth; iCol += iMeshIncrement) {
+                fX1 += pxMImage.getMPixel32(iCol, iRow);
+                fY1 += pyMImage.getMPixel32(iCol, iRow);
+                fZ1 += pzMImage.getMPixel32(iCol, iRow);
+                fTotalCells++;
+            } // for iCol
+        } // for iRow
 
         // Set the output parameters
-        centroidX = x1/totalCells;
-        centroidY = y1/totalCells;
-        centroidZ = z1/totalCells;
+        pFCentroidX = fX1/fTotalCells;
+        pFCentroidY = fY1/fTotalCells;
+        pFCentroidZ = fZ1/fTotalCells;
 
-        msgText = "Mesh centroid calculated: " + centroidX + " " + centroidY + " " + centroidZ;
-        statusPrint(msgText);
+        sMsgText = "Mesh centroid calculated: " + pFCentroidX + " " + pFCentroidY + " " + pFCentroidZ;
+        statusPrint(sMsgText);
 
         return 0;
     } // getMeshCentroid
   
 
-    // This method came from QMESHMODEL.CPP
+    // This method originally came from QMESHMODEL.CPP
+    //
     // Called from:
     //     RenderObject ctor that takes 4 parameters: a String, int, boolean and Point3d
-    public static int translateMesh(MemImage xImage, MemImage yImage, MemImage zImage,
-    float offsetX, float offsetY, float offsetZ) {
+    public static int translateMesh(MemImage pxMImage, MemImage pyMImage, MemImage pzMImage,
+    float pfOffsetX, float pfOffsetY, float pfOffsetZ) {
         statusPrint("Translating mesh.");
 
         // Each image must be the same size.
         if(
-        xImage.getHeight() == yImage.getHeight() && 
-        yImage.getHeight() == zImage.getHeight() &&
-        xImage.getWidth() == yImage.getWidth() && 
-        yImage.getWidth() == zImage.getWidth()) {
-            // Do nothing cause everything's OK
-        } else {
+        pxMImage.getHeight() != pyMImage.getHeight() || 
+        pyMImage.getHeight() != pzMImage.getHeight() ||
+        pxMImage.getWidth()  != pyMImage.getWidth()  || 
+        pyMImage.getWidth()  != pzMImage.getWidth()) {
             statusPrint("translateMesh: Surface images must have equal size.");
             return -1;
         }
     
         // Each image must have 32 bit pixels.
         if(
-        xImage.getBitsPerPixel() == 32 && 
-        yImage.getBitsPerPixel() == 32 &&
-        zImage.getBitsPerPixel() == 32) {
-            // Do nothing cause everything's OK
-        } else {
+        pxMImage.getBitsPerPixel() != 32 || 
+        pyMImage.getBitsPerPixel() != 32 ||
+        pzMImage.getBitsPerPixel() != 32) {
             statusPrint("translateMesh: Surface images must have 32 bit pixels.");
             return -2;
         }
     
-        int imHeight = xImage.getHeight();
-        int imWidth  = xImage.getWidth();
-        float x1 = 0.0f;
-        float y1 = 0.0f;
-        float z1 = 0.0f;
-        int meshIncrement = 1;  // increase for greater speed, but less accuracy
-        int row, col;
+        int iImHeight = pxMImage.getHeight();
+        int iImWidth  = pxMImage.getWidth();
+        float fX1 = 0.0f;
+        float fY1 = 0.0f;
+        float fZ1 = 0.0f;
+        int iMeshIncrement = 1;  // increase for greater speed, but less accuracy
+        int iRow, iCol;
     
-        for (row = 1; row <= imHeight; row += meshIncrement) {
-            for (col = 1; col <= imWidth; col += meshIncrement) {
-                x1 = xImage.getMPixel32(col, row);
-                x1 += offsetX;
-                xImage.setMPixel32(col, row, x1);
+        for (iRow = 1; iRow <= iImHeight; iRow += iMeshIncrement) {
+            for (iCol = 1; iCol <= iImWidth; iCol += iMeshIncrement) {
+                fX1 = pxMImage.getMPixel32(iCol, iRow);
+                fX1 += pfOffsetX;
+                pxMImage.setMPixel32(iCol, iRow, fX1);
 
-                y1 = yImage.getMPixel32(col, row);
-                y1 += offsetY;
-                yImage.setMPixel32(col, row, y1);
+                fY1 = pyMImage.getMPixel32(iCol, iRow);
+                fY1 += pfOffsetY;
+                pyMImage.setMPixel32(iCol, iRow, fY1);
 
-                z1 = zImage.getMPixel32(col, row);
-                z1 += offsetZ;
-                zImage.setMPixel32(col, row, z1);
+                fZ1 = pzMImage.getMPixel32(iCol, iRow);
+                fZ1 += pfOffsetZ;
+                pzMImage.setMPixel32(iCol, iRow, fZ1);
             } // for col
         } // for row
 
@@ -3082,135 +3077,144 @@ public class Globals {
     } // translateMesh
 
 
-    // This method came from MEMIMG32.CPP
+    // This method originally came from MEMIMG32.CPP
+    //
     // Called from:
     //     SceneList.render
-    public static int makeRGBimage(String redImage, String greenImage, String blueImage, String outFileName) {
-        String msgBuffer;
+    public static int makeRGBimage(String psRedImage, String psGreenImage, String psBlueImage, 
+    String psOutFileName) {
+        String sMsgBuffer;
 
         // Combine separate color channels into one RGB BMP
-        int rHeight, rWidth, gHeight, gWidth, bHeight, bWidth;
+        int iRHeight, iRWidth;
+        int iGHeight, iGWidth;
+        int iBHeight, iBWidth;
 
-        MemImage theRed = new MemImage(redImage, 0, 0, JICTConstants.I_SEQUENTIAL, 'R', JICTConstants.I_REDCOLOR);
-        if (!theRed.isValid()) {
-            msgBuffer = "makeRGBIMage: Unable to open Red image: " + redImage;
-            statusPrint(msgBuffer);
+        MemImage redMImage = new MemImage(psRedImage, 0, 0, 
+            JICTConstants.I_SEQUENTIAL, 'R', JICTConstants.I_REDCOLOR);
+        if (!redMImage.isValid()) {
+            sMsgBuffer = "makeRGBImage: Unable to open Red image: " + psRedImage;
+            statusPrint(sMsgBuffer);
             return 1;
         }
 
-        MemImage theGreen = new MemImage(greenImage, 0, 0, JICTConstants.I_SEQUENTIAL,'R', JICTConstants.I_GREENCOLOR);
-        if (!theGreen.isValid()) {
-            msgBuffer = "makeRGBIMage: Unable to open Green image: " + greenImage;
-            statusPrint(msgBuffer);
+        MemImage greenMImage = new MemImage(psGreenImage, 0, 0, 
+            JICTConstants.I_SEQUENTIAL,'R', JICTConstants.I_GREENCOLOR);
+        if (!greenMImage.isValid()) {
+            sMsgBuffer = "makeRGBImage: Unable to open Green image: " + psGreenImage;
+            statusPrint(sMsgBuffer);
             return 1;
         }
 
-        MemImage theBlue = new MemImage(blueImage, 0, 0, JICTConstants.I_SEQUENTIAL,'R', JICTConstants.I_BLUECOLOR);
-        if (!theBlue.isValid()) {
-            msgBuffer = "makeRGBIMage: Unable to open Blue image: %s" + blueImage;
-            statusPrint(msgBuffer);
+        MemImage blueMImage = new MemImage(psBlueImage, 0, 0, 
+            JICTConstants.I_SEQUENTIAL,'R', JICTConstants.I_BLUECOLOR);
+        if (!blueMImage.isValid()) {
+            sMsgBuffer = "makeRGBImage: Unable to open Blue image: %s" + psBlueImage;
+            statusPrint(sMsgBuffer);
             return 1;
         }
 
-        rHeight = theRed.getHeight();
-        rWidth  = theRed.getWidth();
+        iRHeight = redMImage.getHeight();
+        iRWidth  = redMImage.getWidth();
 
-        gHeight = theGreen.getHeight();
-        gWidth  = theGreen.getWidth();
+        iGHeight = greenMImage.getHeight();
+        iGWidth  = greenMImage.getWidth();
 
-        bHeight = theBlue.getHeight();
-        bWidth  = theBlue.getWidth();
+        iBHeight = blueMImage.getHeight();
+        iBWidth  = blueMImage.getWidth();
 
-        if (!(rWidth == gWidth && gWidth == bWidth && rWidth == bWidth)) {
-            statusPrint("makeRGBIMage: R,G, and B image widths are not equal.");
+        if (!(iRWidth == iGWidth && iGWidth == iBWidth && iRWidth == iBWidth)) {
+            statusPrint("makeRGBImage: R,G, and B image widths are not equal.");
             return 1;
         }
-        if (!(rHeight == gHeight && gHeight == bHeight && rHeight == bHeight)) {
-            statusPrint("makeRGBIMage: R,G, and B image heights are not equal.");
-            return 1;
-        }
-
-        MemImage theRGB = new MemImage(outFileName, gHeight, gWidth, JICTConstants.I_SEQUENTIAL, 'W', JICTConstants.I_RGBCOLOR);
-        if (!theRGB.isValid()) {
-            statusPrint("makeRGBIMage: Unable to open RGB image.");
-
-            theRed.close();
-            theGreen.close();
-            theBlue.close();
+        if (!(iRHeight == iGHeight && iGHeight == iBHeight && iRHeight == iBHeight)) {
+            statusPrint("makeRGBImage: R,G, and B image heights are not equal.");
             return 1;
         }
 
-        byte[] redPixel, greenPixel, bluePixel, rgbPixel;
-        int rStatus, gStatus, bStatus;
+        MemImage RGBMImage = new MemImage(psOutFileName, iGHeight, iGWidth, 
+            JICTConstants.I_SEQUENTIAL, 'W', JICTConstants.I_RGBCOLOR);
+        if (!RGBMImage.isValid()) {
+            statusPrint("makeRGBImage: Unable to open RGB image.");
 
-        for (int y = 1; y <= gHeight; y++) {
-            rStatus = theRed.readNextRow();
-            if (rStatus != 0) {
+            redMImage.close();
+            greenMImage.close();
+            blueMImage.close();
+            return 1;
+        }
+
+        // byta = > byte array
+        byte[] bytaRedPixels, bytaGreenPixels, bytaBluePixels, bytaRgbPixels;
+        int iRStatus, iGStatus, iBStatus;
+
+        for (int iY = 1; iY <= iGHeight; iY++) {
+            iRStatus = redMImage.readNextRow();
+            if (iRStatus != 0) {
                 statusPrint("makeRGBImage: red readNextRow error.");
 
-                theRed.close();
-                theGreen.close();
-                theBlue.close();
+                redMImage.close();
+                greenMImage.close();
+                blueMImage.close();
                 return 1;
             }
 
-            gStatus = theGreen.readNextRow();
-            if (gStatus != 0) {
+            iGStatus = greenMImage.readNextRow();
+            if (iGStatus != 0) {
                 statusPrint("makeRGBImage: green readNextRow error.");
 
-                theRed.close();
-                theGreen.close();
-                theBlue.close();
+                redMImage.close();
+                greenMImage.close();
+                blueMImage.close();
                 return 1;
             }
 
-            bStatus = theBlue.readNextRow();
-            if (bStatus != 0) {
+            iBStatus = blueMImage.readNextRow();
+            if (iBStatus != 0) {
                 statusPrint("makeRGBImage: blue readNextRow error.");
 
-                theRed.close();
-                theGreen.close();
-                theBlue.close();
+                redMImage.close();
+                greenMImage.close();
+                blueMImage.close();
                 return 1;
             }
 
-            redPixel   = theRed.getBytes();
+            bytaRedPixels   = redMImage.getBytes();
             int redPixelIdx = 0;
-            greenPixel = theGreen.getBytes();
+            bytaGreenPixels = greenMImage.getBytes();
             int greenPixelIdx = 0;
-            bluePixel  = theBlue.getBytes();
+            bytaBluePixels  = blueMImage.getBytes();
             int bluePixelIdx = 0;
-            rgbPixel   = theRGB.getBytes();
+            bytaRgbPixels   = RGBMImage.getBytes();
             int rgbPixelIdx = 0;
 
-            for (int x = 1; x <= gWidth; x++) {
-                rgbPixel[rgbPixelIdx] = bluePixel[bluePixelIdx];
+            for (int iX = 1; iX <= iGWidth; iX++) {
+                bytaRgbPixels[rgbPixelIdx] = bytaBluePixels[bluePixelIdx];
                 rgbPixelIdx++;
 
-                rgbPixel[rgbPixelIdx] = greenPixel[greenPixelIdx];
+                bytaRgbPixels[rgbPixelIdx] = bytaGreenPixels[greenPixelIdx];
                 rgbPixelIdx++;
 
-                rgbPixel[rgbPixelIdx] = redPixel[redPixelIdx];
+                bytaRgbPixels[rgbPixelIdx] = bytaRedPixels[redPixelIdx];
                 rgbPixelIdx++;
 
                 redPixelIdx++;
                 greenPixelIdx++;
                 bluePixelIdx++;
-            } // for x
+            } // for iX
 
             // Write the output
-            theRGB.writeNextRow();
-        } // for y
+            RGBMImage.writeNextRow();
+        } // for iY
 
         // Close the files and destroy the objects
-        theRed.close();
-        theGreen.close();
-        theBlue.close();
-        theRGB.close();
+        redMImage.close();
+        greenMImage.close();
+        blueMImage.close();
+        RGBMImage.close();
 
-        FileUtils.deleteFile(redImage);     // to conserve disk space, remove the
-        FileUtils.deleteFile(greenImage);   // input files
-        FileUtils.deleteFile(blueImage);
+        FileUtils.deleteFile(psRedImage);     // to conserve disk space, remove the
+        FileUtils.deleteFile(psGreenImage);   // input files
+        FileUtils.deleteFile(psBlueImage);
         return 0;
     } // makeRGBimage
 
