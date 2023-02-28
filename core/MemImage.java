@@ -1310,6 +1310,7 @@ public:
     // Called from:
     //     The MemImage constructor that takes 6 parameters
     //     saveAs8
+    //     Globals.createQMeshModel
     //     Globals.motionBlur
     //     Globals.tweenImage
     //     ImageView.onRButtonDown
@@ -2183,13 +2184,13 @@ public:
 
         int iX, iY;
         byte bytPackedByte;
-        byte *packedBytes = bytes;
+        int iPackedBytesIdx = 0;
 
         // paddedwidth is a multiple of 4 bytes to satisfy the requirements of a .BMP
         // the 1 bit image was created using GetBitmapBits which assumes that an image
         // width is a multiple of 2 bytes.  We need to calculate this width
         // before proceeding
-        int iWidth   = miImageWidth / 8;
+        int iWidth     = miImageWidth / 8;
         int iRemainder = miImageWidth % 8;
         if (iRemainder > 0) {
             iWidth++;
@@ -2201,19 +2202,20 @@ public:
         for (iY = 1; iY <= miImageHeight; iY++) {
             int xCounter = 0;
             for (iX = 1; iX <= iWidth; iX++) {
-                bytPackedByte = *packedBytes;
+                bytPackedByte = bytes[iPackedBytesIdx];
                 for(int bitCounter = 0; bitCounter < 8; bitCounter++) {
                     xCounter++;
                     if(xCounter <= miImageWidth) {
                         if(((bytPackedByte >> (7-bitCounter)) & 0x1) != 0) {
-                            pOutputMImage.setMPixel(xCounter, miImageHeight-(iY-1), 255);
+                            pOutputMImage.setMPixel(xCounter, miImageHeight - (iY - 1), 255);
                         } else {
-                            pOutputMImage.setMPixel(xCounter, miImageHeight-(iY-1), (byte)JICTConstants.I_CHROMAVALUE);
+                            pOutputMImage.setMPixel(xCounter, miImageHeight - (iY - 1), 
+                                (byte)JICTConstants.I_CHROMAVALUE);
                         }
                     }
                 } // for bitCounter
 
-                packedBytes++;
+                iPackedBytesIdx++;
             } // for iX
         } // for iY
 
