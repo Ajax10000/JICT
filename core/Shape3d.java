@@ -176,11 +176,14 @@ public:
             if(psFileName.equalsIgnoreCase("Output Image Rectangle")) {
                 this.miNumVertices = 4;
                 VertexSet[] nullPointer = new VertexSet[this.miNumVertices];
+                // if nullPointer == null, then the JVM would have thrown an OutOfMemoryException
+                /*
                 if(nullPointer == null) {
                     Globals.statusPrint("Shape3d ctor: Unable to allocate shape object");
                     this.miNumAllocatedVertices = 0; //signal an error
                     // Though an error has occurred, the code continues. Why?
                 }
+                */
                 // nullPointer will be used to set firstVertex
 
                 Integer iWidth = 0, iHeight = 0;
@@ -340,6 +343,9 @@ public:
         }
 
         this.miNumFaces = 0;
+        // The following will set the following fields:
+        // miNumertices, miNumFaces, miNumAllocatedVertices, mVertices, mFaces
+        // miCurrVtxIdx, mCurrentVertex, 
         readShape(psPathName);
         Float cX = 0f, cY = 0f, cZ = 0f;
         getWCentroid(cX, cY, cZ);  // calculate and save the world coord centroid
@@ -370,6 +376,7 @@ public:
         this.miNumAllocatedVertices = piNumVerts;
 
         VertexSet[] nullPointer = new VertexSet[miNumAllocatedVertices];
+        // If nullPointer were = null, the JVM would throw an OutOfMemoryException
         /* Dead code, per the compiler
         if(nullPointer == null) {
             Globals.statusPrint("Shape3d constructor 3: Unable to allocate shape object");
@@ -415,6 +422,7 @@ public:
         this.miNumAllocatedVertices = this.miNumVertices;
 
         VertexSet[] nullPointer = new VertexSet[this.miNumVertices];
+        // If nullPointer were = null, the JVM would throw an OutOfMemoryException
         /* Dead code, per the compiler
         if(nullPointer == null) {
             Globals.statusPrint("Shape3d constructor 4: Unable to allocate shape object");
@@ -463,6 +471,7 @@ public:
         this.miNumAllocatedVertices = this.miNumVertices;
 
         VertexSet[] nullPointer = new VertexSet[this.miNumVertices];
+        // If nullPointer were = null, the JVM would throw an OutOfMemoryException
         /* Dead code, per the compiler
         if(nullPointer == null) {
             Globals.statusPrint("Shape3d constructor 5: Unable to allocate shape object");
