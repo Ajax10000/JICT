@@ -48,10 +48,6 @@ public class MotionBlurDlg extends JDialog {
     private JButton btnOK;
     private JButton btnCancel;
 
-    private JPanel topPanel;
-    private JPanel botLeftPanel;
-    private JPanel botRightPanel;
-
 /*
 class MotionBlurDialog : public CDialog
 {
