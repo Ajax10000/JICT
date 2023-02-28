@@ -26,9 +26,22 @@ import math.MathUtils;
 // See methods onPreviewStillScene and onPreviewSequenceScene of the MainFrame class.
 // To see what it should look like, see Figure D.13 on p 285 of the book.
 public class ScenePreviewDlg extends JDialog {
-    protected MainFrame m_theFrame;
-    protected boolean isDirty;
-	protected RenderObject anObject;
+    // Used in methods:
+    //     onSelChangeCmbModels
+    //     onChkMoveViewPoint
+    //     onCmdPlus
+    //     onCmdReset
+    //     onOK
+    //     setTextBoxesWithModelTransform
+    //     setTextBoxesWithViewTransform
+    //     chooseModel
+    //     onInitDialog
+    protected MainFrame mMainFrame;
+
+    // Set to true in method onCmdPlus
+    // Read in method onOK
+    protected boolean mbIsDirty;
+	// protected RenderObject mRndrObject; // not used
     protected float mfIncrScaleFactor;
 
     private JButton btnOk;
@@ -248,12 +261,15 @@ protected:
         JLabel lblRotation = new JLabel("Rotation");
         JLabel lblScale = new JLabel("Scale");
         JLabel lblTranslation = new JLabel("Translation");
+
         JLabel lblRotX = new JLabel("X");
         JLabel lblRotY = new JLabel("Y");
         JLabel lblRotZ = new JLabel("Z");
+
         JLabel lblSclX = new JLabel("X");
         JLabel lblSclY = new JLabel("Y");
         JLabel lblSclZ = new JLabel("Z");
+
         JLabel lblTrnX = new JLabel("X");
         JLabel lblTrnY = new JLabel("Y");
         JLabel lblTrnZ = new JLabel("Z");
@@ -270,12 +286,15 @@ protected:
         JLabel lblRotation = new JLabel("Rotation");
         JLabel lblScale = new JLabel("Scale");
         JLabel lblTranslation = new JLabel("Translation");
+
         JLabel lblRotX = new JLabel("X");
         JLabel lblRotY = new JLabel("Y");
         JLabel lblRotZ = new JLabel("Z");
+
         JLabel lblSclX = new JLabel("X");
         JLabel lblSclY = new JLabel("Y");
         JLabel lblSclZ = new JLabel("Z");
+
         JLabel lblTrnX = new JLabel("X");
         JLabel lblTrnY = new JLabel("Y");
         JLabel lblTrnZ = new JLabel("Z");
@@ -283,9 +302,11 @@ protected:
         txtRotationX    = new JTextField("0.00", 6);
         txtRotationY    = new JTextField("0.00", 6);
         txtRotationZ    = new JTextField("0.00", 6);
+
         txtScaleX       = new JTextField("0.00", 6);
         txtScaleY       = new JTextField("0.00", 6);
         txtScaleZ       = new JTextField("0.00", 6);
+        
         txtTranslationX = new JTextField("0.00", 6);
         txtTranslationY = new JTextField("0.00", 6);
         txtTranslationZ = new JTextField("0.00", 6);
@@ -345,25 +366,25 @@ protected:
 
         if (iChoice != -1) {
             sSelectedModel = (String)cboModel.getSelectedItem();
-            m_theFrame.mSceneList.setCurrentModel(sSelectedModel);
+            mMainFrame.mSceneList.setCurrentModel(sSelectedModel);
 
             // The following method sets all of the parameters
-            m_theFrame.mSceneList.getCurrentModelTransform(
+            mMainFrame.mSceneList.getCurrentModelTransform(
                 fRx, fRy, fRz, 
                 fSx, fSy, fSz, 
                 fTx, fTy, fTz);
                 
-            m_theFrame.mWarpTranslateX = fTx;
-            m_theFrame.mWarpTranslateY = fTy;
-            m_theFrame.mWarpTranslateZ = fTz;
+            mMainFrame.mWarpTranslateX = fTx;
+            mMainFrame.mWarpTranslateY = fTy;
+            mMainFrame.mWarpTranslateZ = fTz;
 
-            m_theFrame.mWarpScaleX = fSx;
-            m_theFrame.mWarpScaleY = fSy;
-            m_theFrame.mWarpScaleZ = fSz;
+            mMainFrame.mWarpScaleX = fSx;
+            mMainFrame.mWarpScaleY = fSy;
+            mMainFrame.mWarpScaleZ = fSz;
 
-            m_theFrame.mWarpRotateX = fRx;
-            m_theFrame.mWarpRotateY = fRy;
-            m_theFrame.mWarpRotateZ = fRz;
+            mMainFrame.mWarpRotateX = fRx;
+            mMainFrame.mWarpRotateY = fRy;
+            mMainFrame.mWarpRotateZ = fRz;
 
             setTextBoxesWithModelTransform();
         }
@@ -374,8 +395,8 @@ protected:
     //
     // ON_BN_CLICKED(IDC_chkMoveViewPoint, OnchkMoveViewPoint)
     void onChkMoveViewPoint() {
-        m_theFrame.mbChangeViewPoint = !m_theFrame.mbChangeViewPoint;
-        if(m_theFrame.mbChangeViewPoint == true) {
+        mMainFrame.mbChangeViewPoint = !mMainFrame.mbChangeViewPoint;
+        if(mMainFrame.mbChangeViewPoint == true) {
             setTextBoxesWithViewTransform();
         } else {
             setTextBoxesWithModelTransform();
@@ -401,12 +422,12 @@ protected:
     //     onCmdMinus
     void onCmdPlus() {
         // String theBuffer; // not used
-        boolean bChangingModel = (m_theFrame.mbChangeViewPoint == false);
+        boolean bChangingModel = (mMainFrame.mbChangeViewPoint == false);
 
         if(bChangingModel) {
             if(
-            (m_theFrame.mIEffectType == JICTConstants.I_SEQUENCE) || 
-            (m_theFrame.mIEffectType == JICTConstants.I_MORPH)) {
+            (mMainFrame.mIEffectType == JICTConstants.I_SEQUENCE) || 
+            (mMainFrame.mIEffectType == JICTConstants.I_MORPH)) {
                 cboModel.setSelectedIndex(0);    // Select the first model
                 chooseModel();
             } else {
@@ -419,7 +440,7 @@ protected:
             }
         }
 
-        isDirty = true;
+        mbIsDirty = true;
         // int bufferLength = 16; // not used
 
         String sBuffer;
@@ -434,98 +455,98 @@ protected:
         
         if(cbxTranslationX.isSelected()) {
             if(bChangingModel) {
-                m_theFrame.mWarpTranslateX += fDeltaX;
+                mMainFrame.mWarpTranslateX += fDeltaX;
             } else {
-                m_theFrame.mViewTranslateX += fDeltaX;
+                mMainFrame.mViewTranslateX += fDeltaX;
             }
         }
 
         if(cbxTranslationY.isSelected()) {
             if(bChangingModel) {
-                m_theFrame.mWarpTranslateY += fDeltaY;
+                mMainFrame.mWarpTranslateY += fDeltaY;
             } else {
-                m_theFrame.mViewTranslateY += fDeltaY;
+                mMainFrame.mViewTranslateY += fDeltaY;
             }
         }
 
         if(cbxTranslationZ.isSelected()) {
             if(bChangingModel) {
-                m_theFrame.mWarpTranslateZ += fDeltaZ;
+                mMainFrame.mWarpTranslateZ += fDeltaZ;
             } else {
-                m_theFrame.mViewTranslateZ += fDeltaZ;
+                mMainFrame.mViewTranslateZ += fDeltaZ;
             }
         }
 
         if(cbxScaleX.isSelected()) {
             if(bChangingModel) {
-                m_theFrame.mWarpScaleX = fDeltaX;
+                mMainFrame.mWarpScaleX = fDeltaX;
             }
         }
 
         if(cbxScaleY.isSelected()) {
             if(bChangingModel) {
-                m_theFrame.mWarpScaleY = fDeltaY;
+                mMainFrame.mWarpScaleY = fDeltaY;
             }
         }
 
         if(cbxScaleZ.isSelected()) {
             if(bChangingModel) {
-                m_theFrame.mWarpScaleZ = fDeltaZ;
+                mMainFrame.mWarpScaleZ = fDeltaZ;
             }
         }
 
         if(cbxRotationX.isSelected()) {
             if(bChangingModel) {
-                m_theFrame.mWarpRotateX += fDeltaX;
-                m_theFrame.mWarpRotateX = MathUtils.fPolar(m_theFrame.mWarpRotateX);
+                mMainFrame.mWarpRotateX += fDeltaX;
+                mMainFrame.mWarpRotateX = MathUtils.fPolar(mMainFrame.mWarpRotateX);
             } else {
-                m_theFrame.mViewRotateX += fDeltaX;
-                m_theFrame.mViewRotateX = MathUtils.fPolar(m_theFrame.mViewRotateX);
+                mMainFrame.mViewRotateX += fDeltaX;
+                mMainFrame.mViewRotateX = MathUtils.fPolar(mMainFrame.mViewRotateX);
             }
         }
 
         if(cbxRotationY.isSelected()) {
             if(bChangingModel) {
-                m_theFrame.mWarpRotateY += fDeltaY;
-                m_theFrame.mWarpRotateY = MathUtils.fPolar(m_theFrame.mWarpRotateY);
+                mMainFrame.mWarpRotateY += fDeltaY;
+                mMainFrame.mWarpRotateY = MathUtils.fPolar(mMainFrame.mWarpRotateY);
             } else {
-                m_theFrame.mViewRotateY += fDeltaY;
-                m_theFrame.mViewRotateY = MathUtils.fPolar(m_theFrame.mViewRotateY);
+                mMainFrame.mViewRotateY += fDeltaY;
+                mMainFrame.mViewRotateY = MathUtils.fPolar(mMainFrame.mViewRotateY);
             }
         }
 
         if(cbxRotationZ.isSelected()) {
             if(bChangingModel) {
-                m_theFrame.mWarpRotateZ += fDeltaZ;
-                m_theFrame.mWarpRotateZ = MathUtils.fPolar(m_theFrame.mWarpRotateZ);
+                mMainFrame.mWarpRotateZ += fDeltaZ;
+                mMainFrame.mWarpRotateZ = MathUtils.fPolar(mMainFrame.mWarpRotateZ);
             } else {
-                m_theFrame.mViewRotateZ += fDeltaZ;
-                m_theFrame.mViewRotateZ = MathUtils.fPolar(m_theFrame.mViewRotateZ);
+                mMainFrame.mViewRotateZ += fDeltaZ;
+                mMainFrame.mViewRotateZ = MathUtils.fPolar(mMainFrame.mViewRotateZ);
             }
         }
 
         if(bChangingModel) {
             // Save the current Transform parameters
-            m_theFrame.mSceneList.setCurrentModelTransform(
-                m_theFrame.mWarpRotateX,    m_theFrame.mWarpRotateY,    m_theFrame.mWarpRotateZ,
-                m_theFrame.mWarpScaleX,     m_theFrame.mWarpScaleY,     m_theFrame.mWarpScaleZ,
-                m_theFrame.mWarpTranslateX, m_theFrame.mWarpTranslateY, m_theFrame.mWarpTranslateZ);
+            mMainFrame.mSceneList.setCurrentModelTransform(
+                mMainFrame.mWarpRotateX,    mMainFrame.mWarpRotateY,    mMainFrame.mWarpRotateZ,
+                mMainFrame.mWarpScaleX,     mMainFrame.mWarpScaleY,     mMainFrame.mWarpScaleZ,
+                mMainFrame.mWarpTranslateX, mMainFrame.mWarpTranslateY, mMainFrame.mWarpTranslateZ);
             setTextBoxesWithModelTransform();
         } else {
             setTextBoxesWithViewTransform();
         }
 
         //  Build the view matrix
-        m_theFrame.mViewMatrix.setIdentity();
-        float fXRadians = m_theFrame.mViewRotateX * JICTConstants.F_DTR;
-        float fYRadians = m_theFrame.mViewRotateY * JICTConstants.F_DTR;
-        float fZRadians = m_theFrame.mViewRotateZ * JICTConstants.F_DTR;
-        m_theFrame.mViewMatrix.rotate(-fXRadians, -fYRadians, -fZRadians);
-        m_theFrame.mViewMatrix.translate(-m_theFrame.mViewTranslateX,
-            -m_theFrame.mViewTranslateY, -m_theFrame.mViewTranslateZ);
+        mMainFrame.mViewMatrix.setIdentity();
+        float fXRadians = mMainFrame.mViewRotateX * JICTConstants.F_DTR;
+        float fYRadians = mMainFrame.mViewRotateY * JICTConstants.F_DTR;
+        float fZRadians = mMainFrame.mViewRotateZ * JICTConstants.F_DTR;
+        mMainFrame.mViewMatrix.rotate(-fXRadians, -fYRadians, -fZRadians);
+        mMainFrame.mViewMatrix.translate(-mMainFrame.mViewTranslateX,
+            -mMainFrame.mViewTranslateY, -mMainFrame.mViewTranslateZ);
 
         //  Redraw the scene list
-        m_theFrame.mPreviewWindowHandle.repaint();
+        mMainFrame.mPreviewWindowHandle.repaint();
         mfIncrScaleFactor = 1.0f;
     } // onCmdPlus
     
@@ -535,27 +556,27 @@ protected:
     // Called when the user clicks on the Reset button
     // ON_BN_CLICKED(IDC_cmdReset, OncmdReset)
     void onCmdReset() {
-        if(m_theFrame.mbChangeViewPoint == false) {  // If manipulating a model...
-            m_theFrame.mWarpTranslateX = 0.0f;
-            m_theFrame.mWarpTranslateY = 0.0f;
-            m_theFrame.mWarpTranslateZ = 0.0f;
+        if(mMainFrame.mbChangeViewPoint == false) {  // If manipulating a model...
+            mMainFrame.mWarpTranslateX = 0.0f;
+            mMainFrame.mWarpTranslateY = 0.0f;
+            mMainFrame.mWarpTranslateZ = 0.0f;
 
-            m_theFrame.mWarpScaleX = 1.0f;
-            m_theFrame.mWarpScaleY = 1.0f;
-            m_theFrame.mWarpScaleZ = 1.0f;
+            mMainFrame.mWarpScaleX = 1.0f;
+            mMainFrame.mWarpScaleY = 1.0f;
+            mMainFrame.mWarpScaleZ = 1.0f;
 
-            m_theFrame.mWarpRotateX = 0.0f;
-            m_theFrame.mWarpRotateY = 0.0f;
-            m_theFrame.mWarpRotateZ = 0.0f;
+            mMainFrame.mWarpRotateX = 0.0f;
+            mMainFrame.mWarpRotateY = 0.0f;
+            mMainFrame.mWarpRotateZ = 0.0f;
             setTextBoxesWithModelTransform();
         } else {  // If manipulating the viewPoint...
-            m_theFrame.mViewTranslateX = 0.0f;
-            m_theFrame.mViewTranslateY = 0.0f;
-            m_theFrame.mViewTranslateZ = 0.0f;
+            mMainFrame.mViewTranslateX = 0.0f;
+            mMainFrame.mViewTranslateY = 0.0f;
+            mMainFrame.mViewTranslateZ = 0.0f;
 
-            m_theFrame.mViewRotateX = 0.0f;
-            m_theFrame.mViewRotateY = 0.0f;
-            m_theFrame.mViewRotateZ = 0.0f;
+            mMainFrame.mViewRotateX = 0.0f;
+            mMainFrame.mViewRotateY = 0.0f;
+            mMainFrame.mViewRotateZ = 0.0f;
             setTextBoxesWithViewTransform();
         }	
     } // onCmdReset
@@ -567,11 +588,11 @@ protected:
     void onOK() {
         String sBuffer = "";
 
-        m_theFrame.mSceneList.setViewTransform(
-            m_theFrame.mViewTranslateX, m_theFrame.mViewTranslateY, m_theFrame.mViewTranslateZ, 
-            m_theFrame.mViewRotateX,    m_theFrame.mViewRotateY,    m_theFrame.mViewRotateZ);
+        mMainFrame.mSceneList.setViewTransform(
+            mMainFrame.mViewTranslateX, mMainFrame.mViewTranslateY, mMainFrame.mViewTranslateZ, 
+            mMainFrame.mViewRotateX,    mMainFrame.mViewRotateY,    mMainFrame.mViewRotateZ);
 
-        if(isDirty) {
+        if(mbIsDirty) {
             //int result = MessageBox("Do you want to save the scene file?", "A model has changed",
             //    MB_YESNO|MB_ICONQUESTION);
             int iResult = JOptionPane.showConfirmDialog(null, 
@@ -580,11 +601,11 @@ protected:
 
             switch(iResult) {
             case JOptionPane.YES_OPTION:
-                m_theFrame.mSceneList.writeList(sBuffer, m_theFrame.msSceneFileName);
+                mMainFrame.mSceneList.writeList(sBuffer, mMainFrame.msSceneFileName);
             } // switch
 
-            m_theFrame.repaint();
-        }
+            mMainFrame.repaint();
+        } // if (mbIsDirty)
     } // onOK
     
 
@@ -601,33 +622,33 @@ protected:
         String sBuffer;
 
         // warpRotate
-        sBuffer = sixDotTwo.format(m_theFrame.mWarpRotateX);
+        sBuffer = sixDotTwo.format(mMainFrame.mWarpRotateX);
         txtRotationX.setText(sBuffer);
 
-        sBuffer = sixDotTwo.format(m_theFrame.mWarpRotateY);
+        sBuffer = sixDotTwo.format(mMainFrame.mWarpRotateY);
         txtRotationY.setText(sBuffer);
 
-        sBuffer = sixDotTwo.format(m_theFrame.mWarpRotateZ);
+        sBuffer = sixDotTwo.format(mMainFrame.mWarpRotateZ);
         txtRotationZ.setText(sBuffer);
         
         // warpScale
-        sBuffer = sixDotTwo.format(m_theFrame.mWarpScaleX);
+        sBuffer = sixDotTwo.format(mMainFrame.mWarpScaleX);
         txtScaleX.setText(sBuffer);
 
-        sBuffer = sixDotTwo.format(m_theFrame.mWarpScaleY);
+        sBuffer = sixDotTwo.format(mMainFrame.mWarpScaleY);
         txtScaleY.setText(sBuffer);
 
-        sBuffer = sixDotTwo.format(m_theFrame.mWarpScaleZ);
+        sBuffer = sixDotTwo.format(mMainFrame.mWarpScaleZ);
         txtScaleZ.setText(sBuffer);
         
         // warpTranslate
-        sBuffer = sixDotTwo.format(m_theFrame.mWarpTranslateX);
+        sBuffer = sixDotTwo.format(mMainFrame.mWarpTranslateX);
         txtTranslationX.setText(sBuffer);
 
-        sBuffer = sixDotTwo.format(m_theFrame.mWarpTranslateY);
+        sBuffer = sixDotTwo.format(mMainFrame.mWarpTranslateY);
         txtTranslationY.setText(sBuffer);
 
-        sBuffer = sixDotTwo.format(m_theFrame.mWarpTranslateZ);
+        sBuffer = sixDotTwo.format(mMainFrame.mWarpTranslateZ);
         txtTranslationZ.setText(sBuffer);
     } // setTextBoxesWithModelTransform
     
@@ -641,13 +662,13 @@ protected:
     void setTextBoxesWithViewTransform() {
         String sBuffer;
 
-        sBuffer = sixDotTwo.format(m_theFrame.mViewRotateX);
+        sBuffer = sixDotTwo.format(mMainFrame.mViewRotateX);
         txtRotationX.setText(sBuffer);
 
-        sBuffer = sixDotTwo.format(m_theFrame.mViewRotateY);
+        sBuffer = sixDotTwo.format(mMainFrame.mViewRotateY);
         txtRotationY.setText(sBuffer);
 
-        sBuffer = sixDotTwo.format(m_theFrame.mViewRotateZ);
+        sBuffer = sixDotTwo.format(mMainFrame.mViewRotateZ);
         txtRotationZ.setText(sBuffer);
         
         sBuffer = sixDotTwo.format(0.0f);
@@ -655,13 +676,13 @@ protected:
         txtScaleY.setText(sBuffer);
         txtScaleZ.setText(sBuffer);
         
-        sBuffer = sixDotTwo.format(m_theFrame.mViewTranslateX);
+        sBuffer = sixDotTwo.format(mMainFrame.mViewTranslateX);
         txtTranslationX.setText(sBuffer);
 
-        sBuffer = sixDotTwo.format(m_theFrame.mViewTranslateY);
+        sBuffer = sixDotTwo.format(mMainFrame.mViewTranslateY);
         txtTranslationY.setText(sBuffer);
 
-        sBuffer = sixDotTwo.format(m_theFrame.mViewTranslateZ);
+        sBuffer = sixDotTwo.format(mMainFrame.mViewTranslateZ);
         txtTranslationZ.setText(sBuffer);
     } // setTextBoxesWithViewTransform
     
@@ -677,23 +698,23 @@ protected:
         Float fTx = 0f, fTy = 0f, fTz = 0f;
 
         sSelectedModel = (String)cboModel.getSelectedItem();
-        m_theFrame.mSceneList.setCurrentModel(sSelectedModel);
-        m_theFrame.mSceneList.getCurrentModelTransform(fRx, fRy, fRz, fSx, fSy, fSz, fTx, fTy, fTz);
+        mMainFrame.mSceneList.setCurrentModel(sSelectedModel);
+        mMainFrame.mSceneList.getCurrentModelTransform(fRx, fRy, fRz, fSx, fSy, fSz, fTx, fTy, fTz);
 
-        m_theFrame.mWarpTranslateX = fTx;
-        m_theFrame.mWarpTranslateY = fTy;
-        m_theFrame.mWarpTranslateZ = fTz;
+        mMainFrame.mWarpTranslateX = fTx;
+        mMainFrame.mWarpTranslateY = fTy;
+        mMainFrame.mWarpTranslateZ = fTz;
         
-        m_theFrame.mWarpScaleX = fSx;
-        m_theFrame.mWarpScaleY = fSy;
-        m_theFrame.mWarpScaleZ = fSz;
+        mMainFrame.mWarpScaleX = fSx;
+        mMainFrame.mWarpScaleY = fSy;
+        mMainFrame.mWarpScaleZ = fSz;
         
-        m_theFrame.mWarpRotateX = fRx;
-        m_theFrame.mWarpRotateY = fRy;
-        m_theFrame.mWarpRotateZ = fRz;
+        mMainFrame.mWarpRotateX = fRx;
+        mMainFrame.mWarpRotateY = fRy;
+        mMainFrame.mWarpRotateZ = fRz;
 
         setTextBoxesWithModelTransform();
-        m_theFrame.mbChangeViewPoint = false;
+        mMainFrame.mbChangeViewPoint = false;
     } // chooseModel
     
 
@@ -704,8 +725,8 @@ protected:
         setTextBoxesWithModelTransform();
 
         // Place model names in cboModel
-        m_theFrame.mSceneList.showModels(cboModel);  
-        m_theFrame.mbChangeViewPoint = false;
+        mMainFrame.mSceneList.showModels(cboModel);  
+        mMainFrame.mbChangeViewPoint = false;
     } // onInitDialog
     
 
