@@ -68,7 +68,7 @@ public class FileUtils {
 
     // This method originally came from SCENELST.CPP
     // Called from:
-    //     Globals.createCutout
+    //     Globals.createCutout (called 5 times, with psSuffix = "r", "g", "b", "a" and "c")
     //     SceneList.render
     public static void appendFileName(String psOutputFileName, String psPrefix, String psSuffix) {
         // sprintf(psOutputFileName, "%.31s%s.bmp\0", psPrefix, psSuffix);
@@ -77,18 +77,31 @@ public class FileUtils {
 
 
     // This method originally came from SCENELST.CPP
+    // Called from:
+    //     Globals.createQMeshModel
+    //     MainFrame.onToolsCreateAlphaImage
+    //     MorphDlg.onOK
+    //     ScnFileParser.readList
     public static void constructPathName(String psOutPath, String psInPath, char pcLastLetter) {
-        String sDrive, sDir, sFile, sExt;
-        _splitpath(psInPath, sDrive, sDir, sFile, sExt);
+        String sFileWExt, sFile, sExt;
+        
+        File inputFile = new File(psOutPath);
+        sFileWExt = inputFile.getName();
+        sFile = sFileWExt.substring(0, sFileWExt.lastIndexOf('.'));
+        sExt = sFileWExt.substring(sFileWExt.lastIndexOf('.'));
+
+        // _splitpath(psInPath, sDrive, sDir, sFile, sExt);
         int iLength = sFile.length();
 
         if(iLength > 0) {
+            // Modify sFile (not the extension!)
             char[] charArray = new char[1];
             charArray[0] = pcLastLetter;
             String sLastLetter = new String(charArray);
             sFile.concat(sLastLetter);  // Substitute a letter
         }
 
-        _makepath(psOutPath, sDrive, sDir, sFile, sExt);
+        // _makepath(psOutPath, sDrive, sDir, sFile, sExt);
+        psOutPath = inputFile.getParent() + File.separator + sFile + '.' + sExt;
     } // constructPathName
 } // class FileUtils
