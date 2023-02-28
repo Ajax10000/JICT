@@ -1,12 +1,18 @@
 package dialogs;
 
+import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 
 public class AboutDlg extends JDialog implements ActionListener {
 	JLabel lblAppName;
@@ -55,21 +61,50 @@ void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 		super(pParent, pModal);
 
 		setTitle("About JICT 1.2");
+		setSize(300, 145);
+
+        JPanel panel = new JPanel();
+        panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5)); // top, left, bottom, right
+        BoxLayout boxLayout = new BoxLayout(panel, BoxLayout.Y_AXIS);
+        panel.setLayout(boxLayout);
+
+		Box vertBox = Box.createVerticalBox();
+        Box row01Box = Box.createHorizontalBox();
+        Box row02Box = Box.createHorizontalBox();
+		Box row03Box = Box.createHorizontalBox();
+		Box row04Box = Box.createHorizontalBox();
+		Box row05Box = Box.createHorizontalBox();
 
 		lblAppName = new JLabel("Java Image Composition Toolkit, Version 1.2");
-		lblByName1 = new JLabel("Original C++ code by TIm Wittenburg");
-		lblByName2 = new JLabel("Java version by David de Leon");
+		row01Box.add(lblAppName);
 
-		add(lblAppName);
-		add(lblByName1);
-		add(lblByName2);
+		lblByName1 = new JLabel("Original C++ code by TIm Wittenburg");
+		row02Box.add(lblByName1);
+
+		lblByName2 = new JLabel("Java version by David de Leon");
+		row03Box.add(lblByName2);
+
+		Component rowSpacer = Box.createRigidArea(new Dimension(180, 10));
+		row04Box.add(rowSpacer);
 
 		btnOk = new JButton("OK");
-		add(btnOk);
+		btnOk.addActionListener(this);
+		row05Box.add(btnOk);
+
+		vertBox.add(row01Box);
+		vertBox.add(row02Box);
+		vertBox.add(row03Box);
+		vertBox.add(row04Box);
+		vertBox.add(row05Box);
+
+		panel.add(vertBox);
+		add(panel);
+		setVisible(true);
     }
 
-	// Called when btnOk is clicked on
-	public void actionPerformed(ActionEvent ae) {
 
+	// Called when the OK button is clicked on
+	public void actionPerformed(ActionEvent ae) {
+		dispose();
 	}
 }
