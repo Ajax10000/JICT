@@ -8,22 +8,13 @@ import java.nio.file.Path;
 import java.util.Random;
 
 public class Texture {
-    // These values came from ICT20.H
-    // Texture Types
-    // These constants are used in method createTexture
-    public static final int I_CONSTANT     = 1;
-    public static final int I_CHECKERBOARD = 2;
-    public static final int I_HORZRAMP     = 3;
-    public static final int I_VERTRAMP     = 4;
-    public static final int I_PLASMA       = 5;
-    public static final int I_COUNTER      = 6;
-
     public static Random random = new Random();
 
 
+    // This method originally came from TEXTURE.CPP
+    //
     // Called from:
     //     MakeTexture.onOK
-    // This method came from TEXTURE.CPP
     public static int createTexture(String psTexturePath, String psOutDirectory, 
     int piTextureType, int piImageType, 
     int piForeColor, int piBackColor, // piBackColor is not used
@@ -56,7 +47,7 @@ public class Texture {
         int iCounter;
 
         switch(piTextureType) {
-        case I_CONSTANT:
+        case JICTConstants.I_CONSTANT:
             for (iRow = 1; iRow <= piNumRows; iRow++) {
                 for (iCol = 1; iCol <= piNumColumns; iCol++) {
                     if(iBitsPerPixel == 8) {
@@ -70,7 +61,7 @@ public class Texture {
             } // for iRow
             break;
 
-        case I_CHECKERBOARD:
+        case JICTConstants.I_CHECKERBOARD:
             for(j = 1; j <= piNumRows; j++) {
                 iRowCounter++;
                 if(iRowCounter == iCellHeight) {
@@ -97,7 +88,7 @@ public class Texture {
             } // for j
             break;
 
-        case I_HORZRAMP:
+        case JICTConstants.I_HORZRAMP:
             for (iRow = 1; iRow <= piNumRows; iRow++) {
                 for (iCol = 1; iCol <= piNumColumns; iCol++) {
                     if(iBitsPerPixel == 8) {
@@ -111,7 +102,7 @@ public class Texture {
             } // for iRow
             break;
 
-        case I_VERTRAMP:
+        case JICTConstants.I_VERTRAMP:
             for (iRow = 1; iRow <= piNumRows; iRow++) {
                 for (iCol = 1; iCol <= piNumColumns; iCol++) {
                     if(iBitsPerPixel == 8) {
@@ -125,7 +116,7 @@ public class Texture {
             } // for iRow
             break;
 
-        case I_COUNTER:
+        case JICTConstants.I_COUNTER:
             iCounter = 0;
             for (iRow = 1; iRow <= piNumRows; iRow++) {
                 for (iCol = 1; iCol <= piNumColumns; iCol++) {
@@ -143,7 +134,7 @@ public class Texture {
             } // for iRow
             break;
 
-        case I_PLASMA:
+        case JICTConstants.I_PLASMA:
             createPlasma(newImage, piNumRows, piNumColumns);
             break;
 
