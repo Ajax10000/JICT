@@ -31,15 +31,15 @@ import javax.swing.SwingConstants;
 // To see what it should look like, see Figure D.5 on p 277 of the book.
 public class MakeTextureDlg extends JDialog {
 	JComboBox<String>	m_textureType;
-    JTextField  mSelectedTextureType;
-	JTextField	m_numRows;
+    private JTextField  mSelectedTextureType;
+	private JTextField	m_numRows;
 	JComboBox<String>	m_imageType;
-    JTextField  mSelectedImageType;
-	JTextField	m_foreColor;
-	JTextField	m_numColumns;
-	JTextField	m_backColor;
-	JTextField	m_textureImageName;
-	JTextField	m_textureDirectory;
+    private JTextField  mSelectedImageType;
+	private JTextField	m_foreColor;
+	private JTextField	m_numColumns;
+	private JTextField	m_backColor;
+	private JTextField	m_textureImageName;
+	private JTextField	m_textureDirectory;
     private JButton     btnOk;
     private JButton     btnCancel;
     private JButton     btnLocate;
@@ -137,6 +137,8 @@ protected:
     } // MakeTextureDlg ctor
 
 
+    // Called from:
+    //     constructor
     private Box addTopSection() {
         Dimension shortSpacerSize = new Dimension(90, 25);
         Dimension txtFieldSize = new Dimension(120, 25);
@@ -209,6 +211,8 @@ protected:
     } // addTopPanel
 
 
+    // Called from:
+    //     constructor
     public Box addMidSection() {
         Dimension lblSize = new Dimension(90, 25);
         Dimension shortTxtFieldSize = new Dimension(90, 25);
@@ -329,6 +333,8 @@ protected:
     } // addMiddlePanel
 
 
+    // Called from:
+    //     constructor
     private Box addBotSection() {
         Dimension btnSize = new Dimension(73, 25);
         Dimension btnVertSpacerSize = new Dimension(73, 5);
@@ -435,10 +441,12 @@ protected:
     } // addBotPanel
 
     
-    // This method came from MAKETEXTUREDLG.CPP
+    // This method originally came from MAKETEXTUREDLG.CPP
+    //
+    // Called when the user clicks on the OK button.
     void onOK() {
         String sTexturePath, sDestinationDir;
-        String aDirectory;
+        // String aDirectory; // not used
 
         // The texture type  and image type is assumed to be one more than the  
         // order in which its name appears in the combo box.
@@ -448,7 +456,7 @@ protected:
         sTexturePath = m_textureImageName.getText();
         sDestinationDir = m_textureDirectory.getText();
 
-        String ddrive, ddir, dfile, dext;
+        // String ddrive, ddir, dfile, dext; // These variables are no longer used
         String sOutDirectory = "";
 
         // Set outDirectory. It will later be used as a parameter to Texture.createTexture
@@ -465,10 +473,10 @@ protected:
         sNumRows    = m_numRows.getText(); 
         sNumColumns = m_numColumns.getText();
 
-        Integer parsedInteger = 0;
+        Integer iParsedInteger = 0;
         int iForeColor  = 0; 
-        if (getIntegerValue(sForeColor, parsedInteger) == null) {
-            iForeColor = parsedInteger.intValue();
+        if (getIntegerValue(sForeColor, iParsedInteger) == null) {
+            iForeColor = iParsedInteger.intValue();
         } else {
             JOptionPane.showMessageDialog(this, "The value entered in Foreground Color is not a valid integer.");
             m_foreColor.requestFocusInWindow();
@@ -476,8 +484,8 @@ protected:
         }
 
         int iBackColor  = 0; 
-        if (getIntegerValue(sBackColor, parsedInteger) == null) {
-            iBackColor = parsedInteger.intValue();
+        if (getIntegerValue(sBackColor, iParsedInteger) == null) {
+            iBackColor = iParsedInteger.intValue();
         } else {
             JOptionPane.showMessageDialog(this, "The value entered in Background Color is not a valid integer.");
             m_backColor.requestFocusInWindow();
@@ -485,8 +493,8 @@ protected:
         }
 
         int iNumRows    = 0; 
-        if (getIntegerValue(sNumRows, parsedInteger) == null) {
-            iNumRows = parsedInteger.intValue();
+        if (getIntegerValue(sNumRows, iParsedInteger) == null) {
+            iNumRows = iParsedInteger.intValue();
         } else {
             JOptionPane.showMessageDialog(this, "The value entered in Rows is not a valid integer.");
             m_numRows.requestFocusInWindow();
@@ -494,8 +502,8 @@ protected:
         }
 
         int iNumColumns = 0;
-        if (getIntegerValue(sNumColumns, parsedInteger) == null) {
-            iNumColumns = parsedInteger.intValue();
+        if (getIntegerValue(sNumColumns, iParsedInteger) == null) {
+            iNumColumns = iParsedInteger.intValue();
         } else {
             JOptionPane.showMessageDialog(this, "The value entered in Columns is not a valid integer.");
             m_numColumns.requestFocusInWindow();
@@ -506,12 +514,15 @@ protected:
             iTextureType, iImageType, 
             iForeColor, iBackColor, 
             iNumRows, iNumColumns);
+
         if(iStatus == -1) {
             Globals.statusPrint("Texture could not be created. See log for more information.");	
         }
     } // onOK
 
 
+    // Called from:
+    //     onOK
     public NumberFormatException getIntegerValue(String psIntAsString, Integer pIParsedInt) {
         try {
             pIParsedInt = Integer.parseInt(psIntAsString);
@@ -522,11 +533,14 @@ protected:
     }
 
 
+    // Called when the user clicks on the Cancel button.
     public void onCancel() {
         this.dispose();
     }
 
-    // This method came from MAKETEXTUREDLG.CPP
+
+    // This method originally came from MAKETEXTUREDLG.CPP
+    //
     // Called when the user clicks on the Locate button
     void onLocateDestDir() {
         JFileChooser dlg = new JFileChooser();
