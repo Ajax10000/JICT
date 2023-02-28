@@ -6,7 +6,7 @@ import javax.swing.SwingUtilities;
 public class viewMotionBlurDlg extends JFrame {
     
     public viewMotionBlurDlg() {
-        MotionBlurDlg motionBlurDlg = new MotionBlurDlg(this, true);
+        new MotionBlurDlg(this, true);
     }
     
     public static void main(String[] args) {
