@@ -3370,16 +3370,19 @@ public class Globals {
     } // indexToCoord
 
 
+    // This method originally came from SHADERS.CPP
+    //
     // This method smooth shades a triangle given 3 vertices (x1, y1), (x2, y2)
     // and (x3, y3) on the triangle, and an intensity at each vertex (i1, i2, and i3).
     // See p 173 of Visual Special Effects Toolkit in C++.
-    // This method came from SHADERS.CPP
+    //
     // Called from:
     //     MemImage.fillPolyz
-    public static int fillTrianglez(int x1, int y1, float i1, float d1,
-    int x2, int y2, float i2, float d2,
-    int x3, int y3, float i3, float d3,
-    MemImage outImage, MemImage zImage) {
+    public static int fillTrianglez(
+    int piX1, int piY1, float pfI1, float pfD1,
+    int piX2, int piY2, float pfI2, float pfD2,
+    int piX3, int piY3, float pfI3, float pfD3,
+    MemImage pOutMImage, MemImage pZMImage) {
         // zImage contains the distance values.
         // To use this function without a z-buffer, call with zImage equal to NULL.
 
@@ -3389,357 +3392,359 @@ public class Globals {
         // The assumption is made here that sets of points describing 
         // vertical or horizontal lines have been handled elsewhere.
 
-        int midPoint = 0;
-        int minX = 0, minY = 0;
-        int maxX = 0, maxY = 0;
-        int midX = 0, midY = 0;
-        int denominator;
-        float minI = 0.0f, maxI = 0.0f, midI = 0.0f;
-        float minD = 0.0f, maxD = 0.0f, midD = 0.0f;
-        float intensity, intensityStep, distance, distanceStep;
-        float id1 = 0.0f, id2 = 0.0f, oldZ;
+        int iMidPoint = 0;
+        int iMinX = 0, iMinY = 0;
+        int iMaxX = 0, iMaxY = 0;
+        int iMidX = 0, iMidY = 0;
+        int iDenominator;
+        float fMinI = 0.0f, fMaxI = 0.0f, fMidI = 0.0f;
+        float fMinD = 0.0f, fMaxD = 0.0f, fMidD = 0.0f;
+        float fIntensity, fIntensityStep, fDistance, fDistanceStep;
+        float id1 = 0.0f, id2 = 0.0f, fOldZ;
 
-        int bpp = outImage.getBitsPerPixel();
-        if(zImage != null) {
-            if (zImage.getBitsPerPixel() != 32) {
+        int iBpp = pOutMImage.getBitsPerPixel();
+        if(pZMImage != null) {
+            if (pZMImage.getBitsPerPixel() != 32) {
                 statusPrint("fillTrianglez: z image must be 32 bits/pixel");
                 return -1;
             }
         }
 
-        midY = -1;
-        int yMax = y1;
-        int yMin = y1;
-        int minPoint = 1;
-        int maxPoint = 1;
+        iMidY = -1;
+        int iYMax = piY1;
+        int iYMin = piY1;
+        int iMinPoint = 1;
+        int iMaxPoint = 1;
 
-        if(y2 > yMax) { 
-            yMax = y2;
-            maxPoint = 2;
+        if(piY2 > iYMax) { 
+            iYMax = piY2;
+            iMaxPoint = 2;
         }
 
-        if(y3 > yMax) {
-            yMax = y3;
-            maxPoint = 4;
+        if(piY3 > iYMax) {
+            iYMax = piY3;
+            iMaxPoint = 4;
         }
 
-        if(y2 < yMin) { 
-            yMin = y2;
-            minPoint = 2;
+        if(piY2 < iYMin) { 
+            iYMin = piY2;
+            iMinPoint = 2;
         }
 
-        if(y3 < yMin) {
-            yMin = y3;
-            minPoint = 4;
+        if(piY3 < iYMin) {
+            iYMin = piY3;
+            iMinPoint = 4;
         }
 
-        if ((minPoint + maxPoint) == 3) midPoint = 4;
-        if ((minPoint + maxPoint) == 5) midPoint = 2;
-        if ((minPoint + maxPoint) == 6) midPoint = 1;
+        // Calculat iMidPoint (used later in a switch stmt)
+        if ((iMinPoint + iMaxPoint) == 3) iMidPoint = 4;
+        if ((iMinPoint + iMaxPoint) == 5) iMidPoint = 2;
+        if ((iMinPoint + iMaxPoint) == 6) iMidPoint = 1;
 
-        switch (minPoint) {
+        switch (iMinPoint) {
         case 1:
-            minX = x1;
-            minY = y1;
-            minI = i1;
-            minD = d1;
+            iMinX = piX1;
+            iMinY = piY1;
+            fMinI = pfI1;
+            fMinD = pfD1;
             break;
 
         case 2:
-            minX = x2;
-            minY = y2;
-            minI = i2;
-            minD = d2;
+            iMinX = piX2;
+            iMinY = piY2;
+            fMinI = pfI2;
+            fMinD = pfD2;
             break;
 
         case 4:
-            minX = x3;
-            minY = y3;
-            minI = i3;
-            minD = d3;
+            iMinX = piX3;
+            iMinY = piY3;
+            fMinI = pfI3;
+            fMinD = pfD3;
             break;
         } // switch
 
-        switch (maxPoint) {
+        switch (iMaxPoint) {
         case 1:
-            maxX = x1;
-            maxY = y1;
-            maxI = i1;
-            maxD = d1;
+            iMaxX = piX1;
+            iMaxY = piY1;
+            fMaxI = pfI1;
+            fMaxD = pfD1;
             break;
 
         case 2:
-            maxX = x2;
-            maxY = y2;
-            maxI = i2;
-            maxD = d2;
+            iMaxX = piX2;
+            iMaxY = piY2;
+            fMaxI = pfI2;
+            fMaxD = pfD2;
             break;
 
         case 4:
-            maxX = x3;
-            maxY = y3;
-            maxI = i3;
-            maxD = d3;
+            iMaxX = piX3;
+            iMaxY = piY3;
+            fMaxI = pfI3;
+            fMaxD = pfD3;
             break;
         } // switch
 
-        switch (midPoint) {
+        switch (iMidPoint) {
         case 1:
-            midX = x1;
-            midY = y1;
-            midI = i1;
-            midD = d1;
+            iMidX = piX1;
+            iMidY = piY1;
+            fMidI = pfI1;
+            fMidD = pfD1;
             break;
 
         case 2:
-            midX = x2;
-            midY = y2;
-            midI = i2;
-            midD = d2;
+            iMidX = piX2;
+            iMidY = piY2;
+            fMidI = pfI2;
+            fMidD = pfD2;
             break;
 
         case 4:
-            midX = x3;
-            midY = y3;
-            midI = i3;
-            midD = d3;
+            iMidX = piX3;
+            iMidY = piY3;
+            fMidI = pfI3;
+            fMidD = pfD3;
             break;
         } // switch
 
-        int row, col, firstX, lastX, triangleType;
-        int ix1 = 0, ix2 = 0, ip1 = 0, ip2 = 0, nSteps;
+        int iRow, iCol, iFirstX, iLastX, iTriangleType;
+        int ix1 = 0, ix2 = 0, ip1 = 0, ip2 = 0, iSteps;
 
-        triangleType = JICTConstants.I_POINTONSIDE;
-        if(midY == maxY) triangleType = JICTConstants.I_POINTONTOP;
-        if(minY == midY) triangleType = JICTConstants.I_POINTONBOTTOM;
+        iTriangleType = JICTConstants.I_POINTONSIDE;
+        if(iMidY == iMaxY) iTriangleType = JICTConstants.I_POINTONTOP;
+        if(iMinY == iMidY) iTriangleType = JICTConstants.I_POINTONBOTTOM;
 
         // Now we have a rotationally independant situation.  Interpolate rows from 
         // minY to midY then from midY to maxY
-        if (midY == -1) {
-            midY = maxY;
+        if (iMidY == -1) {
+            iMidY = iMaxY;
             return -1;
         }
 
-        if(triangleType == JICTConstants.I_POINTONSIDE) {
-            for(row = minY; row <= midY; row++) {
+        if(iTriangleType == JICTConstants.I_POINTONSIDE) {
+            for(iRow = iMinY; iRow <= iMidY; iRow++) {
                 // Interpolate the x interval and the intensities at the interval boundary
-                ix1 = (int)MathUtils.interpolate((float)minX, (float)maxX, (float)minY, (float)maxY, (float)row);
-                ix2 = (int)MathUtils.interpolate((float)minX, (float)midX, (float)minY, (float)midY, (float)row);
-                ip1 = (int)MathUtils.interpolate(       minI,        maxI, (float)minY, (float)maxY, (float)row);
-                ip2 = (int)MathUtils.interpolate(       minI,        midI, (float)minY, (float)midY, (float)row);
-                if(zImage != null) {
-                    id1 = MathUtils.interpolate(minD, maxD, (float)minY, (float)maxY, (float)row);
-                    id2 = MathUtils.interpolate(minD, midD, (float)minY, (float)midY, (float)row);
+                ix1 = (int)MathUtils.interpolate((float)iMinX, (float)iMaxX, (float)iMinY, (float)iMaxY, (float)iRow);
+                ix2 = (int)MathUtils.interpolate((float)iMinX, (float)iMidX, (float)iMinY, (float)iMidY, (float)iRow);
+                ip1 = (int)MathUtils.interpolate(       fMinI,        fMaxI, (float)iMinY, (float)iMaxY, (float)iRow);
+                ip2 = (int)MathUtils.interpolate(       fMinI,        fMidI, (float)iMinY, (float)iMidY, (float)iRow);
+                if(pZMImage != null) {
+                    id1 = MathUtils.interpolate(fMinD, fMaxD, (float)iMinY, (float)iMaxY, (float)iRow);
+                    id2 = MathUtils.interpolate(fMinD, fMidD, (float)iMinY, (float)iMidY, (float)iRow);
                 }
 
-                nSteps = Math.abs(ix2 - ix1);
+                iSteps = Math.abs(ix2 - ix1);
                 if(ix1 <= ix2) {
-                    firstX = ix1;
-                    lastX = ix2;
-                    intensity = ip1;
-                    distance = id1;
-                    denominator = nSteps + 1;
-                    if(denominator > 0) {
-                        intensityStep = (ip2 - ip1)/denominator;
-                        distanceStep  = (id2 - id1)/denominator;
+                    iFirstX = ix1;
+                    iLastX = ix2;
+                    fIntensity = ip1;
+                    fDistance = id1;
+                    iDenominator = iSteps + 1;
+                    if(iDenominator > 0) {
+                        fIntensityStep = (ip2 - ip1)/iDenominator;
+                        fDistanceStep  = (id2 - id1)/iDenominator;
                     } else {
-                        intensityStep = 0.0f;
-                        distanceStep  = 0.0f;
+                        fIntensityStep = 0.0f;
+                        fDistanceStep  = 0.0f;
                     }
                 } else {
-                    firstX = ix2;
-                    lastX = ix1;
-                    intensity = ip2;
-                    distance = id2;
-                    denominator = nSteps + 1;
+                    iFirstX = ix2;
+                    iLastX = ix1;
+                    fIntensity = ip2;
+                    fDistance = id2;
+                    iDenominator = iSteps + 1;
 
-                    if(denominator > 0) {
-                        intensityStep = (ip1 - ip2)/denominator;
-                        distanceStep  = (id1 - id2)/denominator;
+                    if(iDenominator > 0) {
+                        fIntensityStep = (ip1 - ip2)/iDenominator;
+                        fDistanceStep  = (id1 - id2)/iDenominator;
                     } else {
-                        intensityStep = 0.0f;
-                        distanceStep  = 0.0f;
+                        fIntensityStep = 0.0f;
+                        fDistanceStep  = 0.0f;
                     }
                 } 
 
-                for (col = firstX; col <= lastX; col++) {
-                    if(zImage != null) {  
+                for (iCol = iFirstX; iCol <= iLastX; iCol++) {
+                    if(pZMImage != null) {  
                         // Render with a Z Buffer
-                        oldZ = zImage.getMPixel32(col, row);
+                        fOldZ = pZMImage.getMPixel32(iCol, iRow);
 
-                        if(distance <= oldZ) {
-                            if(distance <= 1.0f) {
-                                distance = 1.0f;
+                        if(fDistance <= fOldZ) {
+                            if(fDistance <= 1.0f) {
+                                fDistance = 1.0f;
                             }
-                            intensity = MathUtils.bound(intensity, 0.0f, 255.0f);
-                            zImage.setMPixel32(col, row, distance);
+                            fIntensity = MathUtils.bound(fIntensity, 0.0f, 255.0f);
+                            pZMImage.setMPixel32(iCol, iRow, fDistance);
 
-                            if(bpp == 8)  outImage.setMPixel(col, row, (byte)intensity);
-                            if(bpp == 24) outImage.setMPixelRGB(col, row, (byte)intensity,
-                                (byte)intensity, (byte)intensity);
+                            if(iBpp == 8)  pOutMImage.setMPixel(iCol, iRow, (byte)fIntensity);
+                            if(iBpp == 24) pOutMImage.setMPixelRGB(iCol, iRow, (byte)fIntensity,
+                                (byte)fIntensity, (byte)fIntensity);
                         }
                     } else {
                         // Render without a Z Buffer
-                        intensity = MathUtils.bound(intensity, 1.0f, 255.0f);
-                        if(bpp == 8)  outImage.setMPixel(col, row, (byte)intensity);
-                        if(bpp == 24) outImage.setMPixelRGB(col, row, (byte)intensity,
-                            (byte)intensity, (byte)intensity);
+                        fIntensity = MathUtils.bound(fIntensity, 1.0f, 255.0f);
+                        if(iBpp == 8)  pOutMImage.setMPixel(iCol, iRow, (byte)fIntensity);
+                        if(iBpp == 24) pOutMImage.setMPixelRGB(iCol, iRow, (byte)fIntensity,
+                            (byte)fIntensity, (byte)fIntensity);
                     }
 
-                    intensity += intensityStep;
-                    distance  += distanceStep;
+                    fIntensity += fIntensityStep;
+                    fDistance  += fDistanceStep;
                 }
             }
 
             // Handle the second half of the pointonside case
-            for(row = midY; row <= maxY; row++) {
+            for(iRow = iMidY; iRow <= iMaxY; iRow++) {
                 // Interpolate the x interval and the intensities at the interval boundary
-                ix1 = (int)MathUtils.interpolate((float)minX, (float)maxX, (float)minY, (float)maxY, (float)row);
-                ix2 = (int)MathUtils.interpolate((float)midX, (float)maxX, (float)midY, (float)maxY, (float)row);
-                ip1 = (int)MathUtils.interpolate(       minI,        maxI, (float)minY, (float)maxY, (float)row);
-                ip2 = (int)MathUtils.interpolate(       midI,        maxI, (float)midY, (float)maxY, (float)row);
-                if(zImage != null) {
-                    id1 = MathUtils.interpolate(minD, maxD, (float)minY, (float)maxY, (float)row);
-                    id2 = MathUtils.interpolate(midD, maxD, (float)midY, (float)maxY, (float)row);
+                ix1 = (int)MathUtils.interpolate((float)iMinX, (float)iMaxX, (float)iMinY, (float)iMaxY, (float)iRow);
+                ix2 = (int)MathUtils.interpolate((float)iMidX, (float)iMaxX, (float)iMidY, (float)iMaxY, (float)iRow);
+                ip1 = (int)MathUtils.interpolate(       fMinI,        fMaxI, (float)iMinY, (float)iMaxY, (float)iRow);
+                ip2 = (int)MathUtils.interpolate(       fMidI,        fMaxI, (float)iMidY, (float)iMaxY, (float)iRow);
+                if(pZMImage != null) {
+                    id1 = MathUtils.interpolate(fMinD, fMaxD, (float)iMinY, (float)iMaxY, (float)iRow);
+                    id2 = MathUtils.interpolate(fMidD, fMaxD, (float)iMidY, (float)iMaxY, (float)iRow);
                 }
 
-                nSteps = Math.abs(ix2 - ix1);
+                iSteps = Math.abs(ix2 - ix1);
                 if(ix1 <= ix2) {
-                    firstX = ix1;
-                    lastX = ix2;
-                    intensity = ip1;
-                    distance = id1;
-                    denominator = nSteps + 1;
-                    if(denominator > 0.0) {
-                        intensityStep = (ip2 - ip1)/denominator;
-                        distanceStep  = (id2 - id1)/denominator;
+                    iFirstX = ix1;
+                    iLastX = ix2;
+                    fIntensity = ip1;
+                    fDistance = id1;
+                    iDenominator = iSteps + 1;
+                    if(iDenominator > 0.0) {
+                        fIntensityStep = (ip2 - ip1)/iDenominator;
+                        fDistanceStep  = (id2 - id1)/iDenominator;
                     } else {
-                        intensityStep = 0.0f;
-                        distanceStep  = 0.0f;
+                        fIntensityStep = 0.0f;
+                        fDistanceStep  = 0.0f;
                     }
                 } else {
-                    firstX = ix2;
-                    lastX = ix1;
-                    intensity = ip2;
-                    distance = id2;
-                    denominator = nSteps + 1;
-                    if(denominator > 0) {
-                        intensityStep = (ip1 - ip2)/denominator;
-                        distanceStep  = (id1 - id2)/denominator;
+                    iFirstX = ix2;
+                    iLastX = ix1;
+                    fIntensity = ip2;
+                    fDistance = id2;
+                    iDenominator = iSteps + 1;
+                    if(iDenominator > 0) {
+                        fIntensityStep = (ip1 - ip2)/iDenominator;
+                        fDistanceStep  = (id1 - id2)/iDenominator;
                     } else {
-                        intensityStep = 0.0f;
-                        distanceStep  = 0.0f;
+                        fIntensityStep = 0.0f;
+                        fDistanceStep  = 0.0f;
                     }
                 }
 
-                for (col = firstX; col <= lastX; col++) {
-                    if(zImage != null) {
-                        oldZ = zImage.getMPixel32(col, row);
-                        if(distance <= oldZ) {
-                            if(distance <= 1.0f) {
-                                distance = 1.0f;
+                for (iCol = iFirstX; iCol <= iLastX; iCol++) {
+                    if(pZMImage != null) {
+                        fOldZ = pZMImage.getMPixel32(iCol, iRow);
+                        if(fDistance <= fOldZ) {
+                            if(fDistance <= 1.0f) {
+                                fDistance = 1.0f;
                             }
-                            intensity = MathUtils.bound(intensity, 0.0f, 255.0f);
-                            zImage.setMPixel32(col, row, distance);
-                            if(bpp == 8)  outImage.setMPixel(col, row, (byte)intensity);
-                            if(bpp == 24) outImage.setMPixelRGB(col, row, (byte)intensity,
-                                (byte)intensity, (byte)intensity);
+                            fIntensity = MathUtils.bound(fIntensity, 0.0f, 255.0f);
+                            pZMImage.setMPixel32(iCol, iRow, fDistance);
+                            if(iBpp == 8)  pOutMImage.setMPixel(iCol, iRow, (byte)fIntensity);
+                            if(iBpp == 24) pOutMImage.setMPixelRGB(iCol, iRow, (byte)fIntensity,
+                                (byte)fIntensity, (byte)fIntensity);
                         }
                     } else {
-                        intensity = MathUtils.bound(intensity, 0.0f, 255.0f);
-                        if(bpp == 8)  outImage.setMPixel(col, row, (byte)intensity);
-                        if(bpp == 24) outImage.setMPixelRGB(col, row, (byte)intensity,
-                            (byte)intensity, (byte)intensity);
+                        fIntensity = MathUtils.bound(fIntensity, 0.0f, 255.0f);
+                        if(iBpp == 8)  pOutMImage.setMPixel(iCol, iRow, (byte)fIntensity);
+                        if(iBpp == 24) pOutMImage.setMPixelRGB(iCol, iRow, (byte)fIntensity,
+                            (byte)fIntensity, (byte)fIntensity);
                     }
-                    intensity += intensityStep;
-                    distance  += distanceStep;
-                } // for col
-            } // for row
+                    fIntensity += fIntensityStep;
+                    fDistance  += fDistanceStep;
+                } // for iCol
+            } // for iRow
         } else {
             // Handle pointontop, pointonbottom cases
-            for(row = minY; row <= maxY; row++) {
+            for(iRow = iMinY; iRow <= iMaxY; iRow++) {
                 // Interpolate the x interval and the intensities at the interval boundary
-                if(triangleType == JICTConstants.I_POINTONTOP) {
-                    ix1 = (int)MathUtils.interpolate((float)minX, (float)maxX, (float)minY, (float)maxY, (float)row);
-                    ix2 = (int)MathUtils.interpolate((float)minX, (float)midX, (float)minY, (float)midY, (float)row);
-                    ip1 = (int)MathUtils.interpolate(       minI,        maxI, (float)minY, (float)maxY, (float)row);
-                    ip2 = (int)MathUtils.interpolate(       minI,        midI, (float)minY, (float)midY, (float)row);
-                    if(zImage != null) {
-                        id1 = MathUtils.interpolate(minD, maxD, (float)minY, (float)maxY, (float)row);
-                        id2 = MathUtils.interpolate(minD, midD, (float)minY, (float)midY, (float)row);
+                if(iTriangleType == JICTConstants.I_POINTONTOP) {
+                    ix1 = (int)MathUtils.interpolate((float)iMinX, (float)iMaxX, (float)iMinY, (float)iMaxY, (float)iRow);
+                    ix2 = (int)MathUtils.interpolate((float)iMinX, (float)iMidX, (float)iMinY, (float)iMidY, (float)iRow);
+                    ip1 = (int)MathUtils.interpolate(       fMinI,        fMaxI, (float)iMinY, (float)iMaxY, (float)iRow);
+                    ip2 = (int)MathUtils.interpolate(       fMinI,        fMidI, (float)iMinY, (float)iMidY, (float)iRow);
+                    if(pZMImage != null) {
+                        id1 = MathUtils.interpolate(fMinD, fMaxD, (float)iMinY, (float)iMaxY, (float)iRow);
+                        id2 = MathUtils.interpolate(fMinD, fMidD, (float)iMinY, (float)iMidY, (float)iRow);
                     }
                 }
-                if(triangleType == JICTConstants.I_POINTONBOTTOM) {
-                    ix1 = (int)MathUtils.interpolate((float)minX, (float)maxX, (float)minY, (float)maxY, (float)row);
-                    ix2 = (int)MathUtils.interpolate((float)midX, (float)maxX, (float)midY, (float)maxY, (float)row);
-                    ip1 = (int)MathUtils.interpolate(       minI,        maxI, (float)minY, (float)maxY, (float)row);
-                    ip2 = (int)MathUtils.interpolate(       midI,        maxI, (float)midY, (float)maxY, (float)row);
-                    if(zImage != null) {
-                        id1 = MathUtils.interpolate(minD, maxD, (float)minY, (float)maxY, (float)row);
-                        id2 = MathUtils.interpolate(midD, maxD, (float)midY, (float)maxY, (float)row);
+                if(iTriangleType == JICTConstants.I_POINTONBOTTOM) {
+                    ix1 = (int)MathUtils.interpolate((float)iMinX, (float)iMaxX, (float)iMinY, (float)iMaxY, (float)iRow);
+                    ix2 = (int)MathUtils.interpolate((float)iMidX, (float)iMaxX, (float)iMidY, (float)iMaxY, (float)iRow);
+                    ip1 = (int)MathUtils.interpolate(       fMinI,        fMaxI, (float)iMinY, (float)iMaxY, (float)iRow);
+                    ip2 = (int)MathUtils.interpolate(       fMidI,        fMaxI, (float)iMidY, (float)iMaxY, (float)iRow);
+                    if(pZMImage != null) {
+                        id1 = MathUtils.interpolate(fMinD, fMaxD, (float)iMinY, (float)iMaxY, (float)iRow);
+                        id2 = MathUtils.interpolate(fMidD, fMaxD, (float)iMidY, (float)iMaxY, (float)iRow);
                     }
                 }
 
-                nSteps = Math.abs(ix2 - ix1);
+                iSteps = Math.abs(ix2 - ix1);
                 if(ix1 <= ix2) {
-                    firstX = ix1;
-                    lastX = ix2;
-                    intensity = ip1;
-                    distance = id1;
-                    denominator = nSteps + 1;
-                    if(denominator > 0) {
-                        intensityStep = (ip2 - ip1)/denominator;
-                        distanceStep  = (id2 - id1)/denominator;
+                    iFirstX = ix1;
+                    iLastX = ix2;
+                    fIntensity = ip1;
+                    fDistance = id1;
+                    iDenominator = iSteps + 1;
+                    if(iDenominator > 0) {
+                        fIntensityStep = (ip2 - ip1)/iDenominator;
+                        fDistanceStep  = (id2 - id1)/iDenominator;
                     } else {
-                        intensityStep = 0.0f;
-                        distanceStep  = 0.0f;
+                        fIntensityStep = 0.0f;
+                        fDistanceStep  = 0.0f;
                     }
                 } else {
-                    firstX = ix2;
-                    lastX = ix1;
-                    intensity = ip2;
-                    distance = id2;
-                    denominator = nSteps  + 1;
-                    if(denominator > 0) {
-                        intensityStep = (ip1 - ip2)/denominator;
-                        distanceStep  = (id1 - id2)/denominator;
+                    iFirstX = ix2;
+                    iLastX = ix1;
+                    fIntensity = ip2;
+                    fDistance = id2;
+                    iDenominator = iSteps  + 1;
+                    if(iDenominator > 0) {
+                        fIntensityStep = (ip1 - ip2)/iDenominator;
+                        fDistanceStep  = (id1 - id2)/iDenominator;
                     } else {
-                        intensityStep = 0.0f;
-                        distanceStep  = 0.0f;
+                        fIntensityStep = 0.0f;
+                        fDistanceStep  = 0.0f;
                     }
                 }   
 
-                for (col = firstX; col <= lastX; col++) {
-                    if(zImage != null) {
-                        oldZ = zImage.getMPixel32(col, row);
-                        if(distance <= oldZ) {
-                            if(distance <= 1.0f) {
-                                distance = 1.0f;
+                for (iCol = iFirstX; iCol <= iLastX; iCol++) {
+                    if(pZMImage != null) {
+                        fOldZ = pZMImage.getMPixel32(iCol, iRow);
+                        if(fDistance <= fOldZ) {
+                            if(fDistance <= 1.0f) {
+                                fDistance = 1.0f;
                             }
-                            intensity = MathUtils.bound(intensity, 0.0f, 255.0f);
-                            zImage.setMPixel32(col, row, distance);
-                            if(bpp == 8)  outImage.setMPixel(col, row, (byte)intensity);
-                            if(bpp == 24) outImage.setMPixelRGB(col, row, (byte)intensity,
-                                (byte)intensity, (byte)intensity);
+                            fIntensity = MathUtils.bound(fIntensity, 0.0f, 255.0f);
+                            pZMImage.setMPixel32(iCol, iRow, fDistance);
+                            if(iBpp == 8)  pOutMImage.setMPixel(iCol, iRow, (byte)fIntensity);
+                            if(iBpp == 24) pOutMImage.setMPixelRGB(iCol, iRow, (byte)fIntensity,
+                                (byte)fIntensity, (byte)fIntensity);
                         }
                     } else {
-                        intensity = MathUtils.bound(intensity, 0.0f, 255.0f);
-                        if(bpp == 8)  outImage.setMPixel(col, row, (byte)intensity);
-                        if(bpp == 24) outImage.setMPixelRGB(col, row, (byte)intensity,
-                            (byte)intensity, (byte)intensity);
+                        fIntensity = MathUtils.bound(fIntensity, 0.0f, 255.0f);
+                        if(iBpp == 8)  pOutMImage.setMPixel(iCol, iRow, (byte)fIntensity);
+                        if(iBpp == 24) pOutMImage.setMPixelRGB(iCol, iRow, (byte)fIntensity,
+                            (byte)fIntensity, (byte)fIntensity);
                     }
 
-                    intensity += intensityStep;
-                    distance  += distanceStep;
-                } // for col
-            } // for row
+                    fIntensity += fIntensityStep;
+                    fDistance  += fDistanceStep;
+                } // for iCol
+            } // for iRow
         }
 
         return 0;
     } // fillTrianglez
 
 
-    // This method came from SHADERS.CPP
+    // This method originally came from SHADERS.CPP
+    //
     // Called from:
     //     RenderObject.renderShapez
     public static byte getLight(Point3d p1, Point3d p2, Point3d c1, Point3d c2) {
