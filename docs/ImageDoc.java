@@ -54,6 +54,7 @@ protected:
 }
 */
 
+	// This constructor originally came from IMAGEDOC.CPP
 	public ImageDoc() {
 		m_sizeDoc = CSize(1, 1);     // dummy value to make CScrollView happy
 		if(ictdebug) {
@@ -62,6 +63,7 @@ protected:
 	} // ImageDoc ctor
 
 
+	// This method originally came from IMAGEDOC.CPP
 	public Dimension getDocSize() {   
 		int imHeight = m_theImage.getHeight();
 		int imWidth  = m_theImage.getWidth();
@@ -70,22 +72,26 @@ protected:
 	} // getDocSize
 
 	
+	// This method originally came from IMAGEDOC.CPP
 	public MemImage getImagePointer() {
 		return m_theImage;
 	} // getImagePointer
 
 
+	// This method originally came from IMAGEDOC.CPP
 	public String getPathName() {
 		return m_pathName;
 	} // getPathName
 
 
+	// This method originally came from IMAGEDOC.CPP
 	public void setImagePointer(MemImage theImage) {
 		m_theImage = theImage;
 		return ;
 	} // setImagePointer
 
 
+	// This destructor originally came from IMAGEDOC.CPP
 	public void finalize() {
 		if(ictdebug) {
 			Globals.statusPrint("ImageDoc Destructor");
@@ -93,6 +99,7 @@ protected:
 	} // finalize
 
 
+	// This method originally came from IMAGEDOC.CPP
 	protected boolean onNewDocument() {
 		if (!CDocument.OnNewDocument()) {
 			return false;
@@ -102,6 +109,7 @@ protected:
 	} // onNewDocument
 
 
+	// This method originally came from IMAGEDOC.CPP
 	public boolean onOpenDocument(String lpszPathName) {
 		m_theImage = new MemImage(lpszPathName, 0, 0, RANDOM, 'R', 0);
 		if(!m_theImage.isValid()) {
@@ -117,12 +125,14 @@ protected:
 	} // onOpenDocument
 
 
+	// This method originally came from IMAGEDOC.CPP
 	public boolean onSaveDocument(String lpszPathName) {
 		m_theImage.writeBMP(lpszPathName);
 		return true;
 	} // onSaveDocument
 
 
+	// This method originally came from IMAGEDOC.CPP
 	public ImageDoc getDoc() {
 		CMDIChildWnd pChild = ((CMDIFrameWnd)(AfxGetApp().m_pMainWnd)).MDIGetActive();
 
