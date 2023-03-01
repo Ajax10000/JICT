@@ -14,6 +14,13 @@ import globals.Globals;
 import globals.JICTConstants;
 
 import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Point;
+
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.awt.image.BufferedImage;
 import java.io.File;
 
 import javax.swing.JDialog;
@@ -21,7 +28,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
 
-public class ImageView extends JDialog {
+public class ImageView extends JDialog implements MouseListener {
 /*
 class imageView : public CScrollView{
 protected:
@@ -68,6 +75,7 @@ protected:
 */
 
     private MainFrame mMainFrame;
+    private BufferedImage mBuffImage;
     public HBITMAP hBitmap;
 
     // Modified in:
@@ -125,6 +133,8 @@ protected:
         afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 */
 
+    // This constructor originally came from IMAGEVEW.CPP
+    //
     // Called from:
     //     MainFrame.onPreviewStillScene
     //     MainFrame.onPreviewSequenceScene
@@ -134,9 +144,11 @@ protected:
         mbFirstPress = false;
         mbEraseMe = false;
         mMImage = null;
+
     } // ImageView ctor
 
 
+    // This destructor originally came from IMAGEVEW.CPP
     public void finalize() {
         // DeleteObject(hBitmap);
     } // finalize
@@ -144,16 +156,20 @@ protected:
 
     // This method originally came from IMAGEVW.H
     public ImageDoc getDocument() {
-        ASSERT (m_pDocument.IsKindOf(RUNTIME_CLASS(imageDoc)));
-        return (ImageDoc)m_pDocument;
+        // m_pDocument is a field inherited from CView
+        // The original C++ class extended CScrollView, which itself extends CView
+        //ASSERT (m_pDocument.IsKindOf(RUNTIME_CLASS(imageDoc)));
+        //return (ImageDoc)m_pDocument;
+        return null;
     } // getDocument
 
 
+    // This method originally came from IMAGEVEW.CPP
     public void onInitialUpdate() {
         String sImage;
 
         ScrollView.OnInitialUpdate();
-        ASSERT(getDocument() != null);
+        // ASSERT(getDocument() != null);
         mMImage = getDocument().getImagePointer();
         if (mMImage != null) {
             SetScrollSizes(MM_TEXT, getDocument().getDocSize());
@@ -168,7 +184,9 @@ protected:
         mbCutoutEnabled = mMainFrame.mbCutoutEnabled;
     } // onInitialUpdate
 
-    
+
+    // This method originally came from IMAGEVEW.CPP
+    // 
     // Called from:
     //     MainFrame.onToolsWarpImage
     public void setCaption(String psCaption) {
@@ -176,10 +194,12 @@ protected:
     } // setCaption
     
 
+    // This method originally came from IMAGEVEW.CPP
+    //
     // Called from:
     //     onLButtonUp
     public void getScrollPos(Integer pIXPixels, Integer pIYPixels) {
-        CPoint locationPt;
+        Point locationPt;
 
         locationPt = GetDeviceScrollPosition();
 
@@ -189,6 +209,8 @@ protected:
     } // getScrollPos
     
 
+    // This method originally came from IMAGEVEW.CPP
+    //
     // Called from:
     //     associateMemImage
     public void onUpdate() {
@@ -196,25 +218,27 @@ protected:
     } // onUpdate
     
 
+    // This method originally came from IMAGEVEW.CPP
+    //
     // Called from:
     //     associateMemImage
     public void onDraw(CDC qdc) {
         int iStatus;
     
         if(mMainFrame.mbPreviewingScene) {
-            iStatus = mMainFrame.mSceneList.previewStill(m_hWnd, 
+            iStatus = mMainFrame.mSceneList.previewStill(mBuffImage, 
                 mMainFrame.mModelMatrix, mMainFrame.mViewMatrix);
             if(iStatus != 0) { 
-                exit;
+                dispose();
             }
             return;
         }
 
-        if(theFrame.previewingSequence) {
-            iStatus = mMainFrame.mSceneList.preview(m_hWnd, 
+        if(mMainFrame.mbPreviewingSequence) {
+            iStatus = mMainFrame.mSceneList.preview(mBuffImage, 
                 mMainFrame.mModelMatrix, mMainFrame.mViewMatrix);
             if(iStatus != 0) {
-                exit;
+                dispose();
             }
             return;
         }
@@ -225,12 +249,12 @@ protected:
             return;
         }
       
-        ASSERT(getDocument() != null);
+        // ASSERT(getDocument() != null);
         if (!getDocument().getImagePointer()) {
             return;
         }
 
-        CSize docSize = getDocument().getDocSize();
+        Dimension docSize = getDocument().getDocSize();
         
         CRect clientRect;
         GetClientRect(clientRect);
@@ -242,9 +266,9 @@ protected:
         SetStretchBltMode(memDC, COLORONCOLOR);
         RECT imageRect;
         imageRect.left = 0; imageRect.top = 0;
-        imageRect.right = docSize.cx; imageRect.bottom = docSize.cy;
+        imageRect.right = docSize.getWidth(); imageRect.bottom = docSize.getHeight();
     
-        CPoint scrollPos = GetDeviceScrollPosition();
+        Point scrollPos = GetDeviceScrollPosition();
         int iXPos = scrollPos.x;
         int iYPos = scrollPos.y;
         clientRect.left   += iXPos;
@@ -253,22 +277,24 @@ protected:
         clientRect.bottom += iYPos;
         
         BitBlt(imageRect.left, imageRect.top,
-          imageRect.right - imageRect.left,
-          imageRect.bottom - imageRect.top,
-          memDC, imageRect.left + iXPos,
-          imageRect.top + iYPos, SRCCOPY);
+            imageRect.right - imageRect.left,
+            imageRect.bottom - imageRect.top,
+            memDC, imageRect.left + iXPos,
+            imageRect.top + iYPos, SRCCOPY);
     
-        PatBlt(docSize.cx, 0,
-            clientRect.right - docSize.cx,
+        PatBlt(docSize.getWidth(), 0,
+            clientRect.right - docSize.getWidth(),
             clientRect.bottom, PATCOPY);
-        PatBlt(0, docSize.cy,
+        PatBlt(0, docSize.getHeight(),
             clientRect.right, 
-            clientRect.bottom - docSize.cy, PATCOPY);
+            clientRect.bottom - docSize.getHeight(), PATCOPY);
     
         SelectObject(memDC, holdBitmap);
     } // onDraw
     
 
+    // This method originally came from IMAGEVEW.CPP
+    // 
     // Called from:
     //     MainFrame.onToolsWarpImage
     public boolean associateMemImage(MemImage pMImage) {
@@ -286,6 +312,8 @@ protected:
     } // associateMemImage
     
 
+    // This method originally came from IMAGEVEW.CPP
+    // 
     // Called from:
     //     associateMemImage
     public void getBitmap() {
@@ -315,6 +343,9 @@ protected:
     } // getBitmap
     
 
+    // This method originally came from IMAGEVEW.CPP
+    // 
+    // Not called from within this file
     public boolean loadBMP(String psName) {
         String sMsgText;
 
@@ -332,6 +363,8 @@ protected:
     } // loadBMP
     
     
+    // This method originally came from IMAGEVEW.CPP
+    // 
     // Called from:
     //     MainFrame.onPreviewStillScene
     //     MainFrame.onPreviewSequenceScene
@@ -356,7 +389,8 @@ protected:
     } // getView
     
 
-    public void onLButtonDown(UINT nFlags, CPoint point) {
+    // This method originally came from IMAGEVEW.CPP
+    public void onLButtonDown(int piFlags, Point pPoint) {
         // Peek into the CMainFrame window object to see if 
         // the cutout enabled option has been checked.
         String sMsgText;
@@ -378,27 +412,25 @@ protected:
             int iXOffset, iYOffset;
             getScrollPos(iXOffset, iYOffset);
 
+            int iX = pPoint.x + iXOffset + 1;
+            int iY = mMImage.getHeight() - pPoint.y - iYOffset;
             switch(mMImage.getBitsPerPixel()) {
             case 32:
-                fValue32 = mMImage.getMPixel32(point.x + iXOffset + 1, mMImage.getHeight() - point.y - iYOffset);
-                sMsgText = "x: " + point.x + iXOffset + 1 + 
-                         "  y: " + mMImage.getHeight() - point.y - iYOffset + 
+                fValue32 = mMImage.getMPixel32(iX, iY);
+                sMsgText = "x: " + iX + "  y: " + iY + 
                      "  Value: " + fValue32;
                 break;
         
             case 24:
-                mMImage.getMPixelRGB(point.x + iXOffset + 1, mMImage.getHeight() - point.y - iYOffset, 
+                mMImage.getMPixelRGB(iX, iY, 
                     bytRed, bytGreen, bytBlue);
-                sMsgText = "x: " + point.x + iXOffset + 1 + 
-                         "  y: " + mMImage.getHeight() - point.y - iYOffset + 
+                sMsgText = "x: " + iX + "  y: " + iY + 
                      "  Color: red: " + bytRed + "  green: " + bytGreen + "  blue: "  + bytBlue;
                 break;
         
             case 8:
-                bytValue = mMImage.getMPixel(point.x + iXOffset + 1, 
-                    mMImage.getHeight() - point.y - iYOffset);
-                sMsgText = "x: " + point.x + iXOffset + 1 + 
-                         "  y: " + mMImage.getHeight() - point.y - iYOffset + 
+                bytValue = mMImage.getMPixel(iX, iY);
+                sMsgText = "x: " + iX + "  y: " + iY + 
                       " Value: " + bytValue;
                 break;
         
@@ -415,7 +447,7 @@ protected:
 
                 // The following sets parameters iRedLow, iRedHigh, iGreenLow, iGreenHigh, iBlueLow and iBlueHigh
                 int iStatus = getSampleRange(mMImage, 
-                    point.x + iXOffset, mMImage.getHeight() - point.y - iYOffset, 
+                    pPoint.x + iXOffset, (mMImage.getHeight() - pPoint.y - iYOffset), 
                     iRedLow,    iRedHigh, 
                     iGreenLow,  iGreenHigh,
                     iBlueLow,   iBlueHigh);
@@ -432,11 +464,12 @@ protected:
             } 
         }
 
-        CScrollView.OnLButtonDown(nFlags, point);
+        // CScrollView.OnLButtonDown(nFlags, point);
     } // onLButtonDown
     
 
-    public void onLButtonUp(UINT nFlags, CPoint point) {
+    // This method originally came from IMAGEVEW.CPP
+    public void onLButtonUp(int nFlags, Point point) {
         if(mbCutoutEnabled) {
             String sMsgText;
             if(mbFirstPress == false) {
@@ -446,7 +479,7 @@ protected:
             int iXOffset, iYOffset;
             getScrollPos(iXOffset, iYOffset);
             sMsgText = "Adding point " + mShape.getNumVertices() + 
-                ": (" + point.x + iXOffset + ", " + point.y - iYOffset + ")";
+                ": (" + point.x + iXOffset + ", " + (point.y - iYOffset) + ")";
             Globals.statusPrint(sMsgText);
             int iStatus;
             iStatus = mShape.addWorldVertex(
@@ -469,14 +502,15 @@ protected:
             }
         } // if(mbCutoutEnabled)
 
-        CScrollView.OnLButtonUp(nFlags, point);
+        // CScrollView.OnLButtonUp(nFlags, point);
     } // onLButtonUp
     
 
-    public void onLButtonDblClk(UINT nFlags, CPoint point) {
+    // This method originally came from IMAGEVEW.CPP
+    public void onLButtonDblClk(int nFlags, Point point) {
         String sMsgText;
         String sCutoutName, sImageFileName;
-        CSize docSize = getDocument().getDocSize();
+        Dimension docSize = getDocument().getDocSize();
 
         if(mbCutoutEnabled) {
             Globals.statusPrint("Left button double click: Save files and Exit");
@@ -491,8 +525,8 @@ protected:
                 msFileName = getDocument().getPathName();
                 sImageFileName = msFileName; 
                 sCutoutName = new String(dlg.m_Name);
-                int iStatus = RenderObject.prepareCutout(mShape, m_hWnd, 
-                    sImageFileName, sCutoutName, (int)docSize.cx, (int)docSize.cy);
+                int iStatus = RenderObject.prepareCutout(mShape, mBuffImage, 
+                    sImageFileName, sCutoutName, (int)docSize.getWidth(), (int)docSize.getHeight());
                 if(iStatus != 0) {
                     sMsgText = "Unable to Create Cutout. " + iStatus;
                     Globals.statusPrint(sMsgText);
@@ -507,17 +541,18 @@ protected:
             }
         }
 
-        CScrollView.OnLButtonDblClk(nFlags, point);
+        // CScrollView.OnLButtonDblClk(nFlags, point);
     } // onLButtonDblClk
     
     
-    public void onRButtonDown(UINT nFlags, CPoint point) {
+    // This method originally came from IMAGEVEW.CPP
+    public void onRButtonDown(int nFlags, Point point) {
         if(mbCutoutEnabled) {
             String sMsgText;
             Integer iXOffset = 0, iYOffset = 0;
 
             getScrollPos(iXOffset, iYOffset);
-            sMsgText = "Deleting: (" + point.x + iXOffset + ", " + point.y - iYOffset + ")";
+            sMsgText = "Deleting: (" + point.x + iXOffset + ", " + (point.y - iYOffset) + ")";
             Globals.statusPrint(sMsgText);
             HPEN hpen;
         
@@ -534,7 +569,7 @@ protected:
             LineTo((int)(fX + 0.5f), (int)(fY + 0.5f));
             iStatus = mShape.deleteLastWorldVertex();
             // TODO: We are not looking at the return value for an error status
-        }
+        } // if(mbCutoutEnabled)
         
         if(mMainFrame.mbRemoveSampleColorsEnabled) {
             //  Ask if the user wishes to save the thresholded image which they have been creating
@@ -559,72 +594,135 @@ protected:
             } // if(iResult == JOptionPane.YES_OPTION)
         } // if(mMainFrame.mbRemoveSampleColorsEnabled)
 
-        CScrollView.OnRButtonDown(nFlags, point);
+        // CScrollView.OnRButtonDown(nFlags, point);
     } // onRButtonDown
 
 
-    public void onRButtonUp(UINT nFlags, CPoint point) {
+    // This method originally came from IMAGEVEW.CPP
+    public void onRButtonUp(int nFlags, Point point) {
         // TODO: Add your message handler code here and/or call default
-        CScrollView.OnRButtonUp(nFlags, point);
+        // CScrollView.OnRButtonUp(nFlags, point);
     } // onRButtonUp
 
 
-    public void onMouseMove(UINT nFlags, CPoint point) {
-        ScrollView.OnMouseMove(nFlags, point);
+    // This method originally came from IMAGEVEW.CPP
+    public void onMouseMove(int nFlags, Point point) {
+        // ScrollView.OnMouseMove(nFlags, point);
     } // onMouseMove
 
 
-    int getSampleRange(MemImage pMImage, int x, int y, 
-    Integer redLow, Integer redHigh, 
-    Integer greenLow, Integer greenHigh,
-    Integer blueLow, Integer blueHigh) {
-        byte red, green, blue;
-        int status;
+    // This method originally came from IMAGEVEW.CPP
+    // 
+    // Called from:
+    //    onLButtonDown
+    private int getSampleRange(MemImage pMImage, int piX, int piY, 
+    Integer piRedLow, Integer piRedHigh, 
+    Integer piGreenLow, Integer piGreenHigh,
+    Integer piBlueLow, Integer piBlueHigh) {
+        byte bytRed, bytGreen, bytBlue;
+        int iStatus;
 
-        pMImage.getMPixelRGB(x, y, red, green, blue);
-        if((red == 0) && (green == 0) && (blue == 0)) {
+        pMImage.getMPixelRGB(piX, piY, bytRed, bytGreen, bytBlue);
+        if((bytRed == 0) && (bytGreen == 0) && (bytBlue == 0)) {
             return -1;  //a background pixel was clicked on
         }
-        redLow = redHigh = (int)red;
-        greenLow = greenHigh = (int)green;
-        blueLow = blueHigh = (int)blue;
+
+        piRedLow = piRedHigh = (int)bytRed;
+        piGreenLow = piGreenHigh = (int)bytGreen;
+        piBlueLow = piBlueHigh = (int)bytBlue;
       
-        status = pMImage.getMPixelRGB(x + 1, y + 1, red, green, blue);
-        if((red != 0) && (green != 0) && (blue != 0)) {
-            if(red < redLow)  redLow  = (int)red;
-            if(red > redHigh) redHigh = (int)red;
+        iStatus = pMImage.getMPixelRGB(piX + 1, piY + 1, bytRed, bytGreen, bytBlue);
+        if((bytRed != 0) && (bytGreen != 0) && (bytBlue != 0)) {
+            if(bytRed < piRedLow)  piRedLow  = (int)bytRed;
+            if(bytRed > piRedHigh) piRedHigh = (int)bytRed;
 
-            if(green < greenLow)  greenLow  = (int)green;
-            if(green > greenHigh) greenHigh = (int)green;
+            if(bytGreen < piGreenLow)  piGreenLow  = (int)bytGreen;
+            if(bytGreen > piGreenHigh) piGreenHigh = (int)bytGreen;
 
-            if(blue < blueLow)  blueLow  = (int)blue;
-            if(blue > blueHigh) blueHigh = (int)blue;
+            if(bytBlue < piBlueLow)  piBlueLow  = (int)bytBlue;
+            if(bytBlue > piBlueHigh) piBlueHigh = (int)bytBlue;
         }
     
-        status = pMImage.getMPixelRGB(x , y + 1, red, green, blue);
-        if((red != 0) && (green != 0) && (blue != 0)) {
-            if(red < redLow)  redLow  = (int)red;
-            if(red > redHigh) redHigh = (int)red;
+        iStatus = pMImage.getMPixelRGB(piX , piY + 1, bytRed, bytGreen, bytBlue);
+        if((bytRed != 0) && (bytGreen != 0) && (bytBlue != 0)) {
+            if(bytRed < piRedLow)  piRedLow  = (int)bytRed;
+            if(bytRed > piRedHigh) piRedHigh = (int)bytRed;
 
-            if(green < greenLow)  greenLow  = (int)green;
-            if(green > greenHigh) greenHigh = (int)green;
+            if(bytGreen < piGreenLow)  piGreenLow  = (int)bytGreen;
+            if(bytGreen > piGreenHigh) piGreenHigh = (int)bytGreen;
 
-            if(blue < blueLow)  blueLow  = (int)blue;
-            if(blue > blueHigh) blueHigh = (int)blue;
+            if(bytBlue < piBlueLow)  piBlueLow  = (int)bytBlue;
+            if(bytBlue > piBlueHigh) piBlueHigh = (int)bytBlue;
         }
     
-        status = pMImage.getMPixelRGB(x + 1, y, red, green, blue);
-        if((red != 0) && (green != 0) && (blue != 0)) {
-            if(red < redLow)  redLow  = (int)red;
-            if(red > redHigh) redHigh = (int)red;
+        iStatus = pMImage.getMPixelRGB(piX + 1, piY, bytRed, bytGreen, bytBlue);
+        if((bytRed != 0) && (bytGreen != 0) && (bytBlue != 0)) {
+            if(bytRed < piRedLow)  piRedLow  = (int)bytRed;
+            if(bytRed > piRedHigh) piRedHigh = (int)bytRed;
 
-            if(green < greenLow)  greenLow  = (int)green;
-            if(green > greenHigh) greenHigh = (int)green;
+            if(bytGreen < piGreenLow)  piGreenLow  = (int)bytGreen;
+            if(bytGreen > piGreenHigh) piGreenHigh = (int)bytGreen;
 
-            if(blue < blueLow)  blueLow  = (int)blue;
-            if(blue > blueHigh) blueHigh = (int)blue;
+            if(bytBlue < piBlueLow)  piBlueLow  = (int)bytBlue;
+            if(bytBlue > piBlueHigh) piBlueHigh = (int)bytBlue;
         }
 
         return 0;
     } // getSampleRange
+
+    
+    // Setter for our mBuffImage field
+    public void setBufferedImage(BufferedImage pBuffImage) {
+        this.mBuffImage = pBuffImage;
+    } // setBufferedImage
+
+
+    // Method mouseClicked is necessary for implementing the MouseListener interface
+    public void mouseClicked(MouseEvent me) {
+        if (me.getClickCount() == 2 && !me.isConsumed()) {
+            me.consume();
+            int iFlags = me.getModifiersEx();
+            Point pt = me.getLocationOnScreen();
+            onLButtonDblClk(iFlags, pt);
+       };
+    } // mouseClicked
+
+
+    // Method mouseEntered is necessary for implementing the MouseListener interface
+    // Invoked when the mouse enters a component.
+    public void mouseEntered(MouseEvent me) {
+        return;
+    } // mouseEntered
+    
+
+    // Method mouseExited is necessary for implementing the MouseListener interface
+    // Invoked when the mouse exits a component.
+    public void mouseExited(MouseEvent me) {
+        return;
+    } // mouseExited
+    
+
+    // Method mousePressed is necessary for implementing the MouseListener interface
+    // Invoked when a mouse button has been pressed on a component.
+    public void mousePressed(MouseEvent me) {
+        // onLButtonDown
+        // onRButtonDown
+        Point pt = me.getLocationOnScreen();
+        int iFlags = me.getModifiersEx();
+        if (me.getButton() == MouseEvent.BUTTON1) {
+            onLButtonDown(iFlags, pt);
+        } else if (me.getButton() == MouseEvent.BUTTON3) {
+            onRButtonDown(iFlags, pt);
+        }
+    } // mousePressed
+    
+
+    // Method mouseReleased is necessary for implementing the MouseListener interface
+    // Invoked when a mouse button has been released on a component.
+    public void mouseReleased(MouseEvent me) {
+        // onLButtonUp
+        // onRButtonUp
+        return;
+    } // mouseReleased
+    
 } // class ImageView
