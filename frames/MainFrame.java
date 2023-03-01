@@ -148,7 +148,7 @@ protected:
 	afx_msg void OnUpdateRenderHazefog(CCmdUI* pCmdUI); - commented out
 	afx_msg void OnUpdateRenderAntialias(CCmdUI* pCmdUI); - commented out
 	afx_msg void OnToolsMotionblur(); - implemented
-	afx_msg void OnRenderHazefog(); - implemented
+	afx_msg void OnRenderHazefog(); - commented out, as it isn't being called
 	afx_msg void OnRenderAntialias(); - implemented
 	afx_msg void OnToolsRenderVrmlFile(); - implemented
 	//}}AFX_MSG
@@ -1737,6 +1737,8 @@ POPUP "Tools"
 */
 
     // ON_COMMAND(ID_RENDER_HAZEFOG, OnRenderHazefog)
+    // Not called from anywhere.
+    /*
     public void onRenderHazeFog() {
         if(mbZBufferEnabled) {
             // Field hazeFogEnabled is passed as a parameter to method 
@@ -1746,7 +1748,7 @@ POPUP "Tools"
             Globals.statusPrint("mainfrm: Haze can only be used if the Z-Buffer is enabled");
         }
     } // onRenderHazeFog
-
+    */
 
     // Called when the user selects the "Anti-Alias" menu item from the Render menu
     // MENUITEM "Anti-Alias",                  ID_RENDER_ANTIALIAS
