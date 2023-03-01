@@ -1009,14 +1009,15 @@ public class Globals {
     } // motionBlur
 
 
+    // This method originally came from IWARP.CPP
+    //
     // This method performs planar texture mapping.
     // See p 157 - 160 of Visual Special Effects Toolkit in C++.
-    // This method originally came from IWARP.CPP
+    //
     // Called from:
-    //     iwarpz
     //     tweenImage
-    // which in turn is called by MorphDlg.onOK (when morph type = JICTConstants.I_TWOD)
     //     MainFrame.onToolsWarpImage
+    // Note that tweenImage in turn is called by MorphDlg.onOK (when morph type = JICTConstants.I_TWOD)
     public static int iwarpz(MemImage pInMImage, MemImage pOutMImage, MemImage pZMImage,
     float pfRx, float pfRy, float pfRz, 
     float pfSx, float pfSy, float pfSz,
@@ -1056,7 +1057,9 @@ public class Globals {
             statusPrint(sMsgText);
         }
 
-        //  Build the forward and inverse transformation matrices
+        // Step 1. Calculated the forward composite transformation matrix
+        // from the desired rotation, scale and translation transformations
+        // Build the forward and inverse transformation matrices
         TMatrix forwardMatrix = new TMatrix();
 
         // F_DTR = floating-point (F) degree to radian (DTR) conversion factor
@@ -1071,6 +1074,7 @@ public class Globals {
         TMatrix viewModelMatrix = new TMatrix();
         viewModelMatrix.multiply(pViewMatrix, forwardMatrix);
 
+        // Step 2. Calculate the inverse transformation matrix.
         TMatrix inverseMatrix = new TMatrix(viewModelMatrix);  // copy the forward transform
         inverseMatrix.invertg();                               // and invert it
 
@@ -1101,6 +1105,7 @@ public class Globals {
         float fIntRefPointY = pfRefPointY + fHalfInHeight;
         float fIntRefPointZ = pfRefPointZ;
 
+        // Step 4. Create a Shape3d object from the screen corner points calculated in Step 3.
         // Load a shape object with the original image boundary coordinates
         Shape3d shape = new Shape3d(4);
         shape.addWorldVertex(      1.0f,         1.0f, 0.0f);
@@ -1150,7 +1155,7 @@ public class Globals {
 
             sMsgText = "write offsets: xCentOffset: " + fXCentOffset + "  yCentOffset: " + fYCentOffset;
             statusPrint(sMsgText);
-        }
+        } // if (bIctDebug)
 
         float fXIn, fYIn, fZIn;
         float fXOut, fYOut, fZOut;
@@ -1186,9 +1191,10 @@ public class Globals {
                         iY, iaScreenXCoords[i],
                         faXCoords[i], faYCoords[i], faZCoords[i]);
                     statusPrint(sMsgText);
-                }
-            }
+                } // for i
+            } // if (bIctDebug)
 
+            // The call to method getIntervals above set variable iNumXCoordsFound
             if (iNumXCoordsFound != 2) {
                 sMsgText = "iWarp: numCoords <> 2. y: " + iY + " numCoords " + iNumXCoordsFound;
                 statusPrint(sMsgText);
@@ -1197,6 +1203,8 @@ public class Globals {
                         iY, iaScreenXCoords[i],
                         faXCoords[i], faYCoords[i], faZCoords[i]);
                     statusPrint(sMsgText);
+                    // Why is this goto in a for loop? You can't actually execute the goto multiple times
+                    // from within a single for loop. Once you goto, you're out of the for loop.
                     goto nextScanLine;
                 } // for i
             }
@@ -1265,7 +1273,7 @@ public class Globals {
                     pInMImage.getMPixelRGB((int)(fXOut + fHalfInWidth + 1), (int)(fYOut + fHalfInHeight + 1), 
                         bytRed, bytGreen, bytBlue);
                     break;
-                }
+                } // switch
 
                 if(pZMImage != null) {
                     theZ = pZMImage.getMPixel32((int)(iX + fXCentOffset), (int)(iY + fYCentOffset));
@@ -2839,16 +2847,30 @@ public class Globals {
         String sDdrive, sDdir, sDfile, sDext;
         String sOutPath, sXPath, sYPath, sZPath;
  
-        _splitpath(psInputImagePath, sDrive, sDir, sFile, sExt);
+        // Get the filename and extension from psInputImagePath
+        //_splitpath(psInputImagePath, sDrive, sDir, sFile, sExt);
         // int theLength = sFile.length(); // not used
-  
-        _splitpath(psDestinationDir, sDdrive, sDdir, sDfile, sDext);
-        _makepath(sOutPath, sDdrive, sDdir, sFile, sExt);
+        File inputImageFile = new File(psInputImagePath);
+        String sFilenameWExt = inputImageFile.getName();
+
+        // Create sOutPath as the psDestinationDir, with the 
+        // file name we extrcted from psInputImagePath
+        //_splitpath(psDestinationDir, sDdrive, sDdir, sDfile, sDext);
+        //_makepath(sOutPath, sDdrive, sDdir, sFile, sExt);
+        File destinationDirFile = new File(psDestinationDir);
+        if (destinationDirFile.isDirectory()) {
+            // append the file name
+            sOutPath = psDestinationDir + File.pathSeparator + sFilenameWExt;
+        } else {
+            statusPrint("createQMeshModel: Destination dir is not a directory: " + psDestinationDir);
+            return -2;
+        }
+        
 
         // As a matter of convenience copy the texture image to the same directory
         // in which the surface images reside, if it isn't there already.
         if(!FileUtils.fileExists(sOutPath)) {
-            sMsgText = "Copying QMesh Model Texture Image to: " + sOutPath;
+            sMsgText = "createQMeshModel: Copying QMesh Model Texture Image to: " + sOutPath;
             statusPrint(sMsgText);
             CopyFile(psInputImagePath, sOutPath, 1);
         }
@@ -2893,7 +2915,7 @@ public class Globals {
         fZMax = fZMin;
 
         // Get an approximate model centroid, bounding box and display it.
-        statusPrint("Calculating approximate mesh centroid and bounding box");
+        statusPrint("createQMeshModel: Calculating approximate mesh centroid and bounding box");
         fXBucket = 0.0f;
         fYBucket = 0.0f;
         fZBucket = 0.0f;
@@ -3223,75 +3245,82 @@ public class Globals {
     // Called from:
     //     tweenImage
     // which in turn is called from MorphDlg.onOK (when morph type = JICTConstants.I_TWOD)
-    public static int getRowIntervals(MemImage anImage, int row, 
-    int[] intervalList, Integer numIntervals) {
-        int imWidth = anImage.getWidth();
-        int bpp = anImage.getBitsPerPixel();
-        int col; 
-        int intervalStatus = 0;
-        int counter = 0;
-        byte aValue, red, green, blue;
+    public static int getRowIntervals(MemImage pMImage, int piRow, 
+    int[] piaIntervalList, Integer pINumIntervals) {
+        int iImWidth = pMImage.getWidth();
+        int iBpp = pMImage.getBitsPerPixel();
+        int iCol; 
+        int iIntervalStatus = 0;
+        int iCounter = 0;
+        byte bytValue;
+        Byte bytRed = 0, bytGreen = 0, bytBlue = 0;
         
-        for(col = 1; col <= imWidth; col++) {
+        for(iCol = 1; iCol <= iImWidth; iCol++) {
             // Set aValue
-            switch(bpp) {
+            switch(iBpp) {
             case 8:
-                aValue = anImage.getMPixel(col, row);
+                bytValue = pMImage.getMPixel(iCol, piRow);
                 break;
                 
             case 24:
-                anImage.getMPixelRGB(col, row, red, green, blue);
+                // The following method sets parameters bytRed, bytGreen and bytBlue
+                pMImage.getMPixelRGB(iCol, piRow, bytRed, bytGreen, bytBlue);
                 if(
-                red   != JICTConstants.I_CHROMARED || 
-                green != JICTConstants.I_CHROMAGREEN || 
-                blue  != JICTConstants.I_CHROMABLUE) {
-                    aValue = 255;
+                bytRed   != JICTConstants.I_CHROMARED || 
+                bytGreen != JICTConstants.I_CHROMAGREEN || 
+                bytBlue  != JICTConstants.I_CHROMABLUE) {
+                    bytValue = 255;
                 } else {
-                    aValue = JICTConstants.I_CHROMAVALUE;
+                    bytValue = JICTConstants.I_CHROMAVALUE;
                 }
                 break;
             } // switch
 
-            if(intervalStatus == 0 && aValue != JICTConstants.I_CHROMAVALUE) {  // interval start
-                intervalList[counter] = col;
-                counter++;
-                intervalStatus = 1;
+            if(
+            (iIntervalStatus == 0) && (
+            bytValue != JICTConstants.I_CHROMAVALUE)) {   // interval start
+                piaIntervalList[iCounter] = iCol;
+                iCounter++;
+                iIntervalStatus = 1;
             }
 
-            if(intervalStatus == 1 && aValue == JICTConstants.I_CHROMAVALUE) {  // interval stop
-                intervalList[counter] = col;
-                counter++;
-                intervalStatus = 0;
+            if(
+            (iIntervalStatus == 1) && 
+            (bytValue == JICTConstants.I_CHROMAVALUE)) {  // interval stop
+                piaIntervalList[iCounter] = iCol;
+                iCounter++;
+                iIntervalStatus = 0;
             }
-        } // for col
+        } // for iCol
 
-        if(intervalStatus == 1) {                            // catch end of line
-            intervalList[counter] = imWidth;
-            counter++;
+        if(iIntervalStatus == 1) {                      // catch end of line
+            piaIntervalList[iCounter] = iImWidth;
+            iCounter++;
         }
 
-        numIntervals = counter / 2;
+        pINumIntervals = iCounter / 2;
         return 0;
     } // getRowIntervals
 
 
-    // This method came from TWEEN.CPP
+    // This method originally came from TWEEN.CPP
+    //
     // Called from:
     //     tweenImage
     // which in turn is called from MorphDlg.onOK (when morph type = JICTConstants.I_TWOD)
-    public static int getTotalIntervalLength(int[] intervalList, int numIntervals) {
-        int totalLength = 0;
+    public static int getTotalIntervalLength(int[] piaIntervalList, int piNumIntervals) {
+        int iTotalLength = 0;
         int i;
 
-        if(numIntervals == 0) {
-            return totalLength;
+        if(piNumIntervals == 0) {
+            return iTotalLength;
         }
 
-        for (i = 0; i < numIntervals * 2; i += 2) {
-            totalLength += (intervalList[i + 1] - intervalList[i] + 1);
+        for (i = 0; i < piNumIntervals * 2; i += 2) {
+            iTotalLength += (piaIntervalList[i + 1] - piaIntervalList[i] + 1);
         }
 
-        return totalLength;
+        return iTotalLength;
     } // getTotalIntervalLength
 
 
@@ -3299,43 +3328,43 @@ public class Globals {
     // Called from:
     //     tweenImage
     // which in turn is called from MorphDlg.onOK (when morph type = JICTConstants.I_TWOD)
-    public static int indexToCoord(int index, int[] intervalList, int numIntervals) {
+    public static int indexToCoord(int piIndex, int[] piaIntervalList, int piNumIntervals) {
         // Map index into the interval list
-        String msgText;
-        int count, runningCount,countDelta;
-        int aCoord, i;
+        String sMsgText;
+        int iCount, iRunningCount, iCountDelta;
+        int iCoord, i;
 
-        runningCount = 0;
-        if(numIntervals == 0) {
+        iRunningCount = 0;
+        if(piNumIntervals == 0) {
             statusPrint("indexToCoord: numIntervals is 0");
             return -1;
         }
 
-        int maxIndex = getTotalIntervalLength(intervalList, numIntervals);
-        if(index > maxIndex) {
-            msgText = "indexToCoord: Index: " + index + " > maxIndex: " + maxIndex;
-            statusPrint(msgText);
+        int iMaxIndex = getTotalIntervalLength(piaIntervalList, piNumIntervals);
+        if(piIndex > iMaxIndex) {
+            sMsgText = "indexToCoord: Index: " + piIndex + " > maxIndex: " + iMaxIndex;
+            statusPrint(sMsgText);
             return -2;
         }
 
-        for(i = 0; i < numIntervals * 2; i += 2) {
-            count = intervalList[i + 1] - intervalList[i] + 1;
-            runningCount = runningCount + count;
+        for(i = 0; i < piNumIntervals * 2; i += 2) {
+            iCount = piaIntervalList[i + 1] - piaIntervalList[i] + 1;
+            iRunningCount = iRunningCount + iCount;
 
-            if(index <= runningCount) {
-                countDelta = runningCount - index;
-                aCoord = intervalList[i + 1] - countDelta;
-                return aCoord;
+            if(piIndex <= iRunningCount) {
+                iCountDelta = iRunningCount - piIndex;
+                iCoord = piaIntervalList[i + 1] - iCountDelta;
+                return iCoord;
             }
-        }
+        } // for i
 
-        msgText = "indexToCoord: Coord not found. Index: " + index;
-        statusPrint(msgText);
+        sMsgText = "indexToCoord: Coord not found. Index: " + piIndex;
+        statusPrint(sMsgText);
 
-        for(i = 0; i < numIntervals * 2; i += 2) {
-            msgText = "i: " + i + " B: " + intervalList[i] + " E: " + intervalList[i + 1];
-            statusPrint(msgText);
-        }
+        for(i = 0; i < piNumIntervals * 2; i += 2) {
+            sMsgText = "i: " + i + " B: " + piaIntervalList[i] + " E: " + piaIntervalList[i + 1];
+            statusPrint(sMsgText);
+        } // for i
 
         return -3;
     } // indexToCoord
@@ -4483,39 +4512,39 @@ public class Globals {
     // Called from:
     //     tweenImage
     // which in turn is called from MorphDlg.onOK (when morph type = JICTConstants.I_TWOD)
-    public static int createTweenableShapes(Shape3d inShape1, Shape3d inShape2, 
-    Shape3d outShapeA, Shape3d outShapeB) {
-        int numVertices1 = inShape1.getNumVertices();
-        int numVertices2 = inShape2.getNumVertices();
+    public static int createTweenableShapes(Shape3d pInShape1, Shape3d pInShape2, 
+    Shape3d pOutShapeA, Shape3d pOutShapeB) {
+        int iNumVertices1 = pInShape1.getNumVertices();
+        int iNumVertices2 = pInShape2.getNumVertices();
         
-        int numVerticesDiff = Math.abs(numVertices1 - numVertices2);
-        int aStatus;
+        int iNumVerticesDiff = Math.abs(iNumVertices1 - iNumVertices2);
+        int iStatus;
         Shape3d outShape1, outShape2;
 
         // Add vertices to the shape having the fewer vertices
-        if(numVertices1 < numVertices2) {
-            outShape1 = inShape1.copyAndExpand(numVerticesDiff);
-            for(int i = 1; i <= numVerticesDiff; i++) {
-                aStatus = outShape1.divideLongestArc();
-                if(aStatus != 0) {
+        if(iNumVertices1 < iNumVertices2) {
+            outShape1 = pInShape1.copyAndExpand(iNumVerticesDiff);
+            for(int i = 1; i <= iNumVerticesDiff; i++) {
+                iStatus = outShape1.divideLongestArc();
+                if(iStatus != 0) {
                     statusPrint("createTweenableShapes: divideLongestArc error");
-                    return aStatus;
+                    return iStatus;
                 }
 
                 // Set output parameter outShapeA
-                outShapeA = outShape1;
+                pOutShapeA = outShape1;
             } // for i
-        } else {
-            outShape2 = inShape2.copyAndExpand(numVerticesDiff);
-            for(int i = 1; i <= numVerticesDiff; i++) {
-                aStatus = outShape2.divideLongestArc();
-                if(aStatus != 0) {
+        } else { // iNumVertices1 >= iNumVertices2
+            outShape2 = pInShape2.copyAndExpand(iNumVerticesDiff);
+            for(int i = 1; i <= iNumVerticesDiff; i++) {
+                iStatus = outShape2.divideLongestArc();
+                if(iStatus != 0) {
                     statusPrint("createTweenableShapes: divideLongestArc error");
-                    return aStatus;
+                    return iStatus;
                 }
 
                 // Set output parameter outShapeB
-                outShapeB = outShape2;
+                pOutShapeB = outShape2;
             } // for i
         }
 
@@ -4526,73 +4555,73 @@ public class Globals {
     // This method originally came from TWEEN.CPP
     // Called from:
     //     MorphDlg.onOK (when morph type = JICTConstants.I_THREED)
-    public static int tweenMesh(float aFraction, 
+    public static int tweenMesh(float pfFraction, 
     MemImage aTexture, MemImage aX, MemImage aY, MemImage aZ,
     MemImage bTexture, MemImage bX, MemImage bY, MemImage bZ, 
     MemImage oTexture, MemImage oX, MemImage oY, MemImage oZ) {
-        int row, col;
+        int iRow, iCol;
         float aValue, bValue, oValue;
         byte aByte, bByte, oByte;
-        byte aRedByte, bRedByte, oRedByte;
-        byte aGreenByte, bGreenByte, oGreenByte;
-        byte aBlueByte, bBlueByte, oBlueByte;
+        byte aRedByte = (byte)0, bRedByte = (byte)0, oRedByte;
+        byte aGreenByte = (byte)0, bGreenByte = (byte)0, oGreenByte;
+        byte aBlueByte = (byte)0, bBlueByte = (byte)0, oBlueByte;
 
-        if ((aFraction < 0.0f) || (aFraction > 1.0f)) {
+        if ((pfFraction < 0.0f) || (pfFraction > 1.0f)) {
             statusPrint("tweenMesh: aFraction must be between 0 and 1");
             return -1;
         }
 
-        float bFraction = 1.0f - aFraction;
-        int imHeight = aTexture.getHeight();
-        int imWidth  = aTexture.getWidth();
-        int bWidth   = bTexture.getWidth();
-        if(imWidth != bWidth){
+        float bFraction = 1.0f - pfFraction;
+        int iImHeight = aTexture.getHeight();
+        int iImWidth  = aTexture.getWidth();
+        int bWidth    = bTexture.getWidth();
+        if(iImWidth != bWidth){
             statusPrint("tweenMesh: texture images must have same width.");
             return -2;
         }
 
-        int bpp = aTexture.getBitsPerPixel();
-        if ((bpp != 8) && (bpp != 24)) {
+        int iBpp = aTexture.getBitsPerPixel();
+        if ((iBpp != 8) && (iBpp != 24)) {
             statusPrint("tweenMesh: Texture image must have 8 or 24 bit pixels.");
             return -3;
         }
 
-        for (row = 1; row <= imHeight; row++){
-            for (col = 1; col <= imWidth; col++){
-                aValue = aX.getMPixel32(col, row);
-                bValue = bX.getMPixel32(col, row);
-                oValue = (aFraction * aValue) + (bFraction * bValue);
-                oX.setMPixel32(col, row, oValue);
+        for (iRow = 1; iRow <= iImHeight; iRow++){
+            for (iCol = 1; iCol <= iImWidth; iCol++){
+                aValue = aX.getMPixel32(iCol, iRow);
+                bValue = bX.getMPixel32(iCol, iRow);
+                oValue = (pfFraction * aValue) + (bFraction * bValue);
+                oX.setMPixel32(iCol, iRow, oValue);
 
-                aValue = aY.getMPixel32(col, row);
-                bValue = bY.getMPixel32(col, row);
-                oValue = (aFraction * aValue) + (bFraction * bValue);
-                oY.setMPixel32(col, row, oValue);
+                aValue = aY.getMPixel32(iCol, iRow);
+                bValue = bY.getMPixel32(iCol, iRow);
+                oValue = (pfFraction * aValue) + (bFraction * bValue);
+                oY.setMPixel32(iCol, iRow, oValue);
 
-                aValue = aZ.getMPixel32(col, row);
-                bValue = bZ.getMPixel32(col, row);
-                oValue = (aFraction * aValue) + (bFraction * bValue);
-                oZ.setMPixel32(col, row, oValue);
+                aValue = aZ.getMPixel32(iCol, iRow);
+                bValue = bZ.getMPixel32(iCol, iRow);
+                oValue = (pfFraction * aValue) + (bFraction * bValue);
+                oZ.setMPixel32(iCol, iRow, oValue);
 
-                switch (bpp) {
+                switch (iBpp) {
                 case 8:
-                    aByte = aTexture.getMPixel(col, row);
-                    bByte = bTexture.getMPixel(col, row);
-                    oByte = (byte)(aFraction * (float)aByte) + (bFraction * (float)bByte);
-                    oTexture.setMPixel(col, row, oByte);
+                    aByte = aTexture.getMPixel(iCol, iRow);
+                    bByte = bTexture.getMPixel(iCol, iRow);
+                    oByte = (byte)Math.round((pfFraction * (float)aByte) + (bFraction * (float)bByte));
+                    oTexture.setMPixel(iCol, iRow, oByte);
                     break;
 
                 case 24:
-                    aByte = (byte)aTexture.getMPixelRGB(col, row, aRedByte, aGreenByte, aBlueByte);
-                    bByte = (byte)bTexture.getMPixelRGB(col, row, bRedByte, bGreenByte, bBlueByte);
-                    oRedByte   = (byte)(aFraction * (float)aRedByte)   + (bFraction * (float)bRedByte);
-                    oGreenByte = (byte)(aFraction * (float)aGreenByte) + (bFraction * (float)bGreenByte);
-                    oBlueByte  = (byte)(aFraction * (float)aBlueByte)  + (bFraction * (float)bBlueByte);
-                    oTexture.setMPixelRGB(col, row, oRedByte, oGreenByte, oBlueByte);
+                    aByte      = (byte)aTexture.getMPixelRGB(iCol, iRow, aRedByte, aGreenByte, aBlueByte);
+                    bByte      = (byte)bTexture.getMPixelRGB(iCol, iRow, bRedByte, bGreenByte, bBlueByte);
+                    oRedByte   = (byte)Math.round((pfFraction * (float)aRedByte)   + (bFraction * (float)bRedByte));
+                    oGreenByte = (byte)Math.round((pfFraction * (float)aGreenByte) + (bFraction * (float)bGreenByte));
+                    oBlueByte  = (byte)Math.round((pfFraction * (float)aBlueByte)  + (bFraction * (float)bBlueByte));
+                    oTexture.setMPixelRGB(iCol, iRow, oRedByte, oGreenByte, oBlueByte);
                     break;
                 } // switch
-            } // for col
-        } // for row
+            } // for iCol
+        } // for iRow
 
         return 0;
     } // tweenMesh
