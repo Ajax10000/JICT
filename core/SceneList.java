@@ -14,6 +14,7 @@ import java.awt.image.BufferedImage;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -441,7 +442,14 @@ public:
         scene = scene.mNextEntry;  // Skip over the list header
 
         File sceneFile = new File(psFileName);
-        BufferedWriter fileOut = new BufferedWriter(new OutputStreamWriter(sceneFile));
+        FileOutputStream fos;
+        try {
+            fos = new FileOutputStream(sceneFile);
+        } catch (FileNotFoundException fnfe) {
+            Globals.statusPrint("writeList: File was not found: " + psFileName);
+            return -1;
+        }
+        BufferedWriter fileOut = new BufferedWriter(new OutputStreamWriter(fos));
         
         scene.writeFile(fileOut); // Write out the scene description
         SceneElement modelSE = scene.mHead;
@@ -452,7 +460,12 @@ public:
         !modelSE.msFileName.equalsIgnoreCase("Output Image Rectangle")) {
             if ((modelSE.mbCompoundModelMember == false) && (bOldCompoundMember == true)) {
                 String output = "End Compound Model" + "\n" + "\n";
-                fileOut.write(output);
+                try {
+                    fileOut.write(output);
+                } catch (IOException ioe) {
+                    Globals.statusPrint("writeFile: Failed to write to file " + psFileName);
+                    return -2;
+                }
             }
             
             modelSE.writeFile(fileOut); // Write out each model description
@@ -460,7 +473,14 @@ public:
             modelSE = modelSE.mNextEntry;
         }
         
-        fileOut.close();
+        try {
+            fileOut.close();
+        } catch (IOException ioe) {
+            Globals.statusPrint("writeFile: IOException while trying to close file " + psFileName);
+            Globals.statusPrint("Ignoring exception");
+            return 0;
+        }
+        
         return 0;
     } // writeList
 
@@ -1152,16 +1172,23 @@ public:
 
     // TODO: Not a method of SceneList in the original C++ code.
     // Called from:
-    //     render
-    private void getSequenceFileName(String psTheInputPath, int piFrameCounter) {
+    //     render, if modelSE.miModelType = JICTConstants.I_SEQUENCE
+    //     render, in turn, is called from: 
+    //         MainFrame.onRenderScene and
+    //         MainFrame.onRenderSequence
+    private void getSequenceFileName(String psInputPath, int piFrameCounter) {
         String sTempPath;
-        sTempPath = psTheInputPath;
-        String sDrive, sDir, sFile, sExt;
+        sTempPath = psInputPath;
+        String sFileWExt, sFile, sExt;
 
-        _splitpath(sTempPath, sDrive, sDir, sFile, sExt);
+        File inputPathFile = new File(psInputPath);
+        sFileWExt = inputPathFile.getName();
+        sFile = sFileWExt.substring(0, sFileWExt.lastIndexOf('.')); 
+        sExt = sFileWExt.substring(sFileWExt.lastIndexOf('.'));
+        // _splitpath(sTempPath, sDrive, sDir, sFile, sExt);
         
         int iLength = sFile.length();
-        int iCurrentFrameNum, iNewFrameNum;
+        int iCurrentFrameNum = 0, iNewFrameNum;
         if(iLength > 0) {
             String sFrameNum = sFile.substring(iLength - 4);
             iCurrentFrameNum = Integer.parseInt(sFrameNum);
@@ -1178,7 +1205,8 @@ public:
 
         //sprintf(sOutFile, "%.16s%#04d%c\0", sPrefix, iNewFrameNum, colorChar);
         sOutFile = String.format("%.16s%#04d%c", sPrefix, iNewFrameNum, cColorChar);
-        _makepath(psTheInputPath, sDrive, sDir, sOutFile, sExt);
+        psInputPath = inputPathFile.getParent() + sOutFile + sExt;
+        // _makepath(psInputPath, sDrive, sDir, sOutFile, sExt);
     } // getSequenceFileName
 
 
