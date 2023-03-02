@@ -129,8 +129,15 @@ public:
   void floor(); - implemented
 */
 
+
+    // This constructor originally came from SHAPE3D.CPP
+    //
     // Called from:
     //     RenderObject ctor that takes 4 parameters: a String, int, boolean and Point3d
+    // and that RenderObject ctor is in turn called from:
+    //     SceneList.calcCompoundModelRefPoint
+    //     SceneList.preview
+    //     SceneList.previewStill
     public Shape3d(String psFileName, int piModelType) {
         String sShapePath;
         String sShapeDir;
@@ -213,9 +220,11 @@ public:
 
                 mCurrentVertex.sx = -fHalfWidth;
                 mCurrentVertex.sy = -fHalfHeight;
+
                 mCurrentVertex.x  = -fHalfWidth;
                 mCurrentVertex.y  = -fHalfHeight;
                 mCurrentVertex.z  = 0.0f;
+
                 mCurrentVertex.tx = -fHalfWidth;
                 mCurrentVertex.ty = -fHalfHeight;
                 mCurrentVertex.tz = 0.0f;
@@ -223,10 +232,12 @@ public:
                 incCurrentVertex();
 
                 mCurrentVertex.sx =  fHalfWidth;
-                mCurrentVertex.sy = -fHalfHeight;	//define screen coordinates for this shape
+                mCurrentVertex.sy = -fHalfHeight;	// define screen coordinates for this shape
+
                 mCurrentVertex.x  =  fHalfWidth;
                 mCurrentVertex.y  = -fHalfHeight;
                 mCurrentVertex.z  = 0.0f;
+
                 mCurrentVertex.tx =  fHalfWidth;
                 mCurrentVertex.ty = -fHalfHeight;
                 mCurrentVertex.tz = 0.0f;
@@ -235,9 +246,11 @@ public:
 
                 mCurrentVertex.sx = fHalfWidth;
                 mCurrentVertex.sy = fHalfHeight;
+
                 mCurrentVertex.x  = fHalfWidth;
                 mCurrentVertex.y  = fHalfHeight;
                 mCurrentVertex.z  = 0.0f;
+
                 mCurrentVertex.tx = fHalfWidth;
                 mCurrentVertex.ty = fHalfHeight;
                 mCurrentVertex.tz = 0.0f;
@@ -246,9 +259,11 @@ public:
 
                 mCurrentVertex.sx = -fHalfWidth;
                 mCurrentVertex.sy =  fHalfHeight;
+
                 mCurrentVertex.x  = -fHalfWidth;  // initial coordinate
                 mCurrentVertex.y  =  fHalfHeight;
                 mCurrentVertex.z  = 0.0f;
+
                 mCurrentVertex.tx = -fHalfWidth; // transformed coordinate
                 mCurrentVertex.ty =  fHalfHeight;
                 mCurrentVertex.tz = 0.0f;
@@ -266,10 +281,13 @@ public:
         case JICTConstants.I_QUADMESH:
             this.miNumVertices = 4;
             VertexSet[] nullPointer = new VertexSet[this.miNumVertices];
+            // If nullPointer is null, then the JVM would have thrown an OutOfMemoryException
+            /* 
             if(nullPointer == null) {
                 Globals.statusPrint("Shape3d constructor 1: Unable to allocate shape object (Quadmesh case)");
                 this.miNumAllocatedVertices = 0; //signal an error
             }
+            */
 
             this.mVertices = nullPointer;
             this.mFaces = null;
@@ -280,9 +298,11 @@ public:
 
             mCurrentVertex.sx = 0.0f;
             mCurrentVertex.sy = 0.0f;
+
             mCurrentVertex.x  = 0.0f;
             mCurrentVertex.y  = 0.0f;
             mCurrentVertex.z  = 0.0f;
+
             mCurrentVertex.tx = 0.0f;
             mCurrentVertex.ty = 0.0f;
             mCurrentVertex.tz = 0.0f;
@@ -291,9 +311,11 @@ public:
             incCurrentVertex();
             mCurrentVertex.sx = 0.0f;
             mCurrentVertex.sy = 0.0f; // define screen coordinates for this shape
+
             mCurrentVertex.x  = 0.0f;
             mCurrentVertex.y  = 0.0f;
             mCurrentVertex.z  = 0.0f;
+
             mCurrentVertex.tx = 0.0f;
             mCurrentVertex.ty = 0.0f;
             mCurrentVertex.tz = 0.0f;
@@ -302,9 +324,11 @@ public:
             incCurrentVertex();
             mCurrentVertex.sx = 0.0f;
             mCurrentVertex.sy = 0.0f;
+
             mCurrentVertex.x  = 0.0f;
             mCurrentVertex.y  = 0.0f;
             mCurrentVertex.z  = 0.0f;
+
             mCurrentVertex.tx = 0.0f;
             mCurrentVertex.ty = 0.0f;
             mCurrentVertex.tz = 0.0f;
@@ -313,9 +337,11 @@ public:
             incCurrentVertex();
             mCurrentVertex.sx = 0.0f;
             mCurrentVertex.sy = 0.0f;
+
             mCurrentVertex.x  = 0.0f; // initial coordinate
             mCurrentVertex.y  = 0.0f;
             mCurrentVertex.z  = 0.0f;
+
             mCurrentVertex.tx = 0.0f; // transformed coordinate
             mCurrentVertex.ty = 0.0f;
             mCurrentVertex.tz = 0.0f;
@@ -328,7 +354,9 @@ public:
 
         if(this.miNumAllocatedVertices != 0) {
             Float cX = 0f, cY = 0f, cZ = 0f;
+            // The following method sets parameters cX, cY and cZ
             getWCentroid(cX, cY, cZ);  // calculate and save the world coord centroid
+
             this.pointOfReference = new Point3d();
             pointOfReference.x = cX;
             pointOfReference.y = cY;
@@ -337,6 +365,7 @@ public:
     } // Shape3d ctor
 
 
+    // This constructor originally came from SHAPE3D.CPP
     public Shape3d(String psPathName) {
         if(bIctDebug) {
             Globals.statusPrint("Shape3d constructor 2 (calls readShape).");
@@ -347,7 +376,9 @@ public:
         // miNumertices, miNumFaces, miNumAllocatedVertices, mVertices, mFaces
         // miCurrVtxIdx, mCurrentVertex, 
         readShape(psPathName);
+
         Float cX = 0f, cY = 0f, cZ = 0f;
+        // The following method sets parameters cX, cY and cZ
         getWCentroid(cX, cY, cZ);  // calculate and save the world coord centroid
 
         this.pointOfReference = new Point3d();
@@ -357,6 +388,8 @@ public:
     } // Shape3d ctor
 
 
+    // This constructor originally came from SHAPE3D.CPP
+    // 
     // Called from:
     //     copyAndExpand
     //     getBoundaryPoint
@@ -389,16 +422,20 @@ public:
         this.mFaces = null;
         this.miCurrVtxIdx = 0;
         this.mCurrentVertex = this.mVertices[0];
+
         // zero the shape memory
         for (int index = 0; index < this.miNumAllocatedVertices; index++) {
             mCurrentVertex.sx = 0.0f; // screen coordinate
             mCurrentVertex.sy = 0.0f;
+
             mCurrentVertex.x  = 0.0f; // initial coordinate
             mCurrentVertex.y  = 0.0f;
             mCurrentVertex.z  = 0.0f;
+
             mCurrentVertex.tx = 0.0f; // transformed coordinate
             mCurrentVertex.ty = 0.0f;
             mCurrentVertex.tz = 0.0f;
+
             // currentVertex++;
             incCurrentVertex();
         }
@@ -411,6 +448,7 @@ public:
     } // Shape3d ctor
 
 
+    // This constructor originally came from SHAPE3D.CPP
     public Shape3d(Shape3d pTransformedShape) {
         // Creates a new shape by copying the shape supplied.
         if(bIctDebug) {
@@ -435,23 +473,30 @@ public:
         this.mFaces = null;
         this.mCurrentVertex = this.mVertices[0];
         pTransformedShape.initCurrentVertex();
+
         for (int index = 0; index < this.miNumVertices; index++) {
             mCurrentVertex.sx = pTransformedShape.mCurrentVertex.sx; // screen coord.
             mCurrentVertex.sy = pTransformedShape.mCurrentVertex.sy;
+
             mCurrentVertex.x  = pTransformedShape.mCurrentVertex.tx; // initial coord.
             mCurrentVertex.y  = pTransformedShape.mCurrentVertex.ty;
             mCurrentVertex.z  = pTransformedShape.mCurrentVertex.tz;
+
             mCurrentVertex.tx = 0.0f; // transformed coord.
             mCurrentVertex.ty = 0.0f;
             mCurrentVertex.tz = 0.0f;
+
             // currentVertex++;
             incCurrentVertex();
+
             // pTransformedShape.currentVertex++;
             pTransformedShape.incCurrentVertex();
         }
 
         Float cX = 0f, cY = 0f, cZ = 0f;
+        // The following method sets parameters cX, cY and cZ
         getWCentroid(cX, cY, cZ);  // calculate and save the world coord centroid
+
         this.pointOfReference = new Point3d();
         pointOfReference.x = cX;
         pointOfReference.y = cY;
@@ -459,6 +504,8 @@ public:
     } // Shape3d ctor
 
 
+    // This constructor originally came from SHAPE3D.CPP
+    // 
     // Called from:
     //     RenderObject constructor that takes 4 Point3d parameters
     public Shape3d(Point3d pULPt, Point3d pURPt, Point3d pLRPt, Point3d pLLPt) {
@@ -485,9 +532,12 @@ public:
         this.mCurrentVertex = this.mVertices[0];
         mCurrentVertex.sx = 0.0f;
         mCurrentVertex.sy = 0.0f;
+
+        // Use upper-left point
         mCurrentVertex.x  = pULPt.x; // initial coordinate
         mCurrentVertex.y  = pULPt.y;
         mCurrentVertex.z  = pULPt.z;
+
         mCurrentVertex.tx = 0.0f;  // transformed coordinate
         mCurrentVertex.ty = 0.0f;
         mCurrentVertex.tz = 0.0f;
@@ -496,9 +546,12 @@ public:
         incCurrentVertex();
         mCurrentVertex.sx = 0.0f;
         mCurrentVertex.sy = 0.0f;
+
+        // Use upper-right point
         mCurrentVertex.x  = pURPt.x;
         mCurrentVertex.y  = pURPt.y;
         mCurrentVertex.z  = pURPt.z;
+
         mCurrentVertex.tx = 0.0f;
         mCurrentVertex.ty = 0.0f;
         mCurrentVertex.tz = 0.0f;
@@ -507,9 +560,12 @@ public:
         incCurrentVertex();
         mCurrentVertex.sx = 0.0f;
         mCurrentVertex.sy = 0.0f;
+
+        // Use lower-right point
         mCurrentVertex.x  = pLRPt.x;
         mCurrentVertex.y  = pLRPt.y;
         mCurrentVertex.z  = pLRPt.z;
+
         mCurrentVertex.tx = 0.0f;
         mCurrentVertex.ty = 0.0f;
         mCurrentVertex.tz = 0.0f;
@@ -518,15 +574,20 @@ public:
         incCurrentVertex();
         mCurrentVertex.sx = 0.0f;
         mCurrentVertex.sy = 0.0f;
+
+        // Use lower-left point
         mCurrentVertex.x  = pLLPt.x;
         mCurrentVertex.y  = pLLPt.y;
         mCurrentVertex.z  = pLLPt.z;
+
         mCurrentVertex.tx = 0.0f;
         mCurrentVertex.ty = 0.0f;
         mCurrentVertex.tz = 0.0f;
 
         Float cX = 0f, cY = 0f, cZ = 0f;
+        // The following method sets parameters cX, cY and cZ
         getWCentroid(cX, cY, cZ);  // calculate and save the world coord centroid
+
         this.pointOfReference = new Point3d();
         pointOfReference.x = cX;
         pointOfReference.y = cY;
@@ -534,6 +595,7 @@ public:
     } // Shape3d ctor
 
 
+    // This destructor originally came from SHAPE3D.CPP
     public void finalize() {
         if(bIctDebug) {
             Globals.statusPrint("Shape3d Destructor");
@@ -541,22 +603,25 @@ public:
     } // finalize
 
 
+    // This method originally came from SHAPE3D.CPP
+    //
     // Reads a ".shp" file whose name is given by parameter psPathName.
+    // 
     // Called from:
     //     Shape3d ctor that takes 2 parameters, a String and an int
     public int readShape(String psPathName) {
         String sMsgText;
-        String theText = "", theKeyWord;
-        Integer fileType = 0;
+        String sText = "", sKeyWord;
+        Integer iFileType = 0;
         StringTokenizer strtok;
 
         this.miNumVertices = 0; // Initialize data members
         this.miNumFaces = 0;
         Integer iNumVertices = 0, iNumFaces = 0;
 
-        // The following method will set fileType, iNumVertices and iNumFaces
-        int myStatus = getShapeFileInfo(psPathName, fileType, iNumVertices, iNumFaces);
-        if (myStatus != 0) {
+        // The following method will set iFileType, iNumVertices and iNumFaces
+        int iStatus = getShapeFileInfo(psPathName, iFileType, iNumVertices, iNumFaces);
+        if (iStatus != 0) {
             sMsgText = "readShape: getShapeFileInfo could not open file: " + psPathName;
             Globals.statusPrint(sMsgText);
             return -1;
@@ -591,17 +656,17 @@ public:
 
         LineNumberReader filein = new LineNumberReader(fileReader);
         // filein >> ws;
-        int lineCounter = 0;
-        int checkCounter = 0;  // Make certain numVertices vertices are read in
-        int counter = 0;
+        Integer iLineCounter = 0;
+        int iCheckCounter = 0;  // Make certain numVertices vertices are read in
+        int iCounter = 0;
         VertexSet[] nullPointer;
         FaceSet[] facePointer;
       
-        switch (fileType) {
+        switch (iFileType) {
         case JICTConstants.I_WITHOUTFACES:
-            theKeyWord = getNextLine(theText, lineCounter, filein, 0);
-            while(!theKeyWord.equalsIgnoreCase("EOF")) {
-                if (counter == 0) {
+            sKeyWord = getNextLine(sText, iLineCounter, filein, 0);
+            while(!sKeyWord.equalsIgnoreCase("EOF")) {
+                if (iCounter == 0) {
                     nullPointer = new VertexSet[this.miNumVertices];
                     /* Dead code, per the compiler
                     if (nullPointer == null) {
@@ -618,7 +683,7 @@ public:
                     this.miCurrVtxIdx = 0;
                     this.mCurrentVertex = this.mVertices[0];
                 } else {  //read in a vertex
-                    strtok = new StringTokenizer(theKeyWord, ",");
+                    strtok = new StringTokenizer(sKeyWord, ",");
                     String xValue = strtok.nextToken();
                     String yValue = strtok.nextToken();
                     String zValue = strtok.nextToken();
@@ -626,28 +691,29 @@ public:
                     if(xValue != null) mCurrentVertex.x = Float.parseFloat(xValue);
                     if(yValue != null) mCurrentVertex.y = Float.parseFloat(yValue);
                     if(zValue != null) mCurrentVertex.z = Float.parseFloat(zValue);
+
                     // currentVertex++;
                     incCurrentVertex();
-                    checkCounter++;
+                    iCheckCounter++;
                 }
 
-                counter++;
-                theKeyWord = getNextLine(theText, lineCounter, filein, 0);
+                iCounter++;
+                sKeyWord = getNextLine(sText, iLineCounter, filein, 0);
             } // while
 
-            myStatus = 0;
-            if (checkCounter != this.miNumVertices) {
+            iStatus = 0;
+            if (iCheckCounter != this.miNumVertices) {
                 sMsgText = "readShape: Vertex miscount in input file: " + psPathName;
                 Globals.statusPrint(sMsgText);
-                myStatus= -4;
+                iStatus= -4;
             }
             break;
 
         case JICTConstants.I_WITHFACES:
-            boolean faces = false;
-            theKeyWord = getNextLine(theText, lineCounter, filein, 0);
-            while(!theKeyWord.equalsIgnoreCase("EOF")) {
-                if (counter == 0) {
+            boolean bFaces = false;
+            sKeyWord = getNextLine(sText, iLineCounter, filein, 0);
+            while(!sKeyWord.equalsIgnoreCase("EOF")) {
+                if (iCounter == 0) {
                     // Allocate vertex and face memory
                     nullPointer = new VertexSet[this.miNumVertices];
                     /* Dead code, per the compiler
@@ -676,15 +742,16 @@ public:
                     this.mCurrentFace = this.mFaces[0];
                     // if counter == 0
                 } else { //counter > 0
-                    if(theKeyWord.equalsIgnoreCase("IndexedFaceSet")) {
-                        faces = true;
+                    if(sKeyWord.equalsIgnoreCase("IndexedFaceSet")) {
+                        bFaces = true;
                     } else {
-                        if(faces) {              // get a face
-                            strtok = new StringTokenizer(theKeyWord, ",");
+                        if(bFaces) {              // get a face
+                            strtok = new StringTokenizer(sKeyWord, ",");
                             String c1 = strtok.nextToken();
                             String c2 = strtok.nextToken();
                             String c3 = strtok.nextToken();
                             String c4 = strtok.nextToken();
+
                             mCurrentFace.i1 = -1;
                             mCurrentFace.i2 = -1;
                             mCurrentFace.i3 = -1;
@@ -694,10 +761,11 @@ public:
                             if(c2 != null) mCurrentFace.i2 = Integer.parseInt(c2);
                             if(c3 != null) mCurrentFace.i3 = Integer.parseInt(c3);
                             if(c4 != null) mCurrentFace.i4 = Integer.parseInt(c4);
+
                             // currentFace++;
                             incCurrentFace();
                         } else {                 // get a vertex
-                            strtok = new StringTokenizer(theKeyWord, ",");
+                            strtok = new StringTokenizer(sKeyWord, ",");
                             String xValue = strtok.nextToken();
                             String yValue = strtok.nextToken();
                             String zValue = strtok.nextToken();
@@ -705,28 +773,32 @@ public:
                             if(xValue != null) mCurrentVertex.x = Float.parseFloat(xValue);
                             if(yValue != null) mCurrentVertex.y = Float.parseFloat(yValue);
                             if(zValue != null) mCurrentVertex.z = Float.parseFloat(zValue);
+
                             // this.currentVertex++;
                             incCurrentVertex();
-                            checkCounter++;
+                            iCheckCounter++;
                         }
                     }
                 } 
 
-                counter++;
-                theKeyWord = getNextLine(theText, lineCounter, filein, 0);
+                iCounter++;
+                sKeyWord = getNextLine(sText, iLineCounter, filein, 0);
             } // while
             break;
-        }  // switch
+        } // switch
 
         try {
             filein.close();
         } catch (IOException ioe) {
-            Globals.statusPrint("readMotion: Could not close file " + psPathName);
+            Globals.statusPrint("readShape: Could not close file " + psPathName);
         }
+
         return 0;
     } // readShape
 
 
+    // This method originally came from SHAPE3D.CPP
+    // 
     // Called from:
     //     readShape
     public int getShapeFileInfo(String psPathName,  
@@ -744,21 +816,21 @@ public:
         }
 
         LineNumberReader filein = new LineNumberReader(fileReader);
-        String theText = "", theKeyWord;
-        boolean faces = false;
-        int lineCounter = 0;
-        int counter = 0;
+        String sText = "", sKeyWord;
+        boolean bFaces = false;
+        Integer iLineCounter = 0;
+        int iCounter = 0;
         pINumVertices = 0;
         pINumFaces = 0;
 
-        theKeyWord = getNextLine(theText, lineCounter, filein, 0);
-        while(!theKeyWord.equalsIgnoreCase("EOF")) {
-            if (counter == 0) {      // Look for a number or 'Coordinate3'
-                if(theKeyWord.equalsIgnoreCase("Coordinate3")) {
+        sKeyWord = getNextLine(sText, iLineCounter, filein, 0);
+        while(!sKeyWord.equalsIgnoreCase("EOF")) {
+            if (iCounter == 0) {      // Look for a number or 'Coordinate3'
+                if(sKeyWord.equalsIgnoreCase("Coordinate3")) {
                     pIFileType = JICTConstants.I_WITHFACES;
                 } else {
                     pIFileType = JICTConstants.I_WITHOUTFACES;
-                    pINumVertices = Integer.parseInt(theKeyWord);
+                    pINumVertices = Integer.parseInt(sKeyWord);
                     pINumFaces = 0;
                     try {
                         filein.close();
@@ -767,23 +839,23 @@ public:
                     }
                     return 0;
                 }
-            }
+            } // if (iCounter == 0)
 
             // Here only if type WITHFACES
-            if(counter > 0) {
-                if(theKeyWord.equalsIgnoreCase("IndexedFaceSet")) {
-                    faces = true;
+            if(iCounter > 0) {
+                if(sKeyWord.equalsIgnoreCase("IndexedFaceSet")) {
+                    bFaces = true;
                 } else {  // count a coordinate
-                    if(faces) {
+                    if(bFaces) {
                         pINumFaces++;
                     } else {
                         pINumVertices++;
                     }
                 }
-            }
+            } // if(iCounter > 0)
 
-            counter++;
-            theKeyWord = getNextLine(theText, lineCounter, filein, 0);
+            iCounter++;
+            sKeyWord = getNextLine(sText, iLineCounter, filein, 0);
         } // while
 
         try {
@@ -791,10 +863,13 @@ public:
         } catch (IOException ioe) {
             Globals.statusPrint("getShapeFileInfo: Could not close file " + psPathName);
         }
+
         return 0;
     } // getShapeFileInfo
 
 
+    // This method originally came from SHAPE3D.CPP
+    // 
     // Called from:
     //     Shape3d ctor the one that takes 2 parameters, a String and an int
     public int shapeFromBMP(String psImageFileName) {
@@ -830,47 +905,59 @@ public:
         float fHalfWidth  = width / 2.0f;
         mCurrentVertex.sx = -fHalfWidth;
         mCurrentVertex.sy = -fHalfHeight;
+
         mCurrentVertex.x  = -fHalfWidth;
         mCurrentVertex.y  = -fHalfHeight;
         mCurrentVertex.z  = 0.0f;
+
         mCurrentVertex.tx = -fHalfWidth;
         mCurrentVertex.ty = -fHalfHeight;
         mCurrentVertex.tz = 0.0f;
+
         // currentVertex++;
         incCurrentVertex();
         
         mCurrentVertex.sx =  fHalfWidth;
         mCurrentVertex.sy = -fHalfHeight;	//define screen coordinates for this shape
+
         mCurrentVertex.x  =  fHalfWidth;
         mCurrentVertex.y  = -fHalfHeight;
         mCurrentVertex.z  = 0.0f;
+
         mCurrentVertex.tx =  fHalfWidth;
         mCurrentVertex.ty = -fHalfHeight;
         mCurrentVertex.tz = 0.0f;
+
         // currentVertex++;
         incCurrentVertex();
 
         mCurrentVertex.sx = fHalfWidth;
         mCurrentVertex.sy = fHalfHeight;
+
         mCurrentVertex.x  = fHalfWidth;
         mCurrentVertex.y  = fHalfHeight;
         mCurrentVertex.z  = 0.0f;
+
         mCurrentVertex.tx = fHalfWidth;
         mCurrentVertex.ty = fHalfHeight;
         mCurrentVertex.tz = 0.0f;
+
         // currentVertex++;
         incCurrentVertex();
 
         mCurrentVertex.sx = -fHalfWidth;
         mCurrentVertex.sy =  fHalfHeight;
+
         mCurrentVertex.x  = -fHalfWidth;  // initial coordinate
         mCurrentVertex.y  =  fHalfHeight;
         mCurrentVertex.z  = 0.0f;
+
         mCurrentVertex.tx = -fHalfWidth; // transformed coordinate
         mCurrentVertex.ty =  fHalfHeight;
         mCurrentVertex.tz = 0.0f;
 
         Float cX = 0f, cY = 0f, cZ = 0f;
+        // The following method sets parameters cX, cY and cZ
         getWCentroid(cX, cY, cZ);  // Calculate and save the world coord centroid
         if(this.pointOfReference == null) {
             this.pointOfReference = new Point3d();
@@ -879,10 +966,13 @@ public:
         pointOfReference.x = cX;
         pointOfReference.y = cY;
         pointOfReference.z = cZ;
+
         return 0;
     } // shapeFromBMP
 
 
+    // This method originally came from SHAPE3D.CPP
+    //
     // Not called from within this file
     // Called from:
     //     Globals.createCutout
@@ -906,6 +996,7 @@ public:
         for (int index = 1; index <= this.miNumVertices; index ++) {
             sOutput = this.mCurrentVertex.x + "," + this.mCurrentVertex.y + "," + this.mCurrentVertex.z + "\n";
             fileOut.write(sOutput);
+
             // this.currentVertex++;
             incCurrentVertex();
         }
@@ -915,6 +1006,8 @@ public:
     } // writeShape
 
 
+    // This method originally came from SHAPE3D.CPP
+    // 
     // Called from:
     //     Globals.iwarpz
     public void printShape(String psComment) {
@@ -931,13 +1024,17 @@ public:
                 mCurrentVertex.tx, mCurrentVertex.ty, mCurrentVertex.tz,
                 mCurrentVertex.sx, mCurrentVertex.sy);
             Globals.statusPrint(sMsgText);
+
             // this.currentVertex++;
             incCurrentVertex();
         }
+
         return;
     } // printShape
 
 
+    // This method originally came from SHAPE3D.CPP
+    // 
     // Called from: 
     //     averageX
     //     averageY
@@ -955,12 +1052,15 @@ public:
             if(mCurrentVertex.sx < mfMinX) this.mfMinX = mCurrentVertex.sx;
             if(mCurrentVertex.sy > mfMaxY) this.mfMaxY = mCurrentVertex.sy;
             if(mCurrentVertex.sy < mfMinY) this.mfMinY = mCurrentVertex.sy;
+
             // this.currentVertex++;
             incCurrentVertex();
         } // for
     } // screenBoundingBox
 
 
+    // This method originally came from SHAPE3D.CPP
+    // 
     // Called from:
     //     Shape3d constructor that takes a string (file name) and an int (model type)
     //     Shape3d constructor that takes 1 parameter, an int
@@ -1012,6 +1112,7 @@ public:
     }
 
 
+    // This method originally came from SHAPE3D.CPP
     public void initCurrentFace() {
         // this.currentFace = this.firstFace;
         this.miCurrFaceIdx = 0;
@@ -1025,6 +1126,8 @@ public:
     } // initCurrentFace
 
     
+    // This method originally came from SHAPE3D.CPP
+    // 
     // Called from:
     //     addVertices
     //     divideLongestArc
@@ -1041,6 +1144,8 @@ public:
     } // getNumVertices
 
 
+    // This method originally came from SHAPE3D.CPP
+    // 
     // Called from:
     //     RenderObject.renderShape
     //     RenderObject.renderShapez
@@ -1049,6 +1154,8 @@ public:
     } // getNumFaces
 
 
+    // This method originally came from SHAPE3D.CPP
+    // 
     // Called from:
     //     copyAndExpand
     public void setNumVertices(int piNv) {
@@ -1056,26 +1163,33 @@ public:
     } // setNumVertices
 
 
+    // This method originally came from SHAPE3D.CPP
+    // 
     // Called from:
     //     Globals.tweenImage
     public void worldBoundingBox() {
         initCurrentVertex();
         this.mfMaxX = mCurrentVertex.x; 
         this.mfMaxY = mCurrentVertex.y;
+
         this.mfMinX = mCurrentVertex.x; 
         this.mfMinY = mCurrentVertex.y;
 
         for (int index = 0; index < this.miNumVertices; index++) {
             if(mCurrentVertex.x > mfMaxX) this.mfMaxX = mCurrentVertex.x;
             if(mCurrentVertex.x < mfMinX) this.mfMinX = mCurrentVertex.x;
+
             if(mCurrentVertex.y > mfMaxY) this.mfMaxY = mCurrentVertex.y;
             if(mCurrentVertex.y < mfMinY) this.mfMinY = mCurrentVertex.y;
+
             // this.currentVertex++;
             incCurrentVertex();
         } // for index
     } // worldBoundingBox
 
 
+    // This method originally came from SHAPE3D.CPP
+    // 
     // Called from:
     //     Globals.iwarpz
     public void transformBoundingBox() {
@@ -1091,16 +1205,21 @@ public:
         for (int index = 0; index < this.miNumVertices; index++) {
             if(mCurrentVertex.tx > mfMaxTX) this.mfMaxTX = mCurrentVertex.tx;
             if(mCurrentVertex.tx < mfMinTX) this.mfMinTX = mCurrentVertex.tx;
+
             if(mCurrentVertex.ty > mfMaxTY) this.mfMaxTY = mCurrentVertex.ty;
             if(mCurrentVertex.ty < mfMinTY) this.mfMinTY = mCurrentVertex.ty;
+
             if(mCurrentVertex.tz > mfMaxTZ) this.mfMaxTZ = mCurrentVertex.tz;
             if(mCurrentVertex.tz < mfMinTZ) this.mfMinTZ = mCurrentVertex.tz;
+
             // currentVertex++;
             incCurrentVertex();
         } // for index
     } // transformBoundingBox
 
 
+    // This method originally came from SHAPE3D.CPP
+    // 
     // Called from:
     //     Globals.tweenImage
     public void invertY(int piScreenHeight) {
@@ -1108,12 +1227,15 @@ public:
 
         for (int index = 0; index < this.miNumVertices; index++) {
             mCurrentVertex.y = piScreenHeight - mCurrentVertex.y;
+
             // currentVertex++;
             incCurrentVertex();
         }
     } // invertY
 
 
+    // This method originally came from SHAPE3D.CPP
+    // 
     // Called from:
     //     Globals.iwarpz
     //     Globals.tweenShape
@@ -1127,6 +1249,7 @@ public:
         mCurrentVertex.x = pfX;
         mCurrentVertex.y = pfY;
         mCurrentVertex.z = pfZ;
+
         // currentVertex++; // advance the vertex pointer
         incCurrentVertex();
 
@@ -1135,6 +1258,8 @@ public:
     } // addWorldVertex
 
 
+    // This method originally came from SHAPE3D.CPP
+    // 
     // Called from:
     //     getBoundaryPoint
     public int addTransformedVertex(float pfX, float pfY, float pfZ) {
@@ -1147,6 +1272,7 @@ public:
         mCurrentVertex.tx = pfX;
         mCurrentVertex.ty = pfY;
         mCurrentVertex.tz = pfZ;
+
         // currentVertex++; // advance the vertex pointer
         incCurrentVertex();
 
@@ -1155,6 +1281,8 @@ public:
     } // addTransformedVertex
 
 
+    // This method originally came from SHAPE3D.CPP
+    // 
     // Called from:
     //     ImageView.onLButtonDblClk
     //     ImageView.onRButtonDown
@@ -1165,11 +1293,14 @@ public:
         
         // this.currentVertex--;
         decCurrentVertex();
+
         this.miNumVertices--;
         return 0;
     } // deleteLastWorldVertex
 
 
+    // This method originally came from SHAPE3D.CPP
+    // 
     // Called from:
     //     ImageView.onRButtonDown
     public int getLastWorldVertex(Float pFX, Float pFY, Float pFZ) {
@@ -1187,10 +1318,13 @@ public:
       pFX = mVertices[miCurrVtxIdx - 1].x;
       pFY = mVertices[miCurrVtxIdx - 1].y;
       pFZ = mVertices[miCurrVtxIdx - 1].z;
+
       return 0;
     } // getLastWorldVertex
 
 
+    // This method originally came from SHAPE3D.CPP
+    // 
     // Called from:
     //     ImageView.onLButtonUp
     //     ImageView.onRButtonDown
@@ -1213,6 +1347,8 @@ public:
     } // getPreviousWorldVertex
 
 
+    // This method originally came from SHAPE3D.CPP
+    //
     // Called from:
     //     RenderObject.drawSequence
     //     RenderObject.drawStill
@@ -1222,6 +1358,8 @@ public:
     } // averageX
 
 
+    // This method originally came from SHAPE3D.CPP
+    //
     // Called from:
     //     RenderObject.drawSequence
     //     RenderObject.drawStill
@@ -1231,6 +1369,8 @@ public:
     } // averageY
 
 
+    // This method originally came from SHAPE3D.CPP
+    //
     // Called from:
     //     addVertices
     //     getBoundaryPoint
@@ -1246,13 +1386,16 @@ public:
             for (int index = 0; index < this.miNumVertices; index++) {
                 if(mCurrentVertex.x > fMaxX) fMaxX = mCurrentVertex.x;
                 if(mCurrentVertex.x < fMinX) fMinX = mCurrentVertex.x;
+
                 if(mCurrentVertex.y > fMaxY) fMaxY = mCurrentVertex.y;
                 if(mCurrentVertex.y < fMinY) fMinY = mCurrentVertex.y;
+
                 if(mCurrentVertex.z > fMaxZ) fMaxZ = mCurrentVertex.z;
                 if(mCurrentVertex.z < fMinZ) fMinZ = mCurrentVertex.z;
+
                 // currentVertex++;
                 incCurrentVertex();
-            }
+            } // for index
 
             this.mfOriginX = fMinX + ((fMaxX - fMinX) / 2.0f);
             this.mfOriginY = fMinY + ((fMaxY - fMinY) / 2.0f);
@@ -1262,10 +1405,12 @@ public:
             pFCentroidX = this.mfOriginX;
             pFCentroidY = this.mfOriginY;
             pFCentroidZ = this.mfOriginZ;
-        }
+        } // if(this.miNumAllocatedVertices > 0)
     } // getWCentroid
 
 
+    // This method originally came from SHAPE3D.CPP
+    // 
     // Not called from within this file
     // Called from:
     //     Globals.tweenImage
@@ -1279,12 +1424,15 @@ public:
             mCurrentVertex.x += pfOffsetX;
             mCurrentVertex.y += pfOffsetY;
             mCurrentVertex.z += pfOffsetZ;
+
             // currentVertex++;
             incCurrentVertex();
-        }
+        } // for index
     } // translateW
 
 
+    // This method originally came from SHAPE3D.CPP
+    // 
     // Called from:
     //     RenderObject ctor that takes 4 Point3d parameters
     public void floor() {
@@ -1294,15 +1442,20 @@ public:
             mCurrentVertex.x  = (int)mCurrentVertex.x;
             mCurrentVertex.y  = (int)mCurrentVertex.y;
             mCurrentVertex.z  = (int)mCurrentVertex.z;
+
             mCurrentVertex.sx = (int)mCurrentVertex.sx;
             mCurrentVertex.sy = (int)mCurrentVertex.sy;
+
             // currentVertex++;
             incCurrentVertex();
-        }
+        } // for index
     } // floor
 
 
+    // This method originally came from SHAPE3D.CPP
+    // 
     // Not called from within this file
+    // Could not find where this is called from
     public void translateT(float pfOffsetX, float pfOffsetY, float pfOffsetZ) {
         initCurrentVertex();
 
@@ -1310,12 +1463,15 @@ public:
             mCurrentVertex.tx += pfOffsetX;
             mCurrentVertex.ty += pfOffsetY;
             mCurrentVertex.tz += pfOffsetZ;
+
             // currentVertex++;
             incCurrentVertex();
-        }
+        } // for index
     } // translateT
 
 
+    // This method originally came from SHAPE3D.CPP
+    // 
     // Not called from within this file
     // Called from:
     //     TMatrix.transformAndProject
@@ -1325,12 +1481,15 @@ public:
         for (int index = 0; index < this.miNumVertices; index++) {
             mCurrentVertex.sx += piOffsetX;
             mCurrentVertex.sy += piOffsetY;
+
             // currentVertex++;
             incCurrentVertex();
-        }
+        } // for index
     } // translateS
 
 
+    // This method originally came from SHAPE3D.CPP
+    // 
     // TODO: Not a method of Shape3d in the original C++ code
     // Called from:
     //     getShapeFileInfo
@@ -1352,6 +1511,7 @@ public:
                 sKeyWord = "EOF";
                 return(sKeyWord);
             }
+
             if(psTheText == null) {
                 // We've reached the end of the file
                 psTheText = "EOF ";
@@ -1379,6 +1539,8 @@ public:
     } // getNextLine
 
 
+    // This method originally came from SHAPE3D.CPP
+    // 
     // TODO: Not a method of Shape3d in the original C++ code
     // This method sets psShapePath
     //
@@ -1390,6 +1552,7 @@ public:
 
         // sFileWExt = file name with extension at end of path psModelPath
         sFileWExt = modelPathFile.getName(); 
+
         // Now strip the extension from sFileWExt
         sBaseFile = sFileWExt.substring(0, sFileWExt.lastIndexOf('.'));
 
@@ -1405,6 +1568,8 @@ public:
     } // getShapePath
 
 
+    // This method originally came from SHAPE3D.CPP
+    // 
     // Called from:
     //     copyAndExpand
     //     getBoundaryPoint
@@ -1418,7 +1583,10 @@ public:
     } // isValid
 
 
+    // This method originally came from SHAPE3D.CPP
+    //
     // Not a method in the original C++ code for Shape3d
+    // 
     // Not called from within this file
     // Couldn't find where this is being called from
     public int getBoundaryPoint(Shape3d pShape, 
@@ -1456,7 +1624,7 @@ public:
         int iStatus = 0;
 
         // Given two points (pfRayCentroidX, pfRayCentroidY) and (pfRayX2, pfRayY2), 
-        // on a ray, get the equation of the ray
+        // on a ray, get the equation of the ray.
         // The following method will set fRaySlope, fRayYIntercept, 
         // bRayHorzFlag and bRayVertFlag
         MathUtils.getFLineEquation(pfRayCentroidX, pfRayCentroidY, pfRayX2, pfRayY2, 
@@ -1477,6 +1645,7 @@ public:
         for (int index = 1; index <= iNumVertices; index++) {
             x1 = pShape.mCurrentVertex.x;
             y1 = pShape.mCurrentVertex.y;
+
             // theShape.currentVertex++;
             pShape.incCurrentVertex();
 
@@ -1487,11 +1656,13 @@ public:
 
             x2 = pShape.mCurrentVertex.x;  // Can't use (currentVertex+1).x
             y2 = pShape.mCurrentVertex.y;  // So first move forward 1 position, then go back.
+
             //theShape.currentVertex--;
             pShape.decCurrentVertex();
 
             fMinX = Math.min(x1, x2);
             fMaxX = Math.max(x1, x2);
+
             fMinY = Math.min(y1, y2);
             fMaxY = Math.max(y1, y2);
 
@@ -1583,6 +1754,7 @@ public:
             fTempX = tempShape.mCurrentVertex.tx;
             fTempY = tempShape.mCurrentVertex.ty;
             fTempDistance = tempShape.mCurrentVertex.tz;
+
             if(fTempDistance <= fLeastDistance) {
                 fLeastDistance = fTempDistance;
                 // Set the output parameters
@@ -1598,7 +1770,10 @@ public:
     } // getBoundaryPoint
 
 
+    // This method originally came from SHAPE3D.CPP
+    // 
     // Not called from within this file.
+    // Could not find where this is being called from.
     public int addVertices(Shape3d pChildShape) {
         // Add the vertices of the child shape to the shape pointed to by this 
         int numVertices = pChildShape.getNumVertices();
@@ -1637,6 +1812,7 @@ public:
                 
                 // this.currentVertex++;
                 this.incCurrentVertex();
+
                 mx2 = this.mCurrentVertex.x;
                 my2 = this.mCurrentVertex.y;
                 mAngle2 = MathUtils.polarAtan(mx2 - mCentroidX, my2 - mCentroidY);
@@ -1676,6 +1852,8 @@ public:
     } // addVertices
 
 
+    // This method originally came from SHAPE3D.CPP
+    // 
     // Not called from within this file.
     // Called from: 
     //     RenderObject.renderMeshz
@@ -1689,6 +1867,8 @@ public:
     } // getReferencePoint
 
 
+    // This method originally came from SHAPE3D.CPP
+    // 
     // Not called from within this file.
     // Called from:
     //     RenderObject ctor that takes 4 Point3d parameters
@@ -1701,6 +1881,8 @@ public:
     } // setReferencePoint
 
 
+    // This method originally came from SHAPE3D.CPP
+    // 
     // Not called from within this file.
     // Called from:
     //     RenderObject.drawStill
@@ -1712,7 +1894,10 @@ public:
             Globals.statusPrint(sMsgText);
             return -1;
         }
+
         VertexSet aVertex = this.mVertices[piIndex];
+
+        // Set the output parameters
         pISx = (int)aVertex.sx;
         pISy = (int)aVertex.sy;
 
@@ -1720,6 +1905,8 @@ public:
     } // getScreenVertex
 
 
+    // This method originally came from SHAPE3D.CPP
+    // 
     // Not called from within this file.
     // Called from:
     //     RenderObject.renderShapez
@@ -1741,6 +1928,8 @@ public:
     } // getTransformedVertex
 
 
+    // This method originally came from SHAPE3D.CPP
+    // 
     // Called from:
     //     getWorldVertex
     public float getWorldDistance(int piVertexNumber) {
@@ -1791,7 +1980,10 @@ public:
     } // getWorldDistance
 
 
+    // This method originally came from SHAPE3D.CPP
+    // 
     // Not called from within this file.
+    // Can't find where this is called from.
     public int getWorldVertex(float pfDistanceFraction, Integer pIVertex, 
     Float pFX, Float pFY, Float pFZ) {
         // Determine the world coordinate that corresponds to the supplied distance fraction.
@@ -1836,7 +2028,9 @@ public:
                 fZ2 = fFirstz;
             }
 
-            if((fDf1 <= pfDistanceFraction) && (pfDistanceFraction <= fDf2)) {
+            if(
+            (fDf1 <= pfDistanceFraction) && 
+            (pfDistanceFraction <= fDf2)) {
                 // Set the output parameters
                 pFX = MathUtils.interpolate(fX1, fX2, fDf1, fDf2, pfDistanceFraction);
                 pFY = MathUtils.interpolate(fY1, fY2, fDf1, fDf2, pfDistanceFraction);
@@ -1855,9 +2049,12 @@ public:
     } // getWorldVertex
 
 
+    // This method originally came from SHAPE3D.CPP
+    // 
     // Not called from within this file.
     // Called from:
     //     Globals.tweenImage
+    // which in turn is called from MorphDlg.onOK (when morph type = JICTConstants.I_TWOD)
     public int removeDuplicates() {
         // If two successive world coords are equal, remove the second one.
         int i, j; // for loop variables
@@ -1899,6 +2096,7 @@ public:
                     currentVertex2Idx++;
                     nextVertexIdx++;
                 } // for j
+
                 // currentVertex--;
                 decCurrentVertex();
             }
@@ -1922,7 +2120,8 @@ public:
     } // removeDuplicates
 
 
-    // This method came from DEPTHSRT.CPP
+    // This method originally came from DEPTHSRT.CPP
+    // 
     // Not called from within this file.
     // Called from:
     //     SceneList.calcCompoundModelRefPoint
@@ -1945,6 +2144,7 @@ public:
 
             if(mCurrentVertex.tz > fMaxtZ) fMaxtZ = mCurrentVertex.tz;
             if(mCurrentVertex.tz < fMintZ) fMintZ = mCurrentVertex.tz;
+
             // currentVertex++;
             incCurrentVertex();
         } // for
@@ -1956,7 +2156,7 @@ public:
     } // getTCentroid
 
 
-    // This method came from TWEEN.CPP
+    // This method originally came from TWEEN.CPP
     //
     // Called from:
     //     addVertices
@@ -1987,11 +2187,13 @@ public:
         int iPrevVtxIdx = miCurrVtxIdx - 1;
         VertexSet prevVertex = mVertices[iPrevVtxIdx - 1];
         int iNumVertsToCopy = iNumVerts - piIndex;
+
         int j;
         for(j = 1; j <= iNumVertsToCopy; j++) {
             mCurrentVertex.x = prevVertex.x;
             mCurrentVertex.y = prevVertex.y;
             mCurrentVertex.z = prevVertex.z;
+
             // currentVertex--;
             decCurrentVertex();
             iPrevVtxIdx--;
@@ -2029,14 +2231,18 @@ public:
         for (int index = 0; index < iNumVertices; index++) {
             newShape.mCurrentVertex.sx = inShape.mCurrentVertex.sx;  // screen coord.
             newShape.mCurrentVertex.sy = inShape.mCurrentVertex.sy;
+
             newShape.mCurrentVertex.x  = inShape.mCurrentVertex.x;   // initial coord.
             newShape.mCurrentVertex.y  = inShape.mCurrentVertex.y;
             newShape.mCurrentVertex.z  = inShape.mCurrentVertex.z;
+
             newShape.mCurrentVertex.tx = inShape.mCurrentVertex.tx;  // transformed coord.
             newShape.mCurrentVertex.ty = inShape.mCurrentVertex.ty;
             newShape.mCurrentVertex.tz = inShape.mCurrentVertex.tz;
+
             // newShape.currentVertex++;
             newShape.incCurrentVertex();
+            
             // inShape.currentVertex++;
             inShape.incCurrentVertex();
         }
@@ -2050,7 +2256,8 @@ public:
     } // copyAndExpand
 
 
-    // This method came from TWEEN.CPP
+    // This method originally came from TWEEN.CPP
+    // 
     // Not called from within this file.
     // Called from:
     //     Globals.createTweenableShapes
@@ -2060,7 +2267,7 @@ public:
         int iNumVertices = getNumVertices();
         int j; 
 
-        // saveJ will be used as a parameter to insertVertexAfter
+        // iSaveJ will be used as a parameter to insertVertexAfter
         // It is set in the for j loop
         int iSaveJ = 0; 
         float fMaxDistance = 0.0f;
