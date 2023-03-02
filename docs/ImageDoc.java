@@ -3,18 +3,16 @@ package docs;
 import core.MemImage;
 
 import globals.Globals;
+import globals.JICTConstants;
 
 import java.awt.Dimension;
 
+// Class ImageView has method getDocument, which returns an object of type ImageDoc
 public class ImageDoc { // : public CDocument {
-	boolean ictdebug = false;
-	protected Dimension m_sizeDoc;
-    protected MemImage m_theImage;
-    protected String m_pathName;
-
-    // These were defined in MEMIMAGE.H
-    public static final int SEQUENTIAL = 1;
-    public static final int RANDOM = 0;
+	private boolean bIctDebug = false;
+	protected Dimension mDocDim;
+    protected MemImage mMImage;
+    protected String msPathName;
 
 /*
 protected: // create from serialization only
@@ -22,15 +20,15 @@ protected: // create from serialization only
 
 // Attributes
 public:
-	imageDoc();
-	virtual ~imageDoc();
-	virtual BOOL OnSaveDocument(LPCTSTR lpszPathName);
-	virtual BOOL OnOpenDocument(LPCTSTR lpszPathName);
-    CSize GetDocSize();
-    memImage *GetImagePointer();
-    CString GetPathName();
-    void SetImagePointer(memImage *theImage);
-    static imageDoc * GetDoc();
+	imageDoc(); - implemented
+	virtual ~imageDoc(); - implemented as method finalize
+	virtual BOOL OnSaveDocument(LPCTSTR lpszPathName); - implemented
+	virtual BOOL OnOpenDocument(LPCTSTR lpszPathName); - implemented
+    CSize GetDocSize(); - implemented
+    memImage *GetImagePointer(); - implemented
+    CString GetPathName(); - implemented
+    void SetImagePointer(memImage *theImage); - implemented
+    static imageDoc * GetDoc(); - implemented
    
 
 // Implementation
@@ -44,7 +42,7 @@ protected:
 	virtual void Dump(CDumpContext& dc) const;
 #endif
 protected:
-	virtual BOOL    OnNewDocument();
+	virtual BOOL    OnNewDocument(); - implemented
 
 // Generated message map functions
 protected:
@@ -56,44 +54,45 @@ protected:
 
 	// This constructor originally came from IMAGEDOC.CPP
 	public ImageDoc() {
-		m_sizeDoc = CSize(1, 1);     // dummy value to make CScrollView happy
-		if(ictdebug) {
+		mDocDim = new Dimension(1, 1);     // dummy value to make CScrollView happy
+		if(bIctDebug) {
 			Globals.statusPrint("ImageDoc Constructor");
 		}
 	} // ImageDoc ctor
 
 
 	// This method originally came from IMAGEDOC.CPP
+	// Not called from within this file.
 	public Dimension getDocSize() {   
-		int imHeight = m_theImage.getHeight();
-		int imWidth  = m_theImage.getWidth();
-		m_sizeDoc = new Dimension(imWidth, imHeight);
-		return m_sizeDoc;     
+		int iImHeight = mMImage.getHeight();
+		int iImWidth  = mMImage.getWidth();
+		mDocDim = new Dimension(iImWidth, iImHeight);
+		return mDocDim;     
 	} // getDocSize
 
 	
 	// This method originally came from IMAGEDOC.CPP
 	public MemImage getImagePointer() {
-		return m_theImage;
+		return mMImage;
 	} // getImagePointer
 
 
 	// This method originally came from IMAGEDOC.CPP
 	public String getPathName() {
-		return m_pathName;
+		return msPathName;
 	} // getPathName
 
 
 	// This method originally came from IMAGEDOC.CPP
-	public void setImagePointer(MemImage theImage) {
-		m_theImage = theImage;
+	public void setImagePointer(MemImage pMImage) {
+		mMImage = pMImage;
 		return ;
 	} // setImagePointer
 
 
 	// This destructor originally came from IMAGEDOC.CPP
 	public void finalize() {
-		if(ictdebug) {
+		if(bIctDebug) {
 			Globals.statusPrint("ImageDoc Destructor");
 		}
 	} // finalize
@@ -101,56 +100,59 @@ protected:
 
 	// This method originally came from IMAGEDOC.CPP
 	protected boolean onNewDocument() {
+		// The original C++ imageDoc class extended CDocument. 
+		// Here it is calling the parent's OnNewDocument() method.
 		if (!CDocument.OnNewDocument()) {
 			return false;
 		}
-		m_theImage = null;
+		mMImage = null;
 		return true;
 	} // onNewDocument
 
 
 	// This method originally came from IMAGEDOC.CPP
-	public boolean onOpenDocument(String lpszPathName) {
-		m_theImage = new MemImage(lpszPathName, 0, 0, RANDOM, 'R', 0);
-		if(!m_theImage.isValid()) {
-			String msgText = "OnOpenDocument: Cannot open image: " + lpszPathName;
-			Globals.statusPrint(msgText);
+	public boolean onOpenDocument(String psPathName) {
+		mMImage = new MemImage(psPathName, 0, 0, 
+			JICTConstants.I_RANDOM, 'R', 0);
+		if(!mMImage.isValid()) {
+			String sMsgText = "OnOpenDocument: Cannot open image: " + psPathName;
+			Globals.statusPrint(sMsgText);
 			return false;
 		}
 
-		String msgText = "Opened: " + lpszPathName + "  " + m_theImage.getHeight() + " rows  " + m_theImage.getWidth() + " cols.";
-		Globals.statusPrint(msgText);
-		m_pathName = new String(lpszPathName);
+		String sMsgText = "Opened: " + psPathName + "  " + mMImage.getHeight() + " rows  " + mMImage.getWidth() + " cols.";
+		Globals.statusPrint(sMsgText);
+		msPathName = new String(psPathName);
 		return true;
 	} // onOpenDocument
 
 
 	// This method originally came from IMAGEDOC.CPP
-	public boolean onSaveDocument(String lpszPathName) {
-		m_theImage.writeBMP(lpszPathName);
+	public boolean onSaveDocument(String psPathName) {
+		mMImage.writeBMP(psPathName);
 		return true;
 	} // onSaveDocument
 
 
 	// This method originally came from IMAGEDOC.CPP
 	public ImageDoc getDoc() {
-		CMDIChildWnd pChild = ((CMDIFrameWnd)(AfxGetApp().m_pMainWnd)).MDIGetActive();
+		CMDIChildWnd childWnd = ((CMDIFrameWnd)(AfxGetApp().m_pMainWnd)).MDIGetActive();
 
-		if (!pChild) {
+		if (!childWnd) {
 			return null;
 		}
 		
-		CDocument pDoc = pChild.GetActiveDocument();
+		CDocument doc = childWnd.GetActiveDocument();
 
-		if (!pDoc) {
+		if (!doc) {
 			return null;
 		}
 
 		// Fail if doc is the wrong kind
-		if(!pDoc.IsKindOf(RUNTIME_CLASS(ImageDoc))) {
+		if(!doc.IsKindOf(RUNTIME_CLASS(ImageDoc))) {
 			return null;
 		}
 
-		return (ImageDoc)pDoc;
+		return (ImageDoc)doc;
 	} // getDoc
 } // class ImageDoc
