@@ -5,7 +5,7 @@ public class IctDoc {
 class CIctDoc : public CDocument
 {
 protected: // create from serialization only
-	CIctDoc();
+	CIctDoc(); - implemented
 	DECLARE_DYNCREATE(CIctDoc)
 
 // Attributes
@@ -18,13 +18,13 @@ public:
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CIctDoc)
 	public:
-	virtual BOOL OnNewDocument();
+	virtual BOOL OnNewDocument(); - implemented
 	//}}AFX_VIRTUAL
 
 // Implementation
 public:
-	virtual ~CIctDoc();
-	virtual void Serialize(CArchive& ar);   // overridden for document i/o
+	virtual ~CIctDoc(); - implemented as method finalize
+	virtual void Serialize(CArchive& ar);   // overridden for document i/o - implemented
 #ifdef _DEBUG
 	virtual void AssertValid() const;
 	virtual void Dump(CDumpContext& dc) const;
@@ -52,20 +52,20 @@ protected:
 };
 */
 
-    // This constructor came from ICT20.CPP
+    // This constructor originally came from ICT20.CPP
     public IctDoc() {
         // TODO: add one-time construction code here
 
-    }
+    } // IctDoc constructor
 
 
-    // This destructor came from ICT20.CPP
+    // This destructor originally came from ICT20.CPP
     public void finalize() {
-    }
+    } // finalize
 
 
-    // This method came from ICT20.CPP
-    boolean OnNewDocument() {
+    // This method originally came from ICT20.CPP
+    public boolean onNewDocument() {
         if (!CDocument.OnNewDocument()) {
             return false;
         }
@@ -74,15 +74,17 @@ protected:
         // (SDI documents will reuse this document)
 
         return true;
-    }
+    } // onNewDocument
 
 	
-    // This method came from ICT20.CPP
-    void Serialize(CArchive ar) {
+    // This method originally came from ICT20.CPP
+    public void serialize(CArchive ar) {
+		// m_viewList is a field of CDocument.
+		// The original C++ class CIctDoc extended CDocument
         if (ar.IsStoring()) {
             ((CEditView)m_viewList.GetHead()).SerializeRaw(ar);
         } else {
             ((CEditView)m_viewList.GetHead()).SerializeRaw(ar);
         }
-    }
+    } // serialize
 } // class IctDoc
