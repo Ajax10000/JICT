@@ -13,27 +13,28 @@ import structs.Point3d;
 
 public class GPipe {
     boolean gpdebug = false;
-    String sceneName, scenePathName;
-    int effectType, mode, colorMode;
-    int outputRows, outputColumns;
-    boolean lightingEnabled;
-    boolean zBufferEnabled;
-    int backfaceCullingEnabled;
-    MemImage zBuffer;
-    MemImage outputImage;
-    TMatrix viewMatrix;        // Contains a viewpoint transformation
-    TMatrix penMatrix;         // Contains model transformation
-    TMatrix viewPenMatrix;     // Contains the composite view, pen transformation
-    Point3d lightSource;
-    Point3d viewPoint;
-    Point3d viewAngle;
-    Point3d penRotation;        // rotation angles in radians
-    Point3d penScale;
-    Point3d penTranslation;
-    Point3d ref;
-    Point3d minBoundingBox;     // bounding box minimums
-    Point3d maxBoundingBox;     // bounding box maximums
-    boolean boundingBoxInitialized; // FALSE if not initialized, else TRUE
+    String msSceneName;
+    String msScenePathName;
+    int miEffectType, miMode, miColorMode;
+    int miOutputRows, miOutputColumns;
+    boolean mbLightingEnabled;
+    boolean mbZBufferEnabled;
+    int miBackfaceCullingEnabled;
+    MemImage mZBuffImage;
+    MemImage mOutputImage;
+    TMatrix mViewMatrix;        // Contains a viewpoint transformation
+    TMatrix mPenMatrix;         // Contains model transformation
+    TMatrix mViewPenMatrix;     // Contains the composite view, pen transformation
+    Point3d mLightSource;
+    Point3d mViewPoint;
+    Point3d mViewAngle;
+    Point3d mPenRotation;        // rotation angles in radians
+    Point3d mPenScale;
+    Point3d mPenTranslation;
+    Point3d mRef;
+    Point3d mMinBoundingBox;     // bounding box minimums
+    Point3d mMaxBoundingBox;     // bounding box maximums
+    boolean mbBoundingBoxInitialized; // FALSE if not initialized, else TRUE
 
     // These values came from GPIPE.H
     public static final int NUMFACETS = 20;
@@ -119,110 +120,127 @@ public:
 };  
  */
 
-    // This constructor came from GPIPE.CPP
-    public GPipe() {
-        outputRows = 512;
-        outputColumns = 512;
-        zBufferEnabled = true;
-        lightingEnabled = true;
-        effectType = STILL;
 
-        scenePathName = "d:\\ict20\\output\\gPipe.bmp";
+    // This constructor originally came from GPIPE.CPP
+    public GPipe() {
+        miOutputRows = 512;
+        miOutputColumns = 512;
+        mbZBufferEnabled = true;
+        mbLightingEnabled = true;
+        miEffectType = STILL;
+
+        msScenePathName = "d:\\ict20\\output\\gPipe.bmp";
 
         //  this vector indicates the direction of the light source
-        lightSource.x = -150.0f;
-        lightSource.y =    0.0f;
-        lightSource.z = -200.0f;
+        mLightSource = new Point3d();
+        mLightSource.x = -150.0f;
+        mLightSource.y =    0.0f;
+        mLightSource.z = -200.0f;
         
-        viewPoint.x =   0.0f;
-        viewPoint.y =   0.0f;
-        viewPoint.z = 200.0f;
+        mViewPoint = new Point3d();
+        mViewPoint.x =   0.0f;
+        mViewPoint.y =   0.0f;
+        mViewPoint.z = 200.0f;
 
-        viewAngle.x = -20.0f * F_DTR;
-        viewAngle.y =   0.0f * F_DTR;
-        viewAngle.z =   0.0f;
+        mViewAngle = new Point3d();
+        mViewAngle.x = -20.0f * F_DTR;
+        mViewAngle.y =   0.0f * F_DTR;
+        mViewAngle.z =   0.0f;
+
+        mViewMatrix = new TMatrix();
         setViewMatrix();
 
-        ref.x = 0.0f;   //  default location of the virtual pen
-        ref.y = 0.0f;
-        ref.z = 0.0f;
+        mRef = new Point3d();
+        mRef.x = 0.0f;   //  default location of the virtual pen
+        mRef.y = 0.0f;
+        mRef.z = 0.0f;
 
-        penRotation.x = 0.0f;
-        penRotation.y = 0.0f;
-        penRotation.z = 0.0f;
+        mPenRotation = new Point3d();
+        mPenRotation.x = 0.0f;
+        mPenRotation.y = 0.0f;
+        mPenRotation.z = 0.0f;
         
-        penTranslation.x = 0.0f;
-        penTranslation.y = 0.0f;
-        penTranslation.z = 0.0f;
+        mPenTranslation = new Point3d();
+        mPenTranslation.x = 0.0f;
+        mPenTranslation.y = 0.0f;
+        mPenTranslation.z = 0.0f;
         
-        penScale.x = 1.0f;
-        penScale.y = 1.0f;
-        penScale.z = 1.0f;
+        mPenScale = new Point3d();
+        mPenScale.x = 1.0f;
+        mPenScale.y = 1.0f;
+        mPenScale.z = 1.0f;
+
+        mPenMatrix = new TMatrix();
         setPenMatrix();
         
-        boundingBoxInitialized = false;
+        mbBoundingBoxInitialized = false;
         
         setZBuffer(true);
         setLighting(true);
+
         Point3d aLight = new Point3d();
         aLight.x =    0.0f;
         aLight.y =    0.0f;
         aLight.z = -100.0f;
         setLightSource(aLight);
-    }
+    } // GPipe constructor
 
 
-    // This destructor came from GPIPE.CPP
+    // This destructor originally came from GPIPE.CPP
     public void finalize() {
 
-    }
+    } // finalize
 
-    // This method came from GPIPE.CPP
+    
+    // This method originally came from GPIPE.CPP
     public void reset() {
-        zBuffer.init32(ZBUFFERMAXVALUE); 
-        outputImage.clear();
-        penRotation.x = 0.0f;
-        penRotation.y = 0.0f;
-        penRotation.z = 0.0f;
+        mZBuffImage.init32(ZBUFFERMAXVALUE); 
+        mOutputImage.clear();
+        mPenRotation.x = 0.0f;
+        mPenRotation.y = 0.0f;
+        mPenRotation.z = 0.0f;
             
-        penTranslation.x = 0.0f;
-        penTranslation.y = 0.0f;
-        penTranslation.z = 0.0f;
+        mPenTranslation.x = 0.0f;
+        mPenTranslation.y = 0.0f;
+        mPenTranslation.z = 0.0f;
             
-        penScale.x = 1.0f;
-        penScale.y = 1.0f;
-        penScale.z = 1.0f;
+        mPenScale.x = 1.0f;
+        mPenScale.y = 1.0f;
+        mPenScale.z = 1.0f;
         setPenMatrix();
-    }
+    } // reset
 
-    // This method came from GPIPE.CPP
+
+    // This method originally came from GPIPE.CPP
+    // 
     // Called from:
     //     MainFrame.onToolsTest
     public int initialize() {
         // Open the output image
-        outputImage = new MemImage(outputRows, outputColumns);
-        if (!outputImage.isValid()) {
+        mOutputImage = new MemImage(miOutputRows, miOutputColumns);
+        if (!mOutputImage.isValid()) {
             Globals.statusPrint("gPipe: Not enough memory to open output image");
             return -1;
         }
 
         // Open the zBuffer if necessary
-        if( zBufferEnabled) {
-            zBuffer = new MemImage(outputRows, outputColumns, 32);
-            if (!zBuffer.isValid()) {
+        if(mbZBufferEnabled) {
+            mZBuffImage = new MemImage(miOutputRows, miOutputColumns, 32);
+            if (!mZBuffImage.isValid()) {
                 Globals.statusPrint("gPipe: Not enough memory to open Z Buffer");
                 return -1;
             }
 
-            // fill the zBuffer with maximum values
-            zBuffer.init32(ZBUFFERMAXVALUE); 
+            // Fill the zBuffer with maximum values
+            mZBuffImage.init32(ZBUFFERMAXVALUE); 
         }
 
         return 0;
     } // initialize
 
 
-    // This method came from GPIPE.CPP
+    // This method originally came from GPIPE.CPP
+    // 
     // Called from:
     //     MainFrame.onToolsTest
     public int addFace(Point3d p1, Point3d p2, Point3d c1, Point3d c2) {
@@ -259,37 +277,37 @@ public:
         Point3d t3 = new Point3d(); 
         Point3d t4 = new Point3d();
 
-        viewPenMatrix.transformAndProjectPoint1(p1, sp1, ref, outputRows, outputColumns, t1);
-        if(zBufferEnabled) {
-            dPrev1 = MathUtils.getDistance3d(t1.x, t1.y, t1.z, viewPoint.x, viewPoint.y, viewPoint.z);
+        mViewPenMatrix.transformAndProjectPoint1(p1, sp1, mRef, miOutputRows, miOutputColumns, t1);
+        if(mbZBufferEnabled) {
+            dPrev1 = MathUtils.getDistance3d(t1.x, t1.y, t1.z, mViewPoint.x, mViewPoint.y, mViewPoint.z);
         }
         updateBoundingBox(p1);  //optional
 
-        viewPenMatrix.transformAndProjectPoint1(p2, sp2, ref, outputRows, outputColumns, t2);
-        if(zBufferEnabled) {
-            dPrev2 = MathUtils.getDistance3d(t2.x, t2.y, t2.z, viewPoint.x, viewPoint.y, viewPoint.z);
+        mViewPenMatrix.transformAndProjectPoint1(p2, sp2, mRef, miOutputRows, miOutputColumns, t2);
+        if(mbZBufferEnabled) {
+            dPrev2 = MathUtils.getDistance3d(t2.x, t2.y, t2.z, mViewPoint.x, mViewPoint.y, mViewPoint.z);
         }
         updateBoundingBox(p2);  //optional
 
-        viewPenMatrix.transformAndProjectPoint1(c1, sc1, ref, outputRows, outputColumns, t3);
-        if(zBufferEnabled) {
-            dCur1 = MathUtils.getDistance3d(t3.x, t3.y, t3.z, viewPoint.x, viewPoint.y, viewPoint.z);
+        mViewPenMatrix.transformAndProjectPoint1(c1, sc1, mRef, miOutputRows, miOutputColumns, t3);
+        if(mbZBufferEnabled) {
+            dCur1 = MathUtils.getDistance3d(t3.x, t3.y, t3.z, mViewPoint.x, mViewPoint.y, mViewPoint.z);
         }
         updateBoundingBox(c1);  //optional
 
         dCur2 = -1.0f;
 
         if(c2 != null) {
-            viewPenMatrix.transformAndProjectPoint1(c2, sc2, ref, outputRows, outputColumns, t4);
-            if(zBufferEnabled) {
-                dCur2 = MathUtils.getDistance3d(t4.x, t4.y, t4.z, viewPoint.x, viewPoint.y, viewPoint.z);
+            mViewPenMatrix.transformAndProjectPoint1(c2, sc2, mRef, miOutputRows, miOutputColumns, t4);
+            if(mbZBufferEnabled) {
+                dCur2 = MathUtils.getDistance3d(t4.x, t4.y, t4.z, mViewPoint.x, mViewPoint.y, mViewPoint.z);
             }
             updateBoundingBox(c2);  //optional
         }
 
         if (gpdebug) {
-            viewPoint.display("ViewPoint");
-            ref.display("Reference");
+            mViewPoint.display("ViewPoint");
+            mRef.display("Reference");
             // np1.display("Normal"); // np1 has not yet been set
             DecimalFormat sixDotTwo = new DecimalFormat("####.##");
             String msgText = 
@@ -303,10 +321,11 @@ public:
         //  Lambertian Shading
         //
         //  Assume a face is planar.  Thus only one surface normal
-        if(lightingEnabled) {
+        if(mbLightingEnabled) {
             float xMax = t1.x;
             float yMax = t1.y;
             float zMax = t1.z;
+
             float xMin = t1.x;
             float yMin = t1.y;
             float zMin = t1.z;
@@ -339,16 +358,20 @@ public:
             if(c2 != null) {
                 if(t4.z < zMin) zMin = t4.z;
                 if(t4.z > zMax) zMax = t4.z;
+
                 if(t4.x > xMax) xMax = t4.x;
                 if(t4.x < xMin) xMin = t4.x;
+
                 if(t4.y > yMax) yMax = t4.y;
                 if(t4.y < yMin) yMin = t4.y;
             }
+
             centroid.x = (xMax + xMin) / 2.0f;
             centroid.y = (yMax + yMin) / 2.0f;
             centroid.z = (zMax + zMin) / 2.0f;
-            float dCentroid = MathUtils.getDistance3d(lightSource.x, lightSource.y, lightSource.z, 
-                                            centroid.x, centroid.y, centroid.z);
+            float dCentroid = MathUtils.getDistance3d(
+                mLightSource.x, mLightSource.y, mLightSource.z, 
+                centroid.x, centroid.y, centroid.z);
             Point3d np1 = new Point3d();
 
             // The following method will set np1
@@ -367,7 +390,7 @@ public:
             float kd = 0.85f;
             int Ip = 160;
 
-            ip1 = Globals.lightModel(kd, Ip, 150, np1, lightSource, dCentroid);
+            ip1 = Globals.lightModel(kd, Ip, 150, np1, mLightSource, dCentroid);
             ip1 = MathUtils.bound(ip1, 1.0f, 255.0f);
         } else {
             ip1 = 175.0f;	   // set a nominal face intensity
@@ -375,15 +398,15 @@ public:
 
         //  Render the face
         if (c2 != null) {
-            if(zBufferEnabled) {
-                outputImage.fillPolyz( 
+            if(mbZBufferEnabled) {
+                mOutputImage.fillPolyz( 
                             (int)sp1.x, (int)sp1.y, ip1, dPrev1,
                             (int)sp2.x, (int)sp2.y, ip1, dPrev2,
                             (int)sc1.x, (int)sc1.y, ip1, dCur1,
                             (int)sc2.x, (int)sc2.y, ip1, dCur2, 
-                            zBuffer);
+                            mZBuffImage);
             } else {
-                outputImage.fillPolyz( 
+                mOutputImage.fillPolyz( 
                             (int)sp1.x, (int)sp1.y, (byte)ip1, 0.0f,
                             (int)sp2.x, (int)sp2.y, (byte)ip1, 0.0f,
                             (int)sc1.x, (int)sc1.y, (byte)ip1, 0.0f,
@@ -391,18 +414,18 @@ public:
                             null);
             }
         } else {
-            if(zBufferEnabled) {
+            if(mbZBufferEnabled) {
                 Globals.fillTrianglez( 
                             (int)sp1.x, (int)sp1.y, ip1, dPrev1,
                             (int)sp2.x, (int)sp2.y, ip1, dPrev2,
                             (int)sc1.x, (int)sc1.y, ip1, dCur1,
-                            outputImage, zBuffer);
+                            mOutputImage, mZBuffImage);
             } else {
                 Globals.fillTrianglez( 
                             (int)sp1.x, (int)sp1.y, (byte)ip1, 0.0f,
                             (int)sp2.x, (int)sp2.y, (byte)ip1, 0.0f,
                             (int)sc1.x, (int)sc1.y, (byte)ip1, 0.0f,
-                            outputImage, null);
+                            mOutputImage, null);
             }
         }
 
@@ -410,445 +433,459 @@ public:
     } // addFace
 
 
-    // This method came from GPIPE.CPP
-    public void setPenScale(float scaleX, float scaleY, float scaleZ) {
-        penScale.x = scaleX;
-        penScale.y = scaleY;
-        penScale.z = scaleZ;
+    // This method originally came from GPIPE.CPP
+    public void setPenScale(float pfScaleX, float pfScaleY, float pfScaleZ) {
+        mPenScale.x = pfScaleX;
+        mPenScale.y = pfScaleY;
+        mPenScale.z = pfScaleZ;
     } // setPenScale
     
 
-    // This method came from GPIPE.CPP
+    // This method originally came from GPIPE.CPP
+    // 
     // Called from:
     //     MainFrame.onToolsTest
-    public void setPenXRotation(float angleRad) {
-        penRotation.x += angleRad;
+    public void setPenXRotation(float pfAngleRad) {
+        mPenRotation.x += pfAngleRad;
     } // setPenXRotation
 
 
-    // This method came from GPIPE.CPP
+    // This method originally came from GPIPE.CPP
+    // 
     // Called from:
     //     MainFrame.onToolsTest
-    public void setPenYRotation(float angleRad) {
-        penRotation.y += angleRad;
+    public void setPenYRotation(float pfAngleRad) {
+        mPenRotation.y += pfAngleRad;
     } // setPenYRotation
 
 
-    // This method came from GPIPE.CPP
-    public void setPenZRotation(float angleRad) {
-        penRotation.z += angleRad;
+    // This method originally came from GPIPE.CPP
+    public void setPenZRotation(float pfAngleRad) {
+        mPenRotation.z += pfAngleRad;
     } // setPenZRotation
 
     
-    // This method came from GPIPE.CPP
+    // This method originally came from GPIPE.CPP
+    // 
     // Called from:
     //     MainFrame.onToolsTest
-    public void setPenTranslation(float tranX, float tranY, float tranZ) {
-        penTranslation.x += tranX;
-        penTranslation.y += tranY;
-        penTranslation.z += tranZ;
+    public void setPenTranslation(float pfTranX, float pfTranY, float pfTranZ) {
+        mPenTranslation.x += pfTranX;
+        mPenTranslation.y += pfTranY;
+        mPenTranslation.z += pfTranZ;
     } // setPenTranslation
 
     
-    // This method came from GPIPE.CPP
+    // This method originally came from GPIPE.CPP
+    // 
+    // Called from:
+    //     constructor
     public void setPenMatrix() {
-        penMatrix.setIdentity();
-        penMatrix.scale(penScale.x, penScale.y, penScale.z);
-        penMatrix.rotate(penRotation.x, penRotation.y, penRotation.z);
-        penMatrix.translate(penTranslation.x, penTranslation.y, penTranslation.z);
+        mPenMatrix.setIdentity();
+        mPenMatrix.scale(mPenScale.x, mPenScale.y, mPenScale.z);
+        mPenMatrix.rotate(mPenRotation.x, mPenRotation.y, mPenRotation.z);
+        mPenMatrix.translate(mPenTranslation.x, mPenTranslation.y, mPenTranslation.z);
     } // setPenMatrix
 
 
-    // This method came from GPIPE.CPP
+    // This method originally came from GPIPE.CPP
+    // 
+    // Called from:
+    //     constructor
     public void setViewMatrix() {
-        viewMatrix.setIdentity();
-        viewMatrix.scale(1.0f, 1.0f, 1.0f);
-        viewMatrix.rotate(-viewAngle.x, -viewAngle.y, -viewAngle.z);
-        viewMatrix.translate(-viewPoint.x, -viewPoint.y, -viewPoint.z);
+        mViewMatrix.setIdentity();
+        mViewMatrix.scale(1.0f, 1.0f, 1.0f);
+        mViewMatrix.rotate(-mViewAngle.x, -mViewAngle.y, -mViewAngle.z);
+        mViewMatrix.translate(-mViewPoint.x, -mViewPoint.y, -mViewPoint.z);
     } // setViewMatrix
     
 
-    // This method came from GPIPE.CPP
+    // This method originally came from GPIPE.CPP
     public void setViewPenMatrix() {
         setPenMatrix();
         setViewMatrix();
-        viewPenMatrix.multiply(viewMatrix, penMatrix);
+        mViewPenMatrix.multiply(mViewMatrix, mPenMatrix);
     } // setViewPenMatrix
 
 
-    // This method came from GPIPE.CPP
+    // This method originally came from GPIPE.CPP
     public void resetPenMatrix() {
-        penMatrix.setIdentity();
+        mPenMatrix.setIdentity();
     } // resetPenMatrix
 
 
-    // This method came from GPIPE.CPP
+    // This method originally came from GPIPE.CPP
+    // 
     // Called from:
     //     MainFrame.onToolsTest
-    public int saveZBuffer(String outputPath) {
-        int status = zBuffer.saveAs8("d:\\ict20\\output\\gPipeZBuffer8.bmp");
-        return status;
+    public int saveZBuffer(String psOutputPath) { // parameter is not used
+        int iStatus = mZBuffImage.saveAs8("d:\\ict20\\output\\gPipeZBuffer8.bmp");
+        return iStatus;
     } // saveZBuffer
 
     
-    // This method came from GPIPE.CPP
+    // This method originally came from GPIPE.CPP
+    // 
     // Called from:
     //     MainFrame.onToolsTest
-    public int saveOutputImage(String outputPath) {
-        int status = outputImage.writeBMP(outputPath); 
-        return status;
+    public int saveOutputImage(String psOutputPath) {
+        int iStatus = mOutputImage.writeBMP(psOutputPath); 
+        return iStatus;
     } // saveOutputImage
     
 
-    // This method came from GPIPE.CPP
+    // This method originally came from GPIPE.CPP
+    // 
     // Called from:
     //     MainFrame.onToolsTest
-    public void setZBuffer(boolean indicator) {
-        zBufferEnabled = indicator;
+    public void setZBuffer(boolean pbIndicator) {
+        mbZBufferEnabled = pbIndicator;
     } // setZBuffer
 
     
-    // This method came from GPIPE.CPP
+    // This method originally came from GPIPE.CPP
+    // 
     // Called from:
     //     MainFrame.onToolsTest
-    public void setLighting(boolean indicator) {
-        lightingEnabled = indicator;
+    public void setLighting(boolean pbIndicator) {
+        mbLightingEnabled = pbIndicator;
     } // setLighting
 
 
-    // This method came from GPIPE.CPP
-    public void addCube(float width, float height, float depth) { 
+    // This method originally came from GPIPE.CPP
+    public void addCube(float pfWidth, float pfHeight, float pfDepth) { 
         Point3d p1 = new Point3d(); 
         Point3d p2 = new Point3d(); 
         Point3d p3 = new Point3d(); 
         Point3d p4 = new Point3d();
 
-        p1.x = -width/2.0f * VP;
-        p1.y = -height/2.0f * VP;
-        p1.z = depth/2.0f * VP;
+        p1.x = -pfWidth/2.0f * VP;
+        p1.y = -pfHeight/2.0f * VP;
+        p1.z = pfDepth/2.0f * VP;
 
-        p2.x = width/2.0f * VP;
-        p2.y = -height/2.0f * VP;
-        p2.z = depth/2.0f * VP;
+        p2.x = pfWidth/2.0f * VP;
+        p2.y = -pfHeight/2.0f * VP;
+        p2.z = pfDepth/2.0f * VP;
 
-        p3.x = width/2.0f * VP;
-        p3.y = height/2.0f * VP;
-        p3.z = depth/2.0f * VP;
+        p3.x = pfWidth/2.0f * VP;
+        p3.y = pfHeight/2.0f * VP;
+        p3.z = pfDepth/2.0f * VP;
 
-        p4.x = -width/2.0f * VP;
-        p4.y = height/2.0f * VP;
-        p4.z = depth/2.0f * VP;
+        p4.x = -pfWidth/2.0f * VP;
+        p4.y = pfHeight/2.0f * VP;
+        p4.z = pfDepth/2.0f * VP;
         addFace(p1, p2, p3, p4); //front
 
-        p1.x = -width/2.0f * VP;
-        p1.y = -height/2.0f * VP;
-        p1.z = -depth/2.0f * VP;
+        p1.x = -pfWidth/2.0f * VP;
+        p1.y = -pfHeight/2.0f * VP;
+        p1.z = -pfDepth/2.0f * VP;
 
-        p2.x = width/2.0f * VP;
-        p2.y = -height/2.0f * VP;
-        p2.z = -depth/2.0f * VP;
+        p2.x = pfWidth/2.0f * VP;
+        p2.y = -pfHeight/2.0f * VP;
+        p2.z = -pfDepth/2.0f * VP;
 
-        p3.x = width/2.0f * VP;
-        p3.y = height/2.0f * VP;
-        p3.z = -depth/2.0f * VP;
+        p3.x = pfWidth/2.0f * VP;
+        p3.y = pfHeight/2.0f * VP;
+        p3.z = -pfDepth/2.0f * VP;
 
-        p4.x = -width/2.0f * VP;
-        p4.y = height/2.0f * VP;
-        p4.z = -depth/2.0f * VP;
+        p4.x = -pfWidth/2.0f * VP;
+        p4.y = pfHeight/2.0f * VP;
+        p4.z = -pfDepth/2.0f * VP;
         addFace(p4, p3, p2, p1); //back
 
-        p1.x = -width/2.0f * VP;
-        p1.y = -height/2.0f * VP;
-        p1.z = -depth/2.0f * VP;
+        p1.x = -pfWidth/2.0f * VP;
+        p1.y = -pfHeight/2.0f * VP;
+        p1.z = -pfDepth/2.0f * VP;
 
-        p2.x = -width/2.0f * VP;
-        p2.y = -height/2.0f * VP;
-        p2.z = depth/2.0f * VP;
+        p2.x = -pfWidth/2.0f * VP;
+        p2.y = -pfHeight/2.0f * VP;
+        p2.z = pfDepth/2.0f * VP;
 
-        p3.x = -width/2.0f * VP;
-        p3.y = height/2.0f * VP;
-        p3.z = depth/2.0f * VP;
+        p3.x = -pfWidth/2.0f * VP;
+        p3.y = pfHeight/2.0f * VP;
+        p3.z = pfDepth/2.0f * VP;
 
-        p4.x = -width/2.0f * VP;
-        p4.y = height/2.0f * VP;
-        p4.z = -depth/2.0f * VP;
+        p4.x = -pfWidth/2.0f * VP;
+        p4.y = pfHeight/2.0f * VP;
+        p4.z = -pfDepth/2.0f * VP;
         addFace(p1, p2, p3, p4); //left
 
-        p1.x = width/2.0f * VP;
-        p1.y = -height/2.0f * VP;
-        p1.z = -depth/2.0f * VP;
+        p1.x = pfWidth/2.0f * VP;
+        p1.y = -pfHeight/2.0f * VP;
+        p1.z = -pfDepth/2.0f * VP;
 
-        p2.x = width/2.0f * VP;
-        p2.y = -height/2.0f * VP;
-        p2.z = depth/2.0f * VP;
+        p2.x = pfWidth/2.0f * VP;
+        p2.y = -pfHeight/2.0f * VP;
+        p2.z = pfDepth/2.0f * VP;
 
-        p3.x = width/2.0f * VP;
-        p3.y = height/2.0f * VP;
-        p3.z = depth/2.0f * VP;
+        p3.x = pfWidth/2.0f * VP;
+        p3.y = pfHeight/2.0f * VP;
+        p3.z = pfDepth/2.0f * VP;
 
-        p4.x = width/2.0f * VP;
-        p4.y = height/2.0f * VP;
-        p4.z = -depth/2.0f * VP;
+        p4.x = pfWidth/2.0f * VP;
+        p4.y = pfHeight/2.0f * VP;
+        p4.z = -pfDepth/2.0f * VP;
         addFace(p4, p3, p2, p1); //right
 
-        p1.x = -width/2.0f * VP;
-        p1.y = height/2.0f * VP;
-        p1.z = depth/2.0f * VP;
+        p1.x = -pfWidth/2.0f * VP;
+        p1.y = pfHeight/2.0f * VP;
+        p1.z = pfDepth/2.0f * VP;
 
-        p2.x = width/2.0f * VP;
-        p2.y = height/2.0f * VP;
-        p2.z = depth/2.0f * VP;
+        p2.x = pfWidth/2.0f * VP;
+        p2.y = pfHeight/2.0f * VP;
+        p2.z = pfDepth/2.0f * VP;
 
-        p3.x = width/2.0f * VP;
-        p3.y = height/2.0f * VP;
-        p3.z = -depth/2.0f * VP;
+        p3.x = pfWidth/2.0f * VP;
+        p3.y = pfHeight/2.0f * VP;
+        p3.z = -pfDepth/2.0f * VP;
 
-        p4.x = -width/2.0f * VP;
-        p4.y = height/2.0f * VP;
-        p4.z = -depth/2.0f * VP;
+        p4.x = -pfWidth/2.0f * VP;
+        p4.y = pfHeight/2.0f * VP;
+        p4.z = -pfDepth/2.0f * VP;
         addFace(p4, p3, p2, p1); //top
 
-        p1.x = -width/2.0f * VP;
-        p1.y = -height/2.0f * VP;
-        p1.z = depth/2.0f * VP;
+        p1.x = -pfWidth/2.0f * VP;
+        p1.y = -pfHeight/2.0f * VP;
+        p1.z = pfDepth/2.0f * VP;
 
-        p2.x = width/2.0f * VP;
-        p2.y = -height/2.0f * VP;
-        p2.z = depth/2.0f * VP;
+        p2.x = pfWidth/2.0f * VP;
+        p2.y = -pfHeight/2.0f * VP;
+        p2.z = pfDepth/2.0f * VP;
 
-        p3.x = width/2.0f * VP;
-        p3.y = -height/2.0f * VP;
-        p3.z = -depth/2.0f * VP;
+        p3.x = pfWidth/2.0f * VP;
+        p3.y = -pfHeight/2.0f * VP;
+        p3.z = -pfDepth/2.0f * VP;
 
-        p4.x = -width/2.0f * VP;
-        p4.y = -height/2.0f * VP;
-        p4.z = -depth/2.0f * VP;
+        p4.x = -pfWidth/2.0f * VP;
+        p4.y = -pfHeight/2.0f * VP;
+        p4.z = -pfDepth/2.0f * VP;
         addFace(p1, p2, p3, p4); //bottom
     } // addCube
 
     
-    // This method came from GPIPE.CPP
-    public void addSphere(float radius) { 
-        float tempAngle, rowRadius, yValue;
+    // This method originally came from GPIPE.CPP
+    public void addSphere(float pfRadius) { 
+        float fTempAngle, fRowRadius, fYValue;
         Point3d[] prevRow =  new Point3d[NUMFACETS];
         Point3d p1 = new Point3d(); 
         Point3d p2 = new Point3d(); 
         Point3d p3 = new Point3d(); 
         Point3d p4 = new Point3d();
-        float asAngle = 90.0f;
-        float angleInc = 360.0f / NUMFACETS;
+        float fAngle = 90.0f;
+        float fAngleInc = 360.0f / NUMFACETS;
         // float yIncrement = 2.0f * radius * VP / NUMFACETS; // this variable is not used
-        int col, row, k;
+        int iCol, iRow, k;
 
-        for (row = 1; row <= NUMFACETS; row++) {
-            rowRadius = (float)Math.abs(radius * VP * Math.cos(asAngle * F_DTR));
-            yValue = radius * VP * (float)Math.sin(asAngle * F_DTR);
+        for (iRow = 1; iRow <= NUMFACETS; iRow++) {
+            fRowRadius = (float)Math.abs(pfRadius * VP * Math.cos(fAngle * F_DTR));
+            fYValue = pfRadius * VP * (float)Math.sin(fAngle * F_DTR);
 
-            if(row == 1) {
-                tempAngle = 0.0f;
+            if(iRow == 1) {
+                fTempAngle = 0.0f;
                 for(k = 0; k < NUMFACETS; k++) {
-                    prevRow[k].x = rowRadius * (float)Math.cos(tempAngle * F_DTR);
-                    prevRow[k].y = yValue;
-                    prevRow[k].z = rowRadius * (float)Math.sin(tempAngle * F_DTR);
-                    tempAngle += angleInc;
+                    prevRow[k].x = fRowRadius * (float)Math.cos(fTempAngle * F_DTR);
+                    prevRow[k].y = fYValue;
+                    prevRow[k].z = fRowRadius * (float)Math.sin(fTempAngle * F_DTR);
+                    fTempAngle += fAngleInc;
                 }
             }
-            tempAngle = 0.0f;
+            fTempAngle = 0.0f;
 
-            for (col = 0; col < NUMFACETS-1 ; col++) {
-                p4.x = prevRow[col].x;
-                p4.y = prevRow[col].y;
-                p4.z = prevRow[col].z;
+            for (iCol = 0; iCol < NUMFACETS-1 ; iCol++) {
+                p4.x = prevRow[iCol].x;
+                p4.y = prevRow[iCol].y;
+                p4.z = prevRow[iCol].z;
 
-                p1.x =  rowRadius * (float)Math.cos(tempAngle * F_DTR);
-                p1.z =  rowRadius * (float)Math.sin(tempAngle * F_DTR);
-                p1.y =  yValue;
-                tempAngle += angleInc;
+                p1.x =  fRowRadius * (float)Math.cos(fTempAngle * F_DTR);
+                p1.z =  fRowRadius * (float)Math.sin(fTempAngle * F_DTR);
+                p1.y =  fYValue;
+                fTempAngle += fAngleInc;
 
-                if(row > 1) { 
-                    p3.x = prevRow[col + 1].x;
-                    p3.y = prevRow[col + 1].y;
-                    p3.z = prevRow[col + 1].z;
+                if(iRow > 1) { 
+                    p3.x = prevRow[iCol + 1].x;
+                    p3.y = prevRow[iCol + 1].y;
+                    p3.z = prevRow[iCol + 1].z;
 
-                    p2.x =  rowRadius * (float)Math.cos(tempAngle * F_DTR);
-                    p2.z =  rowRadius * (float)Math.sin(tempAngle * F_DTR);
-                    p2.y =  yValue;
+                    p2.x =  fRowRadius * (float)Math.cos(fTempAngle * F_DTR);
+                    p2.z =  fRowRadius * (float)Math.sin(fTempAngle * F_DTR);
+                    p2.y =  fYValue;
 
                     addFace(p4, p3, p2, p1);
-                    prevRow[col].x = p1.x;
-                    prevRow[col].y = p1.y;
-                    prevRow[col].z = p1.z;
+                    prevRow[iCol].x = p1.x;
+                    prevRow[iCol].y = p1.y;
+                    prevRow[iCol].z = p1.z;
                 }
-            }
+            } // for iCol
 
-            asAngle += (angleInc / 2.0f);
-        }
+            fAngle += (fAngleInc / 2.0f);
+        } // for iRow
     } // addSphere
 
 
-    // This method came from GPIPE.CPP
-    public void addCylTop(float height, float radius) { 
-        float tempAngle = 0.0f;
+    // This method originally came from GPIPE.CPP
+    public void addCylTop(float pfHeight, float pfRadius) { 
+        float fTempAngle = 0.0f;
         Point3d p1 = new Point3d(); 
         Point3d p2 = new Point3d(); 
         Point3d p3 = new Point3d();
         p1.x = 0.0f;
-        p1.y = VP * height/2.0f;
+        p1.y = VP * pfHeight/2.0f;
         p1.z = 0.0f;
 
-        float angleInc = 360.0f / NUMFACETS;
+        float fAngleInc = 360.0f / NUMFACETS;
         for (int i = 1; i <= NUMFACETS; i++) {
-            p2.x = VP * radius * (float)Math.cos(tempAngle * F_DTR);
-            p2.z = VP * radius * (float)Math.sin(tempAngle * F_DTR);
-            p2.y = VP * height/2.0f;
+            p2.x = VP * pfRadius * (float)Math.cos(fTempAngle * F_DTR);
+            p2.z = VP * pfRadius * (float)Math.sin(fTempAngle * F_DTR);
+            p2.y = VP * pfHeight/2.0f;
 
-            tempAngle += angleInc;
-            p3.x = VP * radius * (float)Math.cos(tempAngle * F_DTR);
-            p3.z = VP * radius * (float)Math.sin(tempAngle * F_DTR);
-            p3.y = VP * height/2.0f;
+            fTempAngle += fAngleInc;
+            p3.x = VP * pfRadius * (float)Math.cos(fTempAngle * F_DTR);
+            p3.z = VP * pfRadius * (float)Math.sin(fTempAngle * F_DTR);
+            p3.y = VP * pfHeight/2.0f;
             addFace(p3, p2, p1, null); 
-        }
+        } // for i
     } // addCylTop
 
     
-    // This method came from GPIPE.CPP
-    public void addCylBottom(float height, float radius) { 
-        float tempAngle = 0.0f;
+    // This method originally came from GPIPE.CPP
+    public void addCylBottom(float pfHeight, float pfRadius) { 
+        float fTempAngle = 0.0f;
         Point3d p1 = new Point3d();
         Point3d p2 = new Point3d(); 
         Point3d p3 = new Point3d();
         p1.x = 0.0f;
-        p1.y = -(VP * height/2.0f);
+        p1.y = -(VP * pfHeight/2.0f);
         p1.z = 0.0f;
 
-        float angleInc = 360.0f / NUMFACETS;
+        float fAngleInc = 360.0f / NUMFACETS;
         for (int i = 1; i <= NUMFACETS; i++) {
-            p2.x = VP * radius * (float)Math.cos(tempAngle * F_DTR);
-            p2.z = VP * radius * (float)Math.sin(tempAngle * F_DTR);
-            p2.y = -VP * height/2.0f;
+            p2.x = VP * pfRadius * (float)Math.cos(fTempAngle * F_DTR);
+            p2.z = VP * pfRadius * (float)Math.sin(fTempAngle * F_DTR);
+            p2.y = -VP * pfHeight/2.0f;
 
-            tempAngle += angleInc;
-            p3.x = VP * radius * (float)Math.cos(tempAngle * F_DTR);
-            p3.z = VP * radius * (float)Math.sin(tempAngle * F_DTR);
-            p3.y = -VP * height/2.0f;
+            fTempAngle += fAngleInc;
+            p3.x = VP * pfRadius * (float)Math.cos(fTempAngle * F_DTR);
+            p3.z = VP * pfRadius * (float)Math.sin(fTempAngle * F_DTR);
+            p3.y = -VP * pfHeight/2.0f;
             addFace(p3, p2, p1, null); 
-        }
+        } // for i
     } // addCylBottom
 
     
-    // This method came from GPIPE.CPP
-    public void addCylSides(float height, float radius) { 
-        float tempAngle = 0.0f;
+    // This method originally came from GPIPE.CPP
+    public void addCylSides(float pfHeight, float pfRadius) { 
+        float fTempAngle = 0.0f;
         Point3d p1 = new Point3d();
         Point3d p2 = new Point3d();
         Point3d p3 = new Point3d();
         Point3d p4 = new Point3d();
 
-        float angleInc = 360.0f / NUMFACETS;
+        float fAngleInc = 360.0f / NUMFACETS;
         for (int i = 1; i <= NUMFACETS; i++) {
-            p1.x = VP * radius * (float)Math.cos(tempAngle * F_DTR);
-            p1.z = VP * radius * (float)Math.sin(tempAngle * F_DTR);
-            p1.y = VP * height/2.0f;
+            p1.x = VP * pfRadius * (float)Math.cos(fTempAngle * F_DTR);
+            p1.z = VP * pfRadius * (float)Math.sin(fTempAngle * F_DTR);
+            p1.y = VP * pfHeight/2.0f;
 
             p2.x = p1.x;
             p2.z = p1.z;
             p2.y = -p1.y;
 
-            tempAngle += angleInc;
-            p3.x = VP * radius * (float)Math.cos(tempAngle * F_DTR);
-            p3.z = VP * radius * (float)Math.sin(tempAngle * F_DTR);
-            p3.y = -(VP * height/2.0f);
+            fTempAngle += fAngleInc;
+            p3.x = VP * pfRadius * (float)Math.cos(fTempAngle * F_DTR);
+            p3.z = VP * pfRadius * (float)Math.sin(fTempAngle * F_DTR);
+            p3.y = -(VP * pfHeight/2.0f);
 
             p4.x = p3.x;
             p4.z = p3.z;
             p4.y = -p3.y;
             addFace(p4, p3, p2, p1); 
-        }
+        } // for i
     } // addCylSides
 
     
-    // This method came from GPIPE.CPP
-    public void addConeBottom(float height, float bottomRadius) { 
-        float tempAngle = 0.0f;
+    // This method originally came from GPIPE.CPP
+    public void addConeBottom(float pfHeight, float pfBottomRadius) { 
+        float fTempAngle = 0.0f;
         Point3d p1 = new Point3d();
         Point3d p2 = new Point3d();
         Point3d p3 = new Point3d();
 
         p1.x = 0.0f;
-        p1.y = -(VP * height/2.0f);
+        p1.y = -(VP * pfHeight/2.0f);
         p1.z = 0.0f;
 
-        float angleInc = 360.0f / NUMFACETS;
+        float fAngleInc = 360.0f / NUMFACETS;
         for (int i = 1; i <= NUMFACETS; i++) {
-            p2.x = VP * bottomRadius * (float)Math.cos(tempAngle * F_DTR);
-            p2.z = VP * bottomRadius * (float)Math.sin(tempAngle * F_DTR);
-            p2.y = -VP * height/2.0f;
+            p2.x = VP * pfBottomRadius * (float)Math.cos(fTempAngle * F_DTR);
+            p2.z = VP * pfBottomRadius * (float)Math.sin(fTempAngle * F_DTR);
+            p2.y = -VP * pfHeight/2.0f;
 
-            tempAngle += angleInc;
-            p3.x = VP * bottomRadius * (float)Math.cos(tempAngle * F_DTR);
-            p3.z = VP * bottomRadius * (float)Math.sin(tempAngle * F_DTR);
-            p3.y = -VP * height/2.0f;
+            fTempAngle += fAngleInc;
+            p3.x = VP * pfBottomRadius * (float)Math.cos(fTempAngle * F_DTR);
+            p3.z = VP * pfBottomRadius * (float)Math.sin(fTempAngle * F_DTR);
+            p3.y = -VP * pfHeight/2.0f;
             addFace(p3, p2, p1, null); 
-        }
+        } // for i
     } // addConeBottom
 
 
-    // This method came from GPIPE.CPP
-    public void addConeSides(float height, float bottomRadius) { 
-        float tempAngle = 0.0f;
+    // This method originally came from GPIPE.CPP
+    public void addConeSides(float pfHeight, float pfBottomRadius) { 
+        float fTempAngle = 0.0f;
         Point3d p1 = new Point3d();
         Point3d p2 = new Point3d();
         Point3d p3 = new Point3d();
 
         p1.x = 0.0f;
-        p1.y = VP * height/2.0f;
+        p1.y = VP * pfHeight/2.0f;
         p1.z = 0.0f;
-        int i;
-        // String pathBuffer; // This variable is not used
-        float angleInc = 360.0f / NUMFACETS;
-        for (i = 1; i <= NUMFACETS; i++) {
-            p2.x =  VP * bottomRadius * (float)Math.cos(tempAngle * F_DTR);
-            p2.z =  VP * bottomRadius * (float)Math.sin(tempAngle * F_DTR);
-            p2.y = -VP * height/2.0f;
 
-            tempAngle += angleInc;
-            p3.x =  VP * bottomRadius * (float)Math.cos(tempAngle * F_DTR);
-            p3.z =  VP * bottomRadius * (float)Math.sin(tempAngle * F_DTR);
-            p3.y = -VP * height/2.0f;
+        // String pathBuffer; // This variable is not used
+        float fAngleInc = 360.0f / NUMFACETS;
+        for (int i = 1; i <= NUMFACETS; i++) {
+            p2.x =  VP * pfBottomRadius * (float)Math.cos(fTempAngle * F_DTR);
+            p2.z =  VP * pfBottomRadius * (float)Math.sin(fTempAngle * F_DTR);
+            p2.y = -VP * pfHeight/2.0f;
+
+            fTempAngle += fAngleInc;
+            p3.x =  VP * pfBottomRadius * (float)Math.cos(fTempAngle * F_DTR);
+            p3.z =  VP * pfBottomRadius * (float)Math.sin(fTempAngle * F_DTR);
+            p3.y = -VP * pfHeight/2.0f;
             addFace(p3, p2, p1, null);
-        }
+        } // for i
     } // addConeSides
 
 
-    // This method came from GPIPE.CPP
-    public void updateBoundingBox(Point3d point) {
-        if(!boundingBoxInitialized) {
-            boundingBoxInitialized = true;
-            minBoundingBox.x = point.x;
-            minBoundingBox.y = point.y;
-            minBoundingBox.z = point.z;
+    // This method originally came from GPIPE.CPP
+    public void updateBoundingBox(Point3d pPoint) {
+        if(!mbBoundingBoxInitialized) {
+            mbBoundingBoxInitialized = true;
+            
+            mMinBoundingBox.x = pPoint.x;
+            mMinBoundingBox.y = pPoint.y;
+            mMinBoundingBox.z = pPoint.z;
 
-            maxBoundingBox.x = point.x;
-            maxBoundingBox.y = point.y;
-            maxBoundingBox.z = point.z;
+            mMaxBoundingBox.x = pPoint.x;
+            mMaxBoundingBox.y = pPoint.y;
+            mMaxBoundingBox.z = pPoint.z;
         } else {
-            if(point.x < minBoundingBox.x) minBoundingBox.x = point.x;
-            if(point.y < minBoundingBox.y) minBoundingBox.y = point.y;
-            if(point.z < minBoundingBox.z) minBoundingBox.z = point.z;
+            if(pPoint.x < mMinBoundingBox.x) mMinBoundingBox.x = pPoint.x;
+            if(pPoint.y < mMinBoundingBox.y) mMinBoundingBox.y = pPoint.y;
+            if(pPoint.z < mMinBoundingBox.z) mMinBoundingBox.z = pPoint.z;
 
-            if(point.x > maxBoundingBox.x) maxBoundingBox.x = point.x;
-            if(point.y > maxBoundingBox.y) maxBoundingBox.y = point.y;
-            if(point.z > maxBoundingBox.z) maxBoundingBox.z = point.z;
+            if(pPoint.x > mMaxBoundingBox.x) mMaxBoundingBox.x = pPoint.x;
+            if(pPoint.y > mMaxBoundingBox.y) mMaxBoundingBox.y = pPoint.y;
+            if(pPoint.z > mMaxBoundingBox.z) mMaxBoundingBox.z = pPoint.z;
         }
     } // updateBoundingBox
 
 
-    // This method came from GPIPE.CPP
+    // This method originally came from GPIPE.CPP
     public boolean viewPointInsideBoundingBox() {
         if(
-        (viewPoint.x >= minBoundingBox.x && viewPoint.x <= maxBoundingBox.x) &&
-        (viewPoint.y >= minBoundingBox.y && viewPoint.y <= maxBoundingBox.y) &&
-        (viewPoint.z >= minBoundingBox.z && viewPoint.z <= maxBoundingBox.z) ) {
+        (mViewPoint.x >= mMinBoundingBox.x && mViewPoint.x <= mMaxBoundingBox.x) &&
+        (mViewPoint.y >= mMinBoundingBox.y && mViewPoint.y <= mMaxBoundingBox.y) &&
+        (mViewPoint.z >= mMinBoundingBox.z && mViewPoint.z <= mMaxBoundingBox.z) ) {
             return true;
         } else {
             return false;
@@ -856,12 +893,13 @@ public:
     } // viewPointInsideBoundingBox
 
 
-    // This method came from GPIPE.CPP
+    // This method originally came from GPIPE.CPP
+    // 
     // Called from:
     //     MainFrame.onToolsTest
-    public void setLightSource(Point3d aPoint) {
-        this.lightSource.x = aPoint.x;
-        this.lightSource.y = aPoint.y;
-        this.lightSource.z = aPoint.z;
+    public void setLightSource(Point3d pPoint) {
+        this.mLightSource.x = pPoint.x;
+        this.mLightSource.y = pPoint.y;
+        this.mLightSource.z = pPoint.z;
     } // setLightSource
 } // class GPipe
