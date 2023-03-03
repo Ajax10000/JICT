@@ -1,12 +1,12 @@
 package core;
 
+import apps.IctApp;
 import dialogs.ImageView;
 
 import fileUtils.FileUtils;
 
 import globals.Globals;
 import globals.JICTConstants;
-import globals.Preference;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -23,6 +23,7 @@ import java.io.OutputStreamWriter;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.StringTokenizer;
+import java.util.prefs.Preferences;
 
 import javax.swing.JComboBox;
 
@@ -75,6 +76,7 @@ public class SceneList implements ISceneList {
     public Scene mSceneListHead;       // Points to the head of the list
     public Scene mCurrentScene;        // Points to the current Scene
     public MemImage mBkgndPlateMImage;  // An optional background plate image
+    private static Preferences prefs = Preferences.userNodeForPackage(IctApp.class);
 /*
 public:
   sceneList(); - implemented
@@ -1120,7 +1122,7 @@ public:
                 // One color channel of the scene is complete! Save it in the proper location
                 String sOutputDir, sOutputPath;
                 getFileName(sOutputFileName, scene.msSceneName, iFrameCounter, iColor);
-                sOutputDir = Globals.ictPreference.getPath(Preference.OutputImageDirectory);
+                sOutputDir = prefs.get("OutputDir", "OUTPUT/");
                 sOutputPath = sOutputDir + sOutputFileName;
 
                 if (iColor == JICTConstants.I_RED)   sRedFileName   = sOutputPath;
@@ -1152,7 +1154,7 @@ public:
                 // Prepare a pathname to the default output image location
                 getFileName(sRGBFileName, scene.msSceneName, iFrameCounter, 0);
                 String sRGBPath, sRGBDir;
-                sRGBDir = Globals.ictPreference.getPath(Preference.OutputImageDirectory);
+                sRGBDir = prefs.get("OutputDir", "OUTPUT/");
                 sRGBPath = sRGBDir + sRGBFileName;
 
                 String sMsgText = "sceneList::render: Saving RGB image: " + sRGBPath;
