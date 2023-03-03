@@ -5,14 +5,16 @@ import javax.swing.filechooser.FileFilter;
 
 public class SCNFileFilter extends FileFilter {
     public boolean accept(File file) {
-        if (file.getName().endsWith(".scn")) {
+        String sFileName = file.getName();
+        sFileName = sFileName.toLowerCase();
+        if (sFileName.endsWith(".scn")) {
             return true;
         }
 
         if(file.isDirectory()) {
             return true;
         }
-
+        
         return false;
     } // accept
 
