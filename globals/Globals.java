@@ -1,5 +1,7 @@
 package globals;
 
+import apps.IctApp;
+
 import core.MemImage;
 import core.RenderObject;
 import core.SceneElement;
@@ -9,10 +11,14 @@ import fileUtils.FileUtils;
 
 import globals.JICTConstants;
 
+import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.LineNumberReader;
 import java.util.Random;
+import java.util.prefs.Preferences;
 
 import javax.swing.JLabel;
 
@@ -28,7 +34,7 @@ public class Globals {
     private static boolean bIctDebug = false;
 
     // This variable came from ICT20.CPP
-    public static Preference ictPreference = new Preference();  // declare a global preference object
+    private static Preferences prefs = Preferences.userNodeForPackage(IctApp.class);  // declare a global preference object
 
     // This variable came from MAINFRM.CPP
     public static GPipe aGraphicPipe = new GPipe();  // a globally defined graphic pipeline for VRML viewing
@@ -36,25 +42,47 @@ public class Globals {
 
     // This method came from UTILS.CPP
     public static void statusPrint(String psMessage) {
-        File theLog;
+        boolean bErrWriting = false;
+        File logFile;
+        String sLogFileName;
+        FileOutputStream logFileOutputStream;
 
         // If the mainframe window is not open, post the message to the log file.
         // else display the message on the status bar and post it to the log file.
+        sLogFileName = prefs.get("LogPath", "logs/");
+        sLogFileName = sLogFileName + "JICT.log";
+        logFile = new File(sLogFileName);
 
         // Open the log file
-        theLog = fopen(ictPreference.getPath(Preference.ProcessLog), "a+");
-
-        // If we can't open the log file ...
-        if (theLog == null) {
-            if(lblStatus != null) {
-                lblStatus.setText("statusPrint: Unable to open the ICT log file ict.log");
-            }
+        try {
+            logFileOutputStream = new FileOutputStream(logFile, true);
+        } catch (FileNotFoundException fnfe) {
+            System.out.println("Could not find file " + sLogFileName);
+            lblStatus.setText("statusPrint: Unable to open the JICT log file jict.log");
             return;
         }
+        DataOutputStream logFileDataOutputStream = new DataOutputStream(logFileOutputStream);
 
         // We were able to open the log file, so write the msg to it
-        fwrite(psMessage, psMessage.length(), 1, theLog);
-        fclose(theLog);
+        try {
+            logFileDataOutputStream.writeChars(psMessage);
+        } catch (IOException ioe) {
+            bErrWriting = true;
+            String sErrMsg = "statusPrint:IOException while trying to write to file " + sLogFileName;
+            System.out.println(sErrMsg);
+            lblStatus.setText(sErrMsg);
+        }
+
+        try {
+            logFileDataOutputStream.close();
+        } catch(IOException ioe) {
+            String sErrMsg = "statusPrint: IOException while trying to close file " + sLogFileName;
+            System.out.println(sErrMsg);
+            lblStatus.setText(sErrMsg);
+            if (bErrWriting) {
+                return;
+            }
+        }
 
         // Display the message immediately on the status bar
         lblStatus.setText(psMessage);
@@ -295,7 +323,8 @@ public class Globals {
     } // blendz
   
 
-    // This method came from BLEND.CPP
+    // This method originally came from BLEND.CPP
+    // 
     // Called from:
     //     RenderObject.prepareCutout
     public static int createCutout(MemImage pOrigMImage, MemImage pMaskMImage,
@@ -323,8 +352,8 @@ public class Globals {
 
         // Prepare pathnames for mask and cutout images
         String sCutoutDir, sMaskDir;
-        sCutoutDir = ictPreference.getPath(Preference.InputImageDirectory);
-        sMaskDir   = ictPreference.getPath(Preference.MaskImageDirectory);
+        sCutoutDir = prefs.get("InputDir", "CUTOUT/");
+        sMaskDir   = prefs.get("MaskDir", "MASK/");
         String sCutoutPath, sMaskPath;
     
         FileUtils.appendFileName(sCutoutRImage,   psCutoutName, "r");
@@ -384,7 +413,7 @@ public class Globals {
         // Create the shape file name and write out the translated shape file
         String sShapeDir;
         String sShapeName;
-        sShapeDir  = ictPreference.getPath(Preference.ShapeFileDirectory);
+        sShapeDir  = prefs.get("ShapeDir", "SHAPE/");
         sShapeName = sShapeDir + psCutoutName + ".shp";
 
         sMsgText = "createCutout: Saving shape file: " + sShapeName;
@@ -3377,6 +3406,7 @@ public class Globals {
     // See p 173 of Visual Special Effects Toolkit in C++.
     //
     // Called from:
+    //     GPipe.addFace
     //     MemImage.fillPolyz
     public static int fillTrianglez(
     int piX1, int piY1, float pfI1, float pfD1,
@@ -3842,6 +3872,7 @@ public class Globals {
 
     // This method came from VECTOR.CPP
     // Called from:
+    //     GPipe.addFace
     //     RenderObject.renderMeshz
     public static float lightModel(float kd, int Ip, int Ia, Point3d N, Point3d L, float d) {
         // kd     the coefficient of reflection or reflectivity of the surface material
