@@ -511,8 +511,7 @@ protected:
         this.mIOutputRows = 250;  // Set these in case a SceneList is not read in
         this.mIOutputColumns = 250;
         this.mbChangeViewPoint = false;
-        // TODO: Uncomment the following line when SceneList is completed
-        //this.mSceneList = new SceneList();
+        this.mSceneList = new SceneList();
         this.mViewMatrix = new TMatrix();
         this.mModelMatrix = new TMatrix();
         this.mPreviewWindowHandle = null;  // The scene preview window handle
@@ -1107,9 +1106,9 @@ POPUP "Tools"
     // MENUITEM "Create a Scene List...",      ID_TOOLS_CREATEASCENELIST
     // ON_COMMAND(ID_TOOLS_CREATEASCENELIST, OnToolsCreateascenelist)
     public void onToolsCreateASceneList() {
-        String aFileName = "";
-        String msgText;
-        int myStatus;
+        String sFileName = "";
+        String sMsgText;
+        int iStatus;
         
         closeAllChildren();
         if(mbIsDirty) {         // If the client window has been drawn on, erase it
@@ -1136,23 +1135,23 @@ POPUP "Tools"
         dlg.setFileFilter(new SCNFileFilter());
 
         // Allow the user to choose a '.scn' file
-        int showDlgResult = dlg.showDialog(this, "Select scn file");
+        int iShowDlgResult = dlg.showDialog(this, "Select scn file");
 
-        if (showDlgResult == JFileChooser.APPROVE_OPTION) {
-            aFileName = dlg.getSelectedFile().getName();
+        if (iShowDlgResult == JFileChooser.APPROVE_OPTION) {
+            sFileName = dlg.getSelectedFile().getName();
         }
 
-        msgText = "Reading Scene List: " + aFileName;
-        Globals.statusPrint(msgText);
+        sMsgText = "Reading Scene List: " + sFileName;
+        Globals.statusPrint(sMsgText);
 
         // Create an instance of a class that can parse .scn files
         ScnFileParser parser = new ScnFileParser(mSceneList);
 
         // Have it parse the .scn file aFileName
-        myStatus = parser.readList(msgText, aFileName);
-        Globals.statusPrint(msgText);
+        iStatus = parser.readList(sMsgText, sFileName);
+        Globals.statusPrint(sMsgText);
 
-        if(myStatus != 0) {
+        if(iStatus != 0) {
             mSceneList.clear();
             return;
         }
