@@ -8,10 +8,10 @@ import docs.ImageDoc;
 import frames.MainFrame;
 
 import globals.Globals;
-import globals.Preference;
 
 import java.io.File;
 import java.time.LocalDateTime;
+import java.util.prefs.Preferences;
 
 import javax.swing.JFileChooser;
 import javax.swing.SwingUtilities;
@@ -52,7 +52,7 @@ CIctApp::CIctApp()
 CIctApp theApp;
  */
 
-    // This constructor came from ICT20.CPP
+    // This constructor originally came from ICT20.CPP
     public IctApp(String[] args) {
         // TODO: add construction code here,
         // Place all significant initialization in InitInstance
@@ -60,9 +60,9 @@ CIctApp theApp;
     } // IctApp ctor
 
 
-    // This method came from ICT20.CPP
+    // This method originally came from ICT20.CPP
     boolean initInstance(String args[]) {
-        String msgText;
+        String sMsgText;
 
         // Standard initialization
         // If you are not using these features and wish to reduce the size
@@ -100,10 +100,9 @@ CIctApp theApp;
         mainFrame.setVisible(true);
         mainFrame.repaint();
 
-        Globals.ictPreference = new Preference();
-
-        // Remove the old ict log and create a new one
-        String oldLogFilePath = Globals.ictPreference.getPath(Preference.ProcessLog);
+        // Remove the old JICT log and create a new one
+        Preferences prefs = Preferences.userNodeForPackage(JICTApp.class);
+        String oldLogFilePath = prefs.get("LogPath", "logs/jict.log");
         File oldLogFile = new File(oldLogFilePath);
         if (oldLogFile.exists()) {
             boolean deleted = oldLogFile.delete();
@@ -112,8 +111,8 @@ CIctApp theApp;
             }
         }
 
-        msgText = "ICT Process Log.  " + LocalDateTime.now();
-        Globals.statusPrint(msgText);
+        sMsgText = "JICT Process Log.  " + LocalDateTime.now();
+        Globals.statusPrint(sMsgText);
 
         return true;
     } // initInstance
