@@ -5,7 +5,9 @@ import javax.swing.filechooser.FileFilter;
 
 public class WRLFileFilter extends FileFilter {
     public boolean accept(File file) {
-        if (file.getName().endsWith(".wrl")) {
+        String sFileName = file.getName();
+        sFileName = sFileName.toLowerCase();
+        if (sFileName.endsWith(".wrl")) {
             return true;
         }
 
