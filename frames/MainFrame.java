@@ -496,7 +496,7 @@ protected:
         this.mbIsDirty = false;
         this.mbCutoutEnabled = false;
         this.mbPreviewSceneEnabled = false;    // Preview|Still menu item is disabled
-        this.mbPreviewSequenceEnabled = false; // Preview|Sequene menu item is disabled
+        this.mbPreviewSequenceEnabled = false; // Preview|Sequence menu item is disabled
         this.mbRenderSceneEnabled = false;     // Render|Still menu item is disabled
         this.mbRenderSequenceEnabled = false;  // Render|Sequence menu item is disabled
         this.mbRemoveSampleColorsEnabled = false;
@@ -1030,7 +1030,7 @@ POPUP "Tools"
         // Was it a View menu item?
 
         // Was it a Help menu item?
-        if (sActionCmd.equals("Help|About ICT 2.0...")) {
+        if (sActionCmd.equals("Help|About JICT 2.0...")) {
             onAppAbout();
             return;
         }
@@ -1779,8 +1779,7 @@ POPUP "Tools"
     // MENUITEM "&About ICT 2.0...",           ID_APP_ABOUT
     // ON_COMMAND(ID_APP_ABOUT, OnAppAbout)
     public void onAppAbout() {
-        AboutDlg aboutDlg = new AboutDlg(null, true);
-        aboutDlg.setVisible(true);
+        new AboutDlg(null, false);
     } // onAppAbout
 
     // ############################################################################################
