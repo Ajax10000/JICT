@@ -1,6 +1,7 @@
 package frames;
 
 import apps.IctApp;
+import apps.JICTApp;
 
 import core.MemImage;
 import core.SceneList;
@@ -23,7 +24,6 @@ import fileUtils.WRLFileFilter;
 
 import globals.Globals;
 import globals.JICTConstants;
-import globals.Preference;
 import globals.VRML;
 
 import java.awt.BorderLayout;
@@ -34,6 +34,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 
 import java.io.File;
+import java.util.prefs.Preferences;
 
 import javax.swing.BoxLayout;
 import javax.swing.JCheckBoxMenuItem;
@@ -433,10 +434,13 @@ protected:
     // the user has previewed.
     private JMenuItem rndrMimStill;
     private JMenuItem rndrMimSequence;
+    private Preferences prefs;
 
     public MainFrame(IctApp ictApp) {
         this.ictApp = ictApp;
+        prefs = Preferences.userNodeForPackage(JICTApp.class);
 
+        setSize(1000, 800);
         initFields();
 
         // Initialize the gPipe object for VRML rendering
@@ -1041,7 +1045,7 @@ POPUP "Tools"
     // ON_COMMAND(ID_FILE_OPENIMAGE, OnFileOpenimage)
     public void onFileOpenImage() {
         // Get the Output Image Directory
-        String sOutputImageDirectory = Globals.ictPreference.getPath(Preference.OutputImageDirectory);
+        String sOutputImageDirectory = prefs.get("OutputDir", "OUTPUT/");
         File currDir = new File(sOutputImageDirectory);
 
         JFileChooser dlg = new JFileChooser();
@@ -1067,7 +1071,7 @@ POPUP "Tools"
     public void onFileOpenIctLog() {
         String processLogPath;
 
-        processLogPath = Globals.ictPreference.getPath(Preference.ProcessLog);
+        processLogPath = prefs.get("LogPath", "logs/jict.log");
         // m_pDocTemplateText.OpenDocumentFile(processLogPath);
     } // onFileOpenIctLog
 
@@ -1077,7 +1081,7 @@ POPUP "Tools"
     // ON_COMMAND(ID_FILE_OPEN, OnFileOpen)
     public void onFileOpen() {
         // Get the Scene File Directory
-        String sScnFileDirectory = Globals.ictPreference.getPath(Preference.SceneFileDirectory);
+        String sScnFileDirectory = prefs.get("SceneDir", "SCENE/");
         File currDir = new File(sScnFileDirectory);
 
         JFileChooser dlg = new JFileChooser();
@@ -1120,7 +1124,7 @@ POPUP "Tools"
 
         // Display standard Open dialog box to select a file name.
         // Get the Scene File Directory
-        String sSceneFileDirectory = Globals.ictPreference.getPath(Preference.SceneFileDirectory);
+        String sSceneFileDirectory = prefs.get("SceneDir", "SCENE/");
         File currDir = new File(sSceneFileDirectory);
 
         JFileChooser dlg = new JFileChooser();
@@ -1353,13 +1357,17 @@ POPUP "Tools"
         Integer inHeight = 0, inWidth = 0, bitsPerPixel = 0;
         MemImage inImage = new MemImage(0, 0);
 
+        String sWarpTestPath = prefs.get("WarpTestPath", "WARPTEST/");
+
         // The following method sets parameters inHeight, inWidth, and bitsPerPixel
-        int iStatus = Globals.readBMPHeader(Globals.ictPreference.getPath(Preference.WarpTestPath), inHeight, inWidth, bitsPerPixel);
+        int iStatus = Globals.readBMPHeader(sWarpTestPath, inHeight, inWidth, bitsPerPixel);
         if(bitsPerPixel == 8) {
-            inImage = new MemImage(Globals.ictPreference.getPath(Preference.WarpTestPath), 0, 0, JICTConstants.I_RANDOM, 'R', JICTConstants.I_MONOCHROME);
+            inImage = new MemImage(sWarpTestPath, 0, 0, 
+                JICTConstants.I_RANDOM, 'R', JICTConstants.I_MONOCHROME);
         }
         if(bitsPerPixel == 24) {
-            inImage = new MemImage(Globals.ictPreference.getPath(Preference.WarpTestPath), 0, 0, JICTConstants.I_RANDOM, 'R', JICTConstants.I_RGBCOLOR);
+            inImage = new MemImage(sWarpTestPath, 0, 0, 
+                JICTConstants.I_RANDOM, 'R', JICTConstants.I_RGBCOLOR);
         }
 
         int outHeight = 350;
@@ -1453,7 +1461,7 @@ POPUP "Tools"
         String inPath, outPath;
 
         // Get the VRML File Directory
-        String sVRMLDirectory = Globals.ictPreference.getPath(Preference.VRMLDirectory);
+        String sVRMLDirectory = prefs.get("VRMLDir", "VRML/");
         File currDir = new File(sVRMLDirectory);
 
         JFileChooser dlg = new JFileChooser();
