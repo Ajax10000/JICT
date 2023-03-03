@@ -5,7 +5,9 @@ import javax.swing.filechooser.FileFilter;
 
 public class BMPFileFilter extends FileFilter {
     public boolean accept(File file) {
-        if (file.getName().endsWith(".bmp")) {
+        String sFileName = file.getName();
+        sFileName = sFileName.toLowerCase();
+        if (sFileName.endsWith(".bmp")) {
             return true;
         }
 
