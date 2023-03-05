@@ -440,6 +440,7 @@ protected:
         this.ictApp = ictApp;
         prefs = Preferences.userNodeForPackage(JICTApp.class);
 
+        setTitle("Java Image Composition Toolkit");
         setSize(1000, 800);
         initFields();
 
@@ -1138,7 +1139,7 @@ POPUP "Tools"
         int iShowDlgResult = dlg.showDialog(this, "Select scn file");
 
         if (iShowDlgResult == JFileChooser.APPROVE_OPTION) {
-            sFileName = dlg.getSelectedFile().getName();
+            sFileName = dlg.getSelectedFile().getPath();
         }
 
         sMsgText = "Reading Scene List: " + sFileName;
@@ -1148,8 +1149,9 @@ POPUP "Tools"
         ScnFileParser parser = new ScnFileParser(mSceneList);
 
         // Have it parse the .scn file aFileName
-        iStatus = parser.readList(sMsgText, sFileName);
-        Globals.statusPrint(sMsgText);
+        StringBuffer sBuff = new StringBuffer();
+        iStatus = parser.readList(sBuff, sFileName);
+        Globals.statusPrint(sBuff.toString());
 
         if(iStatus != 0) {
             mSceneList.clear();
