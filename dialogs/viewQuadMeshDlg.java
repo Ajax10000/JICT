@@ -6,7 +6,7 @@ import javax.swing.SwingUtilities;
 public class viewQuadMeshDlg extends JFrame {
     
     public viewQuadMeshDlg() {
-        QuadMeshDlg quadMeshDlg = new QuadMeshDlg(this, true);
+        new QuadMeshDlg(this, true);
     }
     
     public static void main(String[] args) {
