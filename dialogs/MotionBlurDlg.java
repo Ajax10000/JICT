@@ -420,8 +420,7 @@ protected:
         }
 
         String sMsgText = "numBlurFrames " + iNumBlurFrames + " blurDepth " + iBlurDepth;
-        // TODO: In future, uncomment the following line
-        //Globals.statusPrint(sMsgText);
+        Globals.statusPrint(sMsgText);
 
         // Blur a sequence of images
         int iStatus = 0;
@@ -429,8 +428,7 @@ protected:
         iStatus = Globals.motionBlur(sFirstImage, sOutDir, iNumBlurFrames, iBlurDepth);
 
         sMsgText = "motion blur Complete. Status: " + iStatus;
-        // TODO: In future, uncomment the following line
-        //Globals.statusPrint(sMsgText);
+        Globals.statusPrint(sMsgText);
     } // onOK
 
 
