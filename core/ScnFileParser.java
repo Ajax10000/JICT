@@ -32,8 +32,9 @@ public class ScnFileParser {
     // doubly-linked list. The start of this list is pointed to by field sceneListHead.
     // Called from:
     //     MainFrame.onToolsCreateASceneList
-    public int readList(String psErrorText, String psPathName) {
-        String sText = "", sKeyWord;
+    public int readList(StringBuffer psErrorText, String psPathName) {
+        StringBuffer sText = new StringBuffer();
+        String sKeyWord;
         String theModelName = "", sFileName, sMotionPath;
         String sSceneName = "", sAlphaPath, sMsgBuffer;
         String sColorAdjustedPath = "";
@@ -57,6 +58,11 @@ public class ScnFileParser {
         StringTokenizer strtok = new StringTokenizer("test");
         StringTokenizer numtok;
 
+        // We will populate psErrorText, so if it has anything inside, clear it
+        if (psErrorText.length() > 0) {
+            psErrorText.delete(0, psErrorText.length());
+        }
+
         final String BLANK = " ";
         // final int DUPLICATESCENE = 3; // This variable is not used
 
@@ -65,7 +71,7 @@ public class ScnFileParser {
         try {
             fileReader = new FileReader(scnFile);
         } catch(FileNotFoundException fnfe) {
-            psErrorText = "Could not find file.";
+            psErrorText.append("Could not find file.");
             // psErrorText will be printed with Global.statusPrint by the caller.
 
             return -1;
@@ -84,7 +90,7 @@ public class ScnFileParser {
         trPt = new Point3d();
         pointOfReference = new Point3d();
         // Assume no problems will occur and initialize psErrorText accordingly.
-        psErrorText = "Scene file read successfully";
+        psErrorText.append("Scene file read successfully");
         
         bDefinedRefPoint = false;
 
@@ -93,7 +99,10 @@ public class ScnFileParser {
         // We return -1 if we encounter an error.
         // We return 0 if no error occurs and we encounter the EOF keyword.
         while(true) {  // Get the scene components
+            // The next line will populate sText with a line read in by filein, 
+            // and update iLineCounter
             sKeyWord = Shape3d.getNextLine(sText, iLineCounter, filein, iMinLineSize);
+
             // As long as we haven't encountered line that indicates 
             // the start of a Model description ...
             while(!sKeyWord.equalsIgnoreCase("MODEL")) {
@@ -111,7 +120,7 @@ public class ScnFileParser {
                 if (sKeyWord.equalsIgnoreCase("SCENE")) {
                     // We have found the start of a Scene description, 
                     // so we will parse it. It has the following format:
-                    // scene <sceneName> [Sequence|Still] <outHeight>, <outWidth> [Color|Mono]
+                    // scene <sceneName> [Sequence|Still] <outHeight>,<outWidth> [Color|Mono]
                     // Rotation <Rx>, <Ry>, <Rz>
                     // Translation <Tx>, <Ty>, <Tz>
                     // MotionPath [None]
@@ -120,43 +129,44 @@ public class ScnFileParser {
                     sBase = sText.substring(6);
 
                     // After the token "SCENE" we should have the scene name
-                    // scene <sceneName> [Sequence|Still] <outHeight>, <outWidth> [Color|Mono]
+                    // scene <sceneName> [Sequence|Still] <outHeight>,<outWidth> [Color|Mono]
                     strtok = new StringTokenizer(sBase, BLANK);
                     sSceneName = strtok.nextToken();
                     if(sSceneName == null) {
-                        psErrorText = "A Scene must have a name. Line " + iLineCounter;
+                        psErrorText.append("A Scene must have a name. Line " + iLineCounter);
                         // psErrorText will be printed with Global.statusPrint by the caller.
                         
                         return -1;
                     }
 
                     // Parse the effect type (i.e., [Sequence|Still])
-                    // scene <sceneName> [Sequence|Still] <outHeight>, <outWidth> [Color|Mono]
+                    // scene <sceneName> [Sequence|Still] <outHeight>,<outWidth> [Color|Mono]
                     sEffectType = strtok.nextToken();
-                    iSequence = 1;
+                    iSequence = JICTConstants.I_STILL; // Assume "STILL"
                     if(sEffectType != null) {
                         if(sEffectType.equalsIgnoreCase("SEQUENCE")) {
+                            // We assumed wrong, so we correct our assumption
                             iSequence = JICTConstants.I_SEQUENCE;
                         }
                         if(sEffectType.equalsIgnoreCase("MORPH")) {
                             iSequence = JICTConstants.I_MORPH;
                         }
                     } else {
-                        psErrorText = "A Sequence must have a name. Line " + iLineCounter;
+                        psErrorText.append("A Sequence must have a name. Line " + iLineCounter);
                         // psErrorText will be printed with Global.statusPrint by the caller.
 
                         closeLineNumberReader(filein);
                         return -1;
                     }
 
-                    // Now parse the image dimensions (i.e., <outHeight>, <outWidth>)
+                    // Now parse the image dimensions (i.e., <outHeight>,<outWidth>)
                     // scene <sceneName> [Sequence|Still] <outHeight>, <outWidth> [Color|Mono]
                     // sTempImageSize is equal to the string starting with <outHeight>:
                     // <outHeight>, <outWidth> [Color|Mono]
                     sTempImageSize = strtok.nextToken();
 
                     // Now looking for Color or Mono:
-                    // scene <sceneName> [Sequence|Still] <outHeight>, <outWidth> [Color|Mono]
+                    // scene <sceneName> [Sequence|Still] <outHeight>,<outWidth> [Color|Mono]
                     sColorMode = strtok.nextToken();
                     // Assume "Mono"
                     iColorMode = JICTConstants.I_MONOCHROME;
@@ -167,16 +177,16 @@ public class ScnFileParser {
                         }
                     } else {
                         // We expected Color or Mono. We didn't find anything.
-                        psErrorText = "Expected: Color or Monochrome. Line " + iLineCounter;
+                        psErrorText.append("Expected: Color or Monochrome. Line " + iLineCounter);
                         // psErrorText will be printed with Global.statusPrint by the caller.
 
                         closeLineNumberReader(filein);
                         return -1;
                     }
 
-                    // Now parse outHeight and outWidth values (i.e., <outHeight>, <outWidth>)
+                    // Now parse outHeight and outWidth values (i.e., <outHeight>,<outWidth>)
                     // These should be integers.
-                    // scene <sceneName> [Sequence|Still] <outHeight>, <outWidth> [Color|Mono]
+                    // scene <sceneName> [Sequence|Still] <outHeight>,<outWidth> [Color|Mono]
                     if(sTempImageSize != null) { // Output Image Height, Width
                         numtok = new StringTokenizer(sTempImageSize, ",");
                         iOutImageRows = Integer.parseInt(numtok.nextToken());
@@ -186,7 +196,7 @@ public class ScnFileParser {
                             bGetOutImageSizeFlag = true;
                         }
                     } else {
-                        psErrorText = "Expected Image Height, Image Width. Line " + iLineCounter;
+                        psErrorText.append("Expected Image Height, Image Width. Line " + iLineCounter);
                         // psErrorText will be printed with Global.statusPrint by the caller.
 
                         closeLineNumberReader(filein);
@@ -200,7 +210,7 @@ public class ScnFileParser {
                     // MotionPath [None|<pathName>]
                     sMotionPath = sText.substring(11);
                     if(sMotionPath.length() == 0) {
-                        psErrorText = "MotionPath file missing on Line " + iLineCounter;
+                        psErrorText.append("MotionPath file missing on Line " + iLineCounter);
                         // psErrorText will be printed with Global.statusPrint by the caller.
 
                         closeLineNumberReader(filein);
@@ -215,8 +225,12 @@ public class ScnFileParser {
                     // ROTATION <Rx>, <Ry>, <Rz>
                     // where Rx, Ry and Rz represent angles 
                     // expressed as floating-point numbers.
-                    String sRt;
+
                     // theRt = strtok(TheText + 9, BLANK);
+                    // Skip over the word "ROTATION "
+                    String sRt = sText.substring(9);
+                    
+                    strtok = new StringTokenizer(sRt, BLANK);
                     sRt = strtok.nextToken();
                     if(checkFor3(sRt) == 0) {
                         iNotFound = THREE_NUMBERS_NOT_FOUND;
@@ -236,7 +250,12 @@ public class ScnFileParser {
                     // where Tx, Ty, and Tz represent translation values 
                     // expressed as floating-point numbers.
                     String sTr;
+
                     // theTr = strtok(TheText + 12, BLANK);
+                    // Skip over the word "TRANSLATION "
+                    sTr = sText.substring(12);
+                    
+                    strtok = new StringTokenizer(sTr, BLANK);
                     sTr = strtok.nextToken();
                     if(checkFor3(sTr) == 0) {
                         iNotFound = THREE_NUMBERS_NOT_FOUND;
@@ -260,7 +279,7 @@ public class ScnFileParser {
                 }
 
                 if (sKeyWord.equalsIgnoreCase("EOF")) {
-                    psErrorText = "sceneFile may be corrupted or has no models";
+                    psErrorText.append("sceneFile may be corrupted or has no models");
                     // psErrorText will be printed with Global.statusPrint by the caller.
 
                     closeLineNumberReader(filein);
@@ -270,11 +289,11 @@ public class ScnFileParser {
                 // iNotFound = TRUE (1), FALSE (0), or THREE_NUMBERS_NOT_FOUND (2)
                 if (iNotFound != 0) {
                     if(iNotFound == 1) {
-                        psErrorText = "Unknown Keyword: " + sKeyWord + ". Line  " + iLineCounter;
+                        psErrorText.append("Unknown Keyword: " + sKeyWord + ". Line  " + iLineCounter);
                     }
                     if(iNotFound == THREE_NUMBERS_NOT_FOUND) {
-                        psErrorText = "Expected 3 numeric values separated by commas: " + sKeyWord + 
-                            "  Line " + iLineCounter;
+                        psErrorText.append("Expected 3 numeric values separated by commas: " + sKeyWord + 
+                            "  Line " + iLineCounter);
                     }
                     // psErrorText will be printed with Global.statusPrint by the caller.
 
@@ -282,13 +301,14 @@ public class ScnFileParser {
                     return -1;
                 }
 
+                sText.delete(0, sText.length());
                 sKeyWord = Shape3d.getNextLine(sText, iLineCounter, filein, iMinLineSize);
             }  // while(!TheKeyWord.equalsIgnoreCase("MODEL"))
 
             // Add the scene to the sceneList and read its elements.
             iNumScenes++;
             if (iNumScenes > 1) {
-                psErrorText = "Only 1 scene definition permitted per scene file";
+                psErrorText.append("Only 1 scene definition permitted per scene file");
                 // psErrorText will be printed with Global.statusPrint by the caller.
 
                 closeLineNumberReader(filein);
@@ -299,7 +319,7 @@ public class ScnFileParser {
                 iOutImageCols, iOutImageRows, iColorMode, 
                 rtPt, trPt, sMotionPath);
             if(iStatus != 0) {
-                psErrorText = "Could not add Scene to Scene List. Line " + iLineCounter;
+                psErrorText.append("Could not add Scene to Scene List. Line " + iLineCounter);
                 // psErrorText will be printed with Global.statusPrint by the caller.
 
                 closeLineNumberReader(filein);
@@ -371,12 +391,15 @@ public class ScnFileParser {
                         if(iCompoundMMember == 1 && iType != JICTConstants.I_COMPOUND) bCompoundMember = true;
 
                         iStatus = mSceneList.addSceneElement(theModelName, sFileName, 
-                            bBlend, iType,
-                            bWarp, fAlpha, 
+                            bBlend, // BLEND => true, NOBLEND => false
+                            iType,
+                            bWarp, // WARP => true, NOWARP => false
+                            fAlpha, 
                             rtPt, scPt, trPt, 
                             sMotionPath, sAlphaPath,
                             bCompoundMember, 
-                            adjustmentColor, sAdjustmentType, 
+                            adjustmentColor, 
+                            sAdjustmentType, // "TARGET" or "RELATIVE"
                             sColorAdjustedPath,
                             bDefinedRefPoint, pointOfReference);
                         if(iCompoundMMember == 0) {
@@ -384,7 +407,7 @@ public class ScnFileParser {
                         }
 
                         if(iStatus != 0) {
-                            psErrorText = "Could not add model to scene list. Line " + iLineCounter;
+                            psErrorText.append("Could not add model to scene list. Line " + iLineCounter);
                             // psErrorText will be printed with Global.statusPrint by the caller.
 
                             closeLineNumberReader(filein);
@@ -439,7 +462,7 @@ public class ScnFileParser {
                             bBlend = false;
                         }
                     } else {
-                        psErrorText = "Missing value or term on Line " + iLineCounter;
+                        psErrorText.append("Missing value or term on Line " + iLineCounter);
                         // psErrorText will be printed with Global.statusPrint by the caller.
 
                         closeLineNumberReader(filein);
@@ -452,7 +475,7 @@ public class ScnFileParser {
                             bWarp = false;
                         }
                     } else {
-                        psErrorText = "Missing value or term on Line " + iLineCounter;
+                        psErrorText.append("Missing value or term on Line " + iLineCounter);
                         // psErrorText will be printed with Global.statusPrint by the caller.
 
                         closeLineNumberReader(filein);
@@ -465,7 +488,7 @@ public class ScnFileParser {
                             fAlpha = Float.parseFloat(sScaleValue);
                         }
                     } else {
-                        psErrorText = "Missing value or term on Line " + iLineCounter;
+                        psErrorText.append("Missing value or term on Line " + iLineCounter);
                         // psErrorText will be printed with Global.statusPrint by the caller.
 
                         closeLineNumberReader(filein);
@@ -484,7 +507,7 @@ public class ScnFileParser {
                             iCompoundMMember = 1;
                         }
                     } else {
-                        psErrorText = "Expected a model type on Line " + iLineCounter;
+                        psErrorText.append("Expected a model type on Line " + iLineCounter);
                         // psErrorText will be printed with Global.statusPrint by the caller.
 
                         closeLineNumberReader(filein);
@@ -631,7 +654,7 @@ public class ScnFileParser {
                     sMotionPath = sText.substring(idxMotionPath + 11);
 
                     if(sMotionPath.length() == 0) {
-                        psErrorText = "MotionPath file missing on Line " + iLineCounter;
+                        psErrorText.append("MotionPath file missing on Line " + iLineCounter);
                         // psErrorText will be printed with Global.statusPrint by the caller.
 
                         closeLineNumberReader(filein);
@@ -648,7 +671,7 @@ public class ScnFileParser {
                     sAlphaPath = sText.substring(idxAlphaImgPath + 15);
 
                     if(sAlphaPath.length() == 0) {
-                        psErrorText = "Alpha Image Path file missing. Line " + iLineCounter;
+                        psErrorText.append("Alpha Image Path file missing. Line " + iLineCounter);
                         // psErrorText will be printed with Global.statusPrint by the caller.
 
                         closeLineNumberReader(filein);
@@ -677,7 +700,7 @@ public class ScnFileParser {
                         int iBmpStatus;
                         iBmpStatus = Globals.readBMPHeader(sFileName, iOutImageRows, iOutImageCols, iBpp);
                         if(iBmpStatus != 0) {
-                            psErrorText = "File name not valid. Line " + iLineCounter;
+                            psErrorText.append("File name not valid. Line " + iLineCounter);
                             // psErrorText will be printed with Global.statusPrint by the caller.
 
                             closeLineNumberReader(filein);
@@ -732,18 +755,21 @@ public class ScnFileParser {
                     if(iCompoundMMember == 1 && iType != JICTConstants.I_COMPOUND) bCompoundMember = true;
 
                     iStatus = mSceneList.addSceneElement(theModelName, sFileName, 
-                        bBlend, iType,
-                        bWarp, fAlpha, 
+                        bBlend, // BLEND => true, NOBLEND => false
+                        iType,
+                        bWarp, // WARP => true, NOWARP => false
+                        fAlpha, 
                         rtPt, scPt, trPt, 
                         sMotionPath, sAlphaPath,
                         bCompoundMember, 
-                        adjustmentColor, sAdjustmentType, 
+                        adjustmentColor, 
+                        sAdjustmentType, 
                         sColorAdjustedPath,
                         bDefinedRefPoint, pointOfReference);
                     if(iCompoundMMember == 0) bCompoundMember = false;
 
                     if(iStatus != 0) {
-                        psErrorText = "Could not add a model to scene list. Line " + iLineCounter;
+                        psErrorText.append("Could not add a model to scene list. Line " + iLineCounter);
                         // psErrorText will be printed with Global.statusPrint by the caller.
 
                         closeLineNumberReader(filein);
@@ -756,17 +782,19 @@ public class ScnFileParser {
             
                 if (iNotFound != 0) {
                     if(iNotFound == 1) {
-                        psErrorText = "Unknown Keyword: " + sKeyWord + "  Line " + iLineCounter;
+                        psErrorText.append("Unknown Keyword: " + sKeyWord + "  Line " + iLineCounter);
                     }
                     if(iNotFound == THREE_NUMBERS_NOT_FOUND) {
-                        psErrorText = "Expected 3 numeric values separated by commas: " + sKeyWord + "  Line " + iLineCounter;
+                        psErrorText.append("Expected 3 numeric values separated by commas: " + sKeyWord + "  Line " + iLineCounter);
                     }
-                    Globals.statusPrint(psErrorText);
+                    // Globals.statusPrint(psErrorText);
 
                     closeLineNumberReader(filein);
                     return -1;
                 } // if (notFound != 0)
                 
+                // Clear out the string buffer before we read the next line into it
+                sText.delete(0, sText.length());
                 sKeyWord = Shape3d.getNextLine(sText, iLineCounter, filein, iMinLineSize);
             } // while(!sKeyWord.equalsIgnoreCase("SCENE"))
         } // while(true)
