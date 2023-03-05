@@ -65,7 +65,7 @@ public class Globals {
 
         // We were able to open the log file, so write the msg to it
         try {
-            logFileDataOutputStream.writeChars(psMessage);
+            logFileDataOutputStream.writeChars(psMessage + "\n");
         } catch (IOException ioe) {
             bErrWriting = true;
             String sErrMsg = "statusPrint:IOException while trying to write to file " + sLogFileName;
