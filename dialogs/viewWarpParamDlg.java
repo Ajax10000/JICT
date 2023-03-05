@@ -6,7 +6,7 @@ import javax.swing.SwingUtilities;
 public class viewWarpParamDlg extends JFrame {
     
     public viewWarpParamDlg() {
-        WarpParamDlg warpParamDlg = new WarpParamDlg(this, true);
+        new WarpParamDlg(this, true);
     }
 
     public static void main(String[] args) {
