@@ -1179,15 +1179,12 @@ public:
     //         MainFrame.onRenderScene and
     //         MainFrame.onRenderSequence
     private void getSequenceFileName(String psInputPath, int piFrameCounter) {
-        String sTempPath;
-        sTempPath = psInputPath;
         String sFileWExt, sFile, sExt;
 
         File inputPathFile = new File(psInputPath);
         sFileWExt = inputPathFile.getName();
         sFile = sFileWExt.substring(0, sFileWExt.lastIndexOf('.')); 
         sExt = sFileWExt.substring(sFileWExt.lastIndexOf('.'));
-        // _splitpath(sTempPath, sDrive, sDir, sFile, sExt);
         
         int iLength = sFile.length();
         int iCurrentFrameNum = 0, iNewFrameNum;
@@ -1208,7 +1205,6 @@ public:
         //sprintf(sOutFile, "%.16s%#04d%c\0", sPrefix, iNewFrameNum, colorChar);
         sOutFile = String.format("%.16s%#04d%c", sPrefix, iNewFrameNum, cColorChar);
         psInputPath = inputPathFile.getParent() + sOutFile + sExt;
-        // _makepath(psInputPath, sDrive, sDir, sOutFile, sExt);
     } // getSequenceFileName
 
 
