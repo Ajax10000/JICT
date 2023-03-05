@@ -6,7 +6,7 @@ import javax.swing.SwingUtilities;
 public class viewAboutDlg extends JFrame {
     
     public viewAboutDlg() {
-        AboutDlg aboutDlg = new AboutDlg(this, true);
+        new AboutDlg(this, true);
     }
 
     public static void main(String[] args) {
