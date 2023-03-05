@@ -358,14 +358,14 @@ public:
         }
 
         if(this.miNumAllocatedVertices != 0) {
-            Float cX = 0f, cY = 0f, cZ = 0f;
+            Float fCX = 0f, fCY = 0f, fCZ = 0f;
             // The following method sets parameters cX, cY and cZ
-            getWCentroid(cX, cY, cZ);  // calculate and save the world coord centroid
+            getWCentroid(fCX, fCY, fCZ);  // calculate and save the world coord centroid
 
             this.pointOfReference = new Point3d();
-            pointOfReference.x = cX;
-            pointOfReference.y = cY;
-            pointOfReference.z = cZ;
+            pointOfReference.x = fCX;
+            pointOfReference.y = fCY;
+            pointOfReference.z = fCZ;
         }
     } // Shape3d ctor
 
@@ -382,14 +382,14 @@ public:
         // miCurrVtxIdx, mCurrentVertex, 
         readShape(psPathName);
 
-        Float cX = 0f, cY = 0f, cZ = 0f;
+        Float fCX = 0f, fCY = 0f, fCZ = 0f;
         // The following method sets parameters cX, cY and cZ
-        getWCentroid(cX, cY, cZ);  // calculate and save the world coord centroid
+        getWCentroid(fCX, fCY, fCZ);  // calculate and save the world coord centroid
 
         this.pointOfReference = new Point3d();
-        pointOfReference.x = cX;
-        pointOfReference.y = cY;
-        pointOfReference.z = cZ;
+        pointOfReference.x = fCX;
+        pointOfReference.y = fCY;
+        pointOfReference.z = fCZ;
     } // Shape3d ctor
 
 
@@ -498,14 +498,14 @@ public:
             pTransformedShape.incCurrentVertex();
         }
 
-        Float cX = 0f, cY = 0f, cZ = 0f;
+        Float fCX = 0f, fCY = 0f, fCZ = 0f;
         // The following method sets parameters cX, cY and cZ
-        getWCentroid(cX, cY, cZ);  // calculate and save the world coord centroid
+        getWCentroid(fCX, fCY, fCZ);  // calculate and save the world coord centroid
 
         this.pointOfReference = new Point3d();
-        pointOfReference.x = cX;
-        pointOfReference.y = cY;
-        pointOfReference.z = cZ;
+        pointOfReference.x = fCX;
+        pointOfReference.y = fCY;
+        pointOfReference.z = fCZ;
     } // Shape3d ctor
 
 
@@ -589,14 +589,14 @@ public:
         mCurrentVertex.ty = 0.0f;
         mCurrentVertex.tz = 0.0f;
 
-        Float cX = 0f, cY = 0f, cZ = 0f;
+        Float fCX = 0f, fCY = 0f, fCZ = 0f;
         // The following method sets parameters cX, cY and cZ
-        getWCentroid(cX, cY, cZ);  // calculate and save the world coord centroid
+        getWCentroid(fCX, fCY, fCZ);  // calculate and save the world coord centroid
 
         this.pointOfReference = new Point3d();
-        pointOfReference.x = cX;
-        pointOfReference.y = cY;
-        pointOfReference.z = cZ;
+        pointOfReference.x = fCX;
+        pointOfReference.y = fCY;
+        pointOfReference.z = fCZ;
     } // Shape3d ctor
 
 
@@ -616,7 +616,8 @@ public:
     //     Shape3d ctor that takes 2 parameters, a String and an int
     public int readShape(String psPathName) {
         String sMsgText;
-        String sText = "", sKeyWord;
+        StringBuffer sText = new StringBuffer();
+        String sKeyWord;
         Integer iFileType = 0;
         StringTokenizer strtok;
 
@@ -689,13 +690,13 @@ public:
                     this.mCurrentVertex = this.mVertices[0];
                 } else {  //read in a vertex
                     strtok = new StringTokenizer(sKeyWord, ",");
-                    String xValue = strtok.nextToken();
-                    String yValue = strtok.nextToken();
-                    String zValue = strtok.nextToken();
+                    String sXValue = strtok.nextToken();
+                    String sYValue = strtok.nextToken();
+                    String sZValue = strtok.nextToken();
 
-                    if(xValue != null) mCurrentVertex.x = Float.parseFloat(xValue);
-                    if(yValue != null) mCurrentVertex.y = Float.parseFloat(yValue);
-                    if(zValue != null) mCurrentVertex.z = Float.parseFloat(zValue);
+                    if(sXValue != null) mCurrentVertex.x = Float.parseFloat(sXValue);
+                    if(sYValue != null) mCurrentVertex.y = Float.parseFloat(sYValue);
+                    if(sZValue != null) mCurrentVertex.z = Float.parseFloat(sZValue);
 
                     // currentVertex++;
                     incCurrentVertex();
@@ -752,32 +753,32 @@ public:
                     } else {
                         if(bFaces) {              // get a face
                             strtok = new StringTokenizer(sKeyWord, ",");
-                            String c1 = strtok.nextToken();
-                            String c2 = strtok.nextToken();
-                            String c3 = strtok.nextToken();
-                            String c4 = strtok.nextToken();
+                            String sInt1 = strtok.nextToken();
+                            String sInt2 = strtok.nextToken();
+                            String sInt3 = strtok.nextToken();
+                            String sInt4 = strtok.nextToken();
 
                             mCurrentFace.i1 = -1;
                             mCurrentFace.i2 = -1;
                             mCurrentFace.i3 = -1;
                             mCurrentFace.i4 = -1;
 
-                            if(c1 != null) mCurrentFace.i1 = Integer.parseInt(c1);
-                            if(c2 != null) mCurrentFace.i2 = Integer.parseInt(c2);
-                            if(c3 != null) mCurrentFace.i3 = Integer.parseInt(c3);
-                            if(c4 != null) mCurrentFace.i4 = Integer.parseInt(c4);
+                            if(sInt1 != null) mCurrentFace.i1 = Integer.parseInt(sInt1);
+                            if(sInt2 != null) mCurrentFace.i2 = Integer.parseInt(sInt2);
+                            if(sInt3 != null) mCurrentFace.i3 = Integer.parseInt(sInt3);
+                            if(sInt4 != null) mCurrentFace.i4 = Integer.parseInt(sInt4);
 
                             // currentFace++;
                             incCurrentFace();
                         } else {                 // get a vertex
                             strtok = new StringTokenizer(sKeyWord, ",");
-                            String xValue = strtok.nextToken();
-                            String yValue = strtok.nextToken();
-                            String zValue = strtok.nextToken();
+                            String sXValue = strtok.nextToken();
+                            String sYValue = strtok.nextToken();
+                            String sZValue = strtok.nextToken();
 
-                            if(xValue != null) mCurrentVertex.x = Float.parseFloat(xValue);
-                            if(yValue != null) mCurrentVertex.y = Float.parseFloat(yValue);
-                            if(zValue != null) mCurrentVertex.z = Float.parseFloat(zValue);
+                            if(sXValue != null) mCurrentVertex.x = Float.parseFloat(sXValue);
+                            if(sYValue != null) mCurrentVertex.y = Float.parseFloat(sYValue);
+                            if(sZValue != null) mCurrentVertex.z = Float.parseFloat(sZValue);
 
                             // this.currentVertex++;
                             incCurrentVertex();
@@ -821,7 +822,8 @@ public:
         }
 
         LineNumberReader filein = new LineNumberReader(fileReader);
-        String sText = "", sKeyWord;
+        StringBuffer sText = new StringBuffer();
+        String sKeyWord;
         boolean bFaces = false;
         Integer iLineCounter = 0;
         int iCounter = 0;
@@ -840,7 +842,7 @@ public:
                     try {
                         filein.close();
                     } catch (IOException ioe) {
-                        Globals.statusPrint("readMotion: Could not close file " + psPathName);
+                        Globals.statusPrint("getShapeFileInfo: Could not close file " + psPathName);
                     }
                     return 0;
                 }
@@ -860,6 +862,8 @@ public:
             } // if(iCounter > 0)
 
             iCounter++;
+            // Clear out the string buffer before we read the next line into it
+            sText.delete(0, sText.length());
             sKeyWord = getNextLine(sText, iLineCounter, filein, 0);
         } // while
 
@@ -879,16 +883,17 @@ public:
     //     Shape3d ctor the one that takes 2 parameters, a String and an int
     public int shapeFromBMP(String psImageFileName) {
         // Create a 4 vertex shape object from a rectangular image boundary
-        int myStatus;
-        Integer height = 0, width = 0, bitsPerPixel = 0;
+        int iStatus;
+        Integer iHeight = 0, iWidth = 0, iBpp = 0;
 
-        myStatus = Globals.readBMPHeader(psImageFileName, height, width, bitsPerPixel);
-        if (myStatus != 0) {
-            return(myStatus);
+        iStatus = Globals.readBMPHeader(psImageFileName, iHeight, iWidth, iBpp);
+        if (iStatus != 0) {
+            return(iStatus);
         }
 
         String sMsgText;
-        sMsgText = String.format("shapeFromBMP: %s  Height: %d  Width: %d  Bits/Pixel: %d", psImageFileName, height, width, bitsPerPixel);
+        sMsgText = String.format("shapeFromBMP: %s  Height: %d  Width: %d  Bits/Pixel: %d", 
+            psImageFileName, iHeight, iWidth, iBpp);
         Globals.statusPrint(sMsgText);
         this.miNumVertices = 4;
 
@@ -906,8 +911,8 @@ public:
         this.mCurrentVertex = this.mVertices[0];
         this.miNumAllocatedVertices = this.miNumVertices;
         
-        float fHalfHeight = height/ 2.0f;
-        float fHalfWidth  = width / 2.0f;
+        float fHalfHeight = iHeight/ 2.0f;
+        float fHalfWidth  = iWidth / 2.0f;
         mCurrentVertex.sx = -fHalfWidth;
         mCurrentVertex.sy = -fHalfHeight;
 
@@ -961,16 +966,16 @@ public:
         mCurrentVertex.ty =  fHalfHeight;
         mCurrentVertex.tz = 0.0f;
 
-        Float cX = 0f, cY = 0f, cZ = 0f;
+        Float fCX = 0f, fCY = 0f, fCZ = 0f;
         // The following method sets parameters cX, cY and cZ
-        getWCentroid(cX, cY, cZ);  // Calculate and save the world coord centroid
+        getWCentroid(fCX, fCY, fCZ);  // Calculate and save the world coord centroid
         if(this.pointOfReference == null) {
             this.pointOfReference = new Point3d();
         }
 
-        pointOfReference.x = cX;
-        pointOfReference.y = cY;
-        pointOfReference.z = cZ;
+        pointOfReference.x = fCX;
+        pointOfReference.y = fCY;
+        pointOfReference.z = fCZ;
 
         return 0;
     } // shapeFromBMP
@@ -1499,7 +1504,7 @@ public:
     // Called from:
     //     getShapeFileInfo
     //     readShape
-    public static String getNextLine(String psTheText, Integer piLineNumber, 
+    public static String getNextLine(StringBuffer psTheText, Integer piLineNumber, 
     LineNumberReader filein, int piMinLineLength) {
         boolean bComment;
         // int theLength = 80; // this variable is no longer used
@@ -1509,17 +1514,17 @@ public:
         bComment = true;
         while (bComment) {
             try {
-                psTheText = filein.readLine();  // Ignore comments and empty lines
+                psTheText.append(filein.readLine());  // Ignore comments and empty lines
             } catch (IOException ioe) {
                 // Assume we've reached the end of the file
-                psTheText = "EOF ";
+                psTheText.append("EOF ");
                 sKeyWord = "EOF";
                 return(sKeyWord);
             }
 
-            if(psTheText == null) {
+            if(psTheText.length() == 0) {
                 // We've reached the end of the file
-                psTheText = "EOF ";
+                psTheText.append("EOF ");
                 sKeyWord = "EOF";
                 return(sKeyWord);
             }
@@ -1527,18 +1532,19 @@ public:
 
             // Minimum line length <= 4 to accomodate CR/LFs from scenefile maker utility
             if (
-            (psTheText.startsWith("//")) || 
+            (psTheText.toString().startsWith("//")) || 
             (psTheText.length() <= piMinLineLength)) {
                 // The line started with two forward slash (/) character, indicating comment, 
                 // or the line had fewer than piMinLineLength characters.
                 // So we ignore the line. We will read the next line.
+                psTheText.delete(0, psTheText.length());
                 bComment = true;
             } else {
                 bComment = false;
             }
         } // while
 
-        strtok = new StringTokenizer(psTheText, " ");
+        strtok = new StringTokenizer(psTheText.toString(), " ");
         sKeyWord = strtok.nextToken();
         return(sKeyWord);
     } // getNextLine
@@ -1739,7 +1745,7 @@ public:
                         return -1;
                     }
                 }
-            }  // end if between x1 and x2
+            } // end if between x1 and x2
 
             // theShape.currentVertex++;
             pShape.incCurrentVertex();
@@ -1781,17 +1787,17 @@ public:
     // Could not find where this is being called from.
     public int addVertices(Shape3d pChildShape) {
         // Add the vertices of the child shape to the shape pointed to by this 
-        int numVertices = pChildShape.getNumVertices();
-        Float mCentroidX = 0f, mCentroidY = 0f, mCentroidZ = 0f;
-        Float cCentroidX = 0f, cCentroidY = 0f, cCentroidZ = 0f;
+        int iNumVertices = pChildShape.getNumVertices();
+        Float fmCentroidX = 0f, fmCentroidY = 0f, fmCentroidZ = 0f;
+        Float fcCentroidX = 0f, fcCentroidY = 0f, fcCentroidZ = 0f;
 
-        this.getWCentroid(mCentroidX, mCentroidY, mCentroidZ);
-        pChildShape.getWCentroid(cCentroidX, cCentroidY, cCentroidZ);
+        this.getWCentroid(fmCentroidX, fmCentroidY, fmCentroidZ);
+        pChildShape.getWCentroid(fcCentroidX, fcCentroidY, fcCentroidZ);
 
-        int i, j, numMVertices; 
-        float cx, cy, mx1, my1, mx2, my2;
-        int aStatus;
-        float mAngle1, mAngle2, childAngle;
+        int i, j, iNumMVertices; 
+        float fcx, fcy, fmx1, fmy1, fmx2, fmy2;
+        int iStatus;
+        float fmAngle1, fmAngle2, fChildAngle;
         // final int counterClockwise = 0; // this variable is not used
         // final int CLOCKWISE = 1;
         final float twoPi = 2.0f*3.1415926f;
@@ -1799,50 +1805,50 @@ public:
         // int boundaryDirection = counterClockwise; // this variable is not used
 
         pChildShape.initCurrentVertex();
-        int clockWise, cclockWise;
-        clockWise = 0;
-        cclockWise = 0;
+        int iClockWise, iCClockWise;
+        iClockWise = 0;
+        iCClockWise = 0;
 
-        for (j = 1; j <= numVertices; j++) {
-            cx = pChildShape.mCurrentVertex.x;
-            cy = pChildShape.mCurrentVertex.y;
-            childAngle = MathUtils.polarAtan(cx - cCentroidX, cy - cCentroidY);
+        for (j = 1; j <= iNumVertices; j++) {
+            fcx = pChildShape.mCurrentVertex.x;
+            fcy = pChildShape.mCurrentVertex.y;
+            fChildAngle = MathUtils.polarAtan(fcx - fcCentroidX, fcy - fcCentroidY);
 
-            numMVertices = this.getNumVertices();
+            iNumMVertices = this.getNumVertices();
             this.initCurrentVertex();
-            for(i = 1; i <= numMVertices; i++) {
-                mx1 = this.mCurrentVertex.x;
-                my1 = this.mCurrentVertex.y;
-                mAngle1 = MathUtils.polarAtan(mx1 - mCentroidX, my1 - mCentroidY);
+            for(i = 1; i <= iNumMVertices; i++) {
+                fmx1 = this.mCurrentVertex.x;
+                fmy1 = this.mCurrentVertex.y;
+                fmAngle1 = MathUtils.polarAtan(fmx1 - fmCentroidX, fmy1 - fmCentroidY);
                 
                 // this.currentVertex++;
                 this.incCurrentVertex();
 
-                mx2 = this.mCurrentVertex.x;
-                my2 = this.mCurrentVertex.y;
-                mAngle2 = MathUtils.polarAtan(mx2 - mCentroidX, my2 - mCentroidY);
-                if (mAngle2 > mAngle1) { 
-                    cclockWise++;
+                fmx2 = this.mCurrentVertex.x;
+                fmy2 = this.mCurrentVertex.y;
+                fmAngle2 = MathUtils.polarAtan(fmx2 - fmCentroidX, fmy2 - fmCentroidY);
+                if (fmAngle2 > fmAngle1) { 
+                    iCClockWise++;
                 } else {
-                    clockWise++;
+                    iClockWise++;
                 }
 
                 // Assume the boundary moves in a counter-clockwise direction
                 if(
-                ((mAngle1 <= childAngle) && (childAngle <= mAngle2)) ||
+                ((fmAngle1 <= fChildAngle) && (fChildAngle <= fmAngle2)) ||
                 (
-                    (mAngle2 < mAngle1) && 
-                    ((mAngle1 <= childAngle && childAngle <= twoPi) || (0.0 <= childAngle && childAngle <= mAngle2))
+                    (fmAngle2 < fmAngle1) && 
+                    ((fmAngle1 <= fChildAngle && fChildAngle <= twoPi) || (0.0 <= fChildAngle && fChildAngle <= fmAngle2))
                 )) {
                     String sMsgText = "Adding Vertex: " + i + ". ";
                     Globals.statusPrint(sMsgText);
-                    aStatus = insertVertexAfter(i, cx, cy, 0.0f);
-                    if(aStatus != 0) {
+                    iStatus = insertVertexAfter(i, fcx, fcy, 0.0f);
+                    if(iStatus != 0) {
                         Globals.statusPrint("Shape3d.addVertices.  Unable to add vertex.");
                         return -1;
                     }
 
-                    numMVertices++;
+                    iNumMVertices++;
                     break;
                 }
             } // for i
@@ -1851,7 +1857,7 @@ public:
             pChildShape.incCurrentVertex();
         } // for j
 
-        String sMsgText = "cclockWise: " + cclockWise + "  clockWise: " + clockWise;
+        String sMsgText = "cclockWise: " + iCClockWise + "  clockWise: " + iClockWise;
         Globals.statusPrint(sMsgText);
         return 0;
     } // addVertices
@@ -2090,16 +2096,16 @@ public:
                 // Shift the other elements over by one
                 // (of course, overwriting this duplicate).
                 iCounter++;
-                int currentVertex2Idx = miCurrVtxIdx - 1;
-                int nextVertexIdx = miCurrVtxIdx;
+                int iCurrentVertex2Idx = miCurrVtxIdx - 1;
+                int iNextVertexIdx = miCurrVtxIdx;
                 iNumVertsToCopy = miNumVertices - i;
 
                 for(j = 1; j <= iNumVertsToCopy; j++) {
-                    mVertices[currentVertex2Idx].x = mVertices[nextVertexIdx].x;
-                    mVertices[currentVertex2Idx].y = mVertices[nextVertexIdx].y;
-                    mVertices[currentVertex2Idx].z = mVertices[nextVertexIdx].z;
-                    currentVertex2Idx++;
-                    nextVertexIdx++;
+                    mVertices[iCurrentVertex2Idx].x = mVertices[iNextVertexIdx].x;
+                    mVertices[iCurrentVertex2Idx].y = mVertices[iNextVertexIdx].y;
+                    mVertices[iCurrentVertex2Idx].z = mVertices[iNextVertexIdx].z;
+                    iCurrentVertex2Idx++;
+                    iNextVertexIdx++;
                 } // for j
 
                 // currentVertex--;
