@@ -6,7 +6,7 @@ import javax.swing.SwingUtilities;
 public class viewMorphDlg extends JFrame {
     
     public viewMorphDlg() {
-        MorphDlg morphDlg = new MorphDlg(this, true);
+        new MorphDlg(this, true);
     }
     
     public static void main(String[] args) {
