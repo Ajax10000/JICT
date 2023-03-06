@@ -2874,7 +2874,10 @@ public class Globals {
         // first determine the input file name, then substitute the last letter with x, y, or z
         String sDrive, sDir, sFile, sExt;
         String sDdrive, sDdir, sDfile, sDext;
-        String sOutPath, sXPath, sYPath, sZPath;
+        String sOutPath;
+        StringBuffer sbXPath = new StringBuffer("");
+        StringBuffer sbYPath = new StringBuffer("");
+        StringBuffer sbZPath = new StringBuffer("");
  
         // Get the filename and extension from psInputImagePath
         //_splitpath(psInputImagePath, sDrive, sDir, sFile, sExt);
@@ -2904,26 +2907,26 @@ public class Globals {
             CopyFile(psInputImagePath, sOutPath, 1);
         }
  
-        FileUtils.constructPathName(sXPath, sOutPath, 'x');
-        FileUtils.constructPathName(sYPath, sOutPath, 'y');
-        FileUtils.constructPathName(sZPath, sOutPath, 'z');
+        FileUtils.constructPathName(sbXPath, sOutPath, 'x');
+        FileUtils.constructPathName(sbYPath, sOutPath, 'y');
+        FileUtils.constructPathName(sbZPath, sOutPath, 'z');
 
         // Insure that a generated path is not the same as the texture path
         if(
-        sXPath.equalsIgnoreCase(psInputImagePath) ||
-        sYPath.equalsIgnoreCase(psInputImagePath) ||
-        sZPath.equalsIgnoreCase(psInputImagePath)) {
+        sbXPath.toString().equalsIgnoreCase(psInputImagePath) ||
+        sbYPath.toString().equalsIgnoreCase(psInputImagePath) ||
+        sbZPath.toString().equalsIgnoreCase(psInputImagePath)) {
             statusPrint("createQMeshModel: A surface image may not have the same name as the texture image.");
             sMsgText = "textureImage: " + psInputImagePath;
             statusPrint(sMsgText);
 
-            sMsgText = "xImage: " + sXPath;
+            sMsgText = "xImage: " + sbXPath.toString();
             statusPrint(sMsgText);
 
-            sMsgText = "yImage: " + sYPath;
+            sMsgText = "yImage: " + sbYPath.toString();
             statusPrint(sMsgText);
 
-            sMsgText = "zImage: " + sZPath;
+            sMsgText = "zImage: " + sbZPath.toString();
             statusPrint(sMsgText);
 
             return -1;
@@ -2987,17 +2990,17 @@ public class Globals {
         sMsgText = "QuadMesh BBox Maxs x: " + fXMax + " y: " + fYMax + " z: " + fZMax;
         statusPrint(sMsgText);
  
-        sMsgText = "Saving QMesh: " + sXPath;
+        sMsgText = "Saving QMesh: " + sbXPath;
         statusPrint(sMsgText);
-        xMImage.writeBMP(sXPath);
+        xMImage.writeBMP(sbXPath.toString());
 
-        sMsgText = "Saving QMesh: " + sYPath;
+        sMsgText = "Saving QMesh: " + sbYPath;
         statusPrint(sMsgText);
-        yMImage.writeBMP(sYPath);
+        yMImage.writeBMP(sbYPath.toString());
 
-        sMsgText = "Saving QMesh: " + sZPath;
+        sMsgText = "Saving QMesh: " + sbZPath;
         statusPrint(sMsgText);
-        zMImage.writeBMP(sZPath);
+        zMImage.writeBMP(sbZPath.toString());
         
         MemImage xMImage8 = new MemImage(iImHeight, iImWidth, 8);
         MemImage yMImage8 = new MemImage(iImHeight, iImWidth, 8);
