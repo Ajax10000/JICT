@@ -1509,12 +1509,14 @@ public:
         boolean bComment;
         // int theLength = 80; // this variable is no longer used
         String sKeyWord;
+        String sLineRead;
         StringTokenizer strtok;
 
         bComment = true;
         while (bComment) {
             try {
-                psTheText.append(filein.readLine());  // Ignore comments and empty lines
+                sLineRead = filein.readLine();
+                psTheText.append(sLineRead);  // Ignore comments and empty lines
             } catch (IOException ioe) {
                 // Assume we've reached the end of the file
                 psTheText.append("EOF ");
@@ -1522,7 +1524,7 @@ public:
                 return(sKeyWord);
             }
 
-            if(psTheText.length() == 0) {
+            if(sLineRead == null) {
                 // We've reached the end of the file
                 psTheText.append("EOF ");
                 sKeyWord = "EOF";
