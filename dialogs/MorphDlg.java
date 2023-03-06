@@ -576,16 +576,22 @@ protected:
             float fractionIncrement;
             Integer aHeight = 0, aWidth = 0, bpp = 0;
 
-            String aTexPath, aXPath = "", aYPath = "", aZPath = "";
-            String bTexPath, bXPath = "", bYPath = "", bZPath = "";
+            String aTexPath;
+            StringBuffer sbAXPath = new StringBuffer("");
+            StringBuffer sbAYPath = new StringBuffer("");
+            StringBuffer sbAZPath = new StringBuffer("");
+            String bTexPath;
+            StringBuffer sbBXPath = new StringBuffer("");
+            StringBuffer sbBYPath = new StringBuffer("");
+            StringBuffer sbBZPath = new StringBuffer("");
             MemImage aTexture, aX, aY, aZ;
             MemImage bTexture, bX, bY, bZ; 
             MemImage oTexture, oX, oY, oZ;
             
             aTexPath = new String(firstImage);
-            FileUtils.constructPathName(aXPath, aTexPath, 'x');
-            FileUtils.constructPathName(aYPath, aTexPath, 'y');
-            FileUtils.constructPathName(aZPath, aTexPath, 'z');
+            FileUtils.constructPathName(sbAXPath, aTexPath, 'x');
+            FileUtils.constructPathName(sbAYPath, aTexPath, 'y');
+            FileUtils.constructPathName(sbAZPath, aTexPath, 'z');
             aStatus = Globals.readBMPHeader(aTexPath, aHeight, aWidth, bpp);
             if(aStatus != 0) {
                 Globals.statusPrint("MorphDlg.onOK(): Unable to open image header.");
@@ -609,17 +615,17 @@ protected:
                 return;
             } // switch
 
-            aX = new MemImage(aXPath, 0, 0, 
+            aX = new MemImage(sbAXPath.toString(), 0, 0, 
                 JICTConstants.I_RANDOM, 'R', JICTConstants.I_A32BIT);
-            aY = new MemImage(aYPath, 0, 0, 
+            aY = new MemImage(sbAYPath.toString(), 0, 0, 
                 JICTConstants.I_RANDOM, 'R', JICTConstants.I_A32BIT);
-            aZ = new MemImage(aZPath, 0, 0, 
+            aZ = new MemImage(sbAZPath.toString(), 0, 0, 
                 JICTConstants.I_RANDOM, 'R', JICTConstants.I_A32BIT);
 
             bTexPath = new String(secondImage);
-            FileUtils.constructPathName(bXPath, bTexPath, 'x');
-            FileUtils.constructPathName(bYPath, bTexPath, 'y');
-            FileUtils.constructPathName(bZPath, bTexPath, 'z');
+            FileUtils.constructPathName(sbBXPath, bTexPath, 'x');
+            FileUtils.constructPathName(sbBYPath, bTexPath, 'y');
+            FileUtils.constructPathName(sbBZPath, bTexPath, 'z');
         
             switch (bpp) {
             case 8:
@@ -637,11 +643,11 @@ protected:
                 return;
             } // switch
 
-            bX = new MemImage(bXPath, 0, 0, 
+            bX = new MemImage(sbBXPath.toString(), 0, 0, 
                 JICTConstants.I_RANDOM, 'R', JICTConstants.I_A32BIT);
-            bY = new MemImage(bYPath, 0, 0, 
+            bY = new MemImage(sbBYPath.toString(), 0, 0, 
                 JICTConstants.I_RANDOM, 'R', JICTConstants.I_A32BIT);
-            bZ = new MemImage(bZPath, 0, 0, 
+            bZ = new MemImage(sbBZPath.toString(), 0, 0, 
                 JICTConstants.I_RANDOM, 'R', JICTConstants.I_A32BIT);
 
             int imHeight = aTexture.getHeight();
