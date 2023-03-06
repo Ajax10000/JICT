@@ -82,15 +82,17 @@ public class FileUtils {
     //     MainFrame.onToolsCreateAlphaImage
     //     MorphDlg.onOK
     //     ScnFileParser.readList
-    public static void constructPathName(String psOutPath, String psInPath, char pcLastLetter) {
+    public static void constructPathName(StringBuffer psOutPath, String psInPath, char pcLastLetter) {
         String sFileWExt, sFile, sExt;
         
-        File inputFile = new File(psOutPath);
+        File inputFile = new File(psInPath);
         sFileWExt = inputFile.getName();
-        sFile = sFileWExt.substring(0, sFileWExt.lastIndexOf('.'));
-        sExt = sFileWExt.substring(sFileWExt.lastIndexOf('.'));
 
-        // _splitpath(psInPath, sDrive, sDir, sFile, sExt);
+        // sFile = file name without extension
+        sFile = sFileWExt.substring(0, sFileWExt.lastIndexOf('.'));
+
+        // sExt includes the leading "."
+        sExt = sFileWExt.substring(sFileWExt.lastIndexOf('.'));
         int iLength = sFile.length();
 
         if(iLength > 0) {
@@ -98,10 +100,12 @@ public class FileUtils {
             char[] charArray = new char[1];
             charArray[0] = pcLastLetter;
             String sLastLetter = new String(charArray);
-            sFile.concat(sLastLetter);  // Substitute a letter
+            sFile = sFile.concat(sLastLetter);  // Append a letter
         }
 
-        // _makepath(psOutPath, sDrive, sDir, sFile, sExt);
-        psOutPath = inputFile.getParent() + File.separator + sFile + '.' + sExt;
+        String sOutPath = inputFile.getParent() + File.separator + sFile + sExt;
+
+        // Set the output parameter
+        psOutPath.append(sOutPath);
     } // constructPathName
 } // class FileUtils
