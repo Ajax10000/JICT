@@ -1254,7 +1254,7 @@ POPUP "Tools"
 
         int iStatus;
         Integer imHeight = 0, imWidth = 0, bitsPerPixel = 0;
-        String centeredName = "";
+        StringBuffer sbCenteredName = new StringBuffer("");
         MemImage alphaImage = new MemImage(1, 1);
         MemImage inImage = new MemImage(1, 1);
 
@@ -1262,8 +1262,8 @@ POPUP "Tools"
             sFileName = dlg.getSelectedFile().getName();
 
             // Center the input image by removing any chromacolor border 
-            FileUtils.constructPathName(centeredName, sFileName, 'q');
-            if(centeredName.equals(sFileName)) {
+            FileUtils.constructPathName(sbCenteredName, sFileName, 'q');
+            if(sbCenteredName.toString().equals(sFileName)) {
                 Globals.beep(10, 10);
                 Globals.statusPrint("onToolsCreateAlphaImage: Centered image name cannot equal original image name");
                 return;
@@ -1279,9 +1279,9 @@ POPUP "Tools"
             }
 
             // Create an alpha image
-            String sAlphaName = "";
-            FileUtils.constructPathName(sAlphaName, sFileName, 'a');
-            if(sAlphaName.equals(sFileName)) {
+            StringBuffer sbAlphaName = new StringBuffer("");
+            FileUtils.constructPathName(sbAlphaName, sFileName, 'a');
+            if(sbAlphaName.toString().equals(sFileName)) {
                 Globals.beep(10, 10);
                 Globals.statusPrint("onToolsCreateAlphaImage: Alpha image name cannot equal original image name");
                 return;
@@ -1316,14 +1316,15 @@ POPUP "Tools"
                     Globals.statusPrint(sMsgText);
                 }
 
-                FileUtils.constructPathName(sAlphaName, sFileName, 'a');
-                if(sAlphaName.equals(sFileName)) {
+                sbAlphaName = new StringBuffer("");
+                FileUtils.constructPathName(sbAlphaName, sFileName, 'a');
+                if(sbAlphaName.toString().equals(sFileName)) {
                     Globals.statusPrint("Alpha Image Name cannot equal the original file name");
                     return;
                 }
 
-                alphaImage.writeBMP(sAlphaName);
-                sMsgText = "Saved an alpha image: " + sAlphaName;
+                alphaImage.writeBMP(sbAlphaName.toString());
+                sMsgText = "Saved an alpha image: " + sbAlphaName.toString();
                 Globals.statusPrint(sMsgText);
             }
         }
