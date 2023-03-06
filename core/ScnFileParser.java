@@ -12,6 +12,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.LineNumberReader;
 
+import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 
 import structs.Point3d;
@@ -33,11 +34,28 @@ public class ScnFileParser {
     // Called from:
     //     MainFrame.onToolsCreateASceneList
     public int readList(StringBuffer psErrorText, String psPathName) {
+        int iRetValue;
+        try {
+            iRetValue = readListReal(psErrorText, psPathName);
+        } catch (Exception e) {
+            Globals.statusPrint("Globals.readList: Exception occurred");
+            Globals.statusPrint(e.toString());
+            e.printStackTrace();
+            iRetValue = -1;
+        }
+
+        return iRetValue;
+    } // readList
+
+
+    // Called from:
+    //     readList
+    private int readListReal(StringBuffer psErrorText, String psPathName) {
         StringBuffer sText = new StringBuffer();
         String sKeyWord;
         String theModelName = "", sFileName, sMotionPath;
         String sSceneName = "", sAlphaPath, sMsgBuffer;
-        String sColorAdjustedPath = "";
+        StringBuffer sColorAdjustedPath;
         int iLineCounter, iNumScenes;
         int iOutImageCols = 0, iOutImageRows = 0;
         int iNotFound; // = TRUE, FALSE, or THREE_NUMBERS_NOT_FOUND
@@ -59,9 +77,7 @@ public class ScnFileParser {
         StringTokenizer numtok;
 
         // We will populate psErrorText, so if it has anything inside, clear it
-        if (psErrorText.length() > 0) {
-            psErrorText.delete(0, psErrorText.length());
-        }
+        clearStringBuffer(psErrorText);
 
         final String BLANK = " ";
         // final int DUPLICATESCENE = 3; // This variable is not used
@@ -71,7 +87,7 @@ public class ScnFileParser {
         try {
             fileReader = new FileReader(scnFile);
         } catch(FileNotFoundException fnfe) {
-            psErrorText.append("Could not find file.");
+            setStringBuffer(psErrorText, "Could not find file.");
             // psErrorText will be printed with Global.statusPrint by the caller.
 
             return -1;
@@ -90,7 +106,7 @@ public class ScnFileParser {
         trPt = new Point3d();
         pointOfReference = new Point3d();
         // Assume no problems will occur and initialize psErrorText accordingly.
-        psErrorText.append("Scene file read successfully");
+        setStringBuffer(psErrorText, "Scene file read successfully");
         
         bDefinedRefPoint = false;
 
@@ -133,7 +149,7 @@ public class ScnFileParser {
                     strtok = new StringTokenizer(sBase, BLANK);
                     sSceneName = strtok.nextToken();
                     if(sSceneName == null) {
-                        psErrorText.append("A Scene must have a name. Line " + iLineCounter);
+                        setStringBuffer(psErrorText, "A Scene must have a name. Line " + iLineCounter);
                         // psErrorText will be printed with Global.statusPrint by the caller.
                         
                         return -1;
@@ -152,7 +168,7 @@ public class ScnFileParser {
                             iSequence = JICTConstants.I_MORPH;
                         }
                     } else {
-                        psErrorText.append("A Sequence must have a name. Line " + iLineCounter);
+                        setStringBuffer(psErrorText, "A Sequence must have a name. Line " + iLineCounter);
                         // psErrorText will be printed with Global.statusPrint by the caller.
 
                         closeLineNumberReader(filein);
@@ -196,7 +212,7 @@ public class ScnFileParser {
                             bGetOutImageSizeFlag = true;
                         }
                     } else {
-                        psErrorText.append("Expected Image Height, Image Width. Line " + iLineCounter);
+                        setStringBuffer(psErrorText, "Expected Image Height, Image Width. Line " + iLineCounter);
                         // psErrorText will be printed with Global.statusPrint by the caller.
 
                         closeLineNumberReader(filein);
@@ -210,7 +226,7 @@ public class ScnFileParser {
                     // MotionPath [None|<pathName>]
                     sMotionPath = sText.substring(11);
                     if(sMotionPath.length() == 0) {
-                        psErrorText.append("MotionPath file missing on Line " + iLineCounter);
+                        setStringBuffer(psErrorText, "MotionPath file missing on Line " + iLineCounter);
                         // psErrorText will be printed with Global.statusPrint by the caller.
 
                         closeLineNumberReader(filein);
@@ -279,7 +295,7 @@ public class ScnFileParser {
                 }
 
                 if (sKeyWord.equalsIgnoreCase("EOF")) {
-                    psErrorText.append("sceneFile may be corrupted or has no models");
+                    setStringBuffer(psErrorText, "sceneFile may be corrupted or has no models");
                     // psErrorText will be printed with Global.statusPrint by the caller.
 
                     closeLineNumberReader(filein);
@@ -289,10 +305,10 @@ public class ScnFileParser {
                 // iNotFound = TRUE (1), FALSE (0), or THREE_NUMBERS_NOT_FOUND (2)
                 if (iNotFound != 0) {
                     if(iNotFound == 1) {
-                        psErrorText.append("Unknown Keyword: " + sKeyWord + ". Line  " + iLineCounter);
+                        setStringBuffer(psErrorText, "Unknown Keyword: " + sKeyWord + ". Line  " + iLineCounter);
                     }
                     if(iNotFound == THREE_NUMBERS_NOT_FOUND) {
-                        psErrorText.append("Expected 3 numeric values separated by commas: " + sKeyWord + 
+                        setStringBuffer(psErrorText, "Expected 3 numeric values separated by commas: " + sKeyWord + 
                             "  Line " + iLineCounter);
                     }
                     // psErrorText will be printed with Global.statusPrint by the caller.
@@ -308,7 +324,7 @@ public class ScnFileParser {
             // Add the scene to the sceneList and read its elements.
             iNumScenes++;
             if (iNumScenes > 1) {
-                psErrorText.append("Only 1 scene definition permitted per scene file");
+                setStringBuffer(psErrorText, "Only 1 scene definition permitted per scene file");
                 // psErrorText will be printed with Global.statusPrint by the caller.
 
                 closeLineNumberReader(filein);
@@ -319,7 +335,7 @@ public class ScnFileParser {
                 iOutImageCols, iOutImageRows, iColorMode, 
                 rtPt, trPt, sMotionPath);
             if(iStatus != 0) {
-                psErrorText.append("Could not add Scene to Scene List. Line " + iLineCounter);
+                setStringBuffer(psErrorText, "Could not add Scene to Scene List. Line " + iLineCounter);
                 // psErrorText will be printed with Global.statusPrint by the caller.
 
                 closeLineNumberReader(filein);
@@ -356,6 +372,7 @@ public class ScnFileParser {
                     iNumModels++;
 
                     if (iNumModels > 1) {
+                        sColorAdjustedPath = new StringBuffer("");
                         // If the color is to be adjusted, adjust it now and change the input image
                         // file name to point to the color corrected image.
                         // AdjustColor [Target|Relative] <R> <G> <B>
@@ -379,12 +396,14 @@ public class ScnFileParser {
                                 bytMidRed, bytMidGreen, bytMidBlue, 
                                 correctedMImage, sAdjustmentType, 0);
 
-                            // The following method sets colorAdjustedPath
+                            // The following method sets sColorAdjustedPath
+                            Globals.statusPrint("readList: sFileName = " + sFileName);
+                            sColorAdjustedPath = new StringBuffer();
                             FileUtils.constructPathName(sColorAdjustedPath, sFileName, 'j');     
                             sMsgBuffer = "sceneList.readList: Saving adjusted color image: " + sColorAdjustedPath;
                             Globals.statusPrint(sMsgBuffer);
             
-                            correctedMImage.writeBMP(sColorAdjustedPath);
+                            correctedMImage.writeBMP(sColorAdjustedPath.toString());
                         }
 
                         if(iCompoundMMember == 1 && iType == JICTConstants.I_COMPOUND) bCompoundMember = false;
@@ -400,14 +419,14 @@ public class ScnFileParser {
                             bCompoundMember, 
                             adjustmentColor, 
                             sAdjustmentType, // "TARGET" or "RELATIVE"
-                            sColorAdjustedPath,
+                            sColorAdjustedPath.toString(),
                             bDefinedRefPoint, pointOfReference);
                         if(iCompoundMMember == 0) {
                             bCompoundMember = false;
                         }
 
                         if(iStatus != 0) {
-                            psErrorText.append("Could not add model to scene list. Line " + iLineCounter);
+                            setStringBuffer(psErrorText, "Could not add model to scene list. Line " + iLineCounter);
                             // psErrorText will be printed with Global.statusPrint by the caller.
 
                             closeLineNumberReader(filein);
@@ -423,13 +442,29 @@ public class ScnFileParser {
                         sMotionPath = "";
                         sFileName = "";
                         sAdjustmentType = "None";
-                        sColorAdjustedPath = "None";
+                        sColorAdjustedPath = new StringBuffer("None");
                     } // if (nModels > 1)
 
                     // Look for the model name:
                     // Model <modelName> [Blend|NoBlend] [Warp|NoWarp] AlphaScale <alpha> [Image|Shape|QuadMesh|Sequence]
-                    // aModelName = strtok(TheText+6, BLANK);
-                    sModelName = strtok.nextToken();
+                    
+                    // Skip over the word "MODEL "
+                    try {
+                        sModelName = sText.substring(6);
+                    } catch (NullPointerException npe) {
+                        setStringBuffer(psErrorText, "A null pointer error occurred while trying to skip over the word 'Model '");
+                        closeLineNumberReader(filein);
+                        return -1;
+                    }
+                    strtok = new StringTokenizer(sModelName, BLANK);
+                    
+                    try {
+                        sModelName = strtok.nextToken();
+                    } catch (NoSuchElementException nsee) {
+                        setStringBuffer(psErrorText, "sceneList.readList: No such element exception occurred");
+                        closeLineNumberReader(filein);
+                        return -1;
+                    }
 
                     // If the modelName is ".", set it to an empty string
                     // causing the model to be displayed without a label
@@ -462,7 +497,7 @@ public class ScnFileParser {
                             bBlend = false;
                         }
                     } else {
-                        psErrorText.append("Missing value or term on Line " + iLineCounter);
+                        setStringBuffer(psErrorText, "Missing value or term on Line " + iLineCounter);
                         // psErrorText will be printed with Global.statusPrint by the caller.
 
                         closeLineNumberReader(filein);
@@ -475,7 +510,7 @@ public class ScnFileParser {
                             bWarp = false;
                         }
                     } else {
-                        psErrorText.append("Missing value or term on Line " + iLineCounter);
+                        setStringBuffer(psErrorText, "Missing value or term on Line " + iLineCounter);
                         // psErrorText will be printed with Global.statusPrint by the caller.
 
                         closeLineNumberReader(filein);
@@ -488,7 +523,7 @@ public class ScnFileParser {
                             fAlpha = Float.parseFloat(sScaleValue);
                         }
                     } else {
-                        psErrorText.append("Missing value or term on Line " + iLineCounter);
+                        setStringBuffer(psErrorText, "Missing value or term on Line " + iLineCounter);
                         // psErrorText will be printed with Global.statusPrint by the caller.
 
                         closeLineNumberReader(filein);
@@ -507,7 +542,7 @@ public class ScnFileParser {
                             iCompoundMMember = 1;
                         }
                     } else {
-                        psErrorText.append("Expected a model type on Line " + iLineCounter);
+                        setStringBuffer(psErrorText, "Expected a model type on Line " + iLineCounter);
                         // psErrorText will be printed with Global.statusPrint by the caller.
 
                         closeLineNumberReader(filein);
@@ -515,16 +550,16 @@ public class ScnFileParser {
                     }
 
                     iNotFound = FALSE;
-                } // if (strcmpi (TheKeyWord, "MODEL")
+                } // if (sKeyWord.equalsIgnoreCase("MODEL"))
 
                 if(sKeyWord.equalsIgnoreCase("REFERENCEPOINT")) {
-                    String sRef;
                     // Skip over the word "REFERENCEPOINT"
-                    // theRef = strtok(TheText + 15, BLANK);
-                    int idxRefPt = sText.indexOf("REFERENCEPOINT");
-                    sRef = sText.substring(idxRefPt + 15);
+                    String sRef = sText.substring(15);
 
+                    // After the word REFERENCEPOINT we should find 3 numbers 
+                    // separated by commas
                     if(checkFor3(sRef) == 0) {
+                        // Remember that we didn't find 3 numbers
                         iNotFound = THREE_NUMBERS_NOT_FOUND;
                     } else {
                         numtok = new StringTokenizer(sRef, ",");
@@ -542,19 +577,20 @@ public class ScnFileParser {
                     // ROTATION <rx>, <ry>, <rz>
                     // where rx, ry and rz are rotation degrees, 
                     // expressed as floating-point numbers.
-                    String sRt;
-                    // Skip over the word "ROTATION"
-                    // theRt = strtok(TheText + 9, BLANK);
-                    int rtIdx = sText.indexOf("ROTATION");
-                    sRt = sText.substring(rtIdx + 9);
 
+                    // Skip over the word "ROTATION"
+                    String sRt = sText.substring(9);
+
+                    // After the word ROTATION we should find 3 numbers 
+                    // separated by commas
                     if(checkFor3(sRt) == 0) {
+                        // Remember that we didn't find 3 numbers
                         iNotFound = THREE_NUMBERS_NOT_FOUND;
                     } else {
                         numtok = new StringTokenizer(sRt, ",");
-                        rtPt.x = Float.parseFloat(strtok.nextToken());
-                        rtPt.y = Float.parseFloat(strtok.nextToken());
-                        rtPt.z = Float.parseFloat(strtok.nextToken());
+                        rtPt.x = Float.parseFloat(numtok.nextToken());
+                        rtPt.y = Float.parseFloat(numtok.nextToken());
+                        rtPt.z = Float.parseFloat(numtok.nextToken());
                         iNotFound = FALSE;
                     }
                 }
@@ -565,13 +601,13 @@ public class ScnFileParser {
                     // SCALE <sx>, <sy>, <sz>
                     // were sx, sy, and sz are scale values, 
                     // expressed as floating-point numbers.
-                    String sSc;
-                    // Skip over the word "SCALE"
-                    // theSc = strtok(TheText + 6, BLANK);
-                    int scIdx = sText.indexOf("SCALE");
-                    sSc = sText.substring(scIdx + 6);
 
+                    // Skip over the word "SCALE"
+                    String sSc = sText.substring(6);
+                    // After the word SCALE we should find 3 numbers 
+                    // separated by commas
                     if(checkFor3(sSc) == 0) {
+                        // Remember that we didn't find 3 numbers
                         iNotFound = THREE_NUMBERS_NOT_FOUND;
                     } else {
                         numtok = new StringTokenizer(sSc, ",");
@@ -588,13 +624,14 @@ public class ScnFileParser {
                     // TRANSLATION <tx>, <ty>, <tz>
                     // where tx, ty, and tz are translation values, 
                     // expressed as floating-point numbers.
-                    String sTr;
-                    // Skip over the word "TRANSLATION"
-                    // theTr = strtok(TheText + 12, BLANK);
-                    int trIdx = sText.indexOf("TRANSLATION");
-                    sTr = sText.substring(trIdx + 12);
 
+                    // Skip over the word "TRANSLATION"
+                    String sTr = sText.substring(12);
+
+                    // After the word TRANSLATION we should find 3 numbers 
+                    // separated by commas
                     if(checkFor3(sTr) == 0) {
+                        // Remember that we didn't find 3 numbers
                         iNotFound = THREE_NUMBERS_NOT_FOUND;
                     } else {
                         numtok = new StringTokenizer(sTr, ",");
@@ -611,30 +648,23 @@ public class ScnFileParser {
                     // ADJUSTCOLOR [Target|Relative] <R>, <G>, <B>
                     // where R, G, and B are RGB color values, 
                     // expressed as integers in the range from 0 to 255.
-                    String adjustment, theColor;
+                    String sAdjustment, sColor;
                     // String adjustmentCopy; // This variable is not used
                     
                     // Skip over the word "ADJUSTCOLOR"
                     // adjustment = strtok(TheText + 12, BLANK);
-                    adjustment = strtok.nextToken();
+                    sAdjustment = sText.substring(12);
 
-                    // adjustmentType should be "TARGET" or "RELATIVE"
-                    sAdjustmentType = adjustment;
-                    // int aLength = adjustment.length(); // This variable is no longer used
-                    // Skip over both the words "ADJUSTCOLOR" and 
-                    // "TARGET" or "RELATIVE"
+                    strtok = new StringTokenizer(sAdjustment, BLANK);
+                    // sAdjustmentType should be "TARGET" or "RELATIVE"
+                    sAdjustmentType = strtok.nextToken();
+
+                    // Skip over the word "TARGET " or "RELATIVE "
+                    sColor = sAdjustment.substring(sAdjustmentType.length() + 1);
                     // theColor = strtok(TheText + 12 + aLength + 1, BLANK);  // move forward to the RGB color
-                    
-                    int idx = sText.indexOf("RELATIVE");
-                    if (idx == -1) {
-                        idx = sText.indexOf("TARGET");
-                        theColor = sText.substring(idx + 6);
-                    } else {
-                        theColor = sText.substring(idx + 9);
-                    }
 
                     // Parse the R, G, B color values
-                    numtok = new StringTokenizer(theColor, ",");
+                    numtok = new StringTokenizer(sColor, ",");
                     int iR = Integer.parseInt(numtok.nextToken());
                     int iG = Integer.parseInt(numtok.nextToken());
                     int iB = Integer.parseInt(numtok.nextToken());
@@ -650,11 +680,10 @@ public class ScnFileParser {
 
                     // Skip over the word "MOTIONPATH"
                     // Now theMotionPath should be either "None" or the path
-                    int idxMotionPath = sText.indexOf("MOTIONPATH");
-                    sMotionPath = sText.substring(idxMotionPath + 11);
+                    sMotionPath = sText.substring(11);
 
                     if(sMotionPath.length() == 0) {
-                        psErrorText.append("MotionPath file missing on Line " + iLineCounter);
+                        setStringBuffer(psErrorText, "MotionPath file missing on Line " + iLineCounter);
                         // psErrorText will be printed with Global.statusPrint by the caller.
 
                         closeLineNumberReader(filein);
@@ -667,11 +696,12 @@ public class ScnFileParser {
                     // Found an ALPHAIMAGEPATH line. So we parse it. 
                     // It should have the following format:
                     // ALPHAIMAGEPATH [None|<pathName>]
-                    int idxAlphaImgPath = sText.indexOf("ALPHAIMAGEPATH");
-                    sAlphaPath = sText.substring(idxAlphaImgPath + 15);
+
+                    // Skip over the word "ALPHAIMAGEPATH"
+                    sAlphaPath = sText.substring(15);
 
                     if(sAlphaPath.length() == 0) {
-                        psErrorText.append("Alpha Image Path file missing. Line " + iLineCounter);
+                        setStringBuffer(psErrorText, "Alpha Image Path file missing. Line " + iLineCounter);
                         // psErrorText will be printed with Global.statusPrint by the caller.
 
                         closeLineNumberReader(filein);
@@ -689,8 +719,9 @@ public class ScnFileParser {
                     // should be the full path to a Windows bitmap (.bmp) file.
                     // If the model type is SHAPE, then pathName 
                     // should be the full path to a shape (.shp) file.
-                    int idxFileName = sText.indexOf("FILENAME");
-                    sFileName = sText.substring(idxFileName + 9);
+
+                    // Skip over the word "FILENAME"
+                    sFileName = sText.substring(9);
 
                     // If the user previously specified either outWidth = 0 or outHeight = 0
                     // in the SCENE line ...
@@ -700,7 +731,7 @@ public class ScnFileParser {
                         int iBmpStatus;
                         iBmpStatus = Globals.readBMPHeader(sFileName, iOutImageRows, iOutImageCols, iBpp);
                         if(iBmpStatus != 0) {
-                            psErrorText.append("File name not valid. Line " + iLineCounter);
+                            setStringBuffer(psErrorText, "File name not valid. Line " + iLineCounter);
                             // psErrorText will be printed with Global.statusPrint by the caller.
 
                             closeLineNumberReader(filein);
@@ -715,8 +746,9 @@ public class ScnFileParser {
                 // Look for other keywords - not model related
                 if(sKeyWord.equalsIgnoreCase("END")) {
                     String sToken;
-                    int tokenIdx = sText.indexOf("END");
-                    sToken = sText.substring(tokenIdx + 4);
+
+                    // Skip over the word "END"
+                    sToken = sText.substring(4);
 
                     if(sToken.equalsIgnoreCase("COMPOUND")) {
                         iCompoundMMember = 0;
@@ -725,6 +757,7 @@ public class ScnFileParser {
                 }
 
                 if (sKeyWord.equalsIgnoreCase("EOF")) {
+                    sColorAdjustedPath = new StringBuffer("");
                     // Save the last model
                     // If the color is to be adjusted (i.e., we previously read an ADJUSTCOLOR line), 
                     // adjust it now and change the input image
@@ -744,11 +777,12 @@ public class ScnFileParser {
                             bytMidRed, bytMidGreen, bytMidBlue, 
                             correctedImage, sAdjustmentType, 0);
 
+                        // The following method sets sColorAdjustedPath
                         FileUtils.constructPathName(sColorAdjustedPath, sFileName, 'j');     
                         sMsgBuffer = "Saving adjusted color image: " + sColorAdjustedPath;
                         Globals.statusPrint(sMsgBuffer);
                   
-                        correctedImage.writeBMP(sColorAdjustedPath);
+                        correctedImage.writeBMP(sColorAdjustedPath.toString());
                     }
 
                     if(iCompoundMMember == 1 && iType == JICTConstants.I_COMPOUND) bCompoundMember = false;
@@ -764,12 +798,12 @@ public class ScnFileParser {
                         bCompoundMember, 
                         adjustmentColor, 
                         sAdjustmentType, 
-                        sColorAdjustedPath,
+                        sColorAdjustedPath.toString(),
                         bDefinedRefPoint, pointOfReference);
                     if(iCompoundMMember == 0) bCompoundMember = false;
 
                     if(iStatus != 0) {
-                        psErrorText.append("Could not add a model to scene list. Line " + iLineCounter);
+                        setStringBuffer(psErrorText, "Could not add a model to scene list. Line " + iLineCounter);
                         // psErrorText will be printed with Global.statusPrint by the caller.
 
                         closeLineNumberReader(filein);
@@ -782,10 +816,10 @@ public class ScnFileParser {
             
                 if (iNotFound != 0) {
                     if(iNotFound == 1) {
-                        psErrorText.append("Unknown Keyword: " + sKeyWord + "  Line " + iLineCounter);
+                        setStringBuffer(psErrorText, "Unknown Keyword: " + sKeyWord + "  Line " + iLineCounter);
                     }
                     if(iNotFound == THREE_NUMBERS_NOT_FOUND) {
-                        psErrorText.append("Expected 3 numeric values separated by commas: " + sKeyWord + "  Line " + iLineCounter);
+                        setStringBuffer(psErrorText, "Expected 3 numeric values separated by commas: " + sKeyWord + "  Line " + iLineCounter);
                     }
                     // Globals.statusPrint(psErrorText);
 
@@ -798,36 +832,69 @@ public class ScnFileParser {
                 sKeyWord = Shape3d.getNextLine(sText, iLineCounter, filein, iMinLineSize);
             } // while(!sKeyWord.equalsIgnoreCase("SCENE"))
         } // while(true)
-    } // readList
+    } // readListReal
 
 
     // Called from:
-    //     readList
-    public int checkFor3(String aString) {
+    //     readListReal
+    public int checkFor3(String psString) {
+        int iRetValue;
+
+        try {
+            iRetValue = checkFor3Real(psString);
+        } catch (StringIndexOutOfBoundsException sioobe) {
+            Globals.statusPrint("StringIndexOutofBoundsException while parsing for 3 numbers.");
+            sioobe.printStackTrace();
+            iRetValue = 0;
+        }
+
+        return iRetValue;
+    } // checkFor3
+
+
+    // Called from:
+    //     checkFor3
+    private int checkFor3Real(String psString) {
         // Perform a syntax check on the input string:
         // The string must have two commas and three numeric values
-        int numChars = aString.length();
+        int numChars = psString.length();
         char aChar;
-        int iStrIdx = 0;
         
         int numCommas = 0;
         int numNumbers = 0;
 
-        for (int j = 0; j < numChars; j++) {
-            aChar = aString.charAt(j);
-            if (aChar == ',') { 
-              numCommas++;
-              iStrIdx++;
-            } else {
-                if(Character.isDigit(aChar) || aChar == '.'|| aChar == '-') {
-                    numNumbers++;
-                }
+        int j = 0;
+        while(j < numChars) {
+            aChar = psString.charAt(j);
+            // status("At top", j, aChar, numCommas, numNumbers);
 
-                while (iStrIdx < numChars - 1 && 
-                (Character.isDigit(aChar) || aChar == '.'|| aChar == '-')) {
-                    iStrIdx++;
-                    aChar = aString.charAt(iStrIdx);
-                }
+            // Check for commas
+            if (aChar == ',') { 
+                numCommas++;
+                j++;
+            } else if(Character.isDigit(aChar) || aChar == '.'|| aChar == '-') {
+                numNumbers++;
+            
+                j++;
+                if (j < numChars) {
+                    aChar = psString.charAt(j);
+                    
+                    // Step through the characters until we find one that is
+                    // not a digit, not a '.', and not a '-'.
+                    // (a comma will stop this while loop)
+                    while (
+                    (j < numChars) && 
+                    (Character.isDigit(aChar) || (aChar == '.') || (aChar == '-'))) {
+                        j++;
+                        if (j < numChars) {
+                            aChar = psString.charAt(j);
+                        }
+                    }
+                }   
+            } else {
+                String sMsgText = "checkFor3Real: Unexpected char found: " + aChar;
+                Globals.statusPrint(sMsgText);
+                return 0;
             }
         }
 
@@ -836,11 +903,19 @@ public class ScnFileParser {
         } else {
             return 0;
         }
-    } // checkFor3
+    } // checkFor3Real
+
+
+    // Method status is used for debugging method checkFor3Real
+    public void status(String sPreMsg, int j, char aChar, int numCommas, int numNumbers) {
+        System.out.println(sPreMsg + " j = " + j + 
+            " aChar = <" + aChar + ">, numCommas = " + numCommas + 
+            ", numNumbers = " + numNumbers);
+    }
 
 
     // Called from:
-    //     readList
+    //     readListReal
     private void closeLineNumberReader(LineNumberReader filein) {
         try {
             filein.close();
@@ -848,4 +923,17 @@ public class ScnFileParser {
             // do nothing
         }
     } // closeLineNumberReader
+
+
+    public static void clearStringBuffer(StringBuffer psStringBuffer) {
+        if (psStringBuffer.length() > 0) {
+            psStringBuffer.delete(0, psStringBuffer.length());
+        }
+    } // clearStringBuffer
+
+
+    public static void setStringBuffer(StringBuffer psStringBuffer, String psMsg) {
+        clearStringBuffer(psStringBuffer);
+        psStringBuffer.append(psMsg);
+    } // setStringBuffer
 } // ScnFileParser
