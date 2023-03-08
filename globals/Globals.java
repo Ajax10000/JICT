@@ -40,7 +40,7 @@ public class Globals {
     public static GPipe aGraphicPipe = new GPipe();  // a globally defined graphic pipeline for VRML viewing
 
 
-    // This method came from UTILS.CPP
+    // This method originally came from UTILS.CPP
     public static void statusPrint(String psMessage) {
         boolean bErrWriting = false;
         File logFile;
@@ -89,7 +89,8 @@ public class Globals {
     } // statusPrint
 
 
-    // This method came from DEPTHSRT.CPP
+    // This method originally came from DEPTHSRT.CPP
+    // 
     // Called from:
     //     SceneList.depthSort
     // which in turn is called from SceneList.render, 
@@ -122,7 +123,8 @@ public class Globals {
     } // insertionSort2
 
 
-    // This method came from BLEND.CPP
+    // This method originally came from BLEND.CPP
+    // 
     // Called from:
     //     iRender
     // However, I could not find where iRender is being called from (or if it is being called).
@@ -140,37 +142,37 @@ public class Globals {
 
         // Each MemImage is assumed to be opened for random access
         int ix, iy;
-        byte maskPixel, inPixel, outPixel, addedPixel;
+        byte bytMaskPixel, bytInPixel, bytOutPixel, bytAddedPixel;
         float fInWeight, fOutWeight;
 
         for(iy = 1; iy <= iCommonRows; iy++) {
             for(ix = 1; ix <= iCommonCols; ix++) {
-                maskPixel = pMaskMImage.getMPixel(ix, iy);
-                inPixel   = pInMImage.getMPixel(ix, iy);
-                if(maskPixel > 0 && inPixel > 0) {
-                    outPixel = pOutMImage.getMPixel(ix, iy);
-                    fInWeight = (float)maskPixel / 255.0f * pfAlphaScale;
+                bytMaskPixel = pMaskMImage.getMPixel(ix, iy);
+                bytInPixel   = pInMImage.getMPixel(ix, iy);
+                if(bytMaskPixel > 0 && bytInPixel > 0) {
+                    bytOutPixel = pOutMImage.getMPixel(ix, iy);
+                    fInWeight = (float)bytMaskPixel / 255.0f * pfAlphaScale;
                     fOutWeight = 1.0f - fInWeight;
 
                     if(pfAlphaScale > 0.0f) {
-                        addedPixel = (byte)((fInWeight * (float)inPixel) + (fOutWeight * (float)outPixel) + 0.5f);
+                        bytAddedPixel = (byte)((fInWeight * (float)bytInPixel) + (fOutWeight * (float)bytOutPixel) + 0.5f);
                     } else {
-                        addedPixel = (byte)((float)outPixel + (fInWeight * (float)inPixel) + 0.5f);
+                        bytAddedPixel = (byte)((float)bytOutPixel + (fInWeight * (float)bytInPixel) + 0.5f);
                         // Make certain shadows won't produce negative values
-                        if (addedPixel > outPixel) {
-                            addedPixel = outPixel;
+                        if (bytAddedPixel > bytOutPixel) {
+                            bytAddedPixel = bytOutPixel;
                         }
                     }
 
-                    if (addedPixel < 1) {
-                        addedPixel = (byte)1;
+                    if (bytAddedPixel < 1) {
+                        bytAddedPixel = (byte)1;
                     }
 
                     if (pfAlphaScale == 0.0f) {
-                        addedPixel = (byte)0;
+                        bytAddedPixel = (byte)0;
                     }
 
-                    pOutMImage.setMPixel(ix, iy, addedPixel);
+                    pOutMImage.setMPixel(ix, iy, bytAddedPixel);
                 }
             } // for ix
         } // for iy
@@ -179,10 +181,12 @@ public class Globals {
     } // blend
   
 
-    // This method came from BLEND.CPP
-    // This method implements an alpha scale factor which can be used to create 
+    // This method originally came from BLEND.CPP
+    //
+    // Method blendz implements an alpha scale factor which can be used to create 
     // fadein and fadeout effects. See p 95 - 96 of the book 
     // Visual Special Effects Toolkit in C++, by Tim Wittenburg
+    // 
     // Called from:
     //     tweenImage
     // which in turn is called from MorphDlg.onOK (when morph type = JICTConstants.I_TWOD)
@@ -224,94 +228,100 @@ public class Globals {
 
         // Each image is assumed to be opened for random access
         int ix, iy;
-        byte mattePixel, inPixel, outPixel, addedPixel;
-        byte inRed = (byte)0, inGreen = (byte)0, inBlue = (byte)0;
-        byte outRed = (byte)0, outGreen = (byte)0, outBlue = (byte)0;
-        byte addedRed, addedGreen, addedBlue;
+        byte bytMattePixel, bytInPixel, bytOutPixel, bytAddedPixel;
+        Byte bytInRed = (byte)0, bytInGreen = (byte)0, bytInBlue = (byte)0;
+        Byte bytOutRed = (byte)0, bytOutGreen = (byte)0, bytOutBlue = (byte)0;
+        byte bytAddedRed, bytAddedGreen, bytAddedBlue;
         float fInWeight, fOutWeight;
     
-        boolean usingZBuffer = false;
+        boolean bUsingZBuffer = false;
         if((pZMImage != null) && (pZBufMImage != null)) {
-            usingZBuffer = true;
+            bUsingZBuffer = true;
         }
     
         for(iy = 1; iy <= iCommonRows; iy++) {
             for(ix = 1; ix <= iCommonCols; ix++) {
-                mattePixel = pMatteMImage.getMPixel(ix, iy);
+                bytMattePixel = pMatteMImage.getMPixel(ix, iy);
                 switch(iBpp) {  // Optionally blend in color or monochrome
                 case 8:
-                    inPixel = pInMImage.getMPixel(ix, iy);
-                    if((mattePixel > JICTConstants.I_CHROMAVALUE) && (inPixel > JICTConstants.I_CHROMAVALUE)) {
-                        outPixel = pOutMImage.getMPixel(ix, iy );
-                        fInWeight = (float)mattePixel / 255.0f * pfAlphaScale;
+                    bytInPixel = pInMImage.getMPixel(ix, iy);
+                    if(
+                    (bytMattePixel > JICTConstants.I_CHROMAVALUE) && 
+                    (bytInPixel > JICTConstants.I_CHROMAVALUE)) {
+                        bytOutPixel = pOutMImage.getMPixel(ix, iy );
+                        fInWeight = (float)bytMattePixel / 255.0f * pfAlphaScale;
                         fOutWeight = 1.0f - fInWeight;
 
                         if(pfAlphaScale > 0.0f) {
-                            addedPixel = (byte)((fInWeight * (float)inPixel) + (fOutWeight *(float)outPixel) + 0.5f);
+                            bytAddedPixel = (byte)((fInWeight * (float)bytInPixel) + (fOutWeight *(float)bytOutPixel) + 0.5f);
                         } else {
-                            addedPixel = (byte)((float)outPixel + (fInWeight *(float)inPixel) + 0.5f);
+                            bytAddedPixel = (byte)((float)bytOutPixel + (fInWeight *(float)bytInPixel) + 0.5f);
                             // Make certain shadows won't produce negative intensities
-                            if (addedPixel > outPixel) {
-                                addedPixel = outPixel;
+                            if (bytAddedPixel > bytOutPixel) {
+                                bytAddedPixel = bytOutPixel;
                             }
                         }
 
-                        if (addedPixel < 1) {
-                            addedPixel = (byte)1;
+                        if (bytAddedPixel < 1) {
+                            bytAddedPixel = (byte)1;
                         }
                         if (pfAlphaScale == 0.0f) {
-                            addedPixel = (byte)0;
+                            bytAddedPixel = (byte)0;
                         }
 
-                        if(usingZBuffer) {
+                        if(bUsingZBuffer) {
                             if(pZMImage.getMPixel32(ix, iy) < pZBufMImage.getMPixel32(ix, iy)) { 
                                 pZBufMImage.setMPixel32(ix, iy, pZMImage.getMPixel32(ix, iy));
-                                pOutMImage.setMPixel(ix, iy, addedPixel);
+                                pOutMImage.setMPixel(ix, iy, bytAddedPixel);
                             }
                         } else {
-                            pOutMImage.setMPixel(ix, iy, addedPixel);
+                            pOutMImage.setMPixel(ix, iy, bytAddedPixel);
                         }
                     } // end if non-zero values
                     break;
         
                 case 24:                           // RGB Blend with Z-Buffer
-                    pInMImage.getMPixelRGB(ix, iy, inRed, inGreen, inBlue);
-                    if((mattePixel > JICTConstants.I_CHROMAVALUE) && (inGreen > JICTConstants.I_CHROMAVALUE)) {
-                        outPixel = (byte)pOutMImage.getMPixelRGB(ix, iy, outRed, outGreen, outBlue);
-                        fInWeight  = (float)mattePixel / 255.0f * pfAlphaScale;
+                    // The following method sets parameters bytInRed, bytInGreen and bytInBlue
+                    pInMImage.getMPixelRGB(ix, iy, bytInRed, bytInGreen, bytInBlue);
+                    if(
+                    (bytMattePixel > JICTConstants.I_CHROMAVALUE) && 
+                    (bytInGreen > JICTConstants.I_CHROMAVALUE)) {
+                        // The following method sets parameters bytOutRed, bytOutGreen, and bytOutBlue
+                        bytOutPixel = (byte)pOutMImage.getMPixelRGB(ix, iy, bytOutRed, bytOutGreen, bytOutBlue);
+                        fInWeight  = (float)bytMattePixel / 255.0f * pfAlphaScale;
                         fOutWeight = 1.0f - fInWeight;
 
                         if(pfAlphaScale > 0.0f) {
-                            addedRed   = (byte)((fInWeight * (float)inRed)   + (fOutWeight *(float)outRed)   + 0.5f);
-                            addedGreen = (byte)((fInWeight * (float)inGreen) + (fOutWeight *(float)outGreen) + 0.5f);
-                            addedBlue  = (byte)((fInWeight * (float)inBlue)  + (fOutWeight *(float)outBlue)  + 0.5f);
+                            bytAddedRed   = (byte)((fInWeight * (float)bytInRed)   + (fOutWeight *(float)bytOutRed)   + 0.5f);
+                            bytAddedGreen = (byte)((fInWeight * (float)bytInGreen) + (fOutWeight *(float)bytOutGreen) + 0.5f);
+                            bytAddedBlue  = (byte)((fInWeight * (float)bytInBlue)  + (fOutWeight *(float)bytOutBlue)  + 0.5f);
                         } else {  // shadow
-                            addedRed   = (byte)((float)outRed   + (fInWeight *(float)inRed)   + 0.5f);
-                            addedGreen = (byte)((float)outGreen + (fInWeight *(float)inGreen) + 0.5f);
-                            addedBlue  = (byte)((float)outBlue  + (fInWeight *(float)inBlue)  + 0.5f);
+                            bytAddedRed   = (byte)((float)bytOutRed   + (fInWeight *(float)bytInRed)   + 0.5f);
+                            bytAddedGreen = (byte)((float)bytOutGreen + (fInWeight *(float)bytInGreen) + 0.5f);
+                            bytAddedBlue  = (byte)((float)bytOutBlue  + (fInWeight *(float)bytInBlue)  + 0.5f);
 
                             // Make certain shadows won't produce negative intensities
-                            if (addedRed > outRed)     addedRed = outRed;
-                            if (addedGreen > outGreen) addedGreen = outGreen;
-                            if (addedBlue > outBlue)   addedBlue = outBlue;
+                            if (bytAddedRed > bytOutRed)     bytAddedRed = bytOutRed;
+                            if (bytAddedGreen > bytOutGreen) bytAddedGreen = bytOutGreen;
+                            if (bytAddedBlue > bytOutBlue)   bytAddedBlue = bytOutBlue;
                         }
 
-                        if (addedRed < 1)   addedRed   = (byte)1;
-                        if (addedGreen < 1) addedGreen = (byte)1;
-                        if (addedBlue < 1)  addedBlue  = (byte)1;
+                        if (bytAddedRed < 1)   bytAddedRed   = (byte)1;
+                        if (bytAddedGreen < 1) bytAddedGreen = (byte)1;
+                        if (bytAddedBlue < 1)  bytAddedBlue  = (byte)1;
                         if (pfAlphaScale == 0.0f) {
-                            addedRed   = (byte)0;
-                            addedGreen = (byte)0;
-                            addedBlue  = (byte)0;
+                            bytAddedRed   = (byte)0;
+                            bytAddedGreen = (byte)0;
+                            bytAddedBlue  = (byte)0;
                         }
 
-                        if(usingZBuffer) {
+                        if(bUsingZBuffer) {
                             if(pZMImage.getMPixel32(ix, iy) < pZBufMImage.getMPixel32(ix, iy)) { 
                                 pZBufMImage.setMPixel32(ix, iy, pZMImage.getMPixel32(ix, iy));
-                                pOutMImage.setMPixelRGB(ix, iy, addedRed, addedGreen, addedBlue);
+                                pOutMImage.setMPixelRGB(ix, iy, bytAddedRed, bytAddedGreen, bytAddedBlue);
                             }
                         } else {
-                            pOutMImage.setMPixelRGB(ix, iy, addedRed, addedGreen, addedBlue);
+                            pOutMImage.setMPixelRGB(ix, iy, bytAddedRed, bytAddedGreen, bytAddedBlue);
                         }
                     } // end if non zero values
                     break;
@@ -583,7 +593,7 @@ public class Globals {
             }
 
         case 24:
-            // The following method sets parameters red, green, and blue
+            // The following method sets parameters bytRed, bytGreen, and bytBlue
             pMImage.getMPixelRGB(piX, piY, bytRed, bytGreen, bytBlue);
             if (
             (bytRed   != JICTConstants.I_CHROMARED) || 
@@ -601,7 +611,7 @@ public class Globals {
     } // in_boundary
 
 
-    // This method came from BLEND.CPP
+    // This method originally came from BLEND.CPP
     //
     // probe(x, y, dir, new_x, new_y)
     //
@@ -727,7 +737,7 @@ public class Globals {
     } // neighbor
 
 
-    // This method came from BLEND.CPP
+    // This method originally came from BLEND.CPP
     //
     // shapeFromImage
     //
@@ -843,8 +853,8 @@ public class Globals {
     } // shapeFromImage
 
 
-    // This method came from MOTION.CPP
-    // TODO: Replace parameter filein with a FileStream
+    // This method originally came from MOTION.CPP
+    // 
     // Called from:
     //     MotionPath.readMotion
     public static String getNextMotionLine(String psText, Integer pILineNumber, 
@@ -880,6 +890,7 @@ public class Globals {
 
 
     // This method originally came from MOTION.CPP
+    // 
     // Called from:
     //     MotionBlur.onOK
     public static int motionBlur(String psFirstImagePath, String psOutputDir, 
@@ -1040,7 +1051,7 @@ public class Globals {
 
     // This method originally came from IWARP.CPP
     //
-    // This method performs planar texture mapping.
+    // Method iwarpz performs planar texture mapping.
     // See p 157 - 160 of Visual Special Effects Toolkit in C++.
     //
     // Called from:
@@ -1592,8 +1603,11 @@ public class Globals {
 
 
     // This method originally came from IWARP.CPP
+    // 
     // There is another method named insertionSort that takes 6 parameters.
     // This method here takes 5 parameters.
+    // RenderObject also defines an insertionSort method that takes 2 parameters.
+    // 
     // Called from:
     //     getIntervals
     public static void insertionSort(int theItems[], 
@@ -1633,8 +1647,10 @@ public class Globals {
 
 
     // This method originally came from IWARP.CPP
+    // 
     // There is another method named insertionSort that takes 5 parameters.
     // This method here takes 6 parameters.
+    // Class RenderObject also defines an insertionSort method that takes 2 parameters.
     public static void insertionSort(int theItems[], 
     int itemData1[], float itemData2[], float itemData3[], float itemData4[], 
     int numItems) {
@@ -1676,8 +1692,10 @@ public class Globals {
 
 
     // This method originally came from IWARP.CPP
+    // 
     // There is another method named removeDuplicates that takes 6 parameters.
     // This method here takes 5 parameters.
+    // 
     // Called from:
     //     getIntervals
     public static int removeDuplicates(int theList[], 
@@ -1713,6 +1731,7 @@ public class Globals {
 
 
     // This method originally came from IWARP.CPP
+    // 
     // There is another method named removeDuplicates that takes 5 parameters.
     // This method here takes 6 parameters.
     public static int removeDuplicates(int theList[], int theItemData1[], 
@@ -1748,7 +1767,8 @@ public class Globals {
     } // removeDuplicates
 
 
-    // This method came from IWARP.CPP
+    // This method originally came from IWARP.CPP
+    // 
     // Called from:
     //     getIntervals
     public static int removeSimilar(int theList[], 
@@ -1783,7 +1803,8 @@ public class Globals {
     } // removeSimilar
 
 
-    // This method came from IWARP.CPP
+    // This method originally came from IWARP.CPP
+    // 
     // Could not find where this is being called from.
     public static int iRender(MemImage outImage, MemImage maskImage, MemImage inImage,
     float rx, float ry, float rz, 
@@ -1867,7 +1888,8 @@ public class Globals {
     } // iRender
 
 
-    // This method came from IWARP.CPP
+    // This method originally came from IWARP.CPP
+    // 
     // Called from:
     //     SceneList.render
     public static int iRenderz(
@@ -3018,7 +3040,8 @@ public class Globals {
     } // createQMeshModel
  
 
-    // This method came from QMESHMODEL.CPP
+    // This method originally came from QMESHMODEL.CPP
+    // 
     // Called from:
     //     RenderObject ctor that takes 4 parameters: a String, int, boolean and Point3d
     public static int getMeshCentroid(MemImage pxMImage, MemImage pyMImage, MemImage pzMImage,
@@ -3273,7 +3296,8 @@ public class Globals {
     } // makeRGBimage
 
 
-    // This method came from TWEEN.CPP
+    // This method originally came from TWEEN.CPP
+    // 
     // Called from:
     //     tweenImage
     // which in turn is called from MorphDlg.onOK (when morph type = JICTConstants.I_TWOD)
@@ -3356,7 +3380,8 @@ public class Globals {
     } // getTotalIntervalLength
 
 
-    // This method came from TWEEN.CPP
+    // This method originally came from TWEEN.CPP
+    // 
     // Called from:
     //     tweenImage
     // which in turn is called from MorphDlg.onOK (when morph type = JICTConstants.I_TWOD)
@@ -3404,7 +3429,7 @@ public class Globals {
 
     // This method originally came from SHADERS.CPP
     //
-    // This method smooth shades a triangle given 3 vertices (x1, y1), (x2, y2)
+    // Method fillTrianglez smooth shades a triangle given 3 vertices (x1, y1), (x2, y2)
     // and (x3, y3) on the triangle, and an intensity at each vertex (i1, i2, and i3).
     // See p 173 of Visual Special Effects Toolkit in C++.
     //
@@ -3873,7 +3898,8 @@ public class Globals {
     } // getLight
 
 
-    // This method came from VECTOR.CPP
+    // This method originally came from VECTOR.CPP
+    // 
     // Called from:
     //     GPipe.addFace
     //     RenderObject.renderMeshz
@@ -3896,9 +3922,11 @@ public class Globals {
     } // lightModel
 
 
-    // This method came from RENDER.CPP
+    // This method originally came from RENDER.CPP
+    // 
     // Class RenderObject also has a renderMesh method, but that one takes 
     // 3 parameters, 2 MemImages and a blendIndicator.
+    // 
     // Called from: 
     //     MorphDlg
     public static int renderMesh(String outputImagePath, MemImage textureImage, 
@@ -4103,15 +4131,17 @@ public class Globals {
     } // renderMesh
 
 
-    // This method came from MEMIMG32.CPP
-    // Sets height, width and bitsPerPixel parameters
+    // This method originally came from MEMIMG32.CPP
+    // 
+    // Method readBMPHeader sets height, width and bitsPerPixel parameters
+    // 
     // Called from:
     //     createQMeshModel
     //     motionBlur
     //     MainFrame.onToolsWarpImage
     //     MemImage constructor that takes 6 parameters
     //     Shape3d.shapeFromBMP
-    public static int readBMPHeader(String psFileName, Integer height, Integer width, Integer bitsPerPixel) {
+    public static int readBMPHeader(String psFileName, Integer pIHeight, Integer pIWidth, Integer pIBitsPerPixel) {
         // TODO: Rewrite this.
         return 0;
         /*
@@ -4169,28 +4199,30 @@ public class Globals {
     } // readBMPHeader
 
 
-    // This method came from TWEEN.CPP
+    // This method originally came from TWEEN.CPP
+    // 
     // Morph two rotoscoped images
+    // 
     // Called from:
     //     MorphDlg.onOK (when morph type = JICTConstants.I_TWOD)
     public static int tweenImage(float aFraction, 
-    MemImage inImageA, MemImage inImageB, 
-    String imagePath, String shapePath) {
+    MemImage pInMImageA, MemImage pInMImageB, 
+    String psImagePath, String psShapePath) { // Parameter psShapePath is not used
         String msgText;
         Shape3d inShapeA, inShapeB;
         inShapeA = new Shape3d(8192);
         inShapeB = new Shape3d(8192);
 
         int mStatus;
-        int aStatus = shapeFromImage(inImageA, inShapeA);
+        int aStatus = shapeFromImage(pInMImageA, inShapeA);
         if(aStatus != 0) {
-            statusPrint("tweenImage: shapeFromImage returned non-zero status. inImageA");
+            statusPrint("tweenImage: shapeFromImage returned non-zero status. pInMImageA");
             return -1;
         }
         
-        aStatus = shapeFromImage(inImageB, inShapeB);
+        aStatus = shapeFromImage(pInMImageB, inShapeB);
         if(aStatus != 0) {
-            statusPrint("tweenImage: shapeFromImage returned non-zero status. inImageB");
+            statusPrint("tweenImage: shapeFromImage returned non-zero status. pInMImageB");
             return -2;
         }
 
@@ -4204,7 +4236,7 @@ public class Globals {
         outShapeB = null;
         tempShapeA = null;
         tempShapeB = null;
-        int bpp = inImageA.getBitsPerPixel();
+        int bpp = pInMImageA.getBitsPerPixel();
 
         // Equalize the number of vertices in each shape
         // The following method sets either outShapeA or outShapeB
@@ -4283,10 +4315,10 @@ public class Globals {
             return -3;
         }
 
-        int numXA = inImageA.getWidth();
-        int numYA = inImageA.getHeight();
-        int numXB = inImageB.getWidth();
-        int numYB = inImageB.getHeight();
+        int numXA = pInMImageA.getWidth();
+        int numYA = pInMImageA.getHeight();
+        int numXB = pInMImageB.getWidth();
+        int numYB = pInMImageB.getHeight();
         if(
         numXA == 0 || numYA == 0 ||
         numXB == 0 || numYB == 0) {
@@ -4305,7 +4337,7 @@ public class Globals {
     
         TMatrix aViewMatrix = new TMatrix(); // initialized to the identity matrix
         MemImage tempImageA = new MemImage(numYO, numXO, bpp); 
-        int warpStatus = iwarpz(inImageA, tempImageA, null,
+        int warpStatus = iwarpz(pInMImageA, tempImageA, null,
             0.0f, 0.0f, 0.0f, 
             xScaleAtoO, yScaleAtoO, 1.0f,
             0.0f, 0.0f, 0.0f, 
@@ -4315,7 +4347,7 @@ public class Globals {
         // why is warpStatus not inspected for an error code?
 
         MemImage tempImageB = new MemImage(numYO, numXO, bpp); 
-        warpStatus = iwarpz(inImageB, tempImageB, null,
+        warpStatus = iwarpz(pInMImageB, tempImageB, null,
             0.0f, 0.0f, 0.f, 
             xScaleBtoO, yScaleBtoO, 1.0f,
             0.0f, 0.0f, 0.0f, 
@@ -4352,7 +4384,7 @@ public class Globals {
         // Morph image A
         for(row = 1; row < numYO; row++) {
             aStatus = getRowIntervals(tempImageA, row, aIntervalList, numAIntervals);
-            if(aStatus != 0){
+            if(aStatus != 0) {
                 msgText = String.format( 
                     "tweenImage: getRowIntervals error (image A) at row: %d", row);
                 statusPrint(msgText);
@@ -4474,13 +4506,13 @@ public class Globals {
             yMiddle = (int)(numYA / 2.0f);
             xTranslation = (int)((numOutX / 2.0f) - xMiddle);
             yTranslation = (int)((numOutY / 2.0f) - yMiddle);
-            inImageA.copy(outImage, xTranslation, yTranslation);
+            pInMImageA.copy(outImage, xTranslation, yTranslation);
         } else if (1.0f - aFraction < 0.005f) {
             xMiddle = (int)(numXB / 2.0f);
             yMiddle = (int)(numYB / 2.0f);
             xTranslation = (int)((numOutX / 2.0f) - xMiddle);
             yTranslation = (int)((numOutY / 2.0f) - yMiddle);
-            inImageB.copy(outImage, xTranslation, yTranslation);
+            pInMImageB.copy(outImage, xTranslation, yTranslation);
         } else {
             xMiddle = (int)(numXO / 2.0f);
             yMiddle = (int)(numYO / 2.0f);
@@ -4489,15 +4521,16 @@ public class Globals {
             morphImage.copy(outImage, xTranslation, yTranslation);
         }
 
-        outImage.writeBMP(imagePath);
+        outImage.writeBMP(psImagePath);
         morphImage = null;
         outImage = null;
         return 0;
     } // tweenImage
 
 
-    // This method sets parameter pOutShape
     // This method originally came from TWEEN.CPP
+    // 
+    // Method tweenShape sets parameter pOutShape
     //
     // Called from:
     //     tweenImage
@@ -4592,6 +4625,7 @@ public class Globals {
 
 
     // This method originally came from TWEEN.CPP
+    // 
     // Called from:
     //     MorphDlg.onOK (when morph type = JICTConstants.I_THREED)
     public static int tweenMesh(float pfFraction, 
