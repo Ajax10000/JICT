@@ -273,50 +273,50 @@ Java version is core/RenderObject.java
 ## scene
 
 Defined in:
-MODEL.CPP
+MODEL.CPP  
 SCENELST.H
 
 Java version is core/Scene.java
 
 ## sceneElement
 
-Defined in:
-MODEL.CPP
+Defined in:  
+MODEL.CPP  
 SCENELST.H
 
 Java version is core/SceneElement.java
 
 ## sceneList
 
-Defined in:
-DEPTHSRT.CPP
-MODEL.CPP
-SCENELST.H
+Defined in:  
+DEPTHSRT.CPP  
+MODEL.CPP  
+SCENELST.H  
 SCENELST.CPP
 
 Java version is core/SceneList.java
 
 ## shape3d
 
-Defined in:
-DEPTHSRT.CPP
-SHAPE3D.H
-SHAPE3D.CPP
+Defined in:  
+DEPTHSRT.CPP  
+SHAPE3D.H  
+SHAPE3D.CPP  
 TWEEN.CPP
 
 Java version is core/Shape3d.java
 
 ## tMatrix
 
-Defined in:
-TMATRIX.H
+Defined in:  
+TMATRIX.H  
 TMATRIX.CPP
 
 Java version is math/TMatrix.java
 
 ## vertexSet
 
-Defined in:
+Defined in:  
 SHAPE3D.H (as struct)
 
 Java version is structs/VertexSet.java
