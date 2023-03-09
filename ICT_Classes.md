@@ -40,104 +40,104 @@ Below each class is discussed in more detail.
 ## bundle
 
 Defined in:\
-SCENELST.H (as struct)\
+SCENELST.H (as struct)
 
 Java version is structs/Bundle.java
 
 ## CAboutDlg
 
-Extends CDialog\
+Extends CDialog
 
 Defined in:\
-ICT20.CPP\
+ICT20.CPP
 
 Java version is dialogs/AboutDlg.java
 
 ## CIctApp
 
-Extends CWinApp\
+Extends CWinApp
 
 Defined in:\
 ICT20.H\
-ICT20.CPP\
+ICT20.CPP
 
 Java version is apps/IctApp.java
 
 ## CIctDoc
 
-Extends CDocument\
+Extends CDocument
 
 Defined in:\
 ICTDOC.H\
-ICTDOC.CPP\
+ICTDOC.CPP
 
 Java version is docs/IctDoc.java
 
 ## CICTMDIChildWnd
 
-Extends CMDIChildWnd\
+Extends CMDIChildWnd
 
 Defined in:\
-ICTMDI.H\
+ICTMDI.H
 
 There is no corresponding Java version.
 
 ## CIctView
 
-Extends CEditView\
+Extends CEditView
 
 Defined in:\
-ICTVIEW.H\
+ICTVIEW.H
 
 There is no corresponding Java version.
 
 ## CMainFrame
 
-Extends CMDIFrameWnd\
+Extends CMDIFrameWnd
 
 Defined in:\
 MAINFRM.H\
-MAINFRM.CPP\
+MAINFRM.CPP
 
 Java version is frames/MainFrame.java
 
 ## CMorphDialog
 
-Extends CDialog\
+Extends CDialog
 
 Defined in:\
 MORPHDIALOG.H\
-MORPHDIALOG.CPP\
+MORPHDIALOG.CPP
 
 Java version is dialogs/MorphDlg.java
 
 ## CNameDialog
 
-Extends CDialog\
+Extends CDialog
 
 Defined in:\
 NAMEDLG.H\
-NAMEDLG.CPP\
+NAMEDLG.CPP
 
 Java version is dialogs/NameDlg.java
 
 ## CQuadMeshDlg
 
-Extends CDialog\
+Extends CDialog
 
 Defined in:\
 QUADMESHDLG.H\
-QUADMESHDLG.CPP\
+QUADMESHDLG.CPP
 
 Java version is dialogs/QuadMeshDlg.java
 
 ## CScenePreviewDlg
 
-Extends CDialog\
+Extends CDialog
 
 Defined in:\
 SCNPREVW.H\
-SCENEPREVIEWDLG.CPP\
+SCENEPREVIEWDLG.CPP
 
 Java version is dialogs/ScenePreviewDlg.java
 
@@ -145,14 +145,14 @@ Java version is dialogs/ScenePreviewDlg.java
 
 Defined in:\
 WARPPARAM.H\
-WARPPARAMDLG.CPP\
+WARPPARAMDLG.CPP
 
 Java version is dialogs/WarpParamDlg.java
 
 ## faceSet
 
 Defined in:\
-SHAPE3D.H (as struct)\
+SHAPE3D.H (as struct)
 
 Java version is structs/FaceSet.java
 
@@ -160,7 +160,7 @@ Java version is structs/FaceSet.java
 
 Defined in:\
 GPIPE.H\
-GPIPE.CPP\
+GPIPE.CPP
 
 Java version is globals/GPipe.java
 
@@ -168,36 +168,36 @@ Java version is globals/GPipe.java
 
 Defined in:\
 IMAGEDOC.H\
-IMAGEDOC.CPP\
+IMAGEDOC.CPP
 
 Java version is docs/ImageDoc.java
 
 ## imageView
 
-Extends CScrollView\
+Extends CScrollView
 
 Defined in:\
 IMAGEVW.H\
-IMAGEVEW.CPP\
+IMAGEVEW.CPP
 
 Java version is dialogs/ImageView.java
 
 ## imageWin
 
-Extends CMDIChildWnd\
+Extends CMDIChildWnd
 
 Defined in:\
-IMAGEWN.H\
+IMAGEWN.H
 
 Java version is windows/ImageWindow.java
 
 ## MakeTextureDlg
 
-Extends CDialog\
+Extends CDialog
 
 Defined in:\
 MAKETEXTUREDLG.H\
-MAKETEXTUREDLG.CPP\
+MAKETEXTUREDLG.CPP
 
 Java version is dialogs/MakeTextureDlg.java
 
@@ -208,17 +208,17 @@ BLEND.CPP\
 IWARP.CPP\
 MEMIMAGE.H\
 MEMIMG32.CPP\
-SHADERS.CPP\
+SHADERS.CPP
 
 Java version is core/MemImage.java
 
 ## MotionBlurDialog
 
-Extends CDialog\
+Extends CDialog
 
 Defined in:\
 MOTIONBLURDIALOG.H\
-MOTIONBLURDIALOG.CPP\
+MOTIONBLURDIALOG.CPP
 
 Java version is MotionBlurDlg.java
 
@@ -226,7 +226,7 @@ Java version is MotionBlurDlg.java
 
 Defined in:\
 MOTION.H\
-MOTION.CPP\
+MOTION.CPP
 
 Java version is motion/MotionNode.java
 
@@ -234,7 +234,7 @@ Java version is motion/MotionNode.java
 
 Defined in:\
 MOTION.H\
-MOTION.CPP\
+MOTION.CPP
 
 Java version is motion/MotionPath.java
 
@@ -242,7 +242,7 @@ Java version is motion/MotionPath.java
 
 Defined in:\
 ICT20.H (as a struct)\
-VECTOR.CPP\
+VECTOR.CPP
 
 Java version is structs/Point2d.java
 
@@ -250,7 +250,7 @@ Java version is structs/Point2d.java
 
 Defined in:\
 ICT20.H (as a struct)\
-VECTOR.CPP\
+VECTOR.CPP
 
 Java version is structs/Point3d.java
 
@@ -258,7 +258,7 @@ Java version is structs/Point3d.java
 
 Defined in:\
 PREFRENCE.H\
-UTILS.CPP\
+UTILS.CPP
 
 No corresponding Java version, as Java provides the java.utils.prefs.Preferences class.
 
@@ -266,7 +266,7 @@ No corresponding Java version, as Java provides the java.utils.prefs.Preferences
 
 Defined in:\
 RENDER.H\
-RENDER.CPP\
+RENDER.CPP
 
 Java version is core/RenderObject.java
 
@@ -274,7 +274,7 @@ Java version is core/RenderObject.java
 
 Defined in:\
 MODEL.CPP\
-SCENELST.H\
+SCENELST.H
 
 Java version is core/Scene.java
 
@@ -282,7 +282,7 @@ Java version is core/Scene.java
 
 Defined in:\
 MODEL.CPP\
-SCENELST.H\
+SCENELST.H
 
 Java version is core/SceneElement.java
 
@@ -292,7 +292,7 @@ Defined in:\
 DEPTHSRT.CPP\
 MODEL.CPP\
 SCENELST.H\
-SCENELST.CPP\
+SCENELST.CPP
 
 Java version is core/SceneList.java
 
@@ -302,7 +302,7 @@ Defined in:\
 DEPTHSRT.CPP\
 SHAPE3D.H\
 SHAPE3D.CPP\
-TWEEN.CPP\
+TWEEN.CPP
 
 Java version is core/Shape3d.java
 
@@ -310,14 +310,14 @@ Java version is core/Shape3d.java
 
 Defined in:\
 TMATRIX.H\
-TMATRIX.CPP\
+TMATRIX.CPP
 
 Java version is math/TMatrix.java
 
 ## vertexSet
 
 Defined in:\
-SHAPE3D.H (as struct)\
+SHAPE3D.H (as struct)
 
 Java version is structs/VertexSet.java
 
