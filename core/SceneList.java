@@ -170,7 +170,7 @@ public:
     } // finalize
 
 
-    // setCurrentModel sets the mCurrentSceneElement field of the current 
+    // Method setCurrentModel sets the mCurrentSceneElement field of the current 
     // SceneList object to the model whose name is passed in as the agument 
     // psDesiredModel.
     //
@@ -195,9 +195,9 @@ public:
     } // setCurrentModel
 
 
-    // setCurrentModelTransform sets the rotation, scale, and translation transformations 
-    // (i.e., mRotation, mScale, and mTranslation fields) of the current model using the 
-    // nine parameters supplied.
+    // Method setCurrentModelTransform sets the rotation, scale, and translation 
+    // transformations (i.e., mRotation, mScale, and mTranslation fields) of the 
+    // current model using the nine parameters supplied.
     //
     // Called from:
     //     ScenePreviewDlg.onCmdPlus
@@ -223,8 +223,8 @@ public:
     } // setCurrentModelTransform
 
 
-    // getCurrentModelTransform returns the rotation, scale, and translation 
-    // transformations of the curent model in the nine parameters.
+    // Method getCurrentModelTransform returns the rotation, scale, and 
+    // translation transformations of the curent model in the nine parameters.
     // 
     // Called from:
     //     ScenePreviewDlg.chooseModel
@@ -252,7 +252,7 @@ public:
     } // getCurrentModelTransform
 
 
-    // showModels places a list of all the model names contained in a 
+    // Method showModels places a list of all the model names contained in a 
     // scene list into the combo box object whose reference is supplied.
     //
     // Not called from within this file.
@@ -279,7 +279,7 @@ public:
     } // showModels
 
 
-    // listLength returns as its value the one-relative number of models 
+    // Method listLength returns as its value the one-relative number of models 
     // in the scene list object. If the scene list has no objects, it 
     // returns 0.
     //
@@ -309,7 +309,7 @@ public:
     //     preview
     //     previewStill
     //     render
-    public int getSceneInfo(String psName, 
+    public int getSceneInfo(StringBuffer psbName, 
     Integer pIType, Integer pICMode, Integer pIOutRows, Integer piOutCols) {
         Scene scene = this.mSceneListHead;
         scene = scene.mNextEntry;  // Skip over the list header
@@ -318,7 +318,7 @@ public:
         }
 
         // Set the output parameters
-        psName    = scene.msSceneName;
+        psbName   = psbName.append(scene.msSceneName);
         pIType    = scene.miSequenceType;
         pICMode   = scene.miColorMode;
         pIOutRows = scene.miOutputRows;
@@ -376,14 +376,15 @@ public:
     } // getViewTransform
 
 
-    // setViewTransform sets the translation and rotation transformations 
-    // (i.e., mTranslationPt and mRotationPt fields) of the current 
-    // scene (not model - ie., not SceneElement) using the nine parameters 
+    // Method setViewTransform sets the translation and rotation transformations 
+    // (i.e., mTranslationPt and mRotationPt fields) of the current scene
+    // (not model - ie., not SceneElement) using the nine parameters 
     // supplied.
     //
     // Called from:
     //     ScenePreviewDlg.onOK
-    public int setViewTransform(float pfViewX, float pfViewY, float pfViewZ,
+    public int setViewTransform(
+    float pfViewX,   float pfViewY,   float pfViewZ,
     float pfRotateX, float pfRotateY, float pfRotateZ) {
         Scene scene = mSceneListHead;
         scene = scene.mNextEntry;  //Skip over the list header
@@ -435,7 +436,8 @@ public:
     } // getViewPoint
 
 
-    // writeList writes the contents of the SceneList to a .scn file.
+    // Method writeList writes the contents of the SceneList 
+    // to a .scn file.
     //
     // Called from:
     //     ScenePreviewDlg.onOK
@@ -487,8 +489,6 @@ public:
     } // writeList
 
 
-    // Not called from within this file.
-    //
     // Method previewSequence previews a sequence visual effect by 
     // traversing the the list of models in the scene list, displaying 
     // on the screen the name and boundary line segments of each model
@@ -499,7 +499,7 @@ public:
     public int preview(BufferedImage pBuffImg, TMatrix pModelMatrix, TMatrix pViewMatrix) {
         String sMsgText;
         int iStatus = 0;
-        String sSceneName;
+        StringBuffer sbSceneName = new StringBuffer();
         Integer iEffectType = 0;
         Integer iColorMode = 0;
         Integer iOutputRows = 0, iOutputColumns = 0;
@@ -514,7 +514,7 @@ public:
 
         // The following method sets all the parameters,
         // but we will not use sSceneName nor iColorMode
-        getSceneInfo(sSceneName, iEffectType, iColorMode, iOutputRows, iOutputColumns);
+        getSceneInfo(sbSceneName, iEffectType, iColorMode, iOutputRows, iOutputColumns);
 
         // Setup for smooth animation.
         MemImage tempImage = new MemImage(iOutputRows, iOutputColumns);
@@ -649,7 +649,7 @@ public:
     public int previewStill(BufferedImage pBuffImg, TMatrix pModelMatrix, TMatrix pViewMatrix) {
         String sMsgText;
         int iStatus = 0;
-        String sSceneName = "";
+        StringBuffer sbSceneName = new StringBuffer();
         Integer iEffectType = 0;
         Integer iColorMode = 0;
         Integer iOutputRows = 0, iOutputColumns = 0;
@@ -671,7 +671,7 @@ public:
         
         // The following method sets all the parameters
         // but we will not use sSceneName nor iColorMode
-        getSceneInfo(sSceneName, iEffectType, iColorMode, iOutputRows, iOutputColumns);
+        getSceneInfo(sbSceneName, iEffectType, iColorMode, iOutputRows, iOutputColumns);
         // int xOffset = iOutputColumns / 2; // this variable is not used
         // int yOffset = iOutputRows / 2; // this variable is not used
 
@@ -862,7 +862,8 @@ public:
     public int render(ImageView pDisplayWindow, TMatrix pViewMatrix,
     boolean pbDepthSortingEnabled, boolean pbZBufferEnabled, boolean pbAntiAliasEnabled, 
     boolean pbHazeFogEnabled) {
-        String sOutputFileName = "", sSceneName = "";
+        String sOutputFileName = "";
+        StringBuffer sbSceneName = new StringBuffer();
         String sRedFileName = "", sGreenFileName = "", sBlueFileName = "", sRGBFileName = "";
         String sCurrentColor = "";
         Integer iEffectType = 0;
@@ -881,7 +882,7 @@ public:
 
         // The following method sets all the parameters
         // but we will not use sSceneName
-        getSceneInfo(sSceneName, iEffectType, iColorMode, iOutputRows, iOutputColumns);
+        getSceneInfo(sbSceneName, iEffectType, iColorMode, iOutputRows, iOutputColumns);
 
         Scene scene = this.mSceneListHead;
         scene = scene.mNextEntry;        // Skip over the list header
@@ -987,7 +988,8 @@ public:
 
                         // Open the model's image if appropriate
                         if(modelSE.miModelType != JICTConstants.I_SHAPE) {
-                            inputMImage = new MemImage(sInputPath, 0, 0, JICTConstants.I_RANDOM, 'R', iColor);
+                            inputMImage = new MemImage(sInputPath, 0, 0, 
+                                JICTConstants.I_RANDOM, 'R', iColor);
                             if (!inputMImage.isValid()) {
                                 sMsgText = "SceneList.Render: Can't open image: " + modelSE.msFileName;
                                 Globals.statusPrint(sMsgText);
@@ -997,15 +999,16 @@ public:
 
                         if(modelSE.mbBlendIndicator) {
                             // Open the alpha image. 
-                            // If an alpha image pathname was specified 
-                            // in the scene file, use it. Otherwise set it to NULL.  In this case
-                            // function iRenderz will create the alphaImage from the warped image.
+                            // If an alpha image pathname was specified in the scene file, use it. 
+                            // Otherwise set it to NULL. In this case method iRenderz will create 
+                            // the alphaImage from the warped image.
                             String sAlphaName;
                             alphaMImage = null;
                             if(modelSE.miModelType == JICTConstants.I_IMAGE) {
                                 if(!modelSE.msAlphaPath.equalsIgnoreCase("NONE")) {
                                     sAlphaName = modelSE.msAlphaPath;
-                                    alphaMImage = new MemImage(sAlphaName, 0, 0, JICTConstants.I_RANDOM, 'R', JICTConstants.I_EIGHTBITMONOCHROME);
+                                    alphaMImage = new MemImage(sAlphaName, 0, 0, 
+                                        JICTConstants.I_RANDOM, 'R', JICTConstants.I_EIGHTBITMONOCHROME);
                                     if (!alphaMImage.isValid()) {
                                         Globals.statusPrint("SceneList.render. Can't open the custom alpha image");
                                     }
@@ -1172,7 +1175,10 @@ public:
     } // render
 
 
-    // TODO: Not a method of SceneList in the original C++ code.
+    // Not a method of SceneList in the original C++ code. However, it is only 
+    // called from within SceneList, so it makes sense to make it a method of 
+    // SceneList.
+    // 
     // Called from:
     //     render, if modelSE.miModelType = JICTConstants.I_SEQUENCE
     //     render, in turn, is called from: 
@@ -1208,7 +1214,10 @@ public:
     } // getSequenceFileName
 
 
-    // Not a method of SceneList in the original C++ code
+    // Not a method of SceneList in the original C++ code. However, it is
+    // only called from within SceneList, so it makes sense to make it a
+    // method of SceneList.
+    //
     // Called from:
     //     render
     public void getFileName(String psOutputFileName, String psPrefix, 
@@ -1415,9 +1424,9 @@ public:
     } // addScene
 
 
-    // Creates a SceneElement object from the parameters and adds it to 
-    // the current SceneList's list. Parameters are related to information read
-    // from a scene file:
+    // Method addSceneElement creates a SceneElement object from the parameters and 
+    // adds it to the current SceneList's list. Parameters are related to information
+    // read from a scene file:
     // Model <modelName> [Blend|NoBlend] [Warp|NoWarp] AlphaScale <alpha> [Image|Shape|QuadMesh|Sequence]
     // => psModelName, pbBlendI, pfScale (= <alpha>)
     // => piType (depends on choice of [Image|Shape|QuadMesh|Sequence] selected)
@@ -1479,7 +1488,7 @@ public:
     } // addSceneElement
 
 
-    // Apparently used for debugging purposes.
+    // Apparently method display is used for debugging purposes.
     // Did not see it being called.
     public void display() {
         Scene scene = mSceneListHead;
@@ -1661,7 +1670,8 @@ public:
             if(
             (!modelSE.mbDefinedRefPoint) && 
             (modelSE.miModelType != JICTConstants.I_COMPOUND)) {
-                // The following method sets centroidX, centroidY, and centroidZ (all of type Float)
+                // The following method sets parameters fCentroidX, fCentroidY, and fCentroidZ 
+                // (all of type Float)
                 modelSE.mScreenRdrObject.mCurrentShape.getReferencePoint(fCentroidX, fCentroidY, fCentroidZ);
 
                 modelSE.pointOfReference.x = fCentroidX; 
@@ -1742,7 +1752,7 @@ public:
             }
             
             modelSE = modelSE.mNextEntry;
-        }
+        } // while (modelSE != null)
 
         pINumModels = iModelCounter;
         if(pbDepthSortingEnabled) {
