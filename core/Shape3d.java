@@ -15,8 +15,6 @@ import java.io.LineNumberReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 
-import java.nio.file.Path;
-
 import java.util.StringTokenizer;
 import java.util.prefs.Preferences;
 
@@ -142,7 +140,7 @@ public:
     //     SceneList.preview
     //     SceneList.previewStill
     public Shape3d(String psFileName, int piModelType) {
-        String sShapePath;
+        StringBuffer sbShapePath = new StringBuffer();
         String sShapeDir;
         int iStatus;
         String sMsgText;
@@ -156,15 +154,15 @@ public:
             sShapeDir = prefs.get("ShapeDir", "SHAPE/");
             
             // The following method sets sShapePath
-            getShapePath(psFileName, sShapeDir, sShapePath);
+            getShapePath(psFileName, sShapeDir, sbShapePath);
 
             // Read the shape file (has extension ".shp")
             // This will populate this object's fields with the data it finds
             // in the shape file.
-            iStatus = readShape(sShapePath);
+            iStatus = readShape(sbShapePath.toString());
             if (iStatus != 0) {
                 // There was a problem reading the shape file
-                sMsgText = "Shape3d. Can't open shape file: " + iStatus + " " + sShapePath;
+                sMsgText = "Shape3d. Can't open shape file: " + iStatus + " " + sbShapePath.toString();
                 Globals.statusPrint(sMsgText);
                 this.miNumAllocatedVertices = 0;
                 this.pointOfReference = null;
@@ -199,20 +197,19 @@ public:
                 // nullPointer will be used to set firstVertex
 
                 Integer iWidth = 0, iHeight = 0;
-                String sSceneName;
+                StringBuffer sbSceneName = new StringBuffer();
                 Integer iEffectType = 0; 
                 Integer iColorMode = 0;
 
                 // Get the pointer to the sceneList object in order to get the output image size.
                 // Get the sceneList object from the application
-                CWnd theWindow = AfxGetMainWnd();
-                MainFrame theFrame = (MainFrame)theWindow;
+                MainFrame theFrame = MainFrame.getInstance();
                 SceneList aSceneList = theFrame.mSceneList;
 
                 // The following method sets all the parameters
                 // However parameters sSceneName, iEffectType and iColorMode will
                 // not henceforth be used in this constructor.
-                aSceneList.getSceneInfo(sSceneName, iEffectType, iColorMode, iHeight, iWidth); 
+                aSceneList.getSceneInfo(sbSceneName, iEffectType, iColorMode, iHeight, iWidth); 
 
                 // Using the scene information, populate this object's fields.
                 this.mVertices = nullPointer;
@@ -1116,6 +1113,8 @@ public:
     }
 
 
+    // This method has no corresponding method in the original C++ code.
+    // It is new to the Java code.
     public void decCurrentVertex() {
         this.miCurrVtxIdx--;
         this.mCurrentVertex = this.mVertices[miCurrVtxIdx];
@@ -1130,6 +1129,8 @@ public:
     } // initCurrentFace
 
 
+    // This method has no corresponding method in the original C++ code.
+    // It is new to the Java code.
     public void incCurrentFace() {
         this.miCurrFaceIdx++;
         this.mCurrentFace = this.mFaces[miCurrFaceIdx];
@@ -1498,12 +1499,13 @@ public:
     } // translateS
 
 
+    // TODO: Not a method of Shape3d in the original C++ code
     // This method originally came from SHAPE3D.CPP
     // 
-    // TODO: Not a method of Shape3d in the original C++ code
     // Called from:
     //     getShapeFileInfo
     //     readShape
+    //     ScnFileParser.readListReal
     public static String getNextLine(StringBuffer psTheText, Integer piLineNumber, 
     LineNumberReader filein, int piMinLineLength) {
         boolean bComment;
@@ -1553,13 +1555,13 @@ public:
 
 
     // This method originally came from SHAPE3D.CPP
-    // 
     // TODO: Not a method of Shape3d in the original C++ code
-    // This method sets psShapePath
+    //
+    // Method getShapePath sets parameter psShapePath
     //
     // Called from:
     //     Constructor that takes 2 parameters, a String and an int
-    public void getShapePath(String psModelPath, String psShapeDir, String psShapePath) {
+    private void getShapePath(String psModelPath, String psShapeDir, StringBuffer psbShapePath) {
         String sFileWExt, sBaseFile;
         File modelPathFile = new File(psModelPath);
 
@@ -1572,9 +1574,9 @@ public:
         int iLength = sBaseFile.length();
         if(iLength > 0) {
             // Set the output parameter
-            psShapePath = psShapeDir;
-            psShapePath.concat(sBaseFile);
-            psShapePath.concat(".shp");
+            psbShapePath.append(psShapeDir);
+            psbShapePath.append(sBaseFile);
+            psbShapePath.append(".shp");
         } else {
             Globals.statusPrint("getShapePath: Empty file name");
         }
