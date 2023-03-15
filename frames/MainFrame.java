@@ -226,7 +226,7 @@ protected:
 
     // Set in:
     //     onToolsCreateASceneList (when SceneList.getSceneInfo is called)
-    public String msSceneName;
+    public StringBuffer msSceneName = new StringBuffer();
 
     // Set in:
     //     onToolsCreateASceneList
@@ -435,9 +435,18 @@ protected:
     private JMenuItem rndrMimStill;
     private JMenuItem rndrMimSequence;
     private Preferences prefs;
+    private static MainFrame mMyself;
 
-    public MainFrame(IctApp ictApp) {
-        this.ictApp = ictApp;
+    public static MainFrame getInstance() {
+        if (mMyself != null) {
+            return mMyself;
+        } else {
+            return new MainFrame();
+        }
+    }
+
+    private MainFrame(/* IctApp ictApp */) {
+        // this.ictApp = ictApp;
         prefs = Preferences.userNodeForPackage(JICTApp.class);
 
         setTitle("Java Image Composition Toolkit");
@@ -467,7 +476,7 @@ protected:
         createMenu(menuBar);
         setJMenuBar(menuBar);
 
-        setVisible(true);
+        // setVisible(true);
     } // MainFrame ctor
 
 
@@ -1184,6 +1193,7 @@ POPUP "Tools"
             this.mbRenderSceneEnabled     = false;
             this.mbRenderSequenceEnabled  = false;
         }
+        updatePreviewMenu();
     } // onToolsCreateASceneList
 
 
@@ -1356,55 +1366,55 @@ POPUP "Tools"
 
         //ictApp.m_pDocTemplateImage.OpenDocumentFile(null);
         orgView = ImageView.getView();
-        Integer inHeight = 0, inWidth = 0, bitsPerPixel = 0;
-        MemImage inImage = new MemImage(0, 0);
+        Integer iInHeight = 0, iInWidth = 0, iBitsPerPixel = 0;
+        MemImage inMImage = new MemImage(0, 0);
 
         String sWarpTestPath = prefs.get("WarpTestPath", "WARPTEST/");
 
         // The following method sets parameters inHeight, inWidth, and bitsPerPixel
-        int iStatus = Globals.readBMPHeader(sWarpTestPath, inHeight, inWidth, bitsPerPixel);
-        if(bitsPerPixel == 8) {
-            inImage = new MemImage(sWarpTestPath, 0, 0, 
+        int iStatus = Globals.readBMPHeader(sWarpTestPath, iInHeight, iInWidth, iBitsPerPixel);
+        if(iBitsPerPixel == 8) {
+            inMImage = new MemImage(sWarpTestPath, 0, 0, 
                 JICTConstants.I_RANDOM, 'R', JICTConstants.I_MONOCHROME);
         }
-        if(bitsPerPixel == 24) {
-            inImage = new MemImage(sWarpTestPath, 0, 0, 
+        if(iBitsPerPixel == 24) {
+            inMImage = new MemImage(sWarpTestPath, 0, 0, 
                 JICTConstants.I_RANDOM, 'R', JICTConstants.I_RGBCOLOR);
         }
 
-        int outHeight = 350;
-        int outWidth  = 350;
-        if(!inImage.isValid()) {
+        int iOutHeight = 350;
+        int iOutWidth  = 350;
+        if(!inMImage.isValid()) {
             Globals.statusPrint("Unable to open warp test image");
             return;
         }
         orgView.setCaption("Original Image");
-        orgView.associateMemImage(inImage);
+        orgView.associateMemImage(inMImage);
 
         // MDITile(MDITILE_VERTICAL);
 
-        MemImage outImage   = new MemImage(outHeight, outWidth, bitsPerPixel);
-        MemImage aliasImage = new MemImage(outHeight, outWidth, bitsPerPixel);
+        MemImage outMImage   = new MemImage(iOutHeight, iOutWidth, iBitsPerPixel);
+        MemImage aliasMImage = new MemImage(iOutHeight, iOutWidth, iBitsPerPixel);
         // int xOffset, yOffset;
         TMatrix dummyMatrix = new TMatrix();
 
         // Translate test image to center of output image
         // float xAngle = 0.0f, yAngle = 0.0f, zAngle = 0.0f;
 
-        Globals.iwarpz(inImage, outImage, null, 
+        Globals.iwarpz(inMImage, outMImage, null, 
             mWarpRotateX, mWarpRotateY, mWarpRotateZ,
             mWarpScaleX,  mWarpScaleY,  mWarpScaleZ, 
             0.0f, 0.0f, 0.0f,
             0.0f, 0.0f, 0.0f,
             dummyMatrix,
             0.0f, 0.0f, 0.0f);
-        outImage.writeBMP("d:\\ict20\\output\\testwarp.bmp");
+        outMImage.writeBMP("d:\\ict20\\output\\testwarp.bmp");
 
         if(mbAntiAliasEnabled) {
-            Globals.antiAlias(outImage, aliasImage);
-            outView.associateMemImage(aliasImage);
+            Globals.antiAlias(outMImage, aliasMImage);
+            outView.associateMemImage(aliasMImage);
         } else {
-            outView.associateMemImage(outImage);
+            outView.associateMemImage(outMImage);
         }
     } // onWarpParamDlgClosed
 
