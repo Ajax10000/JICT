@@ -21,7 +21,7 @@ public class MemImage {
     // Consider making private - it is returned by method getWidth
     protected int miImageWidth;     // Width in pixels
 
-    // Consider making private - itis returned by method getBitsPerPixel
+    // Consider making private - it is returned by method getBitsPerPixel
     protected int miBitsPerPixel;   // Bits per pixel
     protected int miPaddedWidth;    // Physical width of the image in bytes (multiple of 4)
     protected int miPads;           // Difference between imagewidth and paddedwidth (bytes)
@@ -268,6 +268,12 @@ public:
             Globals.statusPrint("MemImage Constructor 1");
         }
     } // MemImage ctor
+
+    public MemImage(StringBuffer psbFileName, int piImHeight, int piImWidth, int piImAccessMode, 
+    char pcRW, int piColorSpec) {
+        this(psbFileName.toString(), piImHeight, piImWidth, piImAccessMode, 
+            pcRW, piColorSpec);
+    }
 
 
     // This constructor originally came from MEMIMG32.CPP
@@ -2034,6 +2040,7 @@ public:
                 for(iCol = 1; iCol <= iNumCols; iCol++) {
                     switch(iBpp) {
                     case 24:
+                        // The following method sets parameters bytRed, bytGreen and bytBlue
                         getMPixelRGB(iCol, iRow, bytRed, bytGreen, bytBlue);
                         if ((bytRed != 0) || (bytGreen != 0) || (bytBlue != 0)) {
                             iNewRed   = bytRed   + piDesiredRed;
@@ -2822,7 +2829,7 @@ public:
                         outMImage.setMPixelRGB(iXMin, iYMin, 
                             (byte)fIntensity, (byte)fIntensity, (byte)fIntensity);
                     }
-                } else {   //no zBuffer
+                } else {   // no zBuffer
                     if(iBpp == 8) {
                         outMImage.setMPixel(iXMin, iYMin, (byte)fIntensity);
                     }
