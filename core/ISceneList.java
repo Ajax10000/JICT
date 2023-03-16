@@ -27,7 +27,7 @@ public interface ISceneList {
 
     int listLength();
 
-    int getSceneInfo(String psName, 
+    int getSceneInfo(StringBuffer psbName, 
     Integer pIType, Integer pICMode, Integer pIOutRows, Integer piOutCols);
 
     int setSceneOutImageSize(int piOutRows, int piOutCols);
