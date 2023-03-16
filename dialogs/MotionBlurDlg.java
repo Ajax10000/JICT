@@ -424,7 +424,7 @@ protected:
 
         // Blur a sequence of images
         int iStatus = 0;
-        // TODO: In future, uncomment the following line
+
         iStatus = Globals.motionBlur(sFirstImage, sOutDir, iNumBlurFrames, iBlurDepth);
 
         sMsgText = "motion blur Complete. Status: " + iStatus;
