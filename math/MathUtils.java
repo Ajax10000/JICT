@@ -1,8 +1,10 @@
 package math;
 
 public class MathUtils {
-    // This method came from UTILS.CPP
+    // This method originally came from UTILS.CPP
+    //
     // Called from:
+    //     Globals.fillTrianglez
     //     Shape3d.getWorldVertex
     public static float interpolate(float desired1, float desired2, float reference1, float reference2, float referenceCurrent) {
         if(reference1 == reference2) { 
@@ -14,7 +16,11 @@ public class MathUtils {
     } // interpolate
 
 
-    // This method came from UTILS.CPP
+    // This method originally came from UTILS.CPP
+    // 
+    // Method fPolar returns an angle such that the angle is >= 0 and < 360.
+    // It assumes the angle passed in is in degrees.
+    //
     // Called from:
     //     ScenePreviewDlg.onCmdPlus
     public static float fPolar(float angle) {
@@ -36,7 +42,8 @@ public class MathUtils {
     } // fPolar
 
 
-    // This method came from UTILS.CPP
+    // This method originally came from UTILS.CPP
+    // 
     // Called from:
     //     Shape3d.addVertices
     //     Shape3d.getBoundaryPoint
@@ -50,7 +57,8 @@ public class MathUtils {
         return rayAngle;
     } // polarAtan
 
-    // This method came from UTILS.CPP
+
+    // This method originally came from UTILS.CPP
     public static float bound(float value, float minValue, float maxValue) {
         if (value < minValue) {
             value = minValue;
@@ -63,7 +71,9 @@ public class MathUtils {
         return value;
     } // bound
 
-    // This method came from DEPTHSRT.CPP
+
+    // This method originally came from DEPTHSRT.CPP
+    // 
     // Called from:
     //     getIntervals
     //     Shape3d.divideLongestArc
@@ -73,7 +83,8 @@ public class MathUtils {
     } // getDistance2d
       
 
-    // This method came from DEPTHSRT.CPP
+    // This method originally came from DEPTHSRT.CPP
+    // 
     // Called from: 
     //     iwarpz
     //     RenderObject.renderMeshz
@@ -86,7 +97,9 @@ public class MathUtils {
           ((z1 - z2) * (z1 - z2)));
     } // getDistance3d
 
-    // This method came from IWARP.CPP
+
+    // This method originally came from IWARP.CPP
+    // 
     // Called from:
     //     getIntervals
     public static void getLineEquation(int x1, int y1, int x2, int y2, 
@@ -110,7 +123,8 @@ public class MathUtils {
     } // getLineEquation
 
 
-    // This method came from IWARP.CPP
+    // This method originally came from IWARP.CPP
+    // 
     // Called from:
     //     Shape3d.getBoundaryPoint
     public static void getFLineEquation(float x1, float y1, float x2, float y2, 
@@ -139,7 +153,9 @@ public class MathUtils {
         }
     } // getFLineEquation
 
-    // This method came from IWARP.CPP
+
+    // This method originally came from IWARP.CPP
+    // 
     // Called from:
     //     getIntervals
     public static int intervalDistance(int a, int b, int c) {
