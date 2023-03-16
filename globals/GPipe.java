@@ -131,7 +131,7 @@ public:
 
         msScenePathName = "d:\\ict20\\output\\gPipe.bmp";
 
-        //  this vector indicates the direction of the light source
+        // This vector indicates the direction of the light source
         mLightSource = new Point3d();
         mLightSource.x = -150.0f;
         mLightSource.y =    0.0f;
