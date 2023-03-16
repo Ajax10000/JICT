@@ -25,9 +25,10 @@ public class FileUtils {
     // This method originally came from UTILS.CPP
     // Called from:
     //     Globals.motionBlur
-    public static void makePath(String currentPath, String inPath, String prefix, int frameCounter, String inSuffix) {
+    public static void makePath(StringBuffer psbCurrentPath, String psInPath, String psPrefix, int piFrameCounter, String psInSuffix) {
         // sprintf(currentPath, "%s%.31s%#04d%s.bmp\0", inPath, prefix, frameCounter, inSuffix);
-        currentPath = String.format("%s%.31s%#04d%s.bmp", inPath, prefix, frameCounter, inSuffix);
+        String sPath = String.format("%s%.31s%04d%s.bmp", psInPath, psPrefix, piFrameCounter, psInSuffix);
+        psbCurrentPath.append(sPath);
     } // makePath
       
 
@@ -70,9 +71,10 @@ public class FileUtils {
     // Called from:
     //     Globals.createCutout (called 5 times, with psSuffix = "r", "g", "b", "a" and "c")
     //     SceneList.render
-    public static void appendFileName(String psOutputFileName, String psPrefix, String psSuffix) {
+    public static void appendFileName(StringBuffer psbOutputFileName, String psPrefix, String psSuffix) {
         // sprintf(psOutputFileName, "%.31s%s.bmp\0", psPrefix, psSuffix);
-        psOutputFileName = String.format("%.31s%s.bmp", psPrefix, psSuffix);
+         String sAppendedFileName = String.format("%.31s%s.bmp", psPrefix, psSuffix);
+         psbOutputFileName.append(sAppendedFileName);
     } // appendFileName
 
 
