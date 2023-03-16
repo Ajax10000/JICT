@@ -1,6 +1,5 @@
 package apps;
 
-import dialogs.AboutDlg;
 import dialogs.ImageView;
 
 import docs.ImageDoc;
@@ -13,7 +12,6 @@ import java.io.File;
 import java.time.LocalDateTime;
 import java.util.prefs.Preferences;
 
-import javax.swing.JFileChooser;
 import javax.swing.SwingUtilities;
 
 public class IctApp {
@@ -90,8 +88,9 @@ CIctApp theApp;
         */
 
         // create main MDI Frame window
-        this.mainFrame = new MainFrame(this);
-
+        // this.mainFrame = new MainFrame(this);
+        this.mainFrame = MainFrame.getInstance();
+        
         if ((args != null) && (args.length > 0)) {
             // TODO: add command line processing here
         }
@@ -102,7 +101,7 @@ CIctApp theApp;
 
         // Remove the old JICT log and create a new one
         Preferences prefs = Preferences.userNodeForPackage(JICTApp.class);
-        String oldLogFilePath = prefs.get("LogPath", "logs/jict.log");
+        String oldLogFilePath = prefs.get("LogPath", "logs/JICT.log");
         File oldLogFile = new File(oldLogFilePath);
         if (oldLogFile.exists()) {
             boolean deleted = oldLogFile.delete();
