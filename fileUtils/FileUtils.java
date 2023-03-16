@@ -11,6 +11,8 @@ public class FileUtils {
     } // fileExists
     
 
+    // Called from:
+    //     RenderObject.maskFromShape
     public static boolean deleteFile(String psPathName) {
         File file = new File(psPathName);
 
