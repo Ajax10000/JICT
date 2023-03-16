@@ -3,14 +3,17 @@ package math;
 import structs.Point3d;
 
 public class Vect {
+    // This method originally came from VECTOR.CPP
     public static void vectorAdd(Point3d result, Point3d p1, Point3d p2) {
         result.x = p1.x + p2.x;
         result.y = p1.y + p2.y;
         result.z = p1.z + p2.z;
         return;
-    }
+    } // vectorAdd
     
 
+    // This method originally came from VECTOR.CPP
+    // 
     // Called from:
     //     RenderObject.transformAndProjectPoint2
     public static void vectorSubtract(Point3d result, Point3d p1, Point3d p2) {
@@ -19,66 +22,76 @@ public class Vect {
         result.z = p1.z - p2.z;
 
         return;
-    }
+    } // vectorSubtract
     
 
+    // This method originally came from VECTOR.CPP
     public static float vectorMagnitude2(Point3d p1, Point3d p2) {
-        float result;
-        result = (float)Math.sqrt((p1.x * p2.x) + (p1.y * p2.y) + (p1.z * p2.z));
+        float fResult;
+        fResult = (float)Math.sqrt((p1.x * p2.x) + (p1.y * p2.y) + (p1.z * p2.z));
 
-        return result;
-    }
+        return fResult;
+    } // vectorMagnitude2
     
 
+    // This method originally came from VECTOR.CPP
     public static float vectorMagnitude1(Point3d p1) {
-        float result;
-        result = (float)Math.sqrt((p1.x * p1.x) + (p1.y * p1.y) + (p1.z * p1.z));
+        float fResult;
+        fResult = (float)Math.sqrt((p1.x * p1.x) + (p1.y * p1.y) + (p1.z * p1.z));
 
-        return result;
-    }
+        return fResult;
+    } // vectorMagnitude1
     
 
+    // This method originally came from VECTOR.CPP
+    // 
     // Called from:
     //     RenderObject.renderMeshz
     public static void vectorNormalize(Point3d p1) {
-        float mag = vectorMagnitude1(p1);
-        if(mag > 1.0f) {
-            p1.x /= mag;
-            p1.y /= mag;
-            p1.z /= mag;
+        float fMag = vectorMagnitude1(p1);
+        if(fMag > 1.0f) {
+            p1.x /= fMag;
+            p1.y /= fMag;
+            p1.z /= fMag;
         }
 
         return;
-    }
+    } // vectorNormalize
     
 
+    // This method originally came from VECTOR.CPP
     public static void crossProduct(Point3d result, Point3d p1, Point3d p2, Point3d p3) {
         //  Watt's definition. p 15. P2 is the origin common to p1 and p3.
-        float v1 = p3.x - p2.x;
-        float v2 = p3.y - p2.y;
-        float v3 = p3.z - p2.z;
+        float fV1 = p3.x - p2.x;
+        float fV2 = p3.y - p2.y;
+        float fV3 = p3.z - p2.z;
         
-        float w1 = p1.x - p2.x;
-        float w2 = p1.y - p2.y;
-        float w3 = p1.z - p2.z;
+        float fW1 = p1.x - p2.x;
+        float fW2 = p1.y - p2.y;
+        float fW3 = p1.z - p2.z;
         
-        result.x = (v2 * w3) - (v3 * w2);
-        result.y = (v3 * w1) - (v1 * w3);
-        result.z = (v1 * w2) - (v2 * w1);
+        result.x = (fV2 * fW3) - (fV3 * fW2);
+        result.y = (fV3 * fW1) - (fV1 * fW3);
+        result.z = (fV1 * fW2) - (fV2 * fW1);
     
         return;
-    }
+    } // crossProduct
     
 
+    // This method originally came from VECTOR.CPP
     public static float dotProduct(Point3d p1, Point3d p2) {
-        float result;
-        result = (p1.x * p2.x) + (p1.y * p2.y) + (p1.z * p2.z);
-        return result;
-    }
+        float fResult;
+        fResult = (p1.x * p2.x) + (p1.y * p2.y) + (p1.z * p2.z);
+
+        return fResult;
+    } // dotProduct
     
 
-    public static void getNormal1(float x0, float y0, float z0, float x1, float y1, float z1, 
-              float x2, float y2, float z2, Float xN, Float yN, Float zN) {
+    // This method originally came from VECTOR.CPP
+    public static void getNormal1(float x0, float y0, float z0, 
+    float x1, float y1, float z1, 
+    float x2, float y2, float z2, 
+    Float xN, Float yN, Float zN) {
         //  Compute the surface normal of the three input points
         float xv = x1 - x0;
         float yv = y1 - y0;
@@ -91,12 +104,15 @@ public class Vect {
         xN = (yv * zw) - (zv * yw);
         yN = (zv * xw) - (xv * zw);
         zN = (xv * yw) - (yv * xw);
-    }
+    } // getNormal1
     
 
+    // This method originally came from VECTOR.CPP
+    // 
     // Called from:
     //     RenderObject.renderMeshz
-    public static void getNormal2(Point3d result, Point3d p0, Point3d p1, Point3d p2) {
+    public static void getNormal2(Point3d result, 
+    Point3d p0, Point3d p1, Point3d p2) {
         //  Compute the surface normal of the three input points
         float xv = p1.x - p0.x;
         float yv = p1.y - p0.y;
@@ -110,5 +126,5 @@ public class Vect {
         result.y = (zv * xw) - (xv * zw);
         result.z = (xv * yw) - (yv * xw);
         return;
-    }
+    } // getNormal2
 } // class Vect
