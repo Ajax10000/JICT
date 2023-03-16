@@ -268,6 +268,7 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
     
     
     // Called from:
+    //     transformAndProject
     //     Globals.iwarpz
     //     RenderObject.transformAndProjectPoint2
     public void transformPoint(float xIn, float yIn, float zIn, 
@@ -418,6 +419,7 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
     
 
     // Called from:
+    //     Globals.fwarpz (called 4 times from here)
     //     RenderObject.renderMeshz
     public void transformAndProjectPoint(float pfX, float pfY, float pfZ, 
     Integer pISx, Integer pISy, 
@@ -491,6 +493,7 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
 
         // Transform the shape using the perspective matrix
         for (int index = 0; index < pShape.getNumVertices(); index++) {
+            // The following method modifies the last 3 parameters
             transformPoint(
                 pShape.mCurrentVertex.x, 
                 pShape.mCurrentVertex.y, 
