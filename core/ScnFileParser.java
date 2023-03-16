@@ -164,6 +164,7 @@ public class ScnFileParser {
                             // We assumed wrong, so we correct our assumption
                             iSequence = JICTConstants.I_SEQUENCE;
                         }
+                        // TODO: Delete the following if statement?
                         if(sEffectType.equalsIgnoreCase("MORPH")) {
                             iSequence = JICTConstants.I_MORPH;
                         }
