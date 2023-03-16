@@ -35,6 +35,7 @@ public class MotionPath {
     // public void getFirstLastFrame(int *firstFrame, int *lastFrame); - implemented
 
     // This constructor originally came from MOTION.CPP
+    // 
     // Called from:
     //     SceneElement ctor
     public MotionPath() {
@@ -43,6 +44,7 @@ public class MotionPath {
         miNumNodes = 0;
     } // MotionPath ctor
 
+
     // This destructor originally came from MOTION.CPP
     public void finalize() {
       /*
@@ -50,6 +52,7 @@ public class MotionPath {
       */
     } // finalize
 
+    
     // This method originally came from MOTION.CPP
     // Called from:
     //     readMotion
