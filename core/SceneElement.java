@@ -148,7 +148,7 @@ public class SceneElement {
 
     // 1 if constructor successful
     // Changed from int to boolean
-    // Changed fromprivate to public as it is used
+    // Changed from private to public as it is used
     // by SceneList in method preview
     public boolean mbValid;
     
