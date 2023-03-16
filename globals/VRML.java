@@ -7,6 +7,9 @@ import java.util.prefs.Preferences;
 public class VRML {
     private static Preferences prefs = Preferences.userNodeForPackage(IctApp.class);
 
+    // This method originally came from READVRML.CPP
+    //
+    // Could not find where this method is being called from.
     public static int readVRML(String psPathName) {
         QvDB.init();
     
@@ -14,8 +17,9 @@ public class VRML {
         QvNode	root;
         // Reassign "stderr" 
         File aStream;
-            
-        aStream = freopen(prefs.get(Preference.VRMLLog), "w", stderr );
+        
+        String sVRMLLogPath = prefs.get("VRMLLogPath", "VRML/VRML.log");
+        aStream = freopen(sVRMLLogPath, "w", stderr);
     
        if(aStream == null) {
             Globals.statusPrint("error on freopen\n");
@@ -45,6 +49,8 @@ public class VRML {
     } // readVRML
     
 
+    // This method originally came from READVRML.CPP
+    // 
     // Called from:
     //     MainFrame.onToolsRenderVrmlFile
     public static int renderVRML(String psInWorldPath, String psOutImagePath) {
@@ -55,7 +61,8 @@ public class VRML {
      
         // Reassign "stdout" 
         File aStream;
-        aStream = freopen(prefs.get(Preference.VRMLLog), "w", stdout);
+        String sVRMLLogPath = prefs.get("VRMLLogPath", "VRML/VRML.log");
+        aStream = freopen(sVRMLLogPath, "w", stdout);
     
         if(aStream == null) {
             Globals.statusPrint("error on freopen\n");
