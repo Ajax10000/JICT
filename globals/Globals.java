@@ -357,8 +357,11 @@ public class Globals {
 
         // A cutout version of both the mask and original
         // image is created in which the zero pixel border is removed.
-        String sCutoutRImage = "", sCutoutGImage = "", sCutoutBImage = "", sCutoutMImage = "";
-        String sCutoutRGBImage = "";
+        StringBuffer sbCutoutRImage = new StringBuffer();
+        StringBuffer sbCutoutGImage = new StringBuffer();
+        StringBuffer sbCutoutBImage = new StringBuffer();
+        StringBuffer sbCutoutMImage = new StringBuffer();
+        StringBuffer sbCutoutRGBImage = new StringBuffer();
 
         // Prepare pathnames for mask and cutout images
         String sCutoutDir, sMaskDir;
@@ -366,13 +369,13 @@ public class Globals {
         sMaskDir   = prefs.get("MaskDir", "MASK/");
         String sCutoutPath, sMaskPath;
     
-        FileUtils.appendFileName(sCutoutRImage,   psCutoutName, "r");
-        FileUtils.appendFileName(sCutoutGImage,   psCutoutName, "g");
-        FileUtils.appendFileName(sCutoutBImage,   psCutoutName, "b");
-        FileUtils.appendFileName(sCutoutMImage,   psCutoutName, "a");
-        FileUtils.appendFileName(sCutoutRGBImage, psCutoutName, "c");
-        sCutoutPath = sCutoutDir + sCutoutRGBImage;
-        sMaskPath   = sMaskDir + sCutoutMImage;
+        FileUtils.appendFileName(sbCutoutRImage,   psCutoutName, "r");
+        FileUtils.appendFileName(sbCutoutGImage,   psCutoutName, "g");
+        FileUtils.appendFileName(sbCutoutBImage,   psCutoutName, "b");
+        FileUtils.appendFileName(sbCutoutMImage,   psCutoutName, "a");
+        FileUtils.appendFileName(sbCutoutRGBImage, psCutoutName, "c");
+        sCutoutPath = sCutoutDir + sbCutoutRGBImage;
+        sMaskPath   = sMaskDir + sbCutoutMImage;
     
         int iMaskHeight, iMaskWidth;
         iMaskHeight = pMaskMImage.getHeight();
@@ -445,14 +448,14 @@ public class Globals {
 
         MemImage cutoutMImg = new MemImage(iCutoutHeight, iCutoutWidth);
         if (!cutoutMImg.isValid()) {
-            sMsgText = "createCutout: Unable to open cutout alpha image: " + sCutoutMImage;
+            sMsgText = "createCutout: Unable to open cutout alpha image: " + sbCutoutMImage;
             statusPrint(sMsgText);
             return 3;
         }
     
         MemImage cutoutGImg = new MemImage(iCutoutHeight, iCutoutWidth);
         if (!cutoutGImg.isValid()) {
-            sMsgText = "createCutout: Unable to open cutout g image: " + sCutoutGImage;
+            sMsgText = "createCutout: Unable to open cutout g image: " + sbCutoutGImage;
             statusPrint(sMsgText);
             return 4;
         }
@@ -462,14 +465,14 @@ public class Globals {
         if(bColor) {
             cutoutRImg = new MemImage(iCutoutHeight, iCutoutWidth);
             if (!cutoutRImg.isValid()) {
-                sMsgText = "createCutout: Unable to open cutout r image: " + sCutoutRImage;
+                sMsgText = "createCutout: Unable to open cutout r image: " + sbCutoutRImage;
                 statusPrint(sMsgText);
                 return 5;
             }
 
             cutoutBImg = new MemImage(iCutoutHeight, iCutoutWidth);
             if (!cutoutBImg.isValid()) {
-                sMsgText = "createCutout: Unable to open cutout b image: " + sCutoutBImage;
+                sMsgText = "createCutout: Unable to open cutout b image: " + sbCutoutBImage;
                 statusPrint(sMsgText);
                 return 6;
             }
@@ -516,17 +519,17 @@ public class Globals {
         statusPrint("createCutout: Smoothing the cutout mask");
         cutoutMImg.alphaSmooth5();
     
-        cutoutGImg.writeBMP(sCutoutGImage);
+        cutoutGImg.writeBMP(sbCutoutGImage);
         sMsgText = "createCutout: Saving alpha image: " + sMaskPath;
         statusPrint(sMsgText);
         cutoutMImg.writeBMP(sMaskPath);
     
         if(bColor) {
-            cutoutRImg.writeBMP(sCutoutRImage);
-            cutoutBImg.writeBMP(sCutoutBImage);
+            cutoutRImg.writeBMP(sbCutoutRImage);
+            cutoutBImg.writeBMP(sbCutoutBImage);
             sMsgText = "createCutout: Saving color cutout image: " + sCutoutPath;
             statusPrint(sMsgText);
-            makeRGBimage(sCutoutRImage, sCutoutGImage, sCutoutBImage, sCutoutPath);
+            makeRGBimage(sbCutoutRImage.toString(), sbCutoutGImage.toString(), sbCutoutBImage.toString(), sCutoutPath);
         }
 
         return 0;
@@ -899,9 +902,10 @@ public class Globals {
         MemImage[] aMImages = new MemImage[32]; 
         MemImage outMImage;
         String sDirectory = "", sFileName = "", sPrefix = "", sInSuffix = "";
-        String sCurrentPath = "";
+        StringBuffer sbCurrentPath = new StringBuffer();
         // String inPath; // This variable is not used
-        String sOutPath = "", sOutSuffix;
+        StringBuffer sbOutPath = new StringBuffer();
+        String sOutSuffix;
         Byte bytRed = (byte)0, bytGreen = (byte)0, bytBlue = (byte)0;
         int iBlur, iNumOpenImages, iBucket, iRedBucket, iGreenBucket, iBlueBucket;
         int iFrameNum = 0, i, j, iStatus;
@@ -938,21 +942,21 @@ public class Globals {
             if(iFrameCounter == iFrameNum + piBlurDepth) {
                 for(i = -piBlurDepth; i <= piBlurDepth; i++) { // open the first blurDepth images
                     // The following method sets parameter sCurrentPath
-                    FileUtils.makePath(sCurrentPath, sDirectory, sPrefix, iFrameCounter + i, sInSuffix);
+                    FileUtils.makePath(sbCurrentPath, sDirectory, sPrefix, iFrameCounter + i, sInSuffix);
                     switch(iBpp) {
                     case 8:
-                        aMImages[i + piBlurDepth] = new MemImage(sCurrentPath, 0, 0, 
+                        aMImages[i + piBlurDepth] = new MemImage(sbCurrentPath.toString(), 0, 0, 
                             JICTConstants.I_RANDOM, 'R', JICTConstants.I_EIGHTBITMONOCHROME);
                         break;
 
                     case 24:
-                        aMImages[i + piBlurDepth] = new MemImage(sCurrentPath, 0, 0, 
+                        aMImages[i + piBlurDepth] = new MemImage(sbCurrentPath.toString(), 0, 0, 
                             JICTConstants.I_RANDOM, 'R', JICTConstants.I_RGBCOLOR);
                         break;
                     } // switch
 
                     if(!aMImages[i + piBlurDepth].isValid()) {
-                        sMsgText = "motionBlur: Unable to open image: " + sCurrentPath;
+                        sMsgText = "motionBlur: Unable to open image: " + sbCurrentPath;
                         statusPrint(sMsgText);
                         return -4;
                     }
@@ -964,21 +968,21 @@ public class Globals {
 
                 // Open new image
                 // The following method sets parameter sCurrentPath
-                FileUtils.makePath(sCurrentPath, sDirectory, sPrefix, iFrameCounter + piBlurDepth, sInSuffix);
+                FileUtils.makePath(sbCurrentPath, sDirectory, sPrefix, iFrameCounter + piBlurDepth, sInSuffix);
                 switch(iBpp) {
                 case 8:
-                    aMImages[iNumOpenImages - 1] = new MemImage(sCurrentPath, 0, 0, 
+                    aMImages[iNumOpenImages - 1] = new MemImage(sbCurrentPath.toString(), 0, 0, 
                         JICTConstants.I_RANDOM, 'R', JICTConstants.I_EIGHTBITMONOCHROME);
                     break;
 
                 case 24:
-                    aMImages[iNumOpenImages - 1] = new MemImage(sCurrentPath, 0, 0, 
+                    aMImages[iNumOpenImages - 1] = new MemImage(sbCurrentPath.toString(), 0, 0, 
                         JICTConstants.I_RANDOM, 'R', JICTConstants.I_RGBCOLOR);
                     break;
                 } // switch
 
                 if(!aMImages[iNumOpenImages - 1].isValid()) {
-                    sMsgText = "motionBlur: Unable to open image 2: " + sCurrentPath;
+                    sMsgText = "motionBlur: Unable to open image 2: " + sbCurrentPath;
                     statusPrint(sMsgText);
                     return -4;
                 }
@@ -989,7 +993,7 @@ public class Globals {
 
             sOutSuffix = "b";
             // The following method sets parameter sOutPath
-            FileUtils.makePath(sOutPath, psOutputDir, sPrefix, iFrameCounter, sOutSuffix);
+            FileUtils.makePath(sbOutPath, psOutputDir, sPrefix, iFrameCounter, sOutSuffix);
             outMImage = new MemImage(iImHeight, iImWidth, iBpp);
 
             // We will now read from aMImages[iBlur] and with the avg data we collect, 
@@ -1040,9 +1044,9 @@ public class Globals {
             } // for iRow
 
             // Save the blurred image
-            sMsgText = "Saving: " + sOutPath;
+            sMsgText = "Saving: " + sbOutPath;
             statusPrint(sMsgText);
-            outMImage.writeBMP(sOutPath);
+            outMImage.writeBMP(sbOutPath);
         } // for iFrameCounter
 
         return 0;
@@ -3014,15 +3018,15 @@ public class Globals {
  
         sMsgText = "Saving QMesh: " + sbXPath;
         statusPrint(sMsgText);
-        xMImage.writeBMP(sbXPath.toString());
+        xMImage.writeBMP(sbXPath);
 
         sMsgText = "Saving QMesh: " + sbYPath;
         statusPrint(sMsgText);
-        yMImage.writeBMP(sbYPath.toString());
+        yMImage.writeBMP(sbYPath);
 
         sMsgText = "Saving QMesh: " + sbZPath;
         statusPrint(sMsgText);
-        zMImage.writeBMP(sbZPath.toString());
+        zMImage.writeBMP(sbZPath);
         
         MemImage xMImage8 = new MemImage(iImHeight, iImWidth, 8);
         MemImage yMImage8 = new MemImage(iImHeight, iImWidth, 8);
@@ -4133,7 +4137,7 @@ public class Globals {
 
     // This method originally came from MEMIMG32.CPP
     // 
-    // Method readBMPHeader sets height, width and bitsPerPixel parameters
+    // Method readBMPHeader sets height, width and bitsPerPixel parameters.
     // 
     // Called from:
     //     createQMeshModel
@@ -4141,7 +4145,8 @@ public class Globals {
     //     MainFrame.onToolsWarpImage
     //     MemImage constructor that takes 6 parameters
     //     Shape3d.shapeFromBMP
-    public static int readBMPHeader(String psFileName, Integer pIHeight, Integer pIWidth, Integer pIBitsPerPixel) {
+    public static int readBMPHeader(String psFileName, 
+    Integer pIHeight, Integer pIWidth, Integer pIBitsPerPixel) {
         // TODO: Rewrite this.
         return 0;
         /*
