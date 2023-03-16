@@ -178,9 +178,10 @@ public class Texture {
     } // createTexture
 
 
+    // This method originally came from TEXTURE.CPP
+    // 
     // Called from:
     //     createPlasma
-    // This method came from TEXTURE.CPP
     public static void plasma(MemImage anImage, int x, int y, int x1, int y1) {
         /* unsigned */int a, b, c, d, e, f, g, i, j;
         int w, h;
@@ -236,9 +237,10 @@ public class Texture {
     } // plasma
 
 
+    // This method originally came from TEXTURE.CPP
+    // 
     // Called from:
     //     createTexure
-    // This method came from TEXTURE.CPP
     public static void createPlasma(MemImage pImage, int piNumRows, int piNumColumns) {
         pImage.setMPixel(         1,      1,  (byte)myRand(64));
         pImage.setMPixel(         1, piNumRows, (byte)myRand(64));
@@ -249,10 +251,11 @@ public class Texture {
     } // createPlasma
 
 
+    // This method originally came from TEXTURE.CPP
+    // 
     // Called from:
     //     createPlasma
     //     plasma
-    // This method came from TEXTURE.CPP
     public static int myRand(int piMaxVal) {
         // random.nextFloat returns a value between 0.0 and 1.0
         // myRand returns a value between 0 and maxVal.
