@@ -11,7 +11,7 @@ import math.MathUtils;
 import structs.Point2d;
 
 public class MemImage {
-    boolean ictdebug = false;
+    private boolean bIctDebug = false;
     protected File fp;
     protected String msSavedFileName;   // The last associated pathname
 
@@ -35,7 +35,7 @@ public class MemImage {
     // State indicator.  1 if successful, else 0
     // I changed this from int to boolean
     // Consider making private - it is returned by method isValid
-    protected boolean valid;
+    protected boolean mbValid;
 
     // Consider making private - it is returned by method getBytes
     protected byte[] bytes;         // Pointer to the image bytes
@@ -114,6 +114,14 @@ public:
  */
 
 
+    // This constructor originally came from MEMIMG32.CPP
+    // 
+    // Constructor creates a MemImage object. If any of the parameters 
+    // piImHeight, piImWidth, or piColorSpec is zero, the code will read the
+    // height and width from the .bmp file and store it in piImHeight and piImWidth, 
+    // and if the piColorSpec is zero it will set it to the return value of
+    // method mapBitsPerPixelToColorSpec.
+    // 
     // Called from:
     //     Globals.motionBlur
     //     RenderObject ctor that takes 4 parameters: a String, int, boolean and Point3d
@@ -124,8 +132,9 @@ public:
     //     MainFrame.onToolsWarpImage
     public MemImage(String psFileName, int piImHeight, int piImWidth, int piImAccessMode, 
     char pcRW, int piColorSpec) {
-        String msgBuffer;
+        String sMsgBuffer;
 
+        // Check for parameters that might be invalid
         if (
         piColorSpec != JICTConstants.I_ONEBITMONOCHROME && 
         piColorSpec != JICTConstants.I_REDCOLOR &&
@@ -135,76 +144,80 @@ public:
         piColorSpec != JICTConstants.I_EIGHTBITMONOCHROME &&
         piColorSpec != 0 && 
         piColorSpec != JICTConstants.I_A32BIT) {
-            msgBuffer = "MemImage Constructor 1: ColorSpec not valid - " + piColorSpec;
-            Globals.statusPrint(msgBuffer);
-            this.valid = false;
+            sMsgBuffer = "MemImage Constructor 1: ColorSpec not valid - " + piColorSpec;
+            Globals.statusPrint(sMsgBuffer);
+            this.mbValid = false;
             return;
         }
 
         if((pcRW != 'R') && (pcRW != 'r') && (pcRW != 'W') && (pcRW != 'w')) {
-            msgBuffer = "MemImage Constructor 1: pcRW must be R or W - " + pcRW;
-            Globals.statusPrint(msgBuffer);
-            this.valid = false;
+            sMsgBuffer = "MemImage Constructor 1: pcRW must be R or W - " + pcRW;
+            Globals.statusPrint(sMsgBuffer);
+            this.mbValid = false;
             return;
         }
 
         if(
         (piImAccessMode != JICTConstants.I_RANDOM) && 
         (piImAccessMode != JICTConstants.I_SEQUENTIAL)) {
-            msgBuffer = "MemImage Constructor 1: accessMode must be RANDOM or SEQUENTIAL - " + piImAccessMode;
-            Globals.statusPrint(msgBuffer);
-            this.valid = false;
+            sMsgBuffer = "MemImage Constructor 1: accessMode must be RANDOM or SEQUENTIAL - " + piImAccessMode;
+            Globals.statusPrint(sMsgBuffer);
+            this.mbValid = false;
             return;
         }
+
+        // Check for incompatible parameters
         if(
         (pcRW == 'W' || pcRW == 'w') && 
         (piImHeight <= 0 || piImWidth <= 0 || piColorSpec == 0)) {
             Globals.statusPrint("MemImage Constructor 1: length, width and colorSpec must be > 0 for write access");
-            this.valid = false;
+            this.mbValid = false;
             return;
         }
 
-        Integer myBitsPerPixel = 0; 
+        // Done with parameter validity checks
+        Integer iBitsPerPixel = 0; 
         int iStatus = 0;
-        this.valid = true;
-        myBitsPerPixel = mapColorSpecToBitsPerPixel(piColorSpec);
+        this.mbValid = true;
+        iBitsPerPixel = mapColorSpecToBitsPerPixel(piColorSpec);
         this.msSavedFileName = psFileName;
 
         // Get a preview of the file 
-        Integer myHeight = 0, myWidth = 0;
+        Integer iHeight = 0, iWidth = 0;
         if(piImHeight == 0 || piImWidth == 0 || piColorSpec == 0) {
-            iStatus = Globals.readBMPHeader(psFileName, myHeight, myWidth, myBitsPerPixel);
+            // The following method sets iHeight, iWidth and iBitsPerPixel
+            iStatus = Globals.readBMPHeader(psFileName, iHeight, iWidth, iBitsPerPixel);
             if(iStatus != 0) {
-                this.valid = false;
+                this.mbValid = false;
                 Globals.statusPrint("MemImage Constructor 1: Unable to open BMP header for read access");
                 return;
             }
 
-            piImHeight = myHeight;
-            piImWidth = myWidth;
+            piImHeight = iHeight;
+            piImWidth = iWidth;
             if(piColorSpec == 0) {
-                piColorSpec = mapBitsPerPixelToColorSpec(myBitsPerPixel);
+                piColorSpec = mapBitsPerPixelToColorSpec(iBitsPerPixel);
             }
-        }
+        } // if(piImHeight == 0 || piImWidth == 0 || piColorSpec == 0)
 
         //  Assign the MemImage properties
-        this.miImageHeight = piImHeight;
-        this.miImageWidth = piImWidth;
-        this.miBitsPerPixel = myBitsPerPixel;
-        this.miColorSpec = piColorSpec;
-        this.miAccessMode = piImAccessMode;
+        this.miImageHeight  = piImHeight;
+        this.miImageWidth   = piImWidth;
+        this.miBitsPerPixel = iBitsPerPixel;
+        this.miColorSpec    = piColorSpec;
+        this.miAccessMode   = piImAccessMode;
 
         if((pcRW == 'W') || (pcRW == 'w')) {
-            int numRows = this.miImageHeight;
+            int iNumRows = this.miImageHeight;
             if (this.miAccessMode == JICTConstants.I_SEQUENTIAL) {
-                numRows = 1;
+                iNumRows = 1;
             }
 
-            allocate(numRows, this.miImageWidth);
+            allocate(iNumRows, this.miImageWidth);
             if(!isValid()) {
                 Globals.statusPrint("MemImage Constructor 1: Could not allocate memory for write");
             }
-        }
+        } // if if((pcRW == 'W') || (pcRW == 'w'))
 
         if(this.miAccessMode == JICTConstants.I_SEQUENTIAL) {
             //  Write or Read the BMP header
@@ -217,16 +230,16 @@ public:
             }
 
             if(iStatus != 0) {
-                this.valid = false; // Indicate the file could not be opened
+                this.mbValid = false; // Indicate the file could not be opened
             }
-        }
+        } // if(this.miAccessMode == JICTConstants.I_SEQUENTIAL)
 
         if(this.miAccessMode == JICTConstants.I_RANDOM) {
             if(
             (pcRW == 'W' || pcRW == 'w') && 
             (piColorSpec == JICTConstants.I_RGBCOLOR)) {
                 Globals.statusPrint("MemImage Constructor 1: RANDOM 24 bit BMPs not supported for writing");
-                this.valid = false;
+                this.mbValid = false;
                 return;
             }
             if(
@@ -236,26 +249,29 @@ public:
             }
 
             if(pcRW == 'R' || pcRW == 'r') {
-                iStatus = Globals.readBMPHeader(psFileName, myHeight, myWidth, myBitsPerPixel);
+                // The following method sets iHeight, iWidth and iBitsPerPixel
+                iStatus = Globals.readBMPHeader(psFileName, iHeight, iWidth, iBitsPerPixel);
                 if(iStatus != 0) {
-                    this.valid = false; // Indicate that the file could not be opened
+                    this.mbValid = false; // Indicate that the file could not be opened
                     Globals.statusPrint("MemImage Constructor 1: Unable to open BMP header");
                     return;
                 }
 
                 readBMP(psFileName, this.miColorSpec);
                 if(iStatus != 0) {
-                    this.valid = false; // Indicate the file could not be opened
+                    this.mbValid = false; // Indicate the file could not be opened
                 }
             }
-        }
+        } // if(this.miAccessMode == JICTConstants.I_RANDOM)
         
-        if (ictdebug) {
+        if (bIctDebug) {
             Globals.statusPrint("MemImage Constructor 1");
         }
     } // MemImage ctor
 
 
+    // This constructor originally came from MEMIMG32.CPP
+    //
     // Called from: 
     //     saveAs8
     //     Globals.motionBlur
@@ -266,7 +282,7 @@ public:
     //     Texture.createTexture
     public MemImage(int piHeight, int piWidth, int piBitsPerPixel) {
         //  Allocates a memory resident 8 bit image by default.
-        this.valid = false;
+        this.mbValid = false;
         this.miAccessMode    = JICTConstants.I_RANDOM;
         this.miImageHeight   = piHeight;
         this.miImageWidth    = piWidth;
@@ -276,12 +292,16 @@ public:
         this.miColorSpec     = mapBitsPerPixelToColorSpec(this.miBitsPerPixel);
         allocate(piHeight, piWidth);
 
-        if (ictdebug) {
+        if (bIctDebug) {
             Globals.statusPrint("MemImage Constructor 2");
         }
     } // MemImage ctor
 
 
+    // This method was added to simulate a default value for a parameter.
+    // In the original C++ code, the memImage constructor that takes 3 parameters
+    // assigns a default value for the last parameter.
+    //
     // Called from:
     //     Globals.tweenImage
     //     RenderObject.renderMeshz
@@ -292,6 +312,8 @@ public:
     } // MemImage ctor
 
 
+    // This constructor originally came from MEMIMG32.CPP
+    // 
     // Called from:
     //     ScnFileParser.readList (twice)
     public MemImage(MemImage pMImage) {
@@ -302,76 +324,83 @@ public:
         this.miColorSpec     = pMImage.miColorSpec;
         this.msSavedFileName = pMImage.msSavedFileName;
 
-        if(pMImage.valid == true) {
+        if(pMImage.mbValid == true) {
             allocate(pMImage.miImageHeight, pMImage.miImageWidth);
         }
 
-        if (ictdebug) {
+        if (bIctDebug) {
             Globals.statusPrint("MemImage Constructor 4");
         }
     } // MemImage ctor
 
 
+    // This destructor originally came from MEMIMG32.CPP
     public void finalize() {
-        if(ictdebug) {
+        if(bIctDebug) {
             Globals.statusPrint("MemImage Destructor");
         }
     } // finalize
 
 
+    // This method originally came from MEMIMG32.CPP
+    // 
     // Called from:
     //     The MemImage constructor that takes 6 parameters
     //     MemImage(int height, int width, int aBitsPerPixel)
     //     MemImage(MemImage m) ctor
     //     readBMP
     protected void allocate(int piHeight, int piWidthInPixels) {
-        int totalBytes;
+        int iTotalBytes;
         // byte[] buffer; // not used
-        float bytesPerPixel = (float)this.miBitsPerPixel/8.0f;
-        float fWidthInBytes = (float)piWidthInPixels * bytesPerPixel;  // 1,24,32 bpp
-        int widthInBytes    = (int)fWidthInBytes;
+        float fBytesPerPixel = (float)this.miBitsPerPixel/8.0f;
+        float fWidthInBytes = (float)piWidthInPixels * fBytesPerPixel;  // 1,24,32 bpp
+        int iWidthInBytes    = (int)fWidthInBytes;
 
-        if (fWidthInBytes > (float)widthInBytes) {
-            widthInBytes++;
+        if (fWidthInBytes > (float)iWidthInBytes) {
+            iWidthInBytes++;
         }
 
-        this.miPaddedWidth = (widthInBytes/4)*4;
+        this.miPaddedWidth = (iWidthInBytes/4)*4;
 
-        if(this.miPaddedWidth != widthInBytes) {
+        if(this.miPaddedWidth != iWidthInBytes) {
             this.miPaddedWidth += 4;
         }
 
-        this.miPads = this.miPaddedWidth - widthInBytes;
-        totalBytes = this.miPaddedWidth * piHeight;
+        this.miPads = this.miPaddedWidth - iWidthInBytes;
+        iTotalBytes = this.miPaddedWidth * piHeight;
 
-        this.valid = true;
-        this.bytes = new byte[totalBytes];            
+        this.mbValid = true;
+        this.bytes = new byte[iTotalBytes];            
         clear();  // Clear the memory area
     } // allocate
 
 
+    // This method originally came from MEMIMG32.CPP
+    // 
     // Called from:
     //     allocate
     //     GPipe.reset
     //     MorphDlg.onOK
     public void clear() {
-        int x, y;
-        int rows = this.miImageHeight;
+        int ix, iy;
+        int iRows = this.miImageHeight;
 
         if (this.miAccessMode == JICTConstants.I_SEQUENTIAL) {
-            rows = 1;
+            iRows = 1;
         }
 
         int iBytesIdx = 0;
-        for (y = 1; y <= rows; y++) {
-            for (x = 1; x <= this.miPaddedWidth; x++) {	 // paddedWidth is the number of bytes per row
+        for (iy = 1; iy <= iRows; iy++) {
+            for (ix = 1; ix <= this.miPaddedWidth; ix++) {	 // miPaddedWidth is the number of bytes per row
                 bytes[iBytesIdx] = 0;
                 iBytesIdx++;
-            } // for x
-        } // for y
+            } // for ix
+        } // for iy
     } // clear
 
 
+    // This method originally came from MEMIMG32.CPP
+    // 
     // Could not find where this is called from
     public int clearRGB(byte pbytRed, byte pbytGreen, byte pbytBlue) {
         // Clear all pixels whose colors match the specified color
@@ -386,15 +415,15 @@ public:
         // Cursor cursor = button.getCursor();
         // button.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
-        int x, y;
+        int ix, iy;
         int iBytesIdx = 0; // an index into array this.bytes
-        int rows = this.miImageHeight;
+        int iRows = this.miImageHeight;
         if (this.miAccessMode == JICTConstants.I_SEQUENTIAL) {
-            rows = 1;
+            iRows = 1;
         }
 
-        for (y = 1; y <= rows; y++) {
-            for (x = 1; x <= this.miImageWidth; x++) {
+        for (iy = 1; iy <= iRows; iy++) {
+            for (ix = 1; ix <= this.miImageWidth; ix++) {
                 if(
                 (bytes[iBytesIdx]     == pbytBlue)  && 
                 (bytes[iBytesIdx + 1] == pbytGreen) && 
@@ -406,10 +435,10 @@ public:
                 }
 
                 iBytesIdx +=3;
-            } // for x
+            } // for ix
 
             iBytesIdx += miPads;
-        } // for y
+        } // for iy
 
         // SetCursor(LoadCursor( null, IDC_ARROW ));
         // TODO: Replace line above with something like:
@@ -419,6 +448,8 @@ public:
     } // clearRGB
 
 
+    // This method originally came from MEMIMG32.CPP
+    // 
     // Called from:
     //     ImageView.onLButtonDown
     public int clearRGBRange(byte pbytRedLow, byte pbytRedHigh, 
@@ -436,16 +467,16 @@ public:
         // Cursor cursor = button.getCursor();
         // button.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
-        int x, y;
+        int ix, iy;
         int iBytesIdx = 0;
-        int rows = this.miImageHeight;
+        int iRows = this.miImageHeight;
 
         if (this.miAccessMode == JICTConstants.I_SEQUENTIAL) {
-            rows = 1;
+            iRows = 1;
         }
 
-        for (y = 1; y <= rows; y++) {
-            for (x = 1; x <= this.miImageWidth; x++) {
+        for (iy = 1; iy <= iRows; iy++) {
+            for (ix = 1; ix <= this.miImageWidth; ix++) {
                 if(
                 (bytes[iBytesIdx]   >= pbytBlueLow)  && (bytes[iBytesIdx]   <= pbytBlueHigh)  && 
                 (bytes[iBytesIdx+1] >= pbytGreenLow) && (bytes[iBytesIdx+1] <= pbytGreenHigh) && 
@@ -456,10 +487,10 @@ public:
                 }
 
                 iBytesIdx += 3;
-            } // for x
+            } // for ix
 
             iBytesIdx += miPads;
-        } // for y
+        } // for iy
 
         // SetCursor(LoadCursor( null, IDC_ARROW ));
         // TODO: Replace line above with something like:
@@ -470,9 +501,12 @@ public:
     } // clearRGBRange
 
 
-    // This method will initialize a MemImage with a given floating-point value.
+    // This method originally came from MEMIMG32.CPP
+    // 
+    // Method init32 will initialize a MemImage with a given floating-point value.
     // See p 104 of the book Visual Special Effects Toolkit in C++, 
     // by Tim Wittenburg.
+    // 
     // Called from:
     //     Globals.renderMesh
     //     GPipe.initialize
@@ -503,9 +537,12 @@ public:
     } // init32
 
 
-    // This method scales a 32-bit image to 8-bit pixel resolution in such a way that 
+    // This method originally came from MEMIMG32.CPP
+    // 
+    // Method scaleTo8 scales a 32-bit image to 8-bit pixel resolution in such a way that 
     // the 32-bit values can be viewed on the screen. See p 104 of the book 
     // Visual Special Effects Toolkit in C++, by Tim Wittenburg.
+    // 
     // Called from:
     //     saveAs8
     //     Globals.createQMeshModel
@@ -518,7 +555,7 @@ public:
         // Scaling is performed in such a way as to eliminate the effects of the default 
         // max ZBuffer value
         String sMsgText;
-        boolean IGNOREMAXVALUE = true;
+        boolean B_IGNOREMAXVALUE = true;
 
         if((pScaledMImage.miBitsPerPixel != 8) || (this.miBitsPerPixel != 32)) {
             Globals.statusPrint("MemImage.scaleTo8: Bits per pixel mismatch");
@@ -545,7 +582,7 @@ public:
         }
         
         fActMax = fActMin = *fTemp;
-        if(IGNOREMAXVALUE) {
+        if(B_IGNOREMAXVALUE) {
             fActMax = 0.0f;
         }
 
@@ -555,7 +592,7 @@ public:
                 if(*fTemp < fActMin) {
                     fActMin = *fTemp;
                 }
-                if(IGNOREMAXVALUE) {
+                if(B_IGNOREMAXVALUE) {
                     if((*fTemp > fActMax) && (*(fTemp) != JICTConstants.F_ZBUFFERMAXVALUE)) {
                         fActMax = *fTemp;
                     }
@@ -581,7 +618,7 @@ public:
         for (iy = 1; iy <= iRows; iy++) {
             for (ix = 1; ix <= this.miImageWidth; ix++) {
                 fActValue = *fTemp;
-                if(IGNOREMAXVALUE) {
+                if(B_IGNOREMAXVALUE) {
                     if(fActValue != JICTConstants.F_ZBUFFERMAXVALUE) {
                         fDesValue = ((fActValue - fActMin) * fsFactor) + fDesMin;
                         bytScaledValue = (byte)(fDesValue + 0.5f);
@@ -594,14 +631,16 @@ public:
                 }
                 
                 fTemp++;
-            } // for x
-        } // for y
+            } // for ix
+        } // for iy
 
         return 0;
     } // scaleTo8
 
 
-    // Draws a MemImage on the indicated BufferedImage
+    // This method originally came from MEMIMG32.CPP
+    // 
+    // Method display draws a MemImage on the indicated BufferedImage
     //
     // Called from:
     //     SceneList.preview
@@ -677,8 +716,11 @@ public:
     } // display
 
 
+    // This method originally came from MEMIMG32.CPP
+    // 
     // TODO: Replace paramater dc with one of type Graphics2D, 
     // as this method performs graphics
+    // 
     // Called from:
     //     RenderObject.maskFromShape
     //     RenderObject.prepareCutout
@@ -733,6 +775,8 @@ public:
     } // drawMask
 
 
+    // This method originally came from MEMIMG32.CPP
+    // 
     // Called from:
     //     Globals.tweenImage
     //     SceneList.render
@@ -773,6 +817,8 @@ public:
     } // copy
 
 
+    // This method originally came from MEMIMG32.CPP
+    // 
     // Not called from within this file.
     // Could not find where this is being called from.
     public int fastCopy(MemImage pOutMImage, int piXOffset, int piYOffset) {
@@ -791,9 +837,9 @@ public:
             return -3;
         }
 
-        int a = pOutMImage.miImageWidth  - piXOffset;
-        int b = pOutMImage.miImageHeight - piYOffset;
-        int c = piXOffset + this.miImageWidth - pOutMImage.miImageWidth;
+        int ia = pOutMImage.miImageWidth  - piXOffset;
+        int ib = pOutMImage.miImageHeight - piYOffset;
+        int ic = piXOffset + this.miImageWidth - pOutMImage.miImageWidth;
 
         // Now we will copy a portion of array this.bytes to array outImage.bytes
         int iOutLoc = ((piYOffset * pOutMImage.miImageWidth) + piXOffset); // not used
@@ -803,8 +849,8 @@ public:
         // byte *currentPix = this.bytes;
         int iCurrentPix = 0;
 
-        for (j = 1; j <= b; j++) {
-            for (i = 1; i <= a; i++) {
+        for (j = 1; j <= ib; j++) {
+            for (i = 1; i <= ia; i++) {
                 if(bytes[iCurrentPix] != 0) {
                     // *outLoc = *currentPix;
                     pOutMImage.bytes[iOutLoc] = bytes[iCurrentPix];
@@ -815,7 +861,7 @@ public:
             } // for i
 
             // if image is over the edge, skip those pixels then add the pad
-            iCurrentPix = iCurrentPix + c + miPads;
+            iCurrentPix = iCurrentPix + ic + miPads;
             iOutLoc += (pOutMImage.miPads + piXOffset); 
         } // for j
 
@@ -823,6 +869,8 @@ public:
     } // fastCopy
 
 
+    // This method originally came from MEMIMG32.CPP
+    // 
     // Not called from within this file
     // Could not find where this is called from.
     public int copy8To24(MemImage pOutMImage) {
@@ -843,13 +891,14 @@ public:
             for (iY = 1; iY < this.miImageHeight; iY++) {
                 bytIntensity = getMPixel(iX, iY);
                 pOutMImage.setMPixelRGB(iX, iY, bytIntensity, bytIntensity, bytIntensity);
-            } // for y
-        } // for x
+            } // for iY
+        } // for iX
 
         return 0;
     } // copy8To24
 
 
+    // This method originally came from MEMIMG32.CPP
     public byte getMPixel(int piX, int piY, char pcColor) {
         // Inputs piX and piY are assumed to be 1 relative
         // Returns the desired pixel from a color image
@@ -884,7 +933,10 @@ public:
     } // getMPixel
 
 
-    // Sets parameters red, green and blue
+    // This method originally came from MEMIMG32.CPP
+    // 
+    // Method getMPixelRGB sets parameters pBytRed, pBytGreen and and pBytBlue
+    // 
     // Called from:
     //     adjustColor
     //     copy (if this.bitsPerPixel = 24)
@@ -892,7 +944,7 @@ public:
     //     Globals.motionBlur
     //     Globals.tweenImage
     //     Globals.tweenMesh
-    public int getMPixelRGB(int piX, int piY, Byte pbytRed, Byte pbytGreen, Byte pbytBlue) {
+    public int getMPixelRGB(int piX, int piY, Byte pBytRed, Byte pBytGreen, Byte pBytBlue) {
         //  Inputs piX and piY are assumed to be 1 relative
         //  Returns the desired pixel from a color image
         if(this.miBitsPerPixel != 24) {
@@ -915,14 +967,16 @@ public:
         iAddr = ((piY - 1) * this.miPaddedWidth) + ((piX - 1)*(this.miBitsPerPixel/8));  // 3 bytes/color pixel
 
         // Set the output parameters
-        pbytBlue  = bytes[iAddr];
-        pbytGreen = bytes[iAddr + 1];
-        pbytRed   = bytes[iAddr + 2];
+        pBytBlue  = bytes[iAddr];
+        pBytGreen = bytes[iAddr + 1];
+        pBytRed   = bytes[iAddr + 2];
 
         return 0;
     } // getMPixelRGB
 
 
+    // This method originally came from MEMIMG32.CPP
+    // 
     // Called from:
     //     adjustColor
     //     copy (if this.bitsPerPixel = 24)
@@ -961,6 +1015,8 @@ public:
     } // setMPixelRGB
 
 
+    // This method originally came from MEMIMG32.CPP
+    // 
     // Called from:
     //     adjustColor
     //     clearRectangle
@@ -995,6 +1051,7 @@ public:
     } // setMPixel
 
 
+    // This method originally came from MEMIMG32.CPP
     public int setMPixelA(float pfX, float pfY, byte pbytValue) {
         // Inputs pfX and pfY are assumed to be 1 relative
         int iAddr;
@@ -1002,7 +1059,7 @@ public:
         int myTemp;
 
         if(this.miAccessMode == JICTConstants.I_SEQUENTIAL) {
-            pfY = 1;
+            pfY = 1.0f;
         }
 
         if (
@@ -1086,6 +1143,7 @@ public:
     } // setMPixelA
 
 
+    // This method originally came from MEMIMG32.CPP
     public byte getMPixelA(float pfX, float pfY) {
         // Inputs pfX and pfY must be 1 relative
         int iAddr;
@@ -1107,18 +1165,23 @@ public:
         float fValaa, fValab, fValba, fValbb;
         float fBucket = 0.0f;
         byte bytChromaColor = (byte)0;
+
         fXa = pfX - (int)pfX;
         fXb = 1.0f - fXa;
+
         fYa = pfY - (int)pfY;
         fYb = 1.0f - fYa;
+
         fWaa = fXa * fYa;
         fWba = fXb * fYa;
+
         fWab = fXa * fYb;
         fWbb = fXb * fYb;
 
         iAddr = (((int)pfY - 1) * (int)miPaddedWidth) + (int)pfX - 1;
         fValaa = myTemp[iAddr]; // TODO: Not done yet, need to assign 4 bytes
         fValab = myTemp[iAddr + (int)miPaddedWidth]; // TODO: Not done yet, need to assign 4 bytes
+
         fValba = myTemp[iAddr + 1]; // TODO: Not done yet, need to assign 4 bytes
         fValbb = myTemp[iAddr + (int)miPaddedWidth + 1]; // TODO: Not done yet, need to assign 4 bytes
 
@@ -1139,6 +1202,8 @@ public:
     } // getMPixelA
 
 
+    // This method originally came from MEMIMG32.CPP
+    // 
     // Called from:
     //     adjustColor
     //     alphaSmooth3
@@ -1177,6 +1242,8 @@ public:
     } // getMPixel
 
 
+    // This method originally came from MEMIMG32.CPP
+    // 
     // Called from:
     //     Globals.createQMeshModel
     //     Globals.iwarpz
@@ -1207,6 +1274,8 @@ public:
     } // setMPixel32
 
 
+    // This method originally came from MEMIMG32.CPP
+    // 
     // Called from:
     //     Globals.iwarpz
     //     Globals.tweenMesh
@@ -1235,6 +1304,8 @@ public:
     } // getMPixel32
 
 
+    // This method originally came from MEMIMG32.CPP
+    //
     // Called from:
     //     adjustColor
     //     histogram
@@ -1250,6 +1321,8 @@ public:
     } // getHeight
 
 
+    // This method originally came from MEMIMG32.CPP
+    //
     // Called from:
     //     adjustColor
     //     histogram
@@ -1264,16 +1337,20 @@ public:
     } // getWidth
 
 
+    // This method originally came from MEMIMG32.CPP
     public int getAccessMode() {
         return this.miAccessMode;
     } // getAccessMode
 
 
+    // This method originally came from MEMIMG32.CPP
     public int getColorSpec() {
         return this.miColorSpec;
     } // getColorSpec
 
 
+    // This method originally came from MEMIMG32.CPP
+    // 
     // Called from:
     //     adjustColor
     //     histogram
@@ -1286,6 +1363,8 @@ public:
     } // getBitsPerPixel
 
 
+    // This method originally came from MEMIMG32.CPP
+    // 
     // Called from:
     //     SceneList.preview
     public byte[] getBytes() {
@@ -1293,6 +1372,8 @@ public:
     } // getBytes
 
 
+    // This method originally came from MEMIMG32.CPP
+    // 
     // Called from:
     //     saveAs8
     //     Globals.motionBlur
@@ -1300,19 +1381,24 @@ public:
     //     RenderObject.renderMeshz
     //     SceneList.render
     public boolean isValid() {
-        //  valid = 1 indicates the constructor did not encounter errors.
-        return this.valid;
+        //  mbValid = true indicates the constructor did not encounter errors.
+        return this.mbValid;
     } // isValid
 
 
+    // This method originally came from MEMIMG32.CPP
+    // 
     // Method writeBMP writes a MemImage object into the file whose name is passed
     // as a parameter. See p 103 of Visual Special Effects Toolkit in C++.
+    // 
     // Called from:
     //     The MemImage constructor that takes 6 parameters
     //     saveAs8
     //     Globals.createQMeshModel
     //     Globals.motionBlur
     //     Globals.tweenImage
+    //     GPipe.saveOutputImage
+    //     ImageDoc.onSaveDocument
     //     ImageView.onRButtonDown
     //     MainFrame.onToolsWarpImage
     //     SceneList.render
@@ -1431,8 +1517,17 @@ public:
     } // writeBMP
 
 
-    // This method reads a Windows .bmp image file into a MemImage object.
+    public int writeBMP(StringBuffer psbFileName) {
+        int iStatus = writeBMP(psbFileName.toString());
+        return iStatus;
+    }
+
+
+    // This method originally came from MEMIMG32.CPP
+    // 
+    // Method readBMP reads a Windows .bmp image file into a MemImage object.
     // See p 103 of the book Visual Special Effects Toolkit in C++.
+    // 
     // Called from:
     //     The MemImage constructor that takes 6 parameters
     public int readBMP(String psFileName, int piColorSpec) {
@@ -1580,6 +1675,8 @@ public:
     } // readBMP
 
 
+    // This method originally came from MEMIMG32.CPP
+    // 
     // Called from:
     //     Globals.createCutout
     //     Globals.makeRGBimage
@@ -1596,6 +1693,8 @@ public:
     } // readNextRow
 
 
+    // This method originally came from MEMIMG32.CPP
+    // 
     // Called from:
     //     Globals.makeRGBimage
     //     RenderObject.maskFromShape
@@ -1605,7 +1704,10 @@ public:
     } // close
 
 
+    // This method originally came from MEMIMG32.CPP
+    // 
     // Changed return value from int to boolean
+    // 
     // Called from:
     //     Globals.makeRGBimage
     public boolean writeNextRow() {
@@ -1621,13 +1723,17 @@ public:
     } // writeNextRow
 
 
-    // TODO: Not a method of MemImage in the original C++ code
+    // This method originally came from MEMIMG32.CPP
+    // 
+    // Not a method of MemImage in the original C++ code,
+    // However it is only called from within MemImage.
+    // 
     // Called from:
     //     The MemImage constructor that takes 6 parameters
     //     readBMP
     //     writeBMP
-    int mapColorSpecToBitsPerPixel(int piColorSpec) {
-        int iBpp = -1;
+    private int mapColorSpecToBitsPerPixel(int piColorSpec) {
+        int iBpp = -1; 
 
         if(
         piColorSpec == JICTConstants.I_REDCOLOR ||
@@ -1651,11 +1757,14 @@ public:
     } // mapColorSpecToBitsPerPixel
 
 
-    // TODO: Not a method of MemImage in the original C++ code
+    // This method originally came from MEMIMG32.CPP.
+    // Not a method of MemImage in the original C++ code, but only called 
+    // from within MemImage.
+    //
     // Called from:
     //     The MemImage constructor that takes 6 parameters
     //     The MemImage constructor that takes 3 parameters
-    int mapBitsPerPixelToColorSpec(int piBitsPerPixel) {
+    private int mapBitsPerPixelToColorSpec(int piBitsPerPixel) {
         int iColorSpec = JICTConstants.I_EIGHTBITMONOCHROME;
 
         if(piBitsPerPixel ==  1) iColorSpec = JICTConstants.I_ONEBITMONOCHROME;
@@ -1667,13 +1776,17 @@ public:
     } // mapBitsPerPixelToColorSpec
 
 
+    // This method originally came from MEMIMG32.CPP
     public int getImageSizeInBytes() {
         return this.miImageHeight * this.miPaddedWidth;
     } // getImageSizeInBytes
 
 
+    // This method originally came from MEMIMG32.CPP
+    // 
     // Called from:
     //     Globals.iwarpz
+    //     GPipe.saveZBuffer
     public int saveAs8(String psOutImagePathName) {
         //  A utility to save a 32 bit image in a viewable 8 bit form
         String sMsgText;
@@ -1687,29 +1800,31 @@ public:
 
         int iOutputRows = getHeight();
         int iOutputCols = getWidth();
-        MemImage testImage = new MemImage(iOutputRows, iOutputCols, 8);
-        if (!testImage.isValid()) {
+        MemImage testMImage = new MemImage(iOutputRows, iOutputCols, 8);
+        if (!testMImage.isValid()) {
             sMsgText = "MemImage.saveAs8: Unable to create intermediate image. " + psOutImagePathName;
             Globals.statusPrint(sMsgText);
             return -1;
         }
 
-        scaleTo8(testImage);
+        scaleTo8(testMImage);
         sMsgText = "MemImage.saveAs8: Saving " + psOutImagePathName;
         Globals.statusPrint(sMsgText);
 
-        testImage.writeBMP(psOutImagePathName);
+        testMImage.writeBMP(psOutImagePathName);
         sMsgText = "MemImage.saveAs8: Histogram of " + psOutImagePathName;
         Globals.statusPrint(sMsgText);
-        testImage.histogram();
+        testMImage.histogram();
 
         return 0;
     } // saveAs8
 
 
+    // This method originally came from MEMIMG32.CPP
+    // 
     // Called from:
     //     saveAs8
-    public int histogram() {
+    private int histogram() {
         String sMsgBuffer;
 
         if(getBitsPerPixel() != 8) {
@@ -1734,7 +1849,7 @@ public:
             } // for j
         } // for i
 
-        // Display the histogram to the ict log
+        // Display the histogram to the JICT log
         sMsgBuffer = "MemImage.histogram: Histogram of " + msSavedFileName;
         Globals.statusPrint(sMsgBuffer);
         for(i = 0; i <= 240; i += 16) {
@@ -1751,12 +1866,18 @@ public:
     } // histogram
     
 
+    // This method originally came from MEMIMG32.CPP
+    // 
     // For more information on this method, see pages 110 - 118 of the book
-    // Visual Special Effects Toolkits in C++. This method handles the color
-    // adjustment specified in a .scn file indicated by the line with format
+    // Visual Special Effects Toolkits in C++. 
+    // Method adjustColor handles the color adjustment specified in a .scn file 
+    // indicated by the line with format
     // adjustColor [Target|Relative] R G B
     //
-    // Sets pMidRed, pMidGreen and pMidBlue
+    // Method adjustColor sets parameters pMidRed, pMidGreen and pMidBlue
+    // 
+    // Called from:
+    //     ScnFileParser.readListReal
     public int adjustColor(int piDesiredRed, int piDesiredGreen, int piDesiredBlue,
     Byte pbytMidRed, Byte pbytMidGreen, Byte pbytMidBlue, 
     MemImage pOutMImage, 
@@ -1938,6 +2059,10 @@ public:
     } // adjustColor
     
 
+    // This method originally came from MEMIMG32.CPP
+    // 
+    // Could not find where this method is being called from.
+    // I suspect this is used only for debugging.
     public int printValue(int piX, int piY) {
         String sMsgBuffer;
         int iBpp = getBitsPerPixel();
@@ -2012,6 +2137,8 @@ public:
     } // printValue
     
 
+    // This method originally came from MEMIMG32.CPP
+    // 
     // Called from:
     //     RenderObject.renderMeshz
     //     SceneList.render
@@ -2020,6 +2147,9 @@ public:
     } // setFileName
 
 
+    // This method originally came from MEMIMG32.CPP
+    // 
+    // Could not find where this method is being called from.
     public int clearRectangle(int piStartX, int piStartY, int piEndX, int piEndY) {
         int iPixelDepth = getBitsPerPixel();
         int iRow, iCol;
@@ -2050,7 +2180,11 @@ public:
     } // clearRectangle
 
 
-    // This method will set parameters xBeg, xEnd, yBeg and yEnd
+    // This method originally came from MEMIMG32.CPP
+    //
+    // Method getBoundingBox will set parameters xBeg, xEnd, yBeg and yEnd
+    // 
+    // Could not find where this method is being called from.
     public int getBoundingBox(Integer pIXBeg, Integer pIXEnd, Integer pIYBeg, Integer pIYEnd) {
         int iX, iY;
         if((this.miBitsPerPixel != 8) && (this.miBitsPerPixel != 24)) {
@@ -2111,7 +2245,8 @@ public:
     } // getBoundingBox
 
 
-    // This method came from BLEND.CPP
+    // This method originally came from BLEND.CPP
+    // 
     // Called from:
     //     Globals.tweenImage
     //     RenderObject.renderMeshz
@@ -2155,7 +2290,8 @@ public:
     } // createAlphaImage
     
 
-    // This method came from BLEND.CPP
+    // This method originally came from BLEND.CPP
+    // 
     // Called from:
     //     RenderObject.maskFromShape
     //     RenderObject.prepareCutout
@@ -2223,7 +2359,8 @@ public:
     } // unPack
     
 
-    // This method came from BLEND.CPP
+    // This method originally came from BLEND.CPP
+    // 
     // Called from:
     //     MorphDlg.onOK
     public int adjustImageBorder(String psOutPath) {
@@ -2248,6 +2385,7 @@ public:
       
         for (iRow = 1; iRow <= iImHeight; iRow++) {
             for (iCol = 1; iCol <= iImWidth; iCol++) {
+                // The following method sets parameters bytRed, bytGreen and bytBlue
                 getMPixelRGB(iCol, iRow, bytRed, bytGreen, bytBlue);
                 if(
                 bytRed != JICTConstants.I_CHROMARED || 
@@ -2288,7 +2426,8 @@ public:
     } // adjustImageBorder
 
 
-    // This method came from IWARP.CPP
+    // This method originally came from IWARP.CPP
+    // 
     // Called from:
     //     Globals.tweenImage
     public int alphaSmooth3() {
@@ -2296,6 +2435,7 @@ public:
         MemImage inMImage  = this;
         MemImage outMImage = this;
 
+        // How can the following if statement fail if inMImage = outMImage = this?
         if(inMImage.getHeight() != outMImage.getHeight() || 
         inMImage.getWidth() != outMImage.getWidth()) {
             Globals.statusPrint("MemImage.alphaSmooth3: Images must have equal size.");
@@ -2374,7 +2514,8 @@ public:
     } // alphaSmooth3
     
 
-    // This method came from IWARP.CPP
+    // This method originally came from IWARP.CPP
+    // 
     // Called from:
     //     Globals.createCutout
     //     MainFrame.onToolsCreateAlphaImage
@@ -2386,6 +2527,7 @@ public:
         MemImage inMImage  = this;
         MemImage outMImage = this;
 
+        // How can the following if statement fail if inMImage = outMImage = this?
         if(
         inMImage.getHeight() != outMImage.getHeight() || 
         inMImage.getWidth() != outMImage.getWidth()) {
@@ -2494,6 +2636,7 @@ public:
         MemImage inMImage  = this;
         MemImage outMImage = this;
 
+        // How can the following if statement fail if inMImage = outMImage = this?
         if(
         inMImage.getHeight() != outMImage.getHeight() ||
         inMImage.getWidth()  != outMImage.getWidth() ) {
@@ -2611,14 +2754,16 @@ public:
 
 
     // This method originally came from SHADERS.CPP
-    // This method takes 4 projected vertices and associated intensities
+    // 
+    // Method fillPolyz takes 4 projected vertices and associated intensities
     // and then fills the four-sided polygon given by those vertices. It 
     // decomposes the four-sided polygon into 4 triangles and then calls 
-    // the fillTriangleZ once for each of the 4 triangles. See Visual 
+    // the fillTriangleZ method once for each of the 4 triangles. See Visual 
     // Special Effects Toolkit in C++, p 173.
     //
     // Called from:
     //     Globals.fwarpz
+    //     GPipe.addFace
     //     RenderObject.renderMesh
     //     RenderObject.renderMeshz
     //     RenderObject.renderShape
