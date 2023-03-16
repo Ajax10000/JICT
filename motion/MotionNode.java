@@ -50,7 +50,14 @@ public class MotionNode {
    //     SceneList.adjustTransforms
    public float mfAlpha;
 
+/*
+  int read(char *); - implemented
+  int read2(char *); ---- NOT IMPLEMENTED - could not find in the C++ code
+  void copy(motionNode); - implemented
+  void clear(void); - implemented 
+ */
 
+ 
    // Called from:
    //     SceneList.getViewMatrix
    public MotionNode() {
