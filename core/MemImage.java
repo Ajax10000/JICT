@@ -1,5 +1,7 @@
 package core;
 
+import dtos.ColorAsBytes;
+
 import globals.Globals;
 import globals.JICTConstants;
 
@@ -800,7 +802,6 @@ public:
         }
 
         byte bytPixel;
-        Byte bytRed = (byte)0, bytGreen = (byte)0, bytBlue = (byte)0;
         for (iX = 1; iX <= this.miImageWidth; iX++) {
             for (iY = 1; iY < this.miImageHeight; iY++) {
                 switch (this.miBitsPerPixel) {
@@ -812,12 +813,14 @@ public:
                     break;
 
                 case 24:
-                    getMPixelRGB(iX, iY, bytRed, bytGreen, bytBlue);
-                    pOutMImage.setMPixelRGB(iX + piXoffset, iY + piYoffset, bytRed, bytGreen, bytBlue);
+                    ColorAsBytes cab = new ColorAsBytes();
+                    // The following method modifies parameter cab
+                    getMPixelRGB(iX, iY, cab);
+                    pOutMImage.setMPixelRGB(iX + piXoffset, iY + piYoffset, cab.bytRed, cab.bytGreen, cab.bytBlue);
                     break;
-                }
-            }
-        }
+                } // switch
+            } // for iY
+        } // for iX
 
         return 0;
     } // copy
@@ -941,16 +944,28 @@ public:
 
     // This method originally came from MEMIMG32.CPP
     // 
-    // Method getMPixelRGB sets parameters pBytRed, pBytGreen and and pBytBlue
+    // Method getMPixelRGB sets the fields bytRed, bytGreen and bytBlue
+    // of parameter pColorAsBytes.
     // 
     // Called from:
     //     adjustColor
+    //     adjustImageBorder
     //     copy (if this.bitsPerPixel = 24)
+    //     crateAlphaImage
+    //     getBoundingBox
+    //     Globals.antiAlias
+    //     Globals.blendz
+    //     Globals.fwarpz
+    //     Globals.fwarpz2
+    //     Globals.getRowIntervals
+    //     Globals.in_boundary
     //     Globals.iwarpz
     //     Globals.motionBlur
     //     Globals.tweenImage
     //     Globals.tweenMesh
-    public int getMPixelRGB(int piX, int piY, Byte pBytRed, Byte pBytGreen, Byte pBytBlue) {
+    //     ImageView.getSampleRange
+    //     ImageView.onLButtonDown
+    public int getMPixelRGB(int piX, int piY, ColorAsBytes pColorAsBytes) {
         //  Inputs piX and piY are assumed to be 1 relative
         //  Returns the desired pixel from a color image
         if(this.miBitsPerPixel != 24) {
@@ -973,9 +988,9 @@ public:
         iAddr = ((piY - 1) * this.miPaddedWidth) + ((piX - 1)*(this.miBitsPerPixel/8));  // 3 bytes/color pixel
 
         // Set the output parameters
-        pBytBlue  = bytes[iAddr];
-        pBytGreen = bytes[iAddr + 1];
-        pBytRed   = bytes[iAddr + 2];
+        pColorAsBytes.bytBlue  = bytes[iAddr];
+        pColorAsBytes.bytGreen = bytes[iAddr + 1];
+        pColorAsBytes.bytRed   = bytes[iAddr + 2];
 
         return 0;
     } // getMPixelRGB
@@ -1902,7 +1917,7 @@ public:
         int iNumRows = getHeight();
         int iNumCols = getWidth();
         int iRow, iCol;
-        Byte bytRed = (byte)0, bytGreen = (byte)0, bytBlue = (byte)0;
+        ColorAsBytes cab;
         fRedBucket   = 0.0f;
         fGreenBucket = 0.0f;
         fBlueBucket  = 0.0f;
@@ -1915,13 +1930,15 @@ public:
                 for(iCol = 1; iCol <= iNumCols; iCol++) {
                     switch(iBpp) {
                     case 24:
-                        // The following sets parameters bytRed, bytGreen, and bytBlue to the colors
-                        // stored at (iRow, iCol), as mapped to field bytes
-                        getMPixelRGB(iCol, iRow, bytRed, bytGreen, bytBlue);
-                        if (bytRed != 0 || bytGreen != 0 || bytBlue != 0) {
-                            fRedBucket   += (bytRed);
-                            fGreenBucket += (bytGreen);
-                            fBlueBucket  += (bytBlue);
+                        cab = new ColorAsBytes();
+                        // The following modifies parameter cab.
+                        // It sets its fields to the colors
+                        // stored at (iRow, iCol), as mapped to field bytes[]
+                        getMPixelRGB(iCol, iRow, cab);
+                        if (cab.bytRed != 0 || cab.bytGreen != 0 || cab.bytBlue != 0) {
+                            fRedBucket   += (cab.bytRed);
+                            fGreenBucket += (cab.bytGreen);
+                            fBlueBucket  += (cab.bytBlue);
                             iTotalPixels++;
                         }
                         break;
@@ -1998,11 +2015,13 @@ public:
             for(iCol = 1; iCol <= iNumCols; iCol++) {
                 switch(iBpp) {
                 case 24:
-                    getMPixelRGB(iCol, iRow, bytRed, bytGreen, bytBlue);
-                    if ((bytRed != 0) || (bytGreen != 0) || (bytBlue != 0)) {
-                        iNewRed   = (int)(bytRed   + fAvgRed);
-                        iNewGreen = (int)(bytGreen + fAvgGreen);
-                        iNewBlue  = (int)(bytBlue  + fAvgBlue);
+                    cab = new ColorAsBytes();
+                    // The following method modifies parameter cab
+                    getMPixelRGB(iCol, iRow, cab);
+                    if ((cab.bytRed != 0) || (cab.bytGreen != 0) || (cab.bytBlue != 0)) {
+                        iNewRed   = (int)(cab.bytRed   + fAvgRed);
+                        iNewGreen = (int)(cab.bytGreen + fAvgGreen);
+                        iNewBlue  = (int)(cab.bytBlue  + fAvgBlue);
 
                         if (iNewRed < 1)     iNewRed   = 1;
                         if (iNewRed > 255)   iNewRed   = 255;
@@ -2040,12 +2059,13 @@ public:
                 for(iCol = 1; iCol <= iNumCols; iCol++) {
                     switch(iBpp) {
                     case 24:
-                        // The following method sets parameters bytRed, bytGreen and bytBlue
-                        getMPixelRGB(iCol, iRow, bytRed, bytGreen, bytBlue);
-                        if ((bytRed != 0) || (bytGreen != 0) || (bytBlue != 0)) {
-                            iNewRed   = bytRed   + piDesiredRed;
-                            iNewGreen = bytGreen + piDesiredGreen;
-                            iNewBlue  = bytBlue  + piDesiredBlue;
+                        cab = new ColorAsBytes();
+                        // The following method modifies parameter cab
+                        getMPixelRGB(iCol, iRow, cab);
+                        if ((cab.bytRed != 0) || (cab.bytGreen != 0) || (cab.bytBlue != 0)) {
+                            iNewRed   = cab.bytRed   + piDesiredRed;
+                            iNewGreen = cab.bytGreen + piDesiredGreen;
+                            iNewBlue  = cab.bytBlue  + piDesiredBlue;
                             pOutMImage.setMPixelRGB(iCol, iRow, (byte)iNewRed, (byte)iNewGreen, (byte)iNewBlue);
                         }
                         break;
@@ -2200,7 +2220,7 @@ public:
         }
 
         byte bytPixel;
-        Byte bytRed = (byte)0, bytGreen = (byte)0, bytBlue = (byte)0;
+        ColorAsBytes cab;
         pIXBeg = Math.max(this.miImageWidth, this.miImageHeight);
         pIYBeg = Math.max(this.miImageWidth, this.miImageHeight);
         pIXEnd = 1;
@@ -2220,20 +2240,22 @@ public:
                     break;
 
                 case 24:
-                    getMPixelRGB(iX, iY, bytRed, bytGreen, bytBlue);
-                    if(bytRed != JICTConstants.I_CHROMARED) {
+                    cab = new ColorAsBytes();
+                    // The following method modifies parameter cab.
+                    getMPixelRGB(iX, iY, cab);
+                    if(cab.bytRed != JICTConstants.I_CHROMARED) {
                         if(iX < pIXBeg) pIXBeg = iX;
                         if(iX > pIXEnd) pIXEnd = iX;
                         if(iY < pIYBeg) pIYBeg = iX;
                         if(iY > pIYEnd) pIYEnd = iX;
                     }
-                    if(bytGreen != JICTConstants.I_CHROMAGREEN) {
+                    if(cab.bytGreen != JICTConstants.I_CHROMAGREEN) {
                         if(iX < pIXBeg) pIXBeg = iX;
                         if(iX > pIXEnd) pIXEnd = iX;
                         if(iY < pIYBeg) pIYBeg = iX;
                         if(iY > pIYEnd) pIYEnd = iX;
                     }
-                    if(bytBlue != JICTConstants.I_CHROMABLUE) {
+                    if(cab.bytBlue != JICTConstants.I_CHROMABLUE) {
                         if(iX < pIXBeg) pIXBeg = iX;
                         if(iX > pIXEnd) pIXEnd = iX;
                         if(iY < pIYBeg) pIYBeg = iX;
@@ -2260,7 +2282,7 @@ public:
     public int createAlphaImage(MemImage pOutMImage) {
         int ix, iy;
         byte bytPixel;
-        Byte bytRed = (byte)0, bytGreen = (byte)0, bytBlue = (byte)0;
+        ColorAsBytes cab;
 
         if(pOutMImage.miBitsPerPixel != 8) {
             Globals.statusPrint("MemImage.createAlphaImage: Output image must be 8 bits per pixel");
@@ -2275,13 +2297,14 @@ public:
                     break;
 
                 case 24:
-                    // The following method sets parameters bytRed, bytGreen and bytBlue
-                    getMPixelRGB(ix, iy, bytRed, bytGreen, bytBlue);
+                    cab = new ColorAsBytes();
+                    // The following method modifies parameter cab
+                    getMPixelRGB(ix, iy, cab);
                     bytPixel = JICTConstants.I_CHROMAVALUE;
                     if(
-                    bytRed   != JICTConstants.I_CHROMAVALUE || 
-                    bytGreen != JICTConstants.I_CHROMAVALUE ||
-                    bytBlue  != JICTConstants.I_CHROMAVALUE) { 
+                    cab.bytRed   != JICTConstants.I_CHROMAVALUE || 
+                    cab.bytGreen != JICTConstants.I_CHROMAVALUE ||
+                    cab.bytBlue  != JICTConstants.I_CHROMAVALUE) { 
                         bytPixel = 255;
                     }
                     break;
@@ -2388,16 +2411,17 @@ public:
         int iMaxX = 1;
         int iMinY = iImHeight;
         int iMaxY = 1;
-        Byte bytRed = (byte)0, bytGreen = (byte)0, bytBlue = (byte)0;
+        ColorAsBytes cab;
       
         for (iRow = 1; iRow <= iImHeight; iRow++) {
             for (iCol = 1; iCol <= iImWidth; iCol++) {
-                // The following method sets parameters bytRed, bytGreen and bytBlue
-                getMPixelRGB(iCol, iRow, bytRed, bytGreen, bytBlue);
+                cab = new ColorAsBytes();
+                // The following method modifies parameter cab
+                getMPixelRGB(iCol, iRow, cab);
                 if(
-                bytRed != JICTConstants.I_CHROMARED || 
-                bytGreen != JICTConstants.I_CHROMAGREEN ||
-                bytBlue != JICTConstants.I_CHROMABLUE) {
+                cab.bytRed != JICTConstants.I_CHROMARED || 
+                cab.bytGreen != JICTConstants.I_CHROMAGREEN ||
+                cab.bytBlue != JICTConstants.I_CHROMABLUE) {
                     if(iRow < iMinY) iMinY = iRow;
                     if(iCol < iMinX) iMinX = iCol;
                     if(iRow > iMaxY) iMaxY = iRow;
@@ -2420,8 +2444,10 @@ public:
         for (iRow = iMinY; iRow <= iMaxY; iRow++) {
             iOutCol = 1;
             for (iCol = iMinX; iCol <= iMaxX; iCol++) {
-                getMPixelRGB(iCol, iRow, bytRed, bytGreen, bytBlue);
-                outMImage.setMPixelRGB(iOutCol, iOutRow, bytRed, bytGreen, bytBlue);
+                cab = new ColorAsBytes();
+                // The following parameter modifies parameter cab
+                getMPixelRGB(iCol, iRow, cab);
+                outMImage.setMPixelRGB(iOutCol, iOutRow, cab.bytRed, cab.bytGreen, cab.bytBlue);
                 iOutCol++;
             } // for iCol
 
