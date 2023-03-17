@@ -6,6 +6,8 @@ import core.Shape3d;
 
 import docs.ImageDoc;
 
+import dtos.ColorAsBytes;
+
 import fileUtils.BMPFileFilter;
 
 import frames.MainFrame;
@@ -26,7 +28,7 @@ import java.io.File;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
-
+import javax.swing.JPanel;
 
 public class ImageView extends JDialog implements MouseListener {
 /*
@@ -105,6 +107,7 @@ protected:
     //     onLButtonDblClk
     public String msFileName;
 
+    private JPanel mJPanel;
 /*
     protected:
     ...
@@ -144,7 +147,6 @@ protected:
         mbFirstPress = false;
         mbEraseMe = false;
         mMImage = null;
-
     } // ImageView ctor
 
 
@@ -158,6 +160,7 @@ protected:
     public ImageDoc getDocument() {
         // m_pDocument is a field inherited from CView
         // The original C++ class extended CScrollView, which itself extends CView
+        // Apparently, it is cast into an object of type ImageDoc.
         //ASSERT (m_pDocument.IsKindOf(RUNTIME_CLASS(imageDoc)));
         //return (ImageDoc)m_pDocument;
         return null;
@@ -406,7 +409,7 @@ protected:
         
         if (!mbCutoutEnabled && mMainFrame.mbImageSamplingEnabled) {
             // Sample the color pixel and display the RGB values
-            Byte bytRed = 0, bytGreen = 0, bytBlue = 0;
+            ColorAsBytes cab;
             byte bytValue;
             float fValue32;
             int iXOffset, iYOffset;
@@ -422,10 +425,11 @@ protected:
                 break;
         
             case 24:
-                mMImage.getMPixelRGB(iX, iY, 
-                    bytRed, bytGreen, bytBlue);
+                cab = new ColorAsBytes();
+                // The following method modifies parameter cab.
+                mMImage.getMPixelRGB(iX, iY, cab);
                 sMsgText = "x: " + iX + "  y: " + iY + 
-                     "  Color: red: " + bytRed + "  green: " + bytGreen + "  blue: "  + bytBlue;
+                     "  Color: red: " + cab.bytRed + "  green: " + cab.bytGreen + "  blue: "  + cab.bytBlue;
                 break;
         
             case 8:
@@ -619,52 +623,79 @@ protected:
     Integer piRedLow, Integer piRedHigh, 
     Integer piGreenLow, Integer piGreenHigh,
     Integer piBlueLow, Integer piBlueHigh) {
-        byte bytRed, bytGreen, bytBlue;
+        ColorAsBytes cab;
         int iStatus;
 
-        pMImage.getMPixelRGB(piX, piY, bytRed, bytGreen, bytBlue);
-        if((bytRed == 0) && (bytGreen == 0) && (bytBlue == 0)) {
+        cab = new ColorAsBytes();
+        // The following method modifies parameter cab
+        pMImage.getMPixelRGB(piX, piY, cab);
+        if(
+        (cab.bytRed == 0) && 
+        (cab.bytGreen == 0) && 
+        (cab.bytBlue == 0)) {
             return -1;  //a background pixel was clicked on
         }
 
-        piRedLow = piRedHigh = (int)bytRed;
-        piGreenLow = piGreenHigh = (int)bytGreen;
-        piBlueLow = piBlueHigh = (int)bytBlue;
+        piRedLow = piRedHigh = (int)cab.bytRed;
+        piGreenLow = piGreenHigh = (int)cab.bytGreen;
+        piBlueLow = piBlueHigh = (int)cab.bytBlue;
       
-        iStatus = pMImage.getMPixelRGB(piX + 1, piY + 1, bytRed, bytGreen, bytBlue);
-        if((bytRed != 0) && (bytGreen != 0) && (bytBlue != 0)) {
-            if(bytRed < piRedLow)  piRedLow  = (int)bytRed;
-            if(bytRed > piRedHigh) piRedHigh = (int)bytRed;
+        // Next we will inspect the colors at the following 3 points:
+        // (piX + 1, piY + 1), (piX, piY + 1), (piX + 1, piY)
+        // and update the output parameters.
 
-            if(bytGreen < piGreenLow)  piGreenLow  = (int)bytGreen;
-            if(bytGreen > piGreenHigh) piGreenHigh = (int)bytGreen;
+        cab = new ColorAsBytes();
+        // The following method modifies parameter cab
+        iStatus = pMImage.getMPixelRGB(piX + 1, piY + 1, cab);
+        if(
+        (cab.bytRed != 0) && 
+        (cab.bytGreen != 0) && 
+        (cab.bytBlue != 0)) {
+            // Update the output parameters
+            if(cab.bytRed < piRedLow)  piRedLow  = (int)cab.bytRed;
+            if(cab.bytRed > piRedHigh) piRedHigh = (int)cab.bytRed;
 
-            if(bytBlue < piBlueLow)  piBlueLow  = (int)bytBlue;
-            if(bytBlue > piBlueHigh) piBlueHigh = (int)bytBlue;
+            if(cab.bytGreen < piGreenLow)  piGreenLow  = (int)cab.bytGreen;
+            if(cab.bytGreen > piGreenHigh) piGreenHigh = (int)cab.bytGreen;
+
+            if(cab.bytBlue < piBlueLow)  piBlueLow  = (int)cab.bytBlue;
+            if(cab.bytBlue > piBlueHigh) piBlueHigh = (int)cab.bytBlue;
         }
     
-        iStatus = pMImage.getMPixelRGB(piX , piY + 1, bytRed, bytGreen, bytBlue);
-        if((bytRed != 0) && (bytGreen != 0) && (bytBlue != 0)) {
-            if(bytRed < piRedLow)  piRedLow  = (int)bytRed;
-            if(bytRed > piRedHigh) piRedHigh = (int)bytRed;
+        cab = new ColorAsBytes();
+        // The following method modifies parameter cab
+        iStatus = pMImage.getMPixelRGB(piX , piY + 1, cab);
+        if(
+        (cab.bytRed != 0) && 
+        (cab.bytGreen != 0) && 
+        (cab.bytBlue != 0)) {
+            // Update the output parameters
+            if(cab.bytRed < piRedLow)  piRedLow  = (int)cab.bytRed;
+            if(cab.bytRed > piRedHigh) piRedHigh = (int)cab.bytRed;
 
-            if(bytGreen < piGreenLow)  piGreenLow  = (int)bytGreen;
-            if(bytGreen > piGreenHigh) piGreenHigh = (int)bytGreen;
+            if(cab.bytGreen < piGreenLow)  piGreenLow  = (int)cab.bytGreen;
+            if(cab.bytGreen > piGreenHigh) piGreenHigh = (int)cab.bytGreen;
 
-            if(bytBlue < piBlueLow)  piBlueLow  = (int)bytBlue;
-            if(bytBlue > piBlueHigh) piBlueHigh = (int)bytBlue;
+            if(cab.bytBlue < piBlueLow)  piBlueLow  = (int)cab.bytBlue;
+            if(cab.bytBlue > piBlueHigh) piBlueHigh = (int)cab.bytBlue;
         }
     
-        iStatus = pMImage.getMPixelRGB(piX + 1, piY, bytRed, bytGreen, bytBlue);
-        if((bytRed != 0) && (bytGreen != 0) && (bytBlue != 0)) {
-            if(bytRed < piRedLow)  piRedLow  = (int)bytRed;
-            if(bytRed > piRedHigh) piRedHigh = (int)bytRed;
+        cab = new ColorAsBytes();
+        // The following method modifies parameter cab
+        iStatus = pMImage.getMPixelRGB(piX + 1, piY, cab);
+        if(
+        (cab.bytRed != 0) && 
+        (cab.bytGreen != 0) && 
+        (cab.bytBlue != 0)) {
+            // Update the output parameters
+            if(cab.bytRed < piRedLow)  piRedLow  = (int)cab.bytRed;
+            if(cab.bytRed > piRedHigh) piRedHigh = (int)cab.bytRed;
 
-            if(bytGreen < piGreenLow)  piGreenLow  = (int)bytGreen;
-            if(bytGreen > piGreenHigh) piGreenHigh = (int)bytGreen;
+            if(cab.bytGreen < piGreenLow)  piGreenLow  = (int)cab.bytGreen;
+            if(cab.bytGreen > piGreenHigh) piGreenHigh = (int)cab.bytGreen;
 
-            if(bytBlue < piBlueLow)  piBlueLow  = (int)bytBlue;
-            if(bytBlue > piBlueHigh) piBlueHigh = (int)bytBlue;
+            if(cab.bytBlue < piBlueLow)  piBlueLow  = (int)cab.bytBlue;
+            if(cab.bytBlue > piBlueHigh) piBlueHigh = (int)cab.bytBlue;
         }
 
         return 0;
