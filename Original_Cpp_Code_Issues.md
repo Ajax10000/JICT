@@ -257,6 +257,57 @@ In method renderVRML, two hard-coded paths are used:
 
 # Possible Bugs
 
+## In MEMIMG32.CPP
+
+Method getBoundingBox appears to compute the bounding box of a memImage incorrectly. I am referring to the code snippet below from method getBoundingBox:
+
+```cpp
+    for (x = 1; x <= imageWidth; x++) {
+        for (y = 1; y < imageHeight; y++) {
+            switch (bitsPerPixel) {
+            case 8:
+                thePixel = getMPixel(x, y);
+                if(thePixel != CHROMAVALUE) {
+                    if(x < *xBeg) *xBeg = x;
+                    if(x > *xEnd) *xEnd = x;
+                    if(y < *yBeg) *yBeg = x; // Shouldn't this x be y?
+                    if(y > *yEnd) *yEnd = x; // Shouldn't this x be y?
+                }
+                break;
+
+            case 24:
+                getMPixelRGB(x, y, &red, &green, &blue);
+                if(red != CHROMARED) {
+                    if(x < *xBeg) *xBeg = x;
+                    if(x > *xEnd) *xEnd = x;
+                    if(y < *yBeg) *yBeg = x; // Shouldn't this x be y?
+                    if(y > *yEnd) *yEnd = x; // Shouldn't this x be y?
+                }
+
+                if(green != CHROMAGREEN) {
+                    if(x < *xBeg) *xBeg = x;
+                    if(x > *xEnd) *xEnd = x;
+                    if(y < *yBeg) *yBeg = x; // Shouldn't this x be y?
+                    if(y > *yEnd) *yEnd = x; // Shouldn't this x be y?
+                }
+
+                if(blue != CHROMABLUE) {
+                    if(x < *xBeg) *xBeg = x;
+                    if(x > *xEnd) *xEnd = x;
+                    if(y < *yBeg) *yBeg = x; // Shouldn't this x be y?
+                    if(y > *yEnd) *yEnd = x; // Shouldn't this x be y?
+                }
+                break;
+            } // switch
+        } // for y
+
+        statusPrint(savedFileName);
+        sprintf(g_msgText,"getBoundingBox: xBeg: %d  xEnd: %d yBeg: %d  yEnd: %d",
+            xBeg, xEnd, yBeg, yEnd);
+        statusPrint(g_msgText);
+    } // for x
+```
+
 ## In RENDER.CPP
 
 Method renderMeshz contains the following code, which modifies parameters vx, vy and vz, all of which are of type float.
