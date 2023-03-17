@@ -150,7 +150,7 @@ However it can be argued that it can be kept and written out to a file in the sc
 
 ### In Method readList - parsing for scene type MORPH
 
-The code, when parsing for the scene type of a scene line in a .scn file, checks to see if there is an scene type (also called effect type) value of "Morph". However the book indicates on page 75 that the only possible values for an effect type are "Still" and "Sequence". The code actually assumes a value of "Still" and then checks for "Sequence", and if it is "Sequence", fixes the assumption. Then it checks for "Morph". Below is the snippet that I am referring to. The two comments below are mine.\
+The code, when parsing for the scene type of a scene line in a .scn file, checks to see if there is an scene type (also called effect type) value of "Morph". However the book indicates on page 75 that the only possible values for an effect type are "Still" and "Sequence". The code actually assumes a value of "Still" and then checks for "Sequence", and if it is "Sequence", fixes the assumption. Then it checks for "Morph". Below is the snippet that I am referring to. The two comments below are mine.
 
 ```cpp
     effectType = strtok(NULL,BLANK);
@@ -162,7 +162,7 @@ The code, when parsing for the scene type of a scene line in a .scn file, checks
 
 ### In Method readList - parsing for COMPOUND
 
-The same readList method, when parsing for the model type, checks for a model of type Compound. This model type is not discussed in the book. The possible image types, per p 75, are Image, Shape, QuadMesh, and Sequence. Below is the code snippet I am referring to. The comment below is mine.\
+The same readList method, when parsing for the model type, checks for a model of type Compound. This model type is not discussed in the book. The possible image types, per p 75, are Image, Shape, QuadMesh, and Sequence. Below is the code snippet I am referring to. The comment below is mine.
 
 ```cpp
     theType = IMAGE;
@@ -196,7 +196,7 @@ The gPipe constructor uses a hard-coded path:\
 
 ## In IWARP.CPP
 
-Method iwarpz uses several hard-coded paths, but they are all in code that is run only when debugging:\
+Method iwarpz uses several hard-coded paths, but they are all in code that is run only when debugging:
 
 ```cpp
     #ifdef ICTDEBUG
@@ -214,7 +214,7 @@ Method iwarpz uses several hard-coded paths, but they are all in code that is ru
     #endif
 ```
 
-Method fwarpz also uses hard-coded paths, but again only in code that runs when debugging:\
+Method fwarpz also uses hard-coded paths, but again only in code that runs when debugging:
 
 ```cpp
     #ifdef ICTDEBUG
@@ -238,7 +238,7 @@ Method OnToolsRenderVrmlFile uses a hard-coded path:\
 
 ## In QMESHMODEL.CPP
 
-Method createQMeshModel uses three hard-coded paths:\
+Method createQMeshModel uses three hard-coded paths:
 
 ```
     xImage8->writeBMP("d:\\ict20\\output\\meshx8.bmp");
@@ -248,7 +248,7 @@ Method createQMeshModel uses three hard-coded paths:\
 
 ## In READVRML.CPP
 
-In method renderVRML, two hard-coded paths are used:\
+In method renderVRML, two hard-coded paths are used:
 
 ```cpp
     aGraphicPipe.saveZBuffer("d:\\ict20\\output\\gPipeZBuffer8.bmp");
@@ -259,7 +259,7 @@ In method renderVRML, two hard-coded paths are used:\
 
 ## In RENDER.CPP
 
-Method renderMeshz contains the following code, which modifies parameters vx, vy and vz, all of which are of type float.\
+Method renderMeshz contains the following code, which modifies parameters vx, vy and vz, all of which are of type float.
 
 ```cpp
     //  Temporary - for testing
