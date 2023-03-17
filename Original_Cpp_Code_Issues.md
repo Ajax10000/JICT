@@ -146,30 +146,30 @@ However it can be argued that it can be kept and written out to a file in the sc
 
 The code, when parsing for the scene type of a scene line in a .scn file, checks to see if there is an scene type (also called effect type) value of "Morph". However the book indicates on page 75 that the only possible values for an effect type are "Still" and "Sequence". The code actually assumes a value of "Still" and then checks for "Sequence", and if it is "Sequence", fixes the assumption. Then it checks for "Morph". Below is the snippet that I am referring to. The two comments below are mine.\
 `effectType = strtok(NULL,BLANK);
-theSequence = 1; // Assumes theSequence = STILL
-if(effectType != NULL) {
-if(strcmpi(effectType,"SEQUENCE") == 0) theSequence = SEQUENCE;
-if(strcmpi(effectType,"MORPH") == 0) theSequence = MORPH; // why?`
+    theSequence = 1; // Assumes theSequence = STILL
+    if(effectType != NULL) {
+    if(strcmpi(effectType,"SEQUENCE") == 0) theSequence = SEQUENCE;
+    if(strcmpi(effectType,"MORPH") == 0) theSequence = MORPH; // why?`
 
 ### In Method readList - parsing for COMPOUND
 
 The same readList method, when parsing for the model type, checks for a model of type Compound. This model type is not discussed in the book. The possible image types, per p 75, are Image, Shape, QuadMesh, and Sequence. Below is the code snippet I am referring to. The comment below is mine.\
-`theType = IMAGE;\
-if(aType != NULL) {\
-    if(strcmpi(aType,"SHAPE") == 0) theType = SHAPE;\
-    if(strcmpi(aType,"QUADMESH") == 0) theType = QUADMESH;\
-    if(strcmpi(aType,"SEQUENCE") == 0) theType = SEQUENCE;\
-    if(strcmpi(aType,"COMPOUND") == 0) { // why?\
-        theType = COMPOUND;\
-        compoundMMember = 1;\
-    }\
-} else {\
-    sprintf(errorText,"Expected a model type on Line %d",\ lineCounter);\
-    delete rt;delete sc;delete tr;\
-    delete pointOfReference;\
-    filein.close();\
-    return -1;\
-}`
+`theType = IMAGE;
+    if(aType != NULL) {
+        if(strcmpi(aType,"SHAPE") == 0) theType = SHAPE;
+        if(strcmpi(aType,"QUADMESH") == 0) theType = QUADMESH;
+        if(strcmpi(aType,"SEQUENCE") == 0) theType = SEQUENCE;
+        if(strcmpi(aType,"COMPOUND") == 0) { // why?
+            theType = COMPOUND;
+            compoundMMember = 1;
+        }
+    } else {
+        sprintf(errorText,"Expected a model type on Line %d",lineCounter);
+        delete rt;delete sc;delete tr;
+        delete pointOfReference;
+        filein.close();
+        return -1;
+    }`
 
 ### In Method readList - parsing for REFERENCEPOINT
 
@@ -185,29 +185,28 @@ The gPipe constructor uses a hard-coded path:\
 ## In IWARP.CPP
 
 Method iwarpz uses several hard-coded paths, but they are all in code that is run only when debugging:\
-`#ifdef ICTDEBUG
+`    #ifdef ICTDEBUG
     if(zImage != NULL) {
         statusPrint("iwarpz: Writing zBuffer - d:\\ict20\\output\\rawWarpz.bmp");
         zImage->saveAs8("d:\\ict20\\output\\Warpz8.bmp");
     }
-#endif`
+    #endif`
 
-`#ifdef ICTDEBUG
-    statusPrint("fWarp1: Writing output -  d:\\ict20\\output\\rawfWarp.bmp");
-    outImage->writeBMP("d:\\ict20\\output\\rawfWarp.bmp");
-#endif`
+`    #ifdef ICTDEBUG
+        statusPrint("fWarp1: Writing output -  d:\\ict20\\output\\rawfWarp.bmp");
+        outImage->writeBMP("d:\\ict20\\output\\rawfWarp.bmp");
+    #endif`
 
 Method fwarpz also uses hard-coded paths, but again only in code that runs when debugging:\
-`#ifdef ICTDEBUG
+` #ifdef ICTDEBUG
 zImage->writeBMP("d:\\ict20\\output\\zBuffer32.bmp");
 statusPrint("fWarp3: Writing z output - d:\\ict20\\output\\zBuffer32.bmp");
 zImage->saveAs8("d:\\ict20\\output\\zBuffer8.bmp");
 statusPrint("fWarp3: Writing z output - d:\\ict20\\output\\zBuffer8.bmp");
 
-    statusPrint("fWarp3: Writing output -  c:\\ict\\output\\rawfWarp.bmp");
-    outImage->writeBMP("c:\\ict\\output\\rawfWarp.bmp");
-
-#endif`
+        statusPrint("fWarp3: Writing output -  c:\\ict\\output\\rawfWarp.bmp");
+        outImage->writeBMP("c:\\ict\\output\\rawfWarp.bmp");
+    #endif`
 
 ## In MAINFRAME.CPP
 
@@ -220,24 +219,24 @@ Method OnToolsRenderVrmlFile uses a hard-coded path:\
 ## In QMESHMODEL.CPP
 
 Method createQMeshModel uses three hard-coded paths:\
-`xImage8->writeBMP("d:\\ict20\\output\\meshx8.bmp");
-yImage8->writeBMP("d:\\ict20\\output\\meshy8.bmp");
-zImage8->writeBMP("d:\\ict20\\output\\meshz8.bmp");`
+`    xImage8->writeBMP("d:\\ict20\\output\\meshx8.bmp");
+    yImage8->writeBMP("d:\\ict20\\output\\meshy8.bmp");
+    zImage8->writeBMP("d:\\ict20\\output\\meshz8.bmp");`
 
 ## In READVRML.CPP
 
 In method renderVRML, two hard-coded paths are used:\
-`aGraphicPipe.saveZBuffer("d:\\ict20\\output\\gPipeZBuffer8.bmp");
-sprintf(g_msgText,"d:\\ict20\\output\\VRMLImage.bmp");`
+`    aGraphicPipe.saveZBuffer("d:\\ict20\\output\\gPipeZBuffer8.bmp");
+    sprintf(g_msgText,"d:\\ict20\\output\\VRMLImage.bmp");`
 
 # Possible Bugs
 
 ## In RENDER.CPP
 
 Method renderMeshz contains the following code, which modifies parameters vx, vy and vz, all of which are of type float.\
-`//  Temporary - for testing
-vx = (float)outWidth/2.0;
-vy = (float)outHeight/2.0;
-vz = 512.0;`
+`    //  Temporary - for testing
+    vx = (float)outWidth/2.0;
+    vy = (float)outHeight/2.0;
+    vz = 512.0;`
 
 I believe the author forgot to comment out or delete this code. These are obviously not output parameters, as otherwise they would have been declared as float \*, not float.
