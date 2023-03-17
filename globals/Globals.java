@@ -7,6 +7,8 @@ import core.RenderObject;
 import core.SceneElement;
 import core.Shape3d;
 
+import dtos.ColorAsBytes;
+
 import fileUtils.FileUtils;
 
 import globals.JICTConstants;
@@ -229,8 +231,8 @@ public class Globals {
         // Each image is assumed to be opened for random access
         int ix, iy;
         byte bytMattePixel, bytInPixel, bytOutPixel, bytAddedPixel;
-        Byte bytInRed = (byte)0, bytInGreen = (byte)0, bytInBlue = (byte)0;
-        Byte bytOutRed = (byte)0, bytOutGreen = (byte)0, bytOutBlue = (byte)0;
+        ColorAsBytes inCab;
+        ColorAsBytes outCab;
         byte bytAddedRed, bytAddedGreen, bytAddedBlue;
         float fInWeight, fOutWeight;
     
@@ -281,29 +283,31 @@ public class Globals {
                     break;
         
                 case 24:                           // RGB Blend with Z-Buffer
-                    // The following method sets parameters bytInRed, bytInGreen and bytInBlue
-                    pInMImage.getMPixelRGB(ix, iy, bytInRed, bytInGreen, bytInBlue);
+                    inCab = new ColorAsBytes();
+                    // The following method modifies parameter inCab
+                    pInMImage.getMPixelRGB(ix, iy, inCab);
                     if(
                     (bytMattePixel > JICTConstants.I_CHROMAVALUE) && 
-                    (bytInGreen > JICTConstants.I_CHROMAVALUE)) {
-                        // The following method sets parameters bytOutRed, bytOutGreen, and bytOutBlue
-                        bytOutPixel = (byte)pOutMImage.getMPixelRGB(ix, iy, bytOutRed, bytOutGreen, bytOutBlue);
+                    (inCab.bytGreen > JICTConstants.I_CHROMAVALUE)) {
+                        outCab = new ColorAsBytes();
+                        // The following method modifies parameter outCab
+                        bytOutPixel = (byte)pOutMImage.getMPixelRGB(ix, iy, outCab);
                         fInWeight  = (float)bytMattePixel / 255.0f * pfAlphaScale;
                         fOutWeight = 1.0f - fInWeight;
 
                         if(pfAlphaScale > 0.0f) {
-                            bytAddedRed   = (byte)((fInWeight * (float)bytInRed)   + (fOutWeight *(float)bytOutRed)   + 0.5f);
-                            bytAddedGreen = (byte)((fInWeight * (float)bytInGreen) + (fOutWeight *(float)bytOutGreen) + 0.5f);
-                            bytAddedBlue  = (byte)((fInWeight * (float)bytInBlue)  + (fOutWeight *(float)bytOutBlue)  + 0.5f);
+                            bytAddedRed   = (byte)((fInWeight * (float)inCab.bytRed)   + (fOutWeight *(float)outCab.bytRed)   + 0.5f);
+                            bytAddedGreen = (byte)((fInWeight * (float)inCab.bytGreen) + (fOutWeight *(float)outCab.bytGreen) + 0.5f);
+                            bytAddedBlue  = (byte)((fInWeight * (float)inCab.bytBlue)  + (fOutWeight *(float)outCab.bytBlue)  + 0.5f);
                         } else {  // shadow
-                            bytAddedRed   = (byte)((float)bytOutRed   + (fInWeight *(float)bytInRed)   + 0.5f);
-                            bytAddedGreen = (byte)((float)bytOutGreen + (fInWeight *(float)bytInGreen) + 0.5f);
-                            bytAddedBlue  = (byte)((float)bytOutBlue  + (fInWeight *(float)bytInBlue)  + 0.5f);
+                            bytAddedRed   = (byte)((float)outCab.bytRed   + (fInWeight *(float)inCab.bytRed)   + 0.5f);
+                            bytAddedGreen = (byte)((float)outCab.bytGreen + (fInWeight *(float)inCab.bytGreen) + 0.5f);
+                            bytAddedBlue  = (byte)((float)outCab.bytBlue  + (fInWeight *(float)inCab.bytBlue)  + 0.5f);
 
                             // Make certain shadows won't produce negative intensities
-                            if (bytAddedRed > bytOutRed)     bytAddedRed = bytOutRed;
-                            if (bytAddedGreen > bytOutGreen) bytAddedGreen = bytOutGreen;
-                            if (bytAddedBlue > bytOutBlue)   bytAddedBlue = bytOutBlue;
+                            if (bytAddedRed   > outCab.bytRed)   bytAddedRed   = outCab.bytRed;
+                            if (bytAddedGreen > outCab.bytGreen) bytAddedGreen = outCab.bytGreen;
+                            if (bytAddedBlue  > outCab.bytBlue)  bytAddedBlue  = outCab.bytBlue;
                         }
 
                         if (bytAddedRed < 1)   bytAddedRed   = (byte)1;
@@ -579,7 +583,7 @@ public class Globals {
         int iImHeight = pMImage.getHeight();
         int iImWidth  = pMImage.getWidth();
         int iBpp      = pMImage.getBitsPerPixel();
-        Byte bytRed = 0, bytGreen = 0, bytBlue = 0;
+        ColorAsBytes cab;
 
         if (
         (piX < 1) || (piX > iImWidth) || 
@@ -596,12 +600,13 @@ public class Globals {
             }
 
         case 24:
-            // The following method sets parameters bytRed, bytGreen, and bytBlue
-            pMImage.getMPixelRGB(piX, piY, bytRed, bytGreen, bytBlue);
+            cab = new ColorAsBytes();
+            // The following method modifies parameter cab
+            pMImage.getMPixelRGB(piX, piY, cab);
             if (
-            (bytRed   != JICTConstants.I_CHROMARED) || 
-            (bytGreen != JICTConstants.I_CHROMAGREEN) ||
-            (bytBlue  != JICTConstants.I_CHROMABLUE)) {
+            (cab.bytRed   != JICTConstants.I_CHROMARED) || 
+            (cab.bytGreen != JICTConstants.I_CHROMAGREEN) ||
+            (cab.bytBlue  != JICTConstants.I_CHROMABLUE)) {
                 return true;
             } else {
                 return false;
@@ -906,7 +911,7 @@ public class Globals {
         // String inPath; // This variable is not used
         StringBuffer sbOutPath = new StringBuffer();
         String sOutSuffix;
-        Byte bytRed = (byte)0, bytGreen = (byte)0, bytBlue = (byte)0;
+        ColorAsBytes cab;
         int iBlur, iNumOpenImages, iBucket, iRedBucket, iGreenBucket, iBlueBucket;
         int iFrameNum = 0, i, j, iStatus;
         Integer iImHeight = 0, iImWidth = 0, iBpp = 0;
@@ -1012,10 +1017,12 @@ public class Globals {
                             break;
 
                         case 24:
-                            aMImages[iBlur].getMPixelRGB(iCol, iRow, bytRed, bytGreen, bytBlue);
-                            iRedBucket   += bytRed;
-                            iGreenBucket += bytGreen;
-                            iBlueBucket  += bytBlue;
+                            cab = new ColorAsBytes();
+                            // The following method modifies parameter cab
+                            aMImages[iBlur].getMPixelRGB(iCol, iRow, cab);
+                            iRedBucket   += cab.bytRed;
+                            iGreenBucket += cab.bytGreen;
+                            iBlueBucket  += cab.bytBlue;
                             break;
 
                         default:
@@ -1211,7 +1218,8 @@ public class Globals {
         float fDx, fDy, fDz;
         float fD, fW, theZ, fDist;
         fD = -512.0f;
-        byte bytIntensity, bytRed, bytGreen, bytBlue;
+        byte bytIntensity;
+        ColorAsBytes cab;
         //int xMin, xMax; // these variables are not used
         //int yMin, yMax; // these variables are not used
         //int zMin, zMax; // these variables are not used
@@ -1314,8 +1322,10 @@ public class Globals {
                     break;
 
                 case 24:
+                    cab = new ColorAsBytes();
+                    // The following method modifies parameter cab
                     pInMImage.getMPixelRGB((int)(fXOut + fHalfInWidth + 1), (int)(fYOut + fHalfInHeight + 1), 
-                        bytRed, bytGreen, bytBlue);
+                        cab);
                     break;
                 } // switch
 
@@ -1335,7 +1345,7 @@ public class Globals {
 
                         case 24:
                             pOutMImage.setMPixelRGB((int)(iX + fXCentOffset), (int)(iY + fYCentOffset), 
-                                bytRed, bytGreen, bytBlue);
+                                cab.bytRed, cab.bytGreen, cab.bytBlue);
                             break;
                         }
                     }
@@ -1348,7 +1358,7 @@ public class Globals {
 
                     case 24:
                         pOutMImage.setMPixelRGB((int)(iX + fXCentOffset), (int)(iY + fYCentOffset), 
-                            bytRed, bytGreen, bytBlue);
+                            cab.bytRed, cab.bytGreen, cab.bytBlue);
                         break;
                     }
                 }
@@ -2088,7 +2098,7 @@ public class Globals {
         float fq00b, fq10b, fq20b = 0.0f;
         float fq11b = 0.0f, fq21b = 0.0f; // fq01b?
         float fq12b = 0.0f, fq22b = 0.0f; // fq02b?
-        Byte bytRed = (byte)0, bytGreen = (byte)0, bytBlue = (byte)0;
+        ColorAsBytes cab;
 
         for (iRow = 2; iRow <= iImHeight - 1; iRow++) {
             for (iCol = 2; iCol <= iImWidth - 1; iCol++) {
@@ -2121,15 +2131,19 @@ public class Globals {
                     break;
 
                 case 24:
-                    pInMImage.getMPixelRGB(iCol - 1, iRow - 1, bytRed, bytGreen, bytBlue);
-                    fq00r = (float)bytRed   * weight[0][0];
-                    fq00g = (float)bytGreen * weight[0][0];
-                    fq00b = (float)bytBlue  * weight[0][0];
+                    cab = new ColorAsBytes();
+                    // The following method modifies parameter cab
+                    pInMImage.getMPixelRGB(iCol - 1, iRow - 1, cab);
+                    fq00r = (float)cab.bytRed   * weight[0][0];
+                    fq00g = (float)cab.bytGreen * weight[0][0];
+                    fq00b = (float)cab.bytBlue  * weight[0][0];
 
-                    pInMImage.getMPixelRGB(iCol, iRow - 1, bytRed, bytGreen, bytBlue);
-                    fq10r = (float)bytRed   * weight[1][0];
-                    fq10g = (float)bytGreen * weight[1][0];
-                    fq10b = (float)bytBlue  * weight[1][0];
+                    cab = new ColorAsBytes();
+                    // The following method modifies parameter cab
+                    pInMImage.getMPixelRGB(iCol, iRow - 1, cab);
+                    fq10r = (float)cab.bytRed   * weight[1][0];
+                    fq10g = (float)cab.bytGreen * weight[1][0];
+                    fq10b = (float)cab.bytBlue  * weight[1][0];
 
                     /*
                     // The following values for the variables fq20, fq01, fq11, fq21 are not used
@@ -2391,14 +2405,10 @@ public class Globals {
         float fIncr = 0.5f;                  // oversample 2:1
         float fInvIncr = 1.0f / fIncr;
         float fD1 = 0.0f, fD2 = 0.0f, fD3 = 0.0f, fD4 = 0.0f;
-        Byte bytRed1  = (byte)0;
-        Byte bytRed2  = (byte)0;
-        Byte bytRed3  = (byte)0;
-        Byte bytRed4  = (byte)0;
-        Byte bytBlue1 = (byte)0;
-        Byte bytBlue2 = (byte)0;
-        Byte bytBlue3 = (byte)0;
-        Byte bytBlue4 = (byte)0;
+        ColorAsBytes cab1;
+        ColorAsBytes cab2;
+        ColorAsBytes cab3;
+        ColorAsBytes cab4;
         
         // Note fInvIncr * fIncr = 1.0f
         for (fY = fInvIncr * fIncr; fY <= iInHeight; fY += fIncr) {
@@ -2416,10 +2426,22 @@ public class Globals {
                     // From the method calls below, we will only use the output parameters 
                     // bytIntensity1, bytIntensity2, bytIntensity3, and bytIntensity4, 
                     // later on, as parameters to pOutMImage.fillPolyz
-                    pInMImage.getMPixelRGB((int)(fX - fIncr),           (int)fY, bytRed1, bytIntensity1, bytBlue1);
-                    pInMImage.getMPixelRGB(          (int)fX,           (int)fY, bytRed2, bytIntensity2, bytBlue2);
-                    pInMImage.getMPixelRGB(          (int)fX, (int)(fY - fIncr), bytRed3, bytIntensity3, bytBlue3);
-                    pInMImage.getMPixelRGB((int)(fX - fIncr), (int)(fY - fIncr), bytRed4, bytIntensity4, bytBlue4);
+                    cab1 = new ColorAsBytes();
+                    pInMImage.getMPixelRGB((int)(fX - fIncr),           (int)fY, cab1);
+
+                    cab2 = new ColorAsBytes();
+                    pInMImage.getMPixelRGB(          (int)fX,           (int)fY, cab2);
+
+                    cab3 = new ColorAsBytes();
+                    pInMImage.getMPixelRGB(          (int)fX, (int)(fY - fIncr), cab3);
+
+                    cab4 = new ColorAsBytes();
+                    pInMImage.getMPixelRGB((int)(fX - fIncr), (int)(fY - fIncr), cab4);
+
+                    bytIntensity1 = cab1.bytGreen;
+                    bytIntensity2 = cab2.bytGreen;
+                    bytIntensity3 = cab3.bytGreen;
+                    bytIntensity4 = cab4.bytGreen;
                 }
 
                 fXIn = fX - fHalfWidth;
@@ -2497,6 +2519,8 @@ public class Globals {
 
 
     // This method originally came from IWARP.CPP
+    // 
+    // Could not find where this method is called from.
     public static int fwarpz2(MemImage pInputMImage, MemImage pOutputMImage, MemImage zBufMImage, 
     float pfRx, float pfRy, float pfRz, 
     float pfSx, float pfSy, float pfSz, 
@@ -2605,7 +2629,8 @@ public class Globals {
 
         float fRow, fCol;
         float fX1, fY1, fZ1;
-        Byte byt1 = (byte)0, bytRed1 = (byte)0, bytBlue1 = (byte)0;
+        ColorAsBytes cab1;
+        byte byt1 = (byte)0;
         // byte bytGreen1; // not used
         Integer iSx1 = 0, iSy1 = 0;
         float fRefX = 0.0f, fRefY = 0.0f, fRefZ = 0.0f;
@@ -2621,8 +2646,10 @@ public class Globals {
                     byt1 = pInputMImage.getMPixel((int)fCol, (int)fRow);
                 }
                 if(iBpp == 24) {
-                    // The following method sets bytRed1, byt1, and bytBlue1. We'll only use byt1.
-                    pInputMImage.getMPixelRGB((int)fCol, (int)fRow, bytRed1, byt1, bytBlue1);
+                    cab1 = new ColorAsBytes();
+                    // The following method modifies parameter cab1.
+                    pInputMImage.getMPixelRGB((int)fCol, (int)fRow, cab1);
+                    byt1 = cab1.bytGreen;
                 }
     
                 // Project to the screen
@@ -2924,7 +2951,6 @@ public class Globals {
             return -2;
         }
         
-
         // As a matter of convenience copy the texture image to the same directory
         // in which the surface images reside, if it isn't there already.
         if(!FileUtils.fileExists(sOutPath)) {
@@ -3313,7 +3339,7 @@ public class Globals {
         int iIntervalStatus = 0;
         int iCounter = 0;
         byte bytValue;
-        Byte bytRed = 0, bytGreen = 0, bytBlue = 0;
+        ColorAsBytes cab;
         
         for(iCol = 1; iCol <= iImWidth; iCol++) {
             // Set aValue
@@ -3323,12 +3349,13 @@ public class Globals {
                 break;
                 
             case 24:
-                // The following method sets parameters bytRed, bytGreen and bytBlue
-                pMImage.getMPixelRGB(iCol, piRow, bytRed, bytGreen, bytBlue);
+                cab = new ColorAsBytes();
+                // The following method modifies parameter cab
+                pMImage.getMPixelRGB(iCol, piRow, cab);
                 if(
-                bytRed   != JICTConstants.I_CHROMARED || 
-                bytGreen != JICTConstants.I_CHROMAGREEN || 
-                bytBlue  != JICTConstants.I_CHROMABLUE) {
+                cab.bytRed   != JICTConstants.I_CHROMARED || 
+                cab.bytGreen != JICTConstants.I_CHROMAGREEN || 
+                cab.bytBlue  != JICTConstants.I_CHROMABLUE) {
                     bytValue = 255;
                 } else {
                     bytValue = JICTConstants.I_CHROMAVALUE;
@@ -4373,7 +4400,8 @@ public class Globals {
         Integer numBIntervals = 0;
         int totalALength, totalMLength;
         // int aCoord, bCoord, j; // these variables are not used
-        Byte red = 0, green = 0, blue = 0;
+        ColorAsBytes cab;
+        byte green = 0;
         float aRatio;
     
         // Copy the world coords to the screen portion of the shape object
@@ -4420,11 +4448,13 @@ public class Globals {
                     switch(bpp) {
                     case 8:
                         green = tempImageA.getMPixel(inCoord, row);
-                        preBlendA.setMPixel(outCoord, row,  green);
+                        preBlendA.setMPixel(outCoord, row, green);
                         break;
                     case 24:
-                        tempImageA.getMPixelRGB(inCoord, row, red, green, blue);
-                        preBlendA.setMPixelRGB(outCoord, row, red, green, blue);
+                        cab = new ColorAsBytes();
+                        // The following method modifies parameter cab
+                        tempImageA.getMPixelRGB(inCoord, row, cab);
+                        preBlendA.setMPixelRGB(outCoord, row, cab.bytRed, cab.bytGreen, cab.bytBlue);
                       break;
                     } // switch
                 } // for col
@@ -4467,12 +4497,14 @@ public class Globals {
                     switch(bpp) {
                     case 8:
                         green = tempImageB.getMPixel(inCoord, row);
-                        preBlendB.setMPixel(outCoord, row,  green);
+                        preBlendB.setMPixel(outCoord, row, green);
                         break;
 
                     case 24:
-                        tempImageB.getMPixelRGB(inCoord, row, red, green, blue);
-                        preBlendB.setMPixelRGB(outCoord, row, red, green, blue);
+                        cab = new ColorAsBytes();
+                        // The following method modifies parameter cab
+                        tempImageB.getMPixelRGB(inCoord, row, cab);
+                        preBlendB.setMPixelRGB(outCoord, row, cab.bytRed, cab.bytGreen, cab.bytBlue);
                         break;
                     } // switch
                 } // for col
@@ -4640,9 +4672,11 @@ public class Globals {
         int iRow, iCol;
         float aValue, bValue, oValue;
         byte aByte, bByte, oByte;
-        byte aRedByte = (byte)0, bRedByte = (byte)0, oRedByte;
-        byte aGreenByte = (byte)0, bGreenByte = (byte)0, oGreenByte;
-        byte aBlueByte = (byte)0, bBlueByte = (byte)0, oBlueByte;
+        ColorAsBytes aCab;
+        ColorAsBytes bCab;
+        byte oRedByte;
+        byte oGreenByte;
+        byte oBlueByte;
 
         if ((pfFraction < 0.0f) || (pfFraction > 1.0f)) {
             statusPrint("tweenMesh: aFraction must be between 0 and 1");
@@ -4690,11 +4724,17 @@ public class Globals {
                     break;
 
                 case 24:
-                    aByte      = (byte)aTexture.getMPixelRGB(iCol, iRow, aRedByte, aGreenByte, aBlueByte);
-                    bByte      = (byte)bTexture.getMPixelRGB(iCol, iRow, bRedByte, bGreenByte, bBlueByte);
-                    oRedByte   = (byte)Math.round((pfFraction * (float)aRedByte)   + (bFraction * (float)bRedByte));
-                    oGreenByte = (byte)Math.round((pfFraction * (float)aGreenByte) + (bFraction * (float)bGreenByte));
-                    oBlueByte  = (byte)Math.round((pfFraction * (float)aBlueByte)  + (bFraction * (float)bBlueByte));
+                    aCab = new ColorAsBytes();
+                    // The following method modifies parameter aCab
+                    aByte      = (byte)aTexture.getMPixelRGB(iCol, iRow, aCab);
+
+                    bCab = new ColorAsBytes();
+                    // The following method modifies parameter bCab
+                    bByte      = (byte)bTexture.getMPixelRGB(iCol, iRow, bCab);
+
+                    oRedByte   = (byte)Math.round((pfFraction * (float)aCab.bytRed)   + (bFraction * (float)bCab.bytRed));
+                    oGreenByte = (byte)Math.round((pfFraction * (float)aCab.bytGreen) + (bFraction * (float)bCab.bytGreen));
+                    oBlueByte  = (byte)Math.round((pfFraction * (float)aCab.bytBlue)  + (bFraction * (float)bCab.bytBlue));
                     oTexture.setMPixelRGB(iCol, iRow, oRedByte, oGreenByte, oBlueByte);
                     break;
                 } // switch
