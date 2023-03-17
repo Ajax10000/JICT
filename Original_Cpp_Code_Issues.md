@@ -99,11 +99,11 @@ for loop ...
 
 ## In SCENELST.H and MODEL.CPP
 
-The sceneElement defined in SCENELST.H defines field 'char adjustmentType[10]':
+The sceneElement defined in SCENELST.H defines field 'char adjustmentType[10]':\
 `  char adjustmentType[10];    // 'Relative' or 'Target'`
 
-However, in MODEL.CPP, which contains all the sceneElement methods, this field is only set in the sceneElement constructor:
-`strcpy(adjustmentType,adjType);`
+However, in MODEL.CPP, which contains all the sceneElement methods, this field is only set in the sceneElement constructor:\
+`strcpy(adjustmentType,adjType);`\
 but is not thereafter used.
 
 It appears that sceneElement does not need to keep this field, as it is used when the .scn file is being parsed. See the following snippet from method readList in SCENELST.CPP:
@@ -144,8 +144,7 @@ However it can be argued that it can be kept and written out to a file in the sc
 
 ### In Method readList - parsing for scene type MORPH
 
-The code, when parsing for the scene type of a scene line in a .scn file, checks
-to see if there is an scene type (also called effect type) value of "Morph". However the book indicates on page 75 that the only possible values for an effect type are "Still" and "Sequence". The code actually assumes a value of "Still" and then checks for "Sequence", and if it is "Sequence", fixes the assumption. Then it checks for "Morph". Below is the snippet that I am referring to. The two comments below are mine.
+The code, when parsing for the scene type of a scene line in a .scn file, checks to see if there is an scene type (also called effect type) value of "Morph". However the book indicates on page 75 that the only possible values for an effect type are "Still" and "Sequence". The code actually assumes a value of "Still" and then checks for "Sequence", and if it is "Sequence", fixes the assumption. Then it checks for "Morph". Below is the snippet that I am referring to. The two comments below are mine.\
 `effectType = strtok(NULL,BLANK);
 theSequence = 1; // Assumes theSequence = STILL
 if(effectType != NULL) {
@@ -156,8 +155,7 @@ if(strcmpi(effectType,"MORPH") == 0) theSequence = MORPH; // why?`
 
 The same readList method, when parsing for the model type, checks for a model of type Compound.
 This model type is not discussed in the book. The possible image types, per p 75, are
-Image, Shape, QuadMesh, and Sequence. Below is the code snippet I am referring to.\
-The comment below is mine.
+Image, Shape, QuadMesh, and Sequence. Below is the code snippet I am referring to. The comment below is mine.\
 `theType = IMAGE;
 if(aType != NULL) {
     if(strcmpi(aType,"SHAPE") == 0) theType = SHAPE;
@@ -183,12 +181,12 @@ Also in the same readList method, in the code that parses for model-related info
 
 ## In GPIPE.CPP
 
-The gPipe constructor uses a hard-coded path:
+The gPipe constructor uses a hard-coded path:\
 `strcpy(scenePathName, "d:\\ict20\\output\\gPipe.bmp");`
 
 ## In IWARP.CPP
 
-Method iwarpz uses several hard-coded paths, but they are all in code that is run only when debugging:
+Method iwarpz uses several hard-coded paths, but they are all in code that is run only when debugging:\
 `#ifdef ICTDEBUG
     if(zImage != NULL) {
         statusPrint("iwarpz: Writing zBuffer - d:\\ict20\\output\\rawWarpz.bmp");
@@ -201,7 +199,7 @@ Method iwarpz uses several hard-coded paths, but they are all in code that is ru
     outImage->writeBMP("d:\\ict20\\output\\rawfWarp.bmp");
 #endif`
 
-Method fwarpz also uses hard-coded paths, but again only in code that runs when debugging:
+Method fwarpz also uses hard-coded paths, but again only in code that runs when debugging:\
 `#ifdef ICTDEBUG
 zImage->writeBMP("d:\\ict20\\output\\zBuffer32.bmp");
 statusPrint("fWarp3: Writing z output - d:\\ict20\\output\\zBuffer32.bmp");
@@ -215,22 +213,22 @@ statusPrint("fWarp3: Writing z output - d:\\ict20\\output\\zBuffer8.bmp");
 
 ## In MAINFRAME.CPP
 
-Method OnToolsWarpimage uses a hard-coded path:
+Method OnToolsWarpimage uses a hard-coded path:\
 `outImage->writeBMP("d:\\ict20\\output\\testwarp.bmp");`
 
-Method OnToolsRenderVrmlFile uses a hard-coded path:
+Method OnToolsRenderVrmlFile uses a hard-coded path:\
 `strcpy(outPath, "D:\\ict20\\output\\vrmlImage.bmp");`
 
 ## In QMESHMODEL.CPP
 
-Method createQMeshModel uses three hard-coded paths:
+Method createQMeshModel uses three hard-coded paths:\
 `xImage8->writeBMP("d:\\ict20\\output\\meshx8.bmp");
 yImage8->writeBMP("d:\\ict20\\output\\meshy8.bmp");
 zImage8->writeBMP("d:\\ict20\\output\\meshz8.bmp");`
 
 ## In READVRML.CPP
 
-In method renderVRML, two hard-coded paths are used:
+In method renderVRML, two hard-coded paths are used:\
 `aGraphicPipe.saveZBuffer("d:\\ict20\\output\\gPipeZBuffer8.bmp");
 sprintf(g_msgText,"d:\\ict20\\output\\VRMLImage.bmp");`
 
@@ -238,7 +236,7 @@ sprintf(g_msgText,"d:\\ict20\\output\\VRMLImage.bmp");`
 
 ## In RENDER.CPP
 
-Method renderMeshz contains the following code, which modifies parameters vx, vy and vz, all of which are of type float.
+Method renderMeshz contains the following code, which modifies parameters vx, vy and vz, all of which are of type float.\
 `//  Temporary - for testing
         vx = (float)outWidth/2.0;
         vy = (float)outHeight/2.0;
