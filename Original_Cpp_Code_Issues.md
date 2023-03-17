@@ -153,24 +153,22 @@ if(strcmpi(effectType,"MORPH") == 0) theSequence = MORPH; // why?`
 
 ### In Method readList - parsing for COMPOUND
 
-The same readList method, when parsing for the model type, checks for a model of type Compound.
-This model type is not discussed in the book. The possible image types, per p 75, are
-Image, Shape, QuadMesh, and Sequence. Below is the code snippet I am referring to. The comment below is mine.\
-`theType = IMAGE;
-if(aType != NULL) {
-    if(strcmpi(aType,"SHAPE") == 0) theType = SHAPE;
-    if(strcmpi(aType,"QUADMESH") == 0) theType = QUADMESH;
-    if(strcmpi(aType,"SEQUENCE") == 0) theType = SEQUENCE;
-    if(strcmpi(aType,"COMPOUND") == 0) { // why?
-        theType = COMPOUND;
-        compoundMMember = 1;
-    }
-} else {
-    sprintf(errorText,"Expected a model type on Line %d", lineCounter);
-    delete rt;delete sc;delete tr;
-    delete pointOfReference;
-    filein.close();
-    return -1;
+The same readList method, when parsing for the model type, checks for a model of type Compound. This model type is not discussed in the book. The possible image types, per p 75, are Image, Shape, QuadMesh, and Sequence. Below is the code snippet I am referring to. The comment below is mine.\
+`theType = IMAGE;\
+if(aType != NULL) {\
+    if(strcmpi(aType,"SHAPE") == 0) theType = SHAPE;\
+    if(strcmpi(aType,"QUADMESH") == 0) theType = QUADMESH;\
+    if(strcmpi(aType,"SEQUENCE") == 0) theType = SEQUENCE;\
+    if(strcmpi(aType,"COMPOUND") == 0) { // why?\
+        theType = COMPOUND;\
+        compoundMMember = 1;\
+    }\
+} else {\
+    sprintf(errorText,"Expected a model type on Line %d",\ lineCounter);\
+    delete rt;delete sc;delete tr;\
+    delete pointOfReference;\
+    filein.close();\
+    return -1;\
 }`
 
 ### In Method readList - parsing for REFERENCEPOINT
@@ -238,8 +236,8 @@ sprintf(g_msgText,"d:\\ict20\\output\\VRMLImage.bmp");`
 
 Method renderMeshz contains the following code, which modifies parameters vx, vy and vz, all of which are of type float.\
 `//  Temporary - for testing
-        vx = (float)outWidth/2.0;
-        vy = (float)outHeight/2.0;
-        vz = 512.0;`
+vx = (float)outWidth/2.0;
+vy = (float)outHeight/2.0;
+vz = 512.0;`
 
 I believe the author forgot to comment out or delete this code. These are obviously not output parameters, as otherwise they would have been declared as float \*, not float.
