@@ -40,38 +40,41 @@ SCENELST.CPP defines method sceneList::render(imageView *displayWindow, tMatrix 
 ### In Method OnToolsCreateascenelist
 
 After calling sceneList.readList, the code checks to see if the scene type (which should be either STILL or SEQUENCE) is equal to MORPH. The code I'm talking about is shown below:
-`/// The following method parses the .scn file the user just selected,
-/// and places the information in a scene object and one or more
-/// sceneElement objects. The scene and sceneElement object(s) are
-/// then placed into the doubly linked list the sceneList maintains.
-myStatus = mySceneList->readList(g_msgText, aFileName);
-statusPrint(g_msgText);
-if(myStatus != 0) {
-mySceneList->clear();
-return;
-}
-strcpy(sceneFileName, dlg.GetPathName()); // save the file name
 
-// Load the scene information into the client object
-mySceneList->getSceneInfo(sceneName, &effectType, &colorMode,
-&outputRows, &outputColumns);
-mySceneList->getViewTransform(
-&viewTranslateX, &viewTranslateY, &viewTranslateZ,
-&viewRotateX, &viewRotateY, &viewRotateZ);
-getViewMatrix(viewMatrix);
+```cpp
+    /// The following method parses the .scn file the user just selected,
+    /// and places the information in a scene object and one or more
+    /// sceneElement objects. The scene and sceneElement object(s) are
+    /// then placed into the doubly linked list the sceneList maintains.
+    myStatus = mySceneList->readList(g_msgText, aFileName);
+    statusPrint(g_msgText);
+    if(myStatus != 0) {
+        mySceneList->clear();
+        return;
+    }
+    strcpy(sceneFileName, dlg.GetPathName()); // save the file name
 
-/// effectType == MORPH - why?
-if((effectType == SEQUENCE) || (effectType == MORPH)) {
-previewSequenceEnabled = 1;
-previewSceneEnabled = 0;
-renderSceneEnabled = 0;
-renderSequenceEnabled = 0;
-} else {
-previewSceneEnabled = 1;
-previewSequenceEnabled = 0;
-renderSceneEnabled = 0;
-renderSequenceEnabled = 0;
-}`
+    // Load the scene information into the client object
+    mySceneList->getSceneInfo(sceneName, &effectType, &colorMode,
+        &outputRows, &outputColumns);
+    mySceneList->getViewTransform(
+        &viewTranslateX, &viewTranslateY, &viewTranslateZ,
+        &viewRotateX, &viewRotateY, &viewRotateZ);
+    getViewMatrix(viewMatrix);
+
+    /// effectType == MORPH - why?
+    if((effectType == SEQUENCE) || (effectType == MORPH)) {
+        previewSequenceEnabled = 1;
+        previewSceneEnabled = 0;
+        renderSceneEnabled = 0;
+        renderSequenceEnabled = 0;
+    } else {
+        previewSceneEnabled = 1;
+        previewSequenceEnabled = 0;
+        renderSceneEnabled = 0;
+        renderSequenceEnabled = 0;
+    }
+```
 
 ## In MEMIMG32.CPP
 
@@ -79,23 +82,25 @@ renderSequenceEnabled = 0;
 
 The parameter adjustmentType passed in can have two values, "Target" or "Relative". But the code in method adjustColor also compares it to "Delta". A summary of the code in method adjustColor is shown below:
 
-`if(strcmpi(adjustmentType, "Target") == 0) {
-// code here
-} // if
+```cpp
+    if(strcmpi(adjustmentType, "Target") == 0) {
+        // code here
+    } // if
 
-if(strcmpi(adjustmentType, "Relative") == 0) {
-// switch stmt
-} // if
+    if(strcmpi(adjustmentType, "Relative") == 0) {
+        // switch stmt
+    } // if
 
-for(row = 1; row <= numRows; row++) {
-for(col = 1; col <= numCols; col++) {
-// switch stmt
-} // for col
-} // for row
+    for(row = 1; row <= numRows; row++) {
+        for(col = 1; col <= numCols; col++) {
+            // switch stmt
+        } // for col
+    } // for row
 
-if(strcmpi(adjustmentType, "Delta") == 0) {
-for loop ...
-}`
+    if(strcmpi(adjustmentType, "Delta") == 0) {
+        // for loop ...
+    }
+```
 
 ## In SCENELST.H and MODEL.CPP
 
@@ -108,35 +113,36 @@ but is not thereafter used.
 
 It appears that sceneElement does not need to keep this field, as it is used when the .scn file is being parsed. See the following snippet from method readList in SCENELST.CPP:
 
-`// If the color is to be adjusted, adjust it now and change the input image
-// file name to point to the color corrected image.
-if(strcmpi(adjustmentType,"None") != 0) {
-memImage *inputImage = new memImage(theFileName, 0, 0, RANDOM, 'R', RGBCOLOR);
-if (!inputImage->isValid()) {
-sprintf(msgBuffer,
-"sceneList.readList: Can't open image for color correction: %s",
-theFileName);
-statusPrint(msgBuffer);
-return -1;
-}
-memImage *correctedImage = new memImage(inputImage);
-statusPrint("Adjusting color image");  
- inputImage->adjustColor(anAdjustment.rgbtRed,
-anAdjustment.rgbtGreen, anAdjustment.rgbtBlue,
-&midRed, &midGreen, &midBlue, correctedImage,
-adjustmentType, NULL);
+```cpp
+    // If the color is to be adjusted, adjust it now and change the input image
+    // file name to point to the color corrected image.
+    if(strcmpi(adjustmentType,"None") != 0) {
+        memImage *inputImage = new memImage(theFileName, 0, 0, RANDOM, 'R', RGBCOLOR);
+        if (!inputImage->isValid()) {
+            sprintf(msgBuffer,
+                "sceneList.readList: Can't open image for color correction: %s",
+                theFileName);
+            statusPrint(msgBuffer);
+            return -1;
+        }
+        memImage *correctedImage = new memImage(inputImage);
+        statusPrint("Adjusting color image");
+        inputImage->adjustColor(anAdjustment.rgbtRed,
+            anAdjustment.rgbtGreen, anAdjustment.rgbtBlue,
+            &midRed, &midGreen, &midBlue, correctedImage,
+            adjustmentType, NULL);
 
-    constructPathName(colorAdjustedPath, theFileName, 'j');
-    sprintf(msgBuffer,
-        "sceneList::readList: Saving adjusted color image: %s",
-        colorAdjustedPath);
-    statusPrint(msgBuffer);
+        constructPathName(colorAdjustedPath, theFileName, 'j');
+        sprintf(msgBuffer,
+            "sceneList::readList: Saving adjusted color image: %s",
+            colorAdjustedPath);
+        statusPrint(msgBuffer);
 
-    correctedImage->writeBMP(colorAdjustedPath);
-    delete inputImage;
-    delete correctedImage;
-
-}`
+        correctedImage->writeBMP(colorAdjustedPath);
+        delete inputImage;
+        delete correctedImage;
+    }
+```
 
 However it can be argued that it can be kept and written out to a file in the sceneElement.writeFile method, which the code currently does not do.
 
@@ -145,16 +151,21 @@ However it can be argued that it can be kept and written out to a file in the sc
 ### In Method readList - parsing for scene type MORPH
 
 The code, when parsing for the scene type of a scene line in a .scn file, checks to see if there is an scene type (also called effect type) value of "Morph". However the book indicates on page 75 that the only possible values for an effect type are "Still" and "Sequence". The code actually assumes a value of "Still" and then checks for "Sequence", and if it is "Sequence", fixes the assumption. Then it checks for "Morph". Below is the snippet that I am referring to. The two comments below are mine.\
-`effectType = strtok(NULL,BLANK);
+
+```cpp
+    effectType = strtok(NULL,BLANK);
     theSequence = 1; // Assumes theSequence = STILL
     if(effectType != NULL) {
     if(strcmpi(effectType,"SEQUENCE") == 0) theSequence = SEQUENCE;
-    if(strcmpi(effectType,"MORPH") == 0) theSequence = MORPH; // why?`
+    if(strcmpi(effectType,"MORPH") == 0) theSequence = MORPH; // why
+```
 
 ### In Method readList - parsing for COMPOUND
 
 The same readList method, when parsing for the model type, checks for a model of type Compound. This model type is not discussed in the book. The possible image types, per p 75, are Image, Shape, QuadMesh, and Sequence. Below is the code snippet I am referring to. The comment below is mine.\
-`theType = IMAGE;
+
+```cpp
+    theType = IMAGE;
     if(aType != NULL) {
         if(strcmpi(aType,"SHAPE") == 0) theType = SHAPE;
         if(strcmpi(aType,"QUADMESH") == 0) theType = QUADMESH;
@@ -169,7 +180,8 @@ The same readList method, when parsing for the model type, checks for a model of
         delete pointOfReference;
         filein.close();
         return -1;
-    }`
+    }
+```
 
 ### In Method readList - parsing for REFERENCEPOINT
 
@@ -185,28 +197,36 @@ The gPipe constructor uses a hard-coded path:\
 ## In IWARP.CPP
 
 Method iwarpz uses several hard-coded paths, but they are all in code that is run only when debugging:\
-`    #ifdef ICTDEBUG
+
+```cpp
+    #ifdef ICTDEBUG
     if(zImage != NULL) {
         statusPrint("iwarpz: Writing zBuffer - d:\\ict20\\output\\rawWarpz.bmp");
         zImage->saveAs8("d:\\ict20\\output\\Warpz8.bmp");
     }
-    #endif`
+    #endif
+```
 
-`    #ifdef ICTDEBUG
+```cpp
+    #ifdef ICTDEBUG
         statusPrint("fWarp1: Writing output -  d:\\ict20\\output\\rawfWarp.bmp");
         outImage->writeBMP("d:\\ict20\\output\\rawfWarp.bmp");
-    #endif`
+    #endif
+```
 
 Method fwarpz also uses hard-coded paths, but again only in code that runs when debugging:\
-` #ifdef ICTDEBUG
-zImage->writeBMP("d:\\ict20\\output\\zBuffer32.bmp");
-statusPrint("fWarp3: Writing z output - d:\\ict20\\output\\zBuffer32.bmp");
-zImage->saveAs8("d:\\ict20\\output\\zBuffer8.bmp");
-statusPrint("fWarp3: Writing z output - d:\\ict20\\output\\zBuffer8.bmp");
+
+```cpp
+    #ifdef ICTDEBUG
+        zImage->writeBMP("d:\\ict20\\output\\zBuffer32.bmp");
+        statusPrint("fWarp3: Writing z output - d:\\ict20\\output\\zBuffer32.bmp");
+        zImage->saveAs8("d:\\ict20\\output\\zBuffer8.bmp");
+        statusPrint("fWarp3: Writing z output - d:\\ict20\\output\\zBuffer8.bmp");
 
         statusPrint("fWarp3: Writing output -  c:\\ict\\output\\rawfWarp.bmp");
         outImage->writeBMP("c:\\ict\\output\\rawfWarp.bmp");
-    #endif`
+    #endif
+```
 
 ## In MAINFRAME.CPP
 
@@ -219,24 +239,33 @@ Method OnToolsRenderVrmlFile uses a hard-coded path:\
 ## In QMESHMODEL.CPP
 
 Method createQMeshModel uses three hard-coded paths:\
-`    xImage8->writeBMP("d:\\ict20\\output\\meshx8.bmp");
+
+```
+    xImage8->writeBMP("d:\\ict20\\output\\meshx8.bmp");
     yImage8->writeBMP("d:\\ict20\\output\\meshy8.bmp");
-    zImage8->writeBMP("d:\\ict20\\output\\meshz8.bmp");`
+    zImage8->writeBMP("d:\\ict20\\output\\meshz8.bmp");
+```
 
 ## In READVRML.CPP
 
 In method renderVRML, two hard-coded paths are used:\
-`    aGraphicPipe.saveZBuffer("d:\\ict20\\output\\gPipeZBuffer8.bmp");
-    sprintf(g_msgText,"d:\\ict20\\output\\VRMLImage.bmp");`
+
+```cpp
+    aGraphicPipe.saveZBuffer("d:\\ict20\\output\\gPipeZBuffer8.bmp");
+    sprintf(g_msgText,"d:\\ict20\\output\\VRMLImage.bmp");
+```
 
 # Possible Bugs
 
 ## In RENDER.CPP
 
 Method renderMeshz contains the following code, which modifies parameters vx, vy and vz, all of which are of type float.\
-`    //  Temporary - for testing
+
+```cpp
+    //  Temporary - for testing
     vx = (float)outWidth/2.0;
     vy = (float)outHeight/2.0;
-    vz = 512.0;`
+    vz = 512.0;
+```
 
 I believe the author forgot to comment out or delete this code. These are obviously not output parameters, as otherwise they would have been declared as float \*, not float.
