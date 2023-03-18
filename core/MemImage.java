@@ -1,5 +1,6 @@
 package core;
 
+import dtos.BoundingBox;
 import dtos.ColorAsBytes;
 
 import globals.Globals;
@@ -1900,7 +1901,8 @@ public:
     // Called from:
     //     ScnFileParser.readListReal
     public int adjustColor(int piDesiredRed, int piDesiredGreen, int piDesiredBlue,
-    Byte pbytMidRed, Byte pbytMidGreen, Byte pbytMidBlue, 
+    ColorAsBytes pCab,
+    // Byte pbytMidRed, Byte pbytMidGreen, Byte pbytMidBlue, 
     MemImage pOutMImage, 
     String psAdjustmentType, int piInputImageColor) {
         // Calculate the average color in the image excluding zeros
@@ -1962,9 +1964,9 @@ public:
             fRedBucket   /= (float)iTotalPixels;
             fGreenBucket /= (float)iTotalPixels;
             fBlueBucket  /= (float)iTotalPixels;
-            pbytMidRed   = (byte)(fRedBucket   + 0.5f);
-            pbytMidGreen = (byte)(fGreenBucket + 0.5f);
-            pbytMidBlue  = (byte)(fBlueBucket  + 0.5f);
+            pCab.bytRed   = (byte)(fRedBucket   + 0.5f);
+            pCab.bytGreen = (byte)(fGreenBucket + 0.5f);
+            pCab.bytBlue  = (byte)(fBlueBucket  + 0.5f);
 
             // Calculate the color difference vector
             switch(iBpp) {
@@ -2051,36 +2053,6 @@ public:
                 } // switch
             } // for iCol
         } // for iRow
-
-        // TODO: The following code appears to be a new feature that 
-        // was planned but not finished.
-        if(psAdjustmentType.equalsIgnoreCase("Delta")) {
-            for(iRow = 1; iRow <= iNumRows; iRow++) {
-                for(iCol = 1; iCol <= iNumCols; iCol++) {
-                    switch(iBpp) {
-                    case 24:
-                        cab = new ColorAsBytes();
-                        // The following method modifies parameter cab
-                        getMPixelRGB(iCol, iRow, cab);
-                        if ((cab.bytRed != 0) || (cab.bytGreen != 0) || (cab.bytBlue != 0)) {
-                            iNewRed   = cab.bytRed   + piDesiredRed;
-                            iNewGreen = cab.bytGreen + piDesiredGreen;
-                            iNewBlue  = cab.bytBlue  + piDesiredBlue;
-                            pOutMImage.setMPixelRGB(iCol, iRow, (byte)iNewRed, (byte)iNewGreen, (byte)iNewBlue);
-                        }
-                        break;
-
-                    case 8:
-                        aValue = getMPixel(iCol, iRow);
-                        if (aValue != 0) {
-                            iNewGreen = aValue + piDesiredGreen;
-                            pOutMImage.setMPixel(iCol, iRow, (byte)iNewGreen);
-                        }
-                        break;
-                    } // switch
-                } // for iCol
-            } // for iRow
-        }
 
         return 0;
     } // adjustColor
@@ -2212,7 +2184,7 @@ public:
     // Method getBoundingBox will set parameters xBeg, xEnd, yBeg and yEnd
     // 
     // Could not find where this method is being called from.
-    public int getBoundingBox(Integer pIXBeg, Integer pIXEnd, Integer pIYBeg, Integer pIYEnd) {
+    public int getBoundingBox(BoundingBox pBBox) {
         int iX, iY;
         if((this.miBitsPerPixel != 8) && (this.miBitsPerPixel != 24)) {
             Globals.statusPrint("MemImage.getBoundingBox: Only 8 or 24 bit images are supported");
@@ -2221,10 +2193,10 @@ public:
 
         byte bytPixel;
         ColorAsBytes cab;
-        pIXBeg = Math.max(this.miImageWidth, this.miImageHeight);
-        pIYBeg = Math.max(this.miImageWidth, this.miImageHeight);
-        pIXEnd = 1;
-        pIYEnd = 1;
+        pBBox.ixBeg = Math.max(this.miImageWidth, this.miImageHeight);
+        pBBox.iyBeg = Math.max(this.miImageWidth, this.miImageHeight);
+        pBBox.ixEnd = 1;
+        pBBox.iyEnd = 1;
 
         for (iX = 1; iX <= this.miImageWidth; iX++) {
             for (iY = 1; iY < this.miImageHeight; iY++) {
@@ -2232,10 +2204,10 @@ public:
                 case 8:
                     bytPixel = getMPixel(iX, iY);
                     if(bytPixel != JICTConstants.I_CHROMAVALUE) {
-                        if(iX < pIXBeg) pIXBeg = iX;
-                        if(iX > pIXEnd) pIXEnd = iX;
-                        if(iY < pIYBeg) pIYBeg = iX;
-                        if(iY > pIYEnd) pIYEnd = iX;
+                        if(iX < pBBox.ixBeg) pBBox.ixBeg = iX;
+                        if(iX > pBBox.ixEnd) pBBox.ixEnd = iX;
+                        if(iY < pBBox.iyBeg) pBBox.iyBeg = iY;
+                        if(iY > pBBox.iyEnd) pBBox.iyEnd = iY;
                     }
                     break;
 
@@ -2244,30 +2216,32 @@ public:
                     // The following method modifies parameter cab.
                     getMPixelRGB(iX, iY, cab);
                     if(cab.bytRed != JICTConstants.I_CHROMARED) {
-                        if(iX < pIXBeg) pIXBeg = iX;
-                        if(iX > pIXEnd) pIXEnd = iX;
-                        if(iY < pIYBeg) pIYBeg = iX;
-                        if(iY > pIYEnd) pIYEnd = iX;
+                        if(iX < pBBox.ixBeg) pBBox.ixBeg = iX;
+                        if(iX > pBBox.ixEnd) pBBox.ixEnd = iX;
+                        if(iY < pBBox.iyBeg) pBBox.iyBeg = iY;
+                        if(iY > pBBox.iyEnd) pBBox.iyEnd = iY;
                     }
                     if(cab.bytGreen != JICTConstants.I_CHROMAGREEN) {
-                        if(iX < pIXBeg) pIXBeg = iX;
-                        if(iX > pIXEnd) pIXEnd = iX;
-                        if(iY < pIYBeg) pIYBeg = iX;
-                        if(iY > pIYEnd) pIYEnd = iX;
+                        if(iX < pBBox.ixBeg) pBBox.ixBeg = iX;
+                        if(iX > pBBox.ixEnd) pBBox.ixEnd = iX;
+                        if(iY < pBBox.iyBeg) pBBox.iyBeg = iY;
+                        if(iY > pBBox.iyEnd) pBBox.iyEnd = iY;
                     }
                     if(cab.bytBlue != JICTConstants.I_CHROMABLUE) {
-                        if(iX < pIXBeg) pIXBeg = iX;
-                        if(iX > pIXEnd) pIXEnd = iX;
-                        if(iY < pIYBeg) pIYBeg = iX;
-                        if(iY > pIYEnd) pIYEnd = iX;
+                        if(iX < pBBox.ixBeg) pBBox.ixBeg = iX;
+                        if(iX > pBBox.ixEnd) pBBox.ixEnd = iX;
+                        if(iY < pBBox.iyBeg) pBBox.iyBeg = iY;
+                        if(iY > pBBox.iyEnd) pBBox.iyEnd = iY;
                     }
                     break;
                 } // switch
             } // for iY
 
             Globals.statusPrint(msSavedFileName);
-            String msgText = "MemImage.getBoundingBox: xBeg: " + pIXBeg + "  xEnd: " + pIXEnd + " yBeg: " + pIYBeg + "  yEnd: " + pIYEnd; 
-            Globals.statusPrint(msgText);
+            String sMsgText = "MemImage.getBoundingBox:" + 
+                " xBeg: " + pBBox.ixBeg + "  xEnd: " + pBBox.ixEnd + 
+                " yBeg: " + pBBox.iyBeg + "  yEnd: " + pBBox.iyEnd;
+            Globals.statusPrint(sMsgText);
         } // for iX
 
         return 0;
