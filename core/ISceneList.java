@@ -48,7 +48,7 @@ public interface ISceneList {
     boolean depthSortingEnabled, boolean zBufferEnabled, boolean antiAliasEnabled, 
     boolean hazeFogEnabled);
 
-    void getFileName(String psOutputFileName, String psPrefix, 
+    void getFileName(StringBuffer psbOutputFileName, String psPrefix, 
     int piCounter, int piTheColor);
 
     int addScene(String theSceneName, int theType, 
