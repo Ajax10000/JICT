@@ -1,6 +1,9 @@
 package core;
 
 import apps.IctApp;
+
+import dtos.ScreenVertex;
+
 import frames.MainFrame;
 
 import globals.Globals;
@@ -1900,10 +1903,11 @@ public:
     // 
     // Not called from within this file.
     // Called from:
+    //     RenderObject.drawSequence
     //     RenderObject.drawStill
     //     RenderObject.renderShape
     //     RenderObject.renderShapez
-    public int getScreenVertex(int piIndex, Integer pISx, Integer pISy) {
+    public int getScreenVertex(int piIndex, ScreenVertex pScreenVertex) {
         if((piIndex < 0) || (piIndex > this.miNumVertices - 1)) {
             String sMsgText = "getScreenVertex.  index < 0 or >= numVertices: " + piIndex;
             Globals.statusPrint(sMsgText);
@@ -1913,8 +1917,8 @@ public:
         VertexSet aVertex = this.mVertices[piIndex];
 
         // Set the output parameters
-        pISx = (int)aVertex.sx;
-        pISy = (int)aVertex.sy;
+        pScreenVertex.iSx = (int)aVertex.sx;
+        pScreenVertex.iSy = (int)aVertex.sy;
 
         return 0;
     } // getScreenVertex
