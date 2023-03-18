@@ -7,6 +7,7 @@ import core.Shape3d;
 import docs.ImageDoc;
 
 import dtos.ColorAsBytes;
+import dtos.LowHiInts;
 
 import fileUtils.BMPFileFilter;
 
@@ -429,7 +430,9 @@ protected:
                 // The following method modifies parameter cab.
                 mMImage.getMPixelRGB(iX, iY, cab);
                 sMsgText = "x: " + iX + "  y: " + iY + 
-                     "  Color: red: " + cab.bytRed + "  green: " + cab.bytGreen + "  blue: "  + cab.bytBlue;
+                     "  Color: red: " + cab.bytRed + 
+                     "  green: " + cab.bytGreen + 
+                     "  blue: "  + cab.bytBlue;
                 break;
         
             case 8:
@@ -445,22 +448,20 @@ protected:
 
             // If the user wishes to remove sampled colors...do it now
             if(mMainFrame.mbRemoveSampleColorsEnabled) {
-                Integer iRedLow = 0, iRedHigh = 0;
-                Integer iGreenLow = 0, iGreenHigh = 0;
-                Integer iBlueLow = 0, iBlueHigh = 0;
+                LowHiInts redLH = new LowHiInts();
+                LowHiInts greenLH = new LowHiInts();
+                LowHiInts blueLH = new LowHiInts();
 
                 // The following sets parameters iRedLow, iRedHigh, iGreenLow, iGreenHigh, iBlueLow and iBlueHigh
                 int iStatus = getSampleRange(mMImage, 
                     pPoint.x + iXOffset, (mMImage.getHeight() - pPoint.y - iYOffset), 
-                    iRedLow,    iRedHigh, 
-                    iGreenLow,  iGreenHigh,
-                    iBlueLow,   iBlueHigh);
+                    redLH, greenLH, blueLH);
             
                 if (iStatus != -1) {
                     mMImage.clearRGBRange(
-                        (byte)iRedLow.intValue(),   (byte)iRedHigh.intValue(),
-                        (byte)iGreenLow.intValue(), (byte)iGreenHigh.intValue(), 
-                        (byte)iBlueLow.intValue(),  (byte)iBlueHigh.intValue());
+                        (byte)redLH.iLow,   (byte)redLH.iHi,
+                        (byte)greenLH.iLow, (byte)greenLH.iHi, 
+                        (byte)blueLH.iLow,  (byte)blueLH.iHi);
                 }
             
                 getBitmap();
@@ -620,9 +621,9 @@ protected:
     // Called from:
     //    onLButtonDown
     private int getSampleRange(MemImage pMImage, int piX, int piY, 
-    Integer piRedLow, Integer piRedHigh, 
-    Integer piGreenLow, Integer piGreenHigh,
-    Integer piBlueLow, Integer piBlueHigh) {
+    LowHiInts pRedLH, 
+    LowHiInts pGreenLH,
+    LowHiInts pBlueLH) {
         ColorAsBytes cab;
         int iStatus;
 
@@ -636,9 +637,9 @@ protected:
             return -1;  //a background pixel was clicked on
         }
 
-        piRedLow = piRedHigh = (int)cab.bytRed;
-        piGreenLow = piGreenHigh = (int)cab.bytGreen;
-        piBlueLow = piBlueHigh = (int)cab.bytBlue;
+        pRedLH.iLow = pRedLH.iHi = (int)cab.bytRed;
+        pGreenLH.iLow = pGreenLH.iHi = (int)cab.bytGreen;
+        pBlueLH.iLow = pBlueLH.iHi = (int)cab.bytBlue;
       
         // Next we will inspect the colors at the following 3 points:
         // (piX + 1, piY + 1), (piX, piY + 1), (piX + 1, piY)
@@ -652,14 +653,14 @@ protected:
         (cab.bytGreen != 0) && 
         (cab.bytBlue != 0)) {
             // Update the output parameters
-            if(cab.bytRed < piRedLow)  piRedLow  = (int)cab.bytRed;
-            if(cab.bytRed > piRedHigh) piRedHigh = (int)cab.bytRed;
+            if(cab.bytRed < pRedLH.iLow) pRedLH.iLow = (int)cab.bytRed;
+            if(cab.bytRed > pRedLH.iHi)  pRedLH.iHi  = (int)cab.bytRed;
 
-            if(cab.bytGreen < piGreenLow)  piGreenLow  = (int)cab.bytGreen;
-            if(cab.bytGreen > piGreenHigh) piGreenHigh = (int)cab.bytGreen;
+            if(cab.bytGreen < pGreenLH.iLow) pGreenLH.iLow = (int)cab.bytGreen;
+            if(cab.bytGreen > pGreenLH.iHi)  pGreenLH.iHi  = (int)cab.bytGreen;
 
-            if(cab.bytBlue < piBlueLow)  piBlueLow  = (int)cab.bytBlue;
-            if(cab.bytBlue > piBlueHigh) piBlueHigh = (int)cab.bytBlue;
+            if(cab.bytBlue < pBlueLH.iLow) pBlueLH.iLow = (int)cab.bytBlue;
+            if(cab.bytBlue > pBlueLH.iHi)  pBlueLH.iHi  = (int)cab.bytBlue;
         }
     
         cab = new ColorAsBytes();
@@ -670,14 +671,14 @@ protected:
         (cab.bytGreen != 0) && 
         (cab.bytBlue != 0)) {
             // Update the output parameters
-            if(cab.bytRed < piRedLow)  piRedLow  = (int)cab.bytRed;
-            if(cab.bytRed > piRedHigh) piRedHigh = (int)cab.bytRed;
+            if(cab.bytRed < pRedLH.iLow) pRedLH.iLow = (int)cab.bytRed;
+            if(cab.bytRed > pRedLH.iHi)  pRedLH.iHi  = (int)cab.bytRed;
 
-            if(cab.bytGreen < piGreenLow)  piGreenLow  = (int)cab.bytGreen;
-            if(cab.bytGreen > piGreenHigh) piGreenHigh = (int)cab.bytGreen;
+            if(cab.bytGreen < pGreenLH.iLow) pGreenLH.iLow = (int)cab.bytGreen;
+            if(cab.bytGreen > pGreenLH.iHi)  pGreenLH.iHi  = (int)cab.bytGreen;
 
-            if(cab.bytBlue < piBlueLow)  piBlueLow  = (int)cab.bytBlue;
-            if(cab.bytBlue > piBlueHigh) piBlueHigh = (int)cab.bytBlue;
+            if(cab.bytBlue < pBlueLH.iLow) pBlueLH.iLow = (int)cab.bytBlue;
+            if(cab.bytBlue > pBlueLH.iHi)  pBlueLH.iHi  = (int)cab.bytBlue;
         }
     
         cab = new ColorAsBytes();
@@ -688,14 +689,14 @@ protected:
         (cab.bytGreen != 0) && 
         (cab.bytBlue != 0)) {
             // Update the output parameters
-            if(cab.bytRed < piRedLow)  piRedLow  = (int)cab.bytRed;
-            if(cab.bytRed > piRedHigh) piRedHigh = (int)cab.bytRed;
+            if(cab.bytRed < pRedLH.iLow) pRedLH.iLow = (int)cab.bytRed;
+            if(cab.bytRed > pRedLH.iHi)  pRedLH.iHi  = (int)cab.bytRed;
 
-            if(cab.bytGreen < piGreenLow)  piGreenLow  = (int)cab.bytGreen;
-            if(cab.bytGreen > piGreenHigh) piGreenHigh = (int)cab.bytGreen;
+            if(cab.bytGreen < pGreenLH.iLow) pGreenLH.iLow = (int)cab.bytGreen;
+            if(cab.bytGreen > pGreenLH.iHi)  pGreenLH.iHi  = (int)cab.bytGreen;
 
-            if(cab.bytBlue < piBlueLow)  piBlueLow  = (int)cab.bytBlue;
-            if(cab.bytBlue > piBlueHigh) piBlueHigh = (int)cab.bytBlue;
+            if(cab.bytBlue < pBlueLH.iLow) pBlueLH.iLow = (int)cab.bytBlue;
+            if(cab.bytBlue > pBlueLH.iHi)  pBlueLH.iHi  = (int)cab.bytBlue;
         }
 
         return 0;
