@@ -1,5 +1,7 @@
 package dtos;
 
+// This is just a DTO, data transfer object.
+// Used to pass output parameters to methods.
 public class BoundingBox {
     public int ixBeg, ixEnd;
     public int iyBeg, iyEnd;
