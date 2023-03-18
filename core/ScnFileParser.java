@@ -1,5 +1,7 @@
 package core;
 
+import dtos.ColorAsBytes;
+
 import fileUtils.FileUtils;
 
 import globals.Globals;
@@ -69,7 +71,7 @@ public class ScnFileParser {
         Color adjustmentColor = new Color(0, 0, 0);
         String sAdjustmentType;
         int iStatus, iMinLineSize = 4;
-        Byte bytMidRed = (byte)0, bytMidGreen = (byte)0, bytMidBlue = (byte)0;
+        ColorAsBytes midCab;
         final int FALSE = 0;
         final int TRUE = 1;
         final int THREE_NUMBERS_NOT_FOUND = 2;
@@ -393,8 +395,9 @@ public class ScnFileParser {
                             // Later we will save it to a file.
                             MemImage correctedMImage = new MemImage(inputMImage);
                             Globals.statusPrint("Adjusting color image");	    
+                            midCab = new ColorAsBytes();
                             inputMImage.adjustColor(adjustmentColor.getRed(), adjustmentColor.getGreen(), adjustmentColor.getBlue(),
-                                bytMidRed, bytMidGreen, bytMidBlue, 
+                                midCab, 
                                 correctedMImage, sAdjustmentType, 0);
 
                             // The following method sets sColorAdjustedPath
@@ -773,9 +776,10 @@ public class ScnFileParser {
                         }
                         
                         MemImage correctedImage = new MemImage(inputImage);
-                        Globals.statusPrint("Adjusting color image");	    
+                        Globals.statusPrint("Adjusting color image");
+                        midCab = new ColorAsBytes();    
                         inputImage.adjustColor(adjustmentColor.getRed(), adjustmentColor.getGreen(), adjustmentColor.getBlue(),
-                            bytMidRed, bytMidGreen, bytMidBlue, 
+                            midCab, 
                             correctedImage, sAdjustmentType, 0);
 
                         // The following method sets sColorAdjustedPath
