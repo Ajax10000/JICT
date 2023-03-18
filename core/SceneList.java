@@ -862,9 +862,10 @@ public:
     public int render(ImageView pDisplayWindow, TMatrix pViewMatrix,
     boolean pbDepthSortingEnabled, boolean pbZBufferEnabled, boolean pbAntiAliasEnabled, 
     boolean pbHazeFogEnabled) {
-        String sOutputFileName = "";
+        StringBuffer sbOutputFileName = new StringBuffer();
         StringBuffer sbSceneName = new StringBuffer();
-        String sRedFileName = "", sGreenFileName = "", sBlueFileName = "", sRGBFileName = "";
+        String sRedFileName = "", sGreenFileName = "", sBlueFileName = ""; 
+        StringBuffer sbRGBFileName = new StringBuffer();
         String sCurrentColor = "";
         Integer iEffectType = 0;
         Integer iColorMode = 0;
@@ -1124,9 +1125,9 @@ public:
 
                 // One color channel of the scene is complete! Save it in the proper location
                 String sOutputDir, sOutputPath;
-                getFileName(sOutputFileName, scene.msSceneName, iFrameCounter, iColor);
+                getFileName(sbOutputFileName, scene.msSceneName, iFrameCounter, iColor);
                 sOutputDir = prefs.get("OutputDir", "OUTPUT/");
-                sOutputPath = sOutputDir + sOutputFileName;
+                sOutputPath = sOutputDir + sbOutputFileName;
 
                 if (iColor == JICTConstants.I_RED)   sRedFileName   = sOutputPath;
                 if (iColor == JICTConstants.I_GREEN) sGreenFileName = sOutputPath;
@@ -1135,7 +1136,7 @@ public:
                 // Optionally anti-alias the output image
                 if(pbAntiAliasEnabled) {
                     aliasMImage = new MemImage(iOutputRows, iOutputColumns);
-                    FileUtils.appendFileName(sOutputFileName, sRGBFileName, sCurrentColor);
+                    FileUtils.appendFileName(sbOutputFileName, sbRGBFileName.toString(), sCurrentColor);
                     Globals.antiAlias(outputMImage, aliasMImage);
                     aliasMImage.copy(outputMImage, 0, 0);
                 }
@@ -1155,10 +1156,10 @@ public:
             iStatus = 0;
             if(iColorMode == JICTConstants.I_COLOR) {
                 // Prepare a pathname to the default output image location
-                getFileName(sRGBFileName, scene.msSceneName, iFrameCounter, 0);
+                getFileName(sbRGBFileName, scene.msSceneName, iFrameCounter, 0);
                 String sRGBPath, sRGBDir;
                 sRGBDir = prefs.get("OutputDir", "OUTPUT/");
-                sRGBPath = sRGBDir + sRGBFileName;
+                sRGBPath = sRGBDir + sbRGBFileName;
 
                 String sMsgText = "sceneList::render: Saving RGB image: " + sRGBPath;
                 Globals.statusPrint(sMsgText);
@@ -1220,7 +1221,7 @@ public:
     //
     // Called from:
     //     render
-    public void getFileName(String psOutputFileName, String psPrefix, 
+    public void getFileName(StringBuffer psbOutputFileName, String psPrefix, 
     int piCounter, int piTheColor) {
         char cColorChar = ' ';
 
@@ -1229,7 +1230,8 @@ public:
         if (piTheColor == JICTConstants.I_BLUE)  cColorChar = 'b';
         if (piTheColor == 0)                     cColorChar = 'c';
         // sprintf(psOutputFileName, "%.16s%#04d%c.bmp\0", psPrefix, piCounter, cColorChar);
-        psOutputFileName = String.format("%.16s%#04d%c.bmp", psPrefix, piCounter, cColorChar);
+        String sNewFileName = String.format("%.16s%04d%c.bmp", psPrefix, piCounter, cColorChar);
+        psbOutputFileName.append(sNewFileName);
     } // getFileName
 
 
