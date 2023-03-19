@@ -1548,9 +1548,10 @@ protected:
     // TODO: Not a method of RenderObject in the original C++ code
     // 
     // Could not find where this method is called from.
+    // TODO: Parameters piOutHeight and piOutWidth are not used.
     void transformAndProjectPoint2(TMatrix pTMatrix, 
     float pfX, float pfY, float pfZ, 
-    Integer sx, Integer sy, 
+    ScreenVertex pScreenVtx, 
     float pfRefX, float pfRefY, float pfRefZ, 
     int piOutHeight, int piOutWidth) {
         // Note that parameters piOutHeight and piOutWidth are not used.
@@ -1592,8 +1593,8 @@ protected:
         float fYp = (ty - (tz * d.y / d.z) + (p.z * d.y / d.z)) / fDenom;
 
         // Set output parameters sx and sy
-        sx = (int)(fXp + 0.5f);
-        sy = (int)(fYp + 0.5f);
+        pScreenVtx.iSx = (int)(fXp + 0.5f);
+        pScreenVtx.iSy = (int)(fYp + 0.5f);
     } // transformAndProjectPoint2
 
 
