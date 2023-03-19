@@ -1,5 +1,7 @@
 package math;
 
+import dtos.LineEqn;
+
 public class MathUtils {
     // This method originally came from UTILS.CPP
     //
@@ -102,23 +104,24 @@ public class MathUtils {
     // 
     // Called from:
     //     getIntervals
-    public static void getLineEquation(int x1, int y1, int x2, int y2, 
-    Float m, Float b, 
-    Boolean horzFlag, Boolean vertFlag) {
+    public static void getLineEquation(int piX1, int piY1, int piX2, int piY2, 
+    LineEqn pLineEqn) {
         // Determine the line equation y = mx + b from 2 (integer) points on the line
-        m = 0.0f;
-        b = 0.0f;
-        horzFlag = false;
-        vertFlag = false;
-        float rise = (y2 - y1);
-        float run  = (x2 - x1);
+        float fRise = (piY2 - piY1);
+        float fRun  = (piX2 - piX1);
 
-        // Set output parameters horzFlag, vertFlag, m and b
-        if (rise == 0.0f) horzFlag = true;
-        if (run == 0.0f)  vertFlag = true;
-        if (!(vertFlag || horzFlag)) {
-            m = rise / run;
-            b = (float)y2 - (m * ((float)x2));
+        // Set output parameter pLineEqn
+        if (fRise == 0.0f) {
+            pLineEqn.bHorzFlag = true;
+        }
+        if (fRun == 0.0f) {
+            pLineEqn.bVertFlag = true;
+        }
+
+        if (!(pLineEqn.bVertFlag || pLineEqn.bHorzFlag)) {
+            pLineEqn.fM = fRise / fRun;
+            float m = pLineEqn.fM;
+            pLineEqn.fB = (float)piY2 - (m * ((float)piX2));
         }
     } // getLineEquation
 
@@ -128,28 +131,23 @@ public class MathUtils {
     // Called from:
     //     Shape3d.getBoundaryPoint
     public static void getFLineEquation(float x1, float y1, float x2, float y2, 
-    Float m, Float b, 
-    Boolean horzFlag, Boolean vertFlag) {
+    LineEqn pLineEqn) {
         // Determine the line equation y = mx + b from 2 (float) points on the line
-        m = 0.0f;
-        b = 0.0f;
-        horzFlag = false;
-        vertFlag = false;
+        float fRise = (y2 - y1);
+        float fRun  = (x2 - x1);
 
-        float rise = (y2 - y1);
-        float run  = (x2 - x1);
-
-        // Set the output parameters horzFlag, vertFlag, m and b
-        if (rise == 0.0f) {
-            horzFlag = true;
+        // Set the output parameter pLineEqn
+        if (fRise == 0.0f) {
+            pLineEqn.bHorzFlag = true;
         }
-        if (run == 0.0f) {
-            vertFlag = true;
+        if (fRun == 0.0f) {
+            pLineEqn.bVertFlag = true;
         }
 
-        if (!(vertFlag || horzFlag)) {
-            m = rise / run;
-            b = y2 - (m * x2);
+        if (!(pLineEqn.bVertFlag || pLineEqn.bHorzFlag)) {
+            pLineEqn.fM = fRise / fRun;
+            float m = pLineEqn.fM;
+            pLineEqn.fB = y2 - (m * x2);
         }
     } // getFLineEquation
 
