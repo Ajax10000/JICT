@@ -2,6 +2,7 @@ package core;
 
 import apps.IctApp;
 
+import dtos.LineEqn;
 import dtos.ScreenVertex;
 
 import frames.MainFrame;
@@ -1614,9 +1615,7 @@ public:
     float pfLastX, float pfLastY) {
         // Find the screen x,y coord where the
         // shape intersects the input ray.  
-        Float fM = 0f, fB = 0f;
-        Boolean bHorzFlag = false, bVertFlag = false;
-        Boolean bRayHorzFlag = false, bRayVertFlag = false;
+        LineEqn lineEqn = new LineEqn();
         // int *currentScreenX; // this variable is not used
         float x1, y1, x2, y2;
         float fMinX, fMinY, fMaxX, fMaxY;
@@ -1636,17 +1635,17 @@ public:
             return -1;
         }
 
-        Float fRaySlope = 0f, fRayYIntercept = 0f;
         float fDistance = 0f;
         float fIntX = 0f, fIntY = 0f;
         int iStatus = 0;
+        LineEqn rayEqn = new LineEqn();
 
         // Given two points (pfRayCentroidX, pfRayCentroidY) and (pfRayX2, pfRayY2), 
         // on a ray, get the equation of the ray.
         // The following method will set fRaySlope, fRayYIntercept, 
         // bRayHorzFlag and bRayVertFlag
         MathUtils.getFLineEquation(pfRayCentroidX, pfRayCentroidY, pfRayX2, pfRayY2, 
-            fRaySlope, fRayYIntercept, bRayHorzFlag, bRayVertFlag);
+            rayEqn);
 
         // Get the centroid of the shape, and the translation which will center the shape
         // on the ray centroid.  This will adjustment normalize line equation and angle calculations.
@@ -1690,48 +1689,48 @@ public:
             // where 
             // m (= fM) is the slope and
             // b (= fB) is the y-intercept
-            MathUtils.getFLineEquation(x1, y1, x2, y2, fM, fB, bHorzFlag, bVertFlag);
+            MathUtils.getFLineEquation(x1, y1, x2, y2, lineEqn);
 
             // Calculate the point of intersection (fIntX, fIntY) of the line above 
             // with the line given by raySlope and rayYIntercept, handling all 
             // possible cases
             if (
-            (fRaySlope.floatValue() == fM.floatValue()) && 
-            (fRayYIntercept.floatValue() == fB.floatValue())) {	//  The ray and the line segment lie on the same line!
+            (rayEqn.fM == lineEqn.fM) && 
+            (rayEqn.fB == lineEqn.fB)) {	//  The ray and the line segment lie on the same line!
                 fIntX = (fMinX + fMaxX) / 2.0f;
                 fIntY = (fMinY + fMaxY) / 2.0f;
             } else {
-                if (fRaySlope.floatValue() == fM.floatValue()) { //  parallel lines
+                if (rayEqn.fM == lineEqn.fM) { //  parallel lines
                     pShape.incCurrentVertex();
                     continue;
                 }
-                if (!(bHorzFlag || bVertFlag) && (!bRayHorzFlag && !bRayVertFlag)) {  // Ray is diagonal
-                    fIntX = (fRayYIntercept - fB) / (fM - fRaySlope);
-                    fIntY = (fM * fIntX) + fB;
+                if (!(lineEqn.bHorzFlag || lineEqn.bVertFlag) && (!rayEqn.bHorzFlag && !lineEqn.bVertFlag)) {  // Ray is diagonal
+                    fIntX = (rayEqn.fB - lineEqn.fB) / (lineEqn.fM - rayEqn.fM);
+                    fIntY = (lineEqn.fM * fIntX) + lineEqn.fB;
                 }
-                if (bVertFlag && !bHorzFlag && (!bRayHorzFlag && !bRayVertFlag)) {   // l.s. is vertical
+                if (lineEqn.bVertFlag && !lineEqn.bHorzFlag && (!rayEqn.bHorzFlag && !rayEqn.bVertFlag)) {   // l.s. is vertical
                     fIntX =  x1;
-                    fIntY = (fRaySlope * fIntX) + fRayYIntercept;
+                    fIntY = (rayEqn.fM * fIntX) + rayEqn.fB;
                 }
                     
-                if (bHorzFlag && !bVertFlag && (!bRayHorzFlag && !bRayVertFlag)) {   // l.s. is horizontal
+                if (lineEqn.bHorzFlag && !lineEqn.bVertFlag && (!rayEqn.bHorzFlag && !rayEqn.bVertFlag)) {   // l.s. is horizontal
                     fIntY =  y1;
-                    fIntX = (fIntY - fRayYIntercept) / fRaySlope;
+                    fIntX = (fIntY - rayEqn.fB) / rayEqn.fM;
                 }
-                if (!(bHorzFlag || bVertFlag) && (bRayVertFlag)) { // Ray is vertical, l.s. is diagonal
+                if (!(lineEqn.bHorzFlag || lineEqn.bVertFlag) && (rayEqn.bVertFlag)) { // Ray is vertical, l.s. is diagonal
                     fIntX = pfRayX2;
-                    fIntY = (fM * fIntX) + fB;
+                    fIntY = (lineEqn.fM * fIntX) + lineEqn.fB;
                 }
                     
-                if (bHorzFlag && !bVertFlag && (bRayVertFlag)) {   // Ray is vertical l.s. is horizontal
+                if (lineEqn.bHorzFlag && !lineEqn.bVertFlag && (rayEqn.bVertFlag)) {   // Ray is vertical l.s. is horizontal
                     fIntX = pfRayX2;
                     fIntY = y1;
                 }
-                if (!(bHorzFlag || bVertFlag) && (bRayHorzFlag)) {  // Ray is horizontal, l.s. is diagonal
+                if (!(lineEqn.bHorzFlag || lineEqn.bVertFlag) && (rayEqn.bHorzFlag)) {  // Ray is horizontal, l.s. is diagonal
                     fIntY = pfRayY2;
-                    fIntX = (fIntY - fB) / fM;
+                    fIntX = (fIntY - lineEqn.fB) / lineEqn.fM;
                 }
-                if (bVertFlag && !bHorzFlag && (bRayHorzFlag)) {   // Ray is horizontal, l.s. is vertical
+                if (lineEqn.bVertFlag && !lineEqn.bHorzFlag && (rayEqn.bHorzFlag)) {   // Ray is horizontal, l.s. is vertical
                     fIntY = pfRayY2;
                     fIntX = x1;
                 }
