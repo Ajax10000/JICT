@@ -859,6 +859,8 @@ public:
     // Called from:
     //     MainFrame.onRenderScene
     //     MainFrame.onRenderSequence
+    // TODO: Parameter pHazeFogEnabled is not used
+    // TODO: Parameter pDisplayWindow is not used
     public int render(ImageView pDisplayWindow, TMatrix pViewMatrix,
     boolean pbDepthSortingEnabled, boolean pbZBufferEnabled, boolean pbAntiAliasEnabled, 
     boolean pbHazeFogEnabled) {
@@ -976,20 +978,20 @@ public:
                         zMImage = null;
 
                         // Open the input image, if the image has been color adjusted, open the adjusted image
-                        String sInputPath;
+                        StringBuffer sbInputPath = new StringBuffer();
                         if(!modelSE.msAdjustmentType.equalsIgnoreCase("None")) {
-                            sInputPath = modelSE.msColorAdjustedPath;
+                            sbInputPath.append(modelSE.msColorAdjustedPath);
                         } else {
-                            sInputPath = modelSE.msFileName;
+                            sbInputPath.append(modelSE.msFileName);
                         }
 
                         if(modelSE.miModelType == JICTConstants.I_SEQUENCE) {
-                            getSequenceFileName(sInputPath, iFrameCounter);
+                            getSequenceFileName(sbInputPath, iFrameCounter);
                         }
 
                         // Open the model's image if appropriate
                         if(modelSE.miModelType != JICTConstants.I_SHAPE) {
-                            inputMImage = new MemImage(sInputPath, 0, 0, 
+                            inputMImage = new MemImage(sbInputPath, 0, 0, 
                                 JICTConstants.I_RANDOM, 'R', iColor);
                             if (!inputMImage.isValid()) {
                                 sMsgText = "SceneList.Render: Can't open image: " + modelSE.msFileName;
@@ -1185,10 +1187,10 @@ public:
     //     render, in turn, is called from: 
     //         MainFrame.onRenderScene and
     //         MainFrame.onRenderSequence
-    private void getSequenceFileName(String psInputPath, int piFrameCounter) {
+    private void getSequenceFileName(StringBuffer psbInputPath, int piFrameCounter) {
         String sFileWExt, sFile, sExt;
 
-        File inputPathFile = new File(psInputPath);
+        File inputPathFile = new File(psbInputPath.toString());
         sFileWExt = inputPathFile.getName();
         sFile = sFileWExt.substring(0, sFileWExt.lastIndexOf('.')); 
         sExt = sFileWExt.substring(sFileWExt.lastIndexOf('.'));
@@ -1210,15 +1212,17 @@ public:
         char cColorChar = sFile.charAt(iLength - 1);
 
         //sprintf(sOutFile, "%.16s%#04d%c\0", sPrefix, iNewFrameNum, colorChar);
-        sOutFile = String.format("%.16s%#04d%c", sPrefix, iNewFrameNum, cColorChar);
-        psInputPath = inputPathFile.getParent() + sOutFile + sExt;
+        sOutFile = String.format("%.16s%04d%c", sPrefix, iNewFrameNum, cColorChar);
+        String sNewPath = inputPathFile.getParent() + sOutFile + sExt;
+        psbInputPath.delete(0, psbInputPath.length() - 1);
+        psbInputPath.append(sNewPath);
     } // getSequenceFileName
 
 
     // Not a method of SceneList in the original C++ code. However, it is
     // only called from within SceneList, so it makes sense to make it a
     // method of SceneList.
-    //
+    // 
     // Called from:
     //     render
     public void getFileName(StringBuffer psbOutputFileName, String psPrefix, 
