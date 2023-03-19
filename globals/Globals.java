@@ -8,6 +8,7 @@ import core.SceneElement;
 import core.Shape3d;
 
 import dtos.ColorAsBytes;
+import dtos.LineEqn;
 
 import fileUtils.FileUtils;
 
@@ -1413,9 +1414,7 @@ public class Globals {
             return -1;
         }
 
-        Float fM = 0f, fB = 0f;
         int i, index, iNewX;
-        Boolean bHorzFlag = false, bVertFlag = false;
         int iCurrentScreenXIdx; // index into array screenXCoords
         // float *currenttX, *currenttY, *currenttZ; 
         int iTxCoordsIdx, iTyCoordsIdx, iTzCoordsIdx;
@@ -1459,11 +1458,12 @@ public class Globals {
             iMinY = Math.min(iSy1, iSy2);
             iMaxY = Math.max(iSy1, iSy2);
 
-            // The following method sets variables fM, fB, bHorzFlag and bVertFlag
-            MathUtils.getLineEquation(iSx1, iSy1, iSx2, iSy2, fM, fB, bHorzFlag, bVertFlag);
+            LineEqn lineEqn = new LineEqn();
+            // The following method sets variable lineEqn
+            MathUtils.getLineEquation(iSx1, iSy1, iSx2, iSy2, lineEqn);
             fX = 0.0f;
-            if(fM != 0.0f) {
-                fX = ((float)piY - fB) / fM;
+            if(lineEqn.fM != 0.0f) {
+                fX = ((float)piY - lineEqn.fB) / lineEqn.fM;
             }
             iNewX = (int)fX;
             
@@ -1473,11 +1473,11 @@ public class Globals {
                 statusPrint(sMsgText);
 
                 sMsgText = "getIntervals: index: " + index + " newX: " + iNewX + 
-                    "  Horz: " + bHorzFlag + "  vert: " + bVertFlag; 
+                    "  Horz: " + lineEqn.bHorzFlag + "  vert: " + lineEqn.bVertFlag; 
                 statusPrint(sMsgText);
             }
             
-            if (!(bHorzFlag || bVertFlag)) {
+            if (!(lineEqn.bHorzFlag || lineEqn.bVertFlag)) {
                 // Determine z by interpolating between screen line segment endpoints
                 fTotalDistance   = MathUtils.getDistance2d(iSx1,  iSy1, iSx2, iSy2);
                 fPartialDistance = MathUtils.getDistance2d(iNewX, piY, iSx1, iSy1);
@@ -1525,7 +1525,7 @@ public class Globals {
                 // end if not horizontal or vertical
             } else {
                 // Handle horizontal and vertical lines
-                if (bVertFlag) {
+                if (lineEqn.bVertFlag) {
                     fTotalDistance   = Math.abs(iSy2 - iSy1);
                     fPartialDistance = Math.abs(piY - iSy1);		
                     if(fTotalDistance != 0.0f) {
