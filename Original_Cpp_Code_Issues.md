@@ -259,7 +259,7 @@ In method renderVRML, two hard-coded paths are used:
 
 ## In MEMIMG32.CPP
 
-Method getBoundingBox appears to compute the bounding box of a memImage incorrectly. I am referring to the code snippet below from method getBoundingBox:
+Method getBoundingBox appears to compute the 2D bounding box of a memImage incorrectly. I am referring to the code snippet below from method getBoundingBox:
 
 ```cpp
     for (x = 1; x <= imageWidth; x++) {
@@ -306,6 +306,29 @@ Method getBoundingBox appears to compute the bounding box of a memImage incorrec
             xBeg, xEnd, yBeg, yEnd);
         statusPrint(g_msgText);
     } // for x
+```
+
+Compare this to the code in SHADERS.CPP, in method getLight, which computes a 3D bounding box:
+
+```
+        //  get the 3D bounding box
+        if(p1->x > xMax) xMax = p1->x;
+        if(p2->x > xMax) xMax = p2->x;
+
+        if(p1->x < xMin) xMin = p1->x;
+        if(p2->x < xMin) xMin = p2->x;
+
+        if(p1->y > yMax) yMax = p1->y;
+        if(p2->y > yMax) yMax = p2->y;
+
+        if(p1->y < yMin) yMin = p1->y;
+        if(p2->y < yMin) yMin = p2->y;
+
+        if(p1->z > zMax) zMax = p1->z;
+        if(p2->z > zMax) zMax = p2->z;
+
+        if(p1->z < zMin) zMin = p1->z;
+        if(p2->z < zMin) zMin = p2->z;
 ```
 
 ## In RENDER.CPP
