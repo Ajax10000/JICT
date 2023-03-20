@@ -87,8 +87,11 @@ public class Scene {
     // Called from:
     //     SceneList constructor
     //     SceneList.addScene
-    public Scene(String psName, int piSeqType, int piNumOutCols, int piNumOutRows,
-    int piColorMode, Point3d pRtPt, Point3d pTrPt, String psSensorpth) {
+    public Scene(String psName, 
+    int piSeqType, int piNumOutCols, int piNumOutRows,
+    int piColorMode, 
+    Point3d pRtPt, Point3d pTrPt, 
+    String psSensorpth) {
         if (bIctDebug) {
             Globals.statusPrint("Scene Constructor.");
         }
@@ -101,14 +104,14 @@ public class Scene {
         this.miColorMode = piColorMode;
   
         this.mRotationPt = new Point3d();
-        this.mRotationPt.x = pRtPt.x;
-        this.mRotationPt.y = pRtPt.y;
-        this.mRotationPt.z = pRtPt.z;
+        this.mRotationPt.fX = pRtPt.fX;
+        this.mRotationPt.fY = pRtPt.fY;
+        this.mRotationPt.fZ = pRtPt.fZ;
     
         this.mTranslationPt = new Point3d();
-        this.mTranslationPt.x = pTrPt.x;
-        this.mTranslationPt.y = pTrPt.y;
-        this.mTranslationPt.z = pTrPt.z;
+        this.mTranslationPt.fX = pTrPt.fX;
+        this.mTranslationPt.fY = pTrPt.fY;
+        this.mTranslationPt.fZ = pTrPt.fZ;
     
         this.msSensorPath = psSensorpth;
         this.mSensorMotion = null;
@@ -169,8 +172,8 @@ public class Scene {
         
         String thisObjectAsString = "scene " + this.msSceneName + " " + sSequenceArray + " " 
             + this.miOutputRows + "," + this.miOutputColumns + " " + sColorArray + "\n" +
-            "Rotation "    + this.mRotationPt.x    + "," + this.mRotationPt.y    + "," + this.mRotationPt.z + "\n" +
-            "Translation " + this.mTranslationPt.x + "," + this.mTranslationPt.y + "," + this.mTranslationPt.z + "\n" + 
+            "Rotation "    + this.mRotationPt.fX    + "," + this.mRotationPt.fY    + "," + this.mRotationPt.fZ + "\n" +
+            "Translation " + this.mTranslationPt.fX + "," + this.mTranslationPt.fY + "," + this.mTranslationPt.fZ + "\n" + 
             "MotionPath "  + this.msSensorPath + "\n\n";
 
         try {
@@ -196,8 +199,8 @@ public class Scene {
         String thisObject = "\n" + "SceneName: " + this.msSceneName
             + " SeqType: " + this.miSequenceType
             + " ViewPoint Rotation, Translation:" + "\n" +
-            this.mRotationPt.x    + " " + this.mRotationPt.y    + " " + this.mRotationPt.z +" " +
-            this.mTranslationPt.x + " " + this.mTranslationPt.y + " " + this.mTranslationPt.z + "\n"
+            this.mRotationPt.fX    + " " + this.mRotationPt.fY    + " " + this.mRotationPt.fZ + " " +
+            this.mTranslationPt.fX + " " + this.mTranslationPt.fY + " " + this.mTranslationPt.fZ + "\n"
             + "SensorPath: " + this.msSensorPath
             + " Head: " + this.mHead
             + " Tail: " + this.mTail

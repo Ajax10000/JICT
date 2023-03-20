@@ -364,9 +364,9 @@ public:
             getWCentroid(fCX, fCY, fCZ);  // calculate and save the world coord centroid
 
             this.pointOfReference = new Point3d();
-            pointOfReference.x = fCX;
-            pointOfReference.y = fCY;
-            pointOfReference.z = fCZ;
+            pointOfReference.fX = fCX;
+            pointOfReference.fY = fCY;
+            pointOfReference.fZ = fCZ;
         }
     } // Shape3d ctor
 
@@ -388,9 +388,9 @@ public:
         getWCentroid(fCX, fCY, fCZ);  // calculate and save the world coord centroid
 
         this.pointOfReference = new Point3d();
-        pointOfReference.x = fCX;
-        pointOfReference.y = fCY;
-        pointOfReference.z = fCZ;
+        pointOfReference.fX = fCX;
+        pointOfReference.fY = fCY;
+        pointOfReference.fZ = fCZ;
     } // Shape3d ctor
 
 
@@ -448,9 +448,9 @@ public:
 
         initCurrentVertex();  // re-initialize the vertex pointer
         this.pointOfReference = new Point3d();
-        pointOfReference.x = 0.0f;
-        pointOfReference.y = 0.0f;
-        pointOfReference.z = 0.0f;
+        pointOfReference.fX = 0.0f;
+        pointOfReference.fY = 0.0f;
+        pointOfReference.fZ = 0.0f;
     } // Shape3d ctor
 
 
@@ -504,9 +504,9 @@ public:
         getWCentroid(fCX, fCY, fCZ);  // calculate and save the world coord centroid
 
         this.pointOfReference = new Point3d();
-        pointOfReference.x = fCX;
-        pointOfReference.y = fCY;
-        pointOfReference.z = fCZ;
+        pointOfReference.fX = fCX;
+        pointOfReference.fY = fCY;
+        pointOfReference.fZ = fCZ;
     } // Shape3d ctor
 
 
@@ -540,9 +540,9 @@ public:
         mCurrentVertex.sy = 0.0f;
 
         // Use upper-left point
-        mCurrentVertex.x  = pULPt.x; // initial coordinate
-        mCurrentVertex.y  = pULPt.y;
-        mCurrentVertex.z  = pULPt.z;
+        mCurrentVertex.x  = pULPt.fX; // initial coordinate
+        mCurrentVertex.y  = pULPt.fY;
+        mCurrentVertex.z  = pULPt.fZ;
 
         mCurrentVertex.tx = 0.0f;  // transformed coordinate
         mCurrentVertex.ty = 0.0f;
@@ -554,9 +554,9 @@ public:
         mCurrentVertex.sy = 0.0f;
 
         // Use upper-right point
-        mCurrentVertex.x  = pURPt.x;
-        mCurrentVertex.y  = pURPt.y;
-        mCurrentVertex.z  = pURPt.z;
+        mCurrentVertex.x  = pURPt.fX;
+        mCurrentVertex.y  = pURPt.fY;
+        mCurrentVertex.z  = pURPt.fZ;
 
         mCurrentVertex.tx = 0.0f;
         mCurrentVertex.ty = 0.0f;
@@ -568,9 +568,9 @@ public:
         mCurrentVertex.sy = 0.0f;
 
         // Use lower-right point
-        mCurrentVertex.x  = pLRPt.x;
-        mCurrentVertex.y  = pLRPt.y;
-        mCurrentVertex.z  = pLRPt.z;
+        mCurrentVertex.x  = pLRPt.fX;
+        mCurrentVertex.y  = pLRPt.fY;
+        mCurrentVertex.z  = pLRPt.fZ;
 
         mCurrentVertex.tx = 0.0f;
         mCurrentVertex.ty = 0.0f;
@@ -582,9 +582,9 @@ public:
         mCurrentVertex.sy = 0.0f;
 
         // Use lower-left point
-        mCurrentVertex.x  = pLLPt.x;
-        mCurrentVertex.y  = pLLPt.y;
-        mCurrentVertex.z  = pLLPt.z;
+        mCurrentVertex.x  = pLLPt.fX;
+        mCurrentVertex.y  = pLLPt.fY;
+        mCurrentVertex.z  = pLLPt.fZ;
 
         mCurrentVertex.tx = 0.0f;
         mCurrentVertex.ty = 0.0f;
@@ -595,9 +595,9 @@ public:
         getWCentroid(fCX, fCY, fCZ);  // calculate and save the world coord centroid
 
         this.pointOfReference = new Point3d();
-        pointOfReference.x = fCX;
-        pointOfReference.y = fCY;
-        pointOfReference.z = fCZ;
+        pointOfReference.fX = fCX;
+        pointOfReference.fY = fCY;
+        pointOfReference.fZ = fCZ;
     } // Shape3d ctor
 
 
@@ -974,9 +974,9 @@ public:
             this.pointOfReference = new Point3d();
         }
 
-        pointOfReference.x = fCX;
-        pointOfReference.y = fCY;
-        pointOfReference.z = fCZ;
+        pointOfReference.fX = fCX;
+        pointOfReference.fY = fCY;
+        pointOfReference.fZ = fCZ;
 
         return 0;
     } // shapeFromBMP
@@ -1878,9 +1878,9 @@ public:
     //     TMatrix.transformAndProject
     public void getReferencePoint(Float pFCentroidX, Float pFCentroidY, Float pFCentroidZ) {
         // Set the output parameters
-        pFCentroidX = this.pointOfReference.x;
-        pFCentroidY = this.pointOfReference.y;
-        pFCentroidZ = this.pointOfReference.z;
+        pFCentroidX = this.pointOfReference.fX;
+        pFCentroidY = this.pointOfReference.fY;
+        pFCentroidZ = this.pointOfReference.fZ;
     } // getReferencePoint
 
 
@@ -1892,9 +1892,9 @@ public:
     //     RenderObject ctor that takes 4 parameters: a String, int, boolean and Point3d
     public void setReferencePoint(float pfCentroidX, float pfCentroidY, float pfCentroidZ) {
         // Use the input parameters to set pointOfReference
-        this.pointOfReference.x = pfCentroidX;
-        this.pointOfReference.y = pfCentroidY;
-        this.pointOfReference.z = pfCentroidZ;
+        this.pointOfReference.fX = pfCentroidX;
+        this.pointOfReference.fY = pfCentroidY;
+        this.pointOfReference.fZ = pfCentroidZ;
     } // setReferencePoint
 
 
@@ -2266,9 +2266,9 @@ public:
         }
 
         newShape.pointOfReference = new Point3d();
-        newShape.pointOfReference.x = inShape.pointOfReference.x;
-        newShape.pointOfReference.y = inShape.pointOfReference.y;
-        newShape.pointOfReference.z = inShape.pointOfReference.z;
+        newShape.pointOfReference.fX = inShape.pointOfReference.fX;
+        newShape.pointOfReference.fY = inShape.pointOfReference.fY;
+        newShape.pointOfReference.fZ = inShape.pointOfReference.fZ;
 
         return newShape;
     } // copyAndExpand

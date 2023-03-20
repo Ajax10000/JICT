@@ -133,42 +133,42 @@ public:
 
         // This vector indicates the direction of the light source
         mLightSource = new Point3d();
-        mLightSource.x = -150.0f;
-        mLightSource.y =    0.0f;
-        mLightSource.z = -200.0f;
+        mLightSource.fX = -150.0f;
+        mLightSource.fY =    0.0f;
+        mLightSource.fZ = -200.0f;
         
         mViewPoint = new Point3d();
-        mViewPoint.x =   0.0f;
-        mViewPoint.y =   0.0f;
-        mViewPoint.z = 200.0f;
+        mViewPoint.fX =   0.0f;
+        mViewPoint.fY =   0.0f;
+        mViewPoint.fZ = 200.0f;
 
         mViewAngle = new Point3d();
-        mViewAngle.x = -20.0f * F_DTR;
-        mViewAngle.y =   0.0f * F_DTR;
-        mViewAngle.z =   0.0f;
+        mViewAngle.fX = -20.0f * F_DTR;
+        mViewAngle.fY =   0.0f * F_DTR;
+        mViewAngle.fZ =   0.0f;
 
         mViewMatrix = new TMatrix();
         setViewMatrix();
 
         mRef = new Point3d();
-        mRef.x = 0.0f;   //  default location of the virtual pen
-        mRef.y = 0.0f;
-        mRef.z = 0.0f;
+        mRef.fX = 0.0f;   //  default location of the virtual pen
+        mRef.fY = 0.0f;
+        mRef.fZ = 0.0f;
 
         mPenRotation = new Point3d();
-        mPenRotation.x = 0.0f;
-        mPenRotation.y = 0.0f;
-        mPenRotation.z = 0.0f;
+        mPenRotation.fX = 0.0f;
+        mPenRotation.fY = 0.0f;
+        mPenRotation.fZ = 0.0f;
         
         mPenTranslation = new Point3d();
-        mPenTranslation.x = 0.0f;
-        mPenTranslation.y = 0.0f;
-        mPenTranslation.z = 0.0f;
+        mPenTranslation.fX = 0.0f;
+        mPenTranslation.fY = 0.0f;
+        mPenTranslation.fZ = 0.0f;
         
         mPenScale = new Point3d();
-        mPenScale.x = 1.0f;
-        mPenScale.y = 1.0f;
-        mPenScale.z = 1.0f;
+        mPenScale.fX = 1.0f;
+        mPenScale.fY = 1.0f;
+        mPenScale.fZ = 1.0f;
 
         mPenMatrix = new TMatrix();
         setPenMatrix();
@@ -179,9 +179,9 @@ public:
         setLighting(true);
 
         Point3d aLight = new Point3d();
-        aLight.x =    0.0f;
-        aLight.y =    0.0f;
-        aLight.z = -100.0f;
+        aLight.fX =    0.0f;
+        aLight.fY =    0.0f;
+        aLight.fZ = -100.0f;
         setLightSource(aLight);
     } // GPipe constructor
 
@@ -196,17 +196,17 @@ public:
     public void reset() {
         mZBuffImage.init32(ZBUFFERMAXVALUE); 
         mOutputImage.clear();
-        mPenRotation.x = 0.0f;
-        mPenRotation.y = 0.0f;
-        mPenRotation.z = 0.0f;
+        mPenRotation.fX = 0.0f;
+        mPenRotation.fY = 0.0f;
+        mPenRotation.fZ = 0.0f;
             
-        mPenTranslation.x = 0.0f;
-        mPenTranslation.y = 0.0f;
-        mPenTranslation.z = 0.0f;
+        mPenTranslation.fX = 0.0f;
+        mPenTranslation.fY = 0.0f;
+        mPenTranslation.fZ = 0.0f;
             
-        mPenScale.x = 1.0f;
-        mPenScale.y = 1.0f;
-        mPenScale.z = 1.0f;
+        mPenScale.fX = 1.0f;
+        mPenScale.fY = 1.0f;
+        mPenScale.fZ = 1.0f;
         setPenMatrix();
     } // reset
 
@@ -279,30 +279,30 @@ public:
 
         mViewPenMatrix.transformAndProjectPoint1(p1, sp1, mRef, miOutputRows, miOutputColumns, t1);
         if(mbZBufferEnabled) {
-            dPrev1 = MathUtils.getDistance3d(t1.x, t1.y, t1.z, mViewPoint.x, mViewPoint.y, mViewPoint.z);
+            dPrev1 = MathUtils.getDistance3d(t1.fX, t1.fY, t1.fZ, mViewPoint.fX, mViewPoint.fY, mViewPoint.fZ);
         }
-        updateBoundingBox(p1);  //optional
+        updateBoundingBox(p1);  // optional
 
         mViewPenMatrix.transformAndProjectPoint1(p2, sp2, mRef, miOutputRows, miOutputColumns, t2);
         if(mbZBufferEnabled) {
-            dPrev2 = MathUtils.getDistance3d(t2.x, t2.y, t2.z, mViewPoint.x, mViewPoint.y, mViewPoint.z);
+            dPrev2 = MathUtils.getDistance3d(t2.fX, t2.fY, t2.fZ, mViewPoint.fX, mViewPoint.fY, mViewPoint.fZ);
         }
-        updateBoundingBox(p2);  //optional
+        updateBoundingBox(p2);  // optional
 
         mViewPenMatrix.transformAndProjectPoint1(c1, sc1, mRef, miOutputRows, miOutputColumns, t3);
         if(mbZBufferEnabled) {
-            dCur1 = MathUtils.getDistance3d(t3.x, t3.y, t3.z, mViewPoint.x, mViewPoint.y, mViewPoint.z);
+            dCur1 = MathUtils.getDistance3d(t3.fX, t3.fY, t3.fZ, mViewPoint.fX, mViewPoint.fY, mViewPoint.fZ);
         }
-        updateBoundingBox(c1);  //optional
+        updateBoundingBox(c1);  // optional
 
         dCur2 = -1.0f;
 
         if(c2 != null) {
             mViewPenMatrix.transformAndProjectPoint1(c2, sc2, mRef, miOutputRows, miOutputColumns, t4);
             if(mbZBufferEnabled) {
-                dCur2 = MathUtils.getDistance3d(t4.x, t4.y, t4.z, mViewPoint.x, mViewPoint.y, mViewPoint.z);
+                dCur2 = MathUtils.getDistance3d(t4.fX, t4.fY, t4.fZ, mViewPoint.fX, mViewPoint.fY, mViewPoint.fZ);
             }
-            updateBoundingBox(c2);  //optional
+            updateBoundingBox(c2);  // optional
         }
 
         if (gpdebug) {
@@ -322,56 +322,56 @@ public:
         //
         //  Assume a face is planar.  Thus only one surface normal
         if(mbLightingEnabled) {
-            float xMax = t1.x;
-            float yMax = t1.y;
-            float zMax = t1.z;
+            float xMax = t1.fX;
+            float yMax = t1.fY;
+            float zMax = t1.fZ;
 
-            float xMin = t1.x;
-            float yMin = t1.y;
-            float zMin = t1.z;
+            float xMin = t1.fX;
+            float yMin = t1.fY;
+            float zMin = t1.fZ;
 
             // Get the 3D bounding box
-            if(t1.x > xMax) xMax = t1.x;
-            if(t2.x > xMax) xMax = t2.x;
-            if(t3.x > xMax) xMax = t3.x;
+            if(t1.fX > xMax) xMax = t1.fX;
+            if(t2.fX > xMax) xMax = t2.fX;
+            if(t3.fX > xMax) xMax = t3.fX;
 
-            if(t1.x < xMin) xMin = t1.x;
-            if(t2.x < xMin) xMin = t2.x;
-            if(t3.x < xMin) xMin = t3.x;
+            if(t1.fX < xMin) xMin = t1.fX;
+            if(t2.fX < xMin) xMin = t2.fX;
+            if(t3.fX < xMin) xMin = t3.fX;
 
-            if(t1.y > yMax) yMax = t1.y;
-            if(t2.y > yMax) yMax = t2.y;
-            if(t3.y > yMax) yMax = t3.y;
+            if(t1.fY > yMax) yMax = t1.fY;
+            if(t2.fY > yMax) yMax = t2.fY;
+            if(t3.fY > yMax) yMax = t3.fY;
 
-            if(t1.y < yMin) yMin = t1.y;
-            if(t2.y < yMin) yMin = t2.y;
-            if(t3.y < yMin) yMin = t3.y;
+            if(t1.fY < yMin) yMin = t1.fY;
+            if(t2.fY < yMin) yMin = t2.fY;
+            if(t3.fY < yMin) yMin = t3.fY;
 
-            if(t1.z > zMax) zMax = t1.z;
-            if(t2.z > zMax) zMax = t2.z;
-            if(t3.z > zMax) zMax = t3.z;
+            if(t1.fZ > zMax) zMax = t1.fZ;
+            if(t2.fZ > zMax) zMax = t2.fZ;
+            if(t3.fZ > zMax) zMax = t3.fZ;
 
-            if(t1.z < zMin) zMin = t1.z;
-            if(t2.z < zMin) zMin = t2.z;
-            if(t3.z < zMin) zMin = t3.z;
+            if(t1.fZ < zMin) zMin = t1.fZ;
+            if(t2.fZ < zMin) zMin = t2.fZ;
+            if(t3.fZ < zMin) zMin = t3.fZ;
 
             if(c2 != null) {
-                if(t4.z < zMin) zMin = t4.z;
-                if(t4.z > zMax) zMax = t4.z;
+                if(t4.fZ < zMin) zMin = t4.fZ;
+                if(t4.fZ > zMax) zMax = t4.fZ;
 
-                if(t4.x > xMax) xMax = t4.x;
-                if(t4.x < xMin) xMin = t4.x;
+                if(t4.fX > xMax) xMax = t4.fX;
+                if(t4.fX < xMin) xMin = t4.fX;
 
-                if(t4.y > yMax) yMax = t4.y;
-                if(t4.y < yMin) yMin = t4.y;
+                if(t4.fY > yMax) yMax = t4.fY;
+                if(t4.fY < yMin) yMin = t4.fY;
             }
 
-            centroid.x = (xMax + xMin) / 2.0f;
-            centroid.y = (yMax + yMin) / 2.0f;
-            centroid.z = (zMax + zMin) / 2.0f;
+            centroid.fX = (xMax + xMin) / 2.0f;
+            centroid.fY = (yMax + yMin) / 2.0f;
+            centroid.fZ = (zMax + zMin) / 2.0f;
             float dCentroid = MathUtils.getDistance3d(
-                mLightSource.x, mLightSource.y, mLightSource.z, 
-                centroid.x, centroid.y, centroid.z);
+                mLightSource.fX, mLightSource.fY, mLightSource.fZ, 
+                centroid.fX, centroid.fY, centroid.fZ);
             Point3d np1 = new Point3d();
 
             // The following method will set np1
@@ -435,9 +435,9 @@ public:
 
     // This method originally came from GPIPE.CPP
     public void setPenScale(float pfScaleX, float pfScaleY, float pfScaleZ) {
-        mPenScale.x = pfScaleX;
-        mPenScale.y = pfScaleY;
-        mPenScale.z = pfScaleZ;
+        mPenScale.fX = pfScaleX;
+        mPenScale.fY = pfScaleY;
+        mPenScale.fZ = pfScaleZ;
     } // setPenScale
     
 
@@ -446,7 +446,7 @@ public:
     // Called from:
     //     MainFrame.onToolsTest
     public void setPenXRotation(float pfAngleRad) {
-        mPenRotation.x += pfAngleRad;
+        mPenRotation.fX += pfAngleRad;
     } // setPenXRotation
 
 
@@ -455,13 +455,13 @@ public:
     // Called from:
     //     MainFrame.onToolsTest
     public void setPenYRotation(float pfAngleRad) {
-        mPenRotation.y += pfAngleRad;
+        mPenRotation.fY += pfAngleRad;
     } // setPenYRotation
 
 
     // This method originally came from GPIPE.CPP
     public void setPenZRotation(float pfAngleRad) {
-        mPenRotation.z += pfAngleRad;
+        mPenRotation.fZ += pfAngleRad;
     } // setPenZRotation
 
     
@@ -470,9 +470,9 @@ public:
     // Called from:
     //     MainFrame.onToolsTest
     public void setPenTranslation(float pfTranX, float pfTranY, float pfTranZ) {
-        mPenTranslation.x += pfTranX;
-        mPenTranslation.y += pfTranY;
-        mPenTranslation.z += pfTranZ;
+        mPenTranslation.fX += pfTranX;
+        mPenTranslation.fY += pfTranY;
+        mPenTranslation.fZ += pfTranZ;
     } // setPenTranslation
 
     
@@ -482,9 +482,9 @@ public:
     //     constructor
     public void setPenMatrix() {
         mPenMatrix.setIdentity();
-        mPenMatrix.scale(mPenScale.x, mPenScale.y, mPenScale.z);
-        mPenMatrix.rotate(mPenRotation.x, mPenRotation.y, mPenRotation.z);
-        mPenMatrix.translate(mPenTranslation.x, mPenTranslation.y, mPenTranslation.z);
+        mPenMatrix.scale(mPenScale.fX, mPenScale.fY, mPenScale.fZ);
+        mPenMatrix.rotate(mPenRotation.fX, mPenRotation.fY, mPenRotation.fZ);
+        mPenMatrix.translate(mPenTranslation.fX, mPenTranslation.fY, mPenTranslation.fZ);
     } // setPenMatrix
 
 
@@ -495,8 +495,8 @@ public:
     public void setViewMatrix() {
         mViewMatrix.setIdentity();
         mViewMatrix.scale(1.0f, 1.0f, 1.0f);
-        mViewMatrix.rotate(-mViewAngle.x, -mViewAngle.y, -mViewAngle.z);
-        mViewMatrix.translate(-mViewPoint.x, -mViewPoint.y, -mViewPoint.z);
+        mViewMatrix.rotate(-mViewAngle.fX, -mViewAngle.fY, -mViewAngle.fZ);
+        mViewMatrix.translate(-mViewPoint.fX, -mViewPoint.fY, -mViewPoint.fZ);
     } // setViewMatrix
     
 
@@ -559,106 +559,106 @@ public:
         Point3d p3 = new Point3d(); 
         Point3d p4 = new Point3d();
 
-        p1.x = -pfWidth/2.0f * VP;
-        p1.y = -pfHeight/2.0f * VP;
-        p1.z = pfDepth/2.0f * VP;
+        p1.fX = -pfWidth/2.0f * VP;
+        p1.fY = -pfHeight/2.0f * VP;
+        p1.fZ = pfDepth/2.0f * VP;
 
-        p2.x = pfWidth/2.0f * VP;
-        p2.y = -pfHeight/2.0f * VP;
-        p2.z = pfDepth/2.0f * VP;
+        p2.fX = pfWidth/2.0f * VP;
+        p2.fY = -pfHeight/2.0f * VP;
+        p2.fZ = pfDepth/2.0f * VP;
 
-        p3.x = pfWidth/2.0f * VP;
-        p3.y = pfHeight/2.0f * VP;
-        p3.z = pfDepth/2.0f * VP;
+        p3.fX = pfWidth/2.0f * VP;
+        p3.fY = pfHeight/2.0f * VP;
+        p3.fZ = pfDepth/2.0f * VP;
 
-        p4.x = -pfWidth/2.0f * VP;
-        p4.y = pfHeight/2.0f * VP;
-        p4.z = pfDepth/2.0f * VP;
+        p4.fX = -pfWidth/2.0f * VP;
+        p4.fY = pfHeight/2.0f * VP;
+        p4.fZ = pfDepth/2.0f * VP;
         addFace(p1, p2, p3, p4); //front
 
-        p1.x = -pfWidth/2.0f * VP;
-        p1.y = -pfHeight/2.0f * VP;
-        p1.z = -pfDepth/2.0f * VP;
+        p1.fX = -pfWidth/2.0f * VP;
+        p1.fY = -pfHeight/2.0f * VP;
+        p1.fZ = -pfDepth/2.0f * VP;
 
-        p2.x = pfWidth/2.0f * VP;
-        p2.y = -pfHeight/2.0f * VP;
-        p2.z = -pfDepth/2.0f * VP;
+        p2.fX = pfWidth/2.0f * VP;
+        p2.fY = -pfHeight/2.0f * VP;
+        p2.fZ = -pfDepth/2.0f * VP;
 
-        p3.x = pfWidth/2.0f * VP;
-        p3.y = pfHeight/2.0f * VP;
-        p3.z = -pfDepth/2.0f * VP;
+        p3.fX = pfWidth/2.0f * VP;
+        p3.fY = pfHeight/2.0f * VP;
+        p3.fZ = -pfDepth/2.0f * VP;
 
-        p4.x = -pfWidth/2.0f * VP;
-        p4.y = pfHeight/2.0f * VP;
-        p4.z = -pfDepth/2.0f * VP;
+        p4.fX = -pfWidth/2.0f * VP;
+        p4.fY = pfHeight/2.0f * VP;
+        p4.fZ = -pfDepth/2.0f * VP;
         addFace(p4, p3, p2, p1); //back
 
-        p1.x = -pfWidth/2.0f * VP;
-        p1.y = -pfHeight/2.0f * VP;
-        p1.z = -pfDepth/2.0f * VP;
+        p1.fX = -pfWidth/2.0f * VP;
+        p1.fY = -pfHeight/2.0f * VP;
+        p1.fZ = -pfDepth/2.0f * VP;
 
-        p2.x = -pfWidth/2.0f * VP;
-        p2.y = -pfHeight/2.0f * VP;
-        p2.z = pfDepth/2.0f * VP;
+        p2.fX = -pfWidth/2.0f * VP;
+        p2.fY = -pfHeight/2.0f * VP;
+        p2.fZ = pfDepth/2.0f * VP;
 
-        p3.x = -pfWidth/2.0f * VP;
-        p3.y = pfHeight/2.0f * VP;
-        p3.z = pfDepth/2.0f * VP;
+        p3.fX = -pfWidth/2.0f * VP;
+        p3.fY = pfHeight/2.0f * VP;
+        p3.fZ = pfDepth/2.0f * VP;
 
-        p4.x = -pfWidth/2.0f * VP;
-        p4.y = pfHeight/2.0f * VP;
-        p4.z = -pfDepth/2.0f * VP;
+        p4.fX = -pfWidth/2.0f * VP;
+        p4.fY = pfHeight/2.0f * VP;
+        p4.fZ = -pfDepth/2.0f * VP;
         addFace(p1, p2, p3, p4); //left
 
-        p1.x = pfWidth/2.0f * VP;
-        p1.y = -pfHeight/2.0f * VP;
-        p1.z = -pfDepth/2.0f * VP;
+        p1.fX = pfWidth/2.0f * VP;
+        p1.fY = -pfHeight/2.0f * VP;
+        p1.fZ = -pfDepth/2.0f * VP;
 
-        p2.x = pfWidth/2.0f * VP;
-        p2.y = -pfHeight/2.0f * VP;
-        p2.z = pfDepth/2.0f * VP;
+        p2.fX = pfWidth/2.0f * VP;
+        p2.fY = -pfHeight/2.0f * VP;
+        p2.fZ = pfDepth/2.0f * VP;
 
-        p3.x = pfWidth/2.0f * VP;
-        p3.y = pfHeight/2.0f * VP;
-        p3.z = pfDepth/2.0f * VP;
+        p3.fX = pfWidth/2.0f * VP;
+        p3.fY = pfHeight/2.0f * VP;
+        p3.fZ = pfDepth/2.0f * VP;
 
-        p4.x = pfWidth/2.0f * VP;
-        p4.y = pfHeight/2.0f * VP;
-        p4.z = -pfDepth/2.0f * VP;
+        p4.fX = pfWidth/2.0f * VP;
+        p4.fY = pfHeight/2.0f * VP;
+        p4.fZ = -pfDepth/2.0f * VP;
         addFace(p4, p3, p2, p1); //right
 
-        p1.x = -pfWidth/2.0f * VP;
-        p1.y = pfHeight/2.0f * VP;
-        p1.z = pfDepth/2.0f * VP;
+        p1.fX = -pfWidth/2.0f * VP;
+        p1.fY = pfHeight/2.0f * VP;
+        p1.fZ = pfDepth/2.0f * VP;
 
-        p2.x = pfWidth/2.0f * VP;
-        p2.y = pfHeight/2.0f * VP;
-        p2.z = pfDepth/2.0f * VP;
+        p2.fX = pfWidth/2.0f * VP;
+        p2.fY = pfHeight/2.0f * VP;
+        p2.fZ = pfDepth/2.0f * VP;
 
-        p3.x = pfWidth/2.0f * VP;
-        p3.y = pfHeight/2.0f * VP;
-        p3.z = -pfDepth/2.0f * VP;
+        p3.fX = pfWidth/2.0f * VP;
+        p3.fY = pfHeight/2.0f * VP;
+        p3.fZ = -pfDepth/2.0f * VP;
 
-        p4.x = -pfWidth/2.0f * VP;
-        p4.y = pfHeight/2.0f * VP;
-        p4.z = -pfDepth/2.0f * VP;
+        p4.fX = -pfWidth/2.0f * VP;
+        p4.fY = pfHeight/2.0f * VP;
+        p4.fZ = -pfDepth/2.0f * VP;
         addFace(p4, p3, p2, p1); //top
 
-        p1.x = -pfWidth/2.0f * VP;
-        p1.y = -pfHeight/2.0f * VP;
-        p1.z = pfDepth/2.0f * VP;
+        p1.fX = -pfWidth/2.0f * VP;
+        p1.fY = -pfHeight/2.0f * VP;
+        p1.fZ = pfDepth/2.0f * VP;
 
-        p2.x = pfWidth/2.0f * VP;
-        p2.y = -pfHeight/2.0f * VP;
-        p2.z = pfDepth/2.0f * VP;
+        p2.fX = pfWidth/2.0f * VP;
+        p2.fY = -pfHeight/2.0f * VP;
+        p2.fZ = pfDepth/2.0f * VP;
 
-        p3.x = pfWidth/2.0f * VP;
-        p3.y = -pfHeight/2.0f * VP;
-        p3.z = -pfDepth/2.0f * VP;
+        p3.fX = pfWidth/2.0f * VP;
+        p3.fY = -pfHeight/2.0f * VP;
+        p3.fZ = -pfDepth/2.0f * VP;
 
-        p4.x = -pfWidth/2.0f * VP;
-        p4.y = -pfHeight/2.0f * VP;
-        p4.z = -pfDepth/2.0f * VP;
+        p4.fX = -pfWidth/2.0f * VP;
+        p4.fY = -pfHeight/2.0f * VP;
+        p4.fZ = -pfDepth/2.0f * VP;
         addFace(p1, p2, p3, p4); //bottom
     } // addCube
 
@@ -683,37 +683,37 @@ public:
             if(iRow == 1) {
                 fTempAngle = 0.0f;
                 for(k = 0; k < NUMFACETS; k++) {
-                    prevRow[k].x = fRowRadius * (float)Math.cos(fTempAngle * F_DTR);
-                    prevRow[k].y = fYValue;
-                    prevRow[k].z = fRowRadius * (float)Math.sin(fTempAngle * F_DTR);
+                    prevRow[k].fX = fRowRadius * (float)Math.cos(fTempAngle * F_DTR);
+                    prevRow[k].fY = fYValue;
+                    prevRow[k].fZ = fRowRadius * (float)Math.sin(fTempAngle * F_DTR);
                     fTempAngle += fAngleInc;
                 }
             }
             fTempAngle = 0.0f;
 
             for (iCol = 0; iCol < NUMFACETS-1 ; iCol++) {
-                p4.x = prevRow[iCol].x;
-                p4.y = prevRow[iCol].y;
-                p4.z = prevRow[iCol].z;
+                p4.fX = prevRow[iCol].fX;
+                p4.fY = prevRow[iCol].fY;
+                p4.fZ = prevRow[iCol].fZ;
 
-                p1.x =  fRowRadius * (float)Math.cos(fTempAngle * F_DTR);
-                p1.z =  fRowRadius * (float)Math.sin(fTempAngle * F_DTR);
-                p1.y =  fYValue;
+                p1.fX =  fRowRadius * (float)Math.cos(fTempAngle * F_DTR);
+                p1.fZ =  fRowRadius * (float)Math.sin(fTempAngle * F_DTR);
+                p1.fY =  fYValue;
                 fTempAngle += fAngleInc;
 
                 if(iRow > 1) { 
-                    p3.x = prevRow[iCol + 1].x;
-                    p3.y = prevRow[iCol + 1].y;
-                    p3.z = prevRow[iCol + 1].z;
+                    p3.fX = prevRow[iCol + 1].fX;
+                    p3.fY = prevRow[iCol + 1].fY;
+                    p3.fZ = prevRow[iCol + 1].fZ;
 
-                    p2.x =  fRowRadius * (float)Math.cos(fTempAngle * F_DTR);
-                    p2.z =  fRowRadius * (float)Math.sin(fTempAngle * F_DTR);
-                    p2.y =  fYValue;
+                    p2.fX =  fRowRadius * (float)Math.cos(fTempAngle * F_DTR);
+                    p2.fZ =  fRowRadius * (float)Math.sin(fTempAngle * F_DTR);
+                    p2.fY =  fYValue;
 
                     addFace(p4, p3, p2, p1);
-                    prevRow[iCol].x = p1.x;
-                    prevRow[iCol].y = p1.y;
-                    prevRow[iCol].z = p1.z;
+                    prevRow[iCol].fX = p1.fX;
+                    prevRow[iCol].fY = p1.fY;
+                    prevRow[iCol].fZ = p1.fZ;
                 }
             } // for iCol
 
@@ -728,20 +728,20 @@ public:
         Point3d p1 = new Point3d(); 
         Point3d p2 = new Point3d(); 
         Point3d p3 = new Point3d();
-        p1.x = 0.0f;
-        p1.y = VP * pfHeight/2.0f;
-        p1.z = 0.0f;
+        p1.fX = 0.0f;
+        p1.fY = VP * pfHeight/2.0f;
+        p1.fZ = 0.0f;
 
         float fAngleInc = 360.0f / NUMFACETS;
         for (int i = 1; i <= NUMFACETS; i++) {
-            p2.x = VP * pfRadius * (float)Math.cos(fTempAngle * F_DTR);
-            p2.z = VP * pfRadius * (float)Math.sin(fTempAngle * F_DTR);
-            p2.y = VP * pfHeight/2.0f;
+            p2.fX = VP * pfRadius * (float)Math.cos(fTempAngle * F_DTR);
+            p2.fZ = VP * pfRadius * (float)Math.sin(fTempAngle * F_DTR);
+            p2.fY = VP * pfHeight/2.0f;
 
             fTempAngle += fAngleInc;
-            p3.x = VP * pfRadius * (float)Math.cos(fTempAngle * F_DTR);
-            p3.z = VP * pfRadius * (float)Math.sin(fTempAngle * F_DTR);
-            p3.y = VP * pfHeight/2.0f;
+            p3.fX = VP * pfRadius * (float)Math.cos(fTempAngle * F_DTR);
+            p3.fZ = VP * pfRadius * (float)Math.sin(fTempAngle * F_DTR);
+            p3.fY = VP * pfHeight/2.0f;
             addFace(p3, p2, p1, null); 
         } // for i
     } // addCylTop
@@ -753,20 +753,20 @@ public:
         Point3d p1 = new Point3d();
         Point3d p2 = new Point3d(); 
         Point3d p3 = new Point3d();
-        p1.x = 0.0f;
-        p1.y = -(VP * pfHeight/2.0f);
-        p1.z = 0.0f;
+        p1.fX = 0.0f;
+        p1.fY = -(VP * pfHeight/2.0f);
+        p1.fZ = 0.0f;
 
         float fAngleInc = 360.0f / NUMFACETS;
         for (int i = 1; i <= NUMFACETS; i++) {
-            p2.x = VP * pfRadius * (float)Math.cos(fTempAngle * F_DTR);
-            p2.z = VP * pfRadius * (float)Math.sin(fTempAngle * F_DTR);
-            p2.y = -VP * pfHeight/2.0f;
+            p2.fX = VP * pfRadius * (float)Math.cos(fTempAngle * F_DTR);
+            p2.fZ = VP * pfRadius * (float)Math.sin(fTempAngle * F_DTR);
+            p2.fY = -VP * pfHeight/2.0f;
 
             fTempAngle += fAngleInc;
-            p3.x = VP * pfRadius * (float)Math.cos(fTempAngle * F_DTR);
-            p3.z = VP * pfRadius * (float)Math.sin(fTempAngle * F_DTR);
-            p3.y = -VP * pfHeight/2.0f;
+            p3.fX = VP * pfRadius * (float)Math.cos(fTempAngle * F_DTR);
+            p3.fZ = VP * pfRadius * (float)Math.sin(fTempAngle * F_DTR);
+            p3.fY = -VP * pfHeight/2.0f;
             addFace(p3, p2, p1, null); 
         } // for i
     } // addCylBottom
@@ -782,22 +782,22 @@ public:
 
         float fAngleInc = 360.0f / NUMFACETS;
         for (int i = 1; i <= NUMFACETS; i++) {
-            p1.x = VP * pfRadius * (float)Math.cos(fTempAngle * F_DTR);
-            p1.z = VP * pfRadius * (float)Math.sin(fTempAngle * F_DTR);
-            p1.y = VP * pfHeight/2.0f;
+            p1.fX = VP * pfRadius * (float)Math.cos(fTempAngle * F_DTR);
+            p1.fZ = VP * pfRadius * (float)Math.sin(fTempAngle * F_DTR);
+            p1.fY = VP * pfHeight/2.0f;
 
-            p2.x = p1.x;
-            p2.z = p1.z;
-            p2.y = -p1.y;
+            p2.fX = p1.fX;
+            p2.fZ = p1.fZ;
+            p2.fY = -p1.fY;
 
             fTempAngle += fAngleInc;
-            p3.x = VP * pfRadius * (float)Math.cos(fTempAngle * F_DTR);
-            p3.z = VP * pfRadius * (float)Math.sin(fTempAngle * F_DTR);
-            p3.y = -(VP * pfHeight/2.0f);
+            p3.fX = VP * pfRadius * (float)Math.cos(fTempAngle * F_DTR);
+            p3.fZ = VP * pfRadius * (float)Math.sin(fTempAngle * F_DTR);
+            p3.fY = -(VP * pfHeight/2.0f);
 
-            p4.x = p3.x;
-            p4.z = p3.z;
-            p4.y = -p3.y;
+            p4.fX = p3.fX;
+            p4.fZ = p3.fZ;
+            p4.fY = -p3.fY;
             addFace(p4, p3, p2, p1); 
         } // for i
     } // addCylSides
@@ -810,20 +810,20 @@ public:
         Point3d p2 = new Point3d();
         Point3d p3 = new Point3d();
 
-        p1.x = 0.0f;
-        p1.y = -(VP * pfHeight/2.0f);
-        p1.z = 0.0f;
+        p1.fX = 0.0f;
+        p1.fY = -(VP * pfHeight/2.0f);
+        p1.fZ = 0.0f;
 
         float fAngleInc = 360.0f / NUMFACETS;
         for (int i = 1; i <= NUMFACETS; i++) {
-            p2.x = VP * pfBottomRadius * (float)Math.cos(fTempAngle * F_DTR);
-            p2.z = VP * pfBottomRadius * (float)Math.sin(fTempAngle * F_DTR);
-            p2.y = -VP * pfHeight/2.0f;
+            p2.fX = VP * pfBottomRadius * (float)Math.cos(fTempAngle * F_DTR);
+            p2.fZ = VP * pfBottomRadius * (float)Math.sin(fTempAngle * F_DTR);
+            p2.fY = -VP * pfHeight/2.0f;
 
             fTempAngle += fAngleInc;
-            p3.x = VP * pfBottomRadius * (float)Math.cos(fTempAngle * F_DTR);
-            p3.z = VP * pfBottomRadius * (float)Math.sin(fTempAngle * F_DTR);
-            p3.y = -VP * pfHeight/2.0f;
+            p3.fX = VP * pfBottomRadius * (float)Math.cos(fTempAngle * F_DTR);
+            p3.fZ = VP * pfBottomRadius * (float)Math.sin(fTempAngle * F_DTR);
+            p3.fY = -VP * pfHeight/2.0f;
             addFace(p3, p2, p1, null); 
         } // for i
     } // addConeBottom
@@ -836,21 +836,21 @@ public:
         Point3d p2 = new Point3d();
         Point3d p3 = new Point3d();
 
-        p1.x = 0.0f;
-        p1.y = VP * pfHeight/2.0f;
-        p1.z = 0.0f;
+        p1.fX = 0.0f;
+        p1.fY = VP * pfHeight/2.0f;
+        p1.fZ = 0.0f;
 
         // String pathBuffer; // This variable is not used
         float fAngleInc = 360.0f / NUMFACETS;
         for (int i = 1; i <= NUMFACETS; i++) {
-            p2.x =  VP * pfBottomRadius * (float)Math.cos(fTempAngle * F_DTR);
-            p2.z =  VP * pfBottomRadius * (float)Math.sin(fTempAngle * F_DTR);
-            p2.y = -VP * pfHeight/2.0f;
+            p2.fX =  VP * pfBottomRadius * (float)Math.cos(fTempAngle * F_DTR);
+            p2.fZ =  VP * pfBottomRadius * (float)Math.sin(fTempAngle * F_DTR);
+            p2.fY = -VP * pfHeight/2.0f;
 
             fTempAngle += fAngleInc;
-            p3.x =  VP * pfBottomRadius * (float)Math.cos(fTempAngle * F_DTR);
-            p3.z =  VP * pfBottomRadius * (float)Math.sin(fTempAngle * F_DTR);
-            p3.y = -VP * pfHeight/2.0f;
+            p3.fX =  VP * pfBottomRadius * (float)Math.cos(fTempAngle * F_DTR);
+            p3.fZ =  VP * pfBottomRadius * (float)Math.sin(fTempAngle * F_DTR);
+            p3.fY = -VP * pfHeight/2.0f;
             addFace(p3, p2, p1, null);
         } // for i
     } // addConeSides
@@ -861,21 +861,21 @@ public:
         if(!mbBoundingBoxInitialized) {
             mbBoundingBoxInitialized = true;
             
-            mMinBoundingBox.x = pPoint.x;
-            mMinBoundingBox.y = pPoint.y;
-            mMinBoundingBox.z = pPoint.z;
+            mMinBoundingBox.fX = pPoint.fX;
+            mMinBoundingBox.fY = pPoint.fY;
+            mMinBoundingBox.fZ = pPoint.fZ;
 
-            mMaxBoundingBox.x = pPoint.x;
-            mMaxBoundingBox.y = pPoint.y;
-            mMaxBoundingBox.z = pPoint.z;
+            mMaxBoundingBox.fX = pPoint.fX;
+            mMaxBoundingBox.fY = pPoint.fY;
+            mMaxBoundingBox.fZ = pPoint.fZ;
         } else {
-            if(pPoint.x < mMinBoundingBox.x) mMinBoundingBox.x = pPoint.x;
-            if(pPoint.y < mMinBoundingBox.y) mMinBoundingBox.y = pPoint.y;
-            if(pPoint.z < mMinBoundingBox.z) mMinBoundingBox.z = pPoint.z;
+            if(pPoint.fX < mMinBoundingBox.fX) mMinBoundingBox.fX = pPoint.fX;
+            if(pPoint.fY < mMinBoundingBox.fY) mMinBoundingBox.fY = pPoint.fY;
+            if(pPoint.fZ < mMinBoundingBox.fZ) mMinBoundingBox.fZ = pPoint.fZ;
 
-            if(pPoint.x > mMaxBoundingBox.x) mMaxBoundingBox.x = pPoint.x;
-            if(pPoint.y > mMaxBoundingBox.y) mMaxBoundingBox.y = pPoint.y;
-            if(pPoint.z > mMaxBoundingBox.z) mMaxBoundingBox.z = pPoint.z;
+            if(pPoint.fX > mMaxBoundingBox.fX) mMaxBoundingBox.fX = pPoint.fX;
+            if(pPoint.fY > mMaxBoundingBox.fY) mMaxBoundingBox.fY = pPoint.fY;
+            if(pPoint.fZ > mMaxBoundingBox.fZ) mMaxBoundingBox.fZ = pPoint.fZ;
         }
     } // updateBoundingBox
 
@@ -883,9 +883,9 @@ public:
     // This method originally came from GPIPE.CPP
     public boolean viewPointInsideBoundingBox() {
         if(
-        (mViewPoint.x >= mMinBoundingBox.x && mViewPoint.x <= mMaxBoundingBox.x) &&
-        (mViewPoint.y >= mMinBoundingBox.y && mViewPoint.y <= mMaxBoundingBox.y) &&
-        (mViewPoint.z >= mMinBoundingBox.z && mViewPoint.z <= mMaxBoundingBox.z) ) {
+        (mViewPoint.fX >= mMinBoundingBox.fX && mViewPoint.fX <= mMaxBoundingBox.fX) &&
+        (mViewPoint.fY >= mMinBoundingBox.fY && mViewPoint.fY <= mMaxBoundingBox.fY) &&
+        (mViewPoint.fZ >= mMinBoundingBox.fZ && mViewPoint.fZ <= mMaxBoundingBox.fZ) ) {
             return true;
         } else {
             return false;
@@ -898,8 +898,8 @@ public:
     // Called from:
     //     MainFrame.onToolsTest
     public void setLightSource(Point3d pPoint) {
-        this.mLightSource.x = pPoint.x;
-        this.mLightSource.y = pPoint.y;
-        this.mLightSource.z = pPoint.z;
+        this.mLightSource.fX = pPoint.fX;
+        this.mLightSource.fY = pPoint.fY;
+        this.mLightSource.fZ = pPoint.fZ;
     } // setLightSource
 } // class GPipe

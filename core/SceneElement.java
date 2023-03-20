@@ -189,30 +189,30 @@ public class SceneElement {
         this.pointOfReference = new Point3d(); // Constructor sets x, y and z members to 0.0f
         this.mbDefinedRefPoint = pbDefinedRefPt;
         if (this.mbDefinedRefPoint) {
-            this.pointOfReference.x = pRefPoint.x;
-            this.pointOfReference.y = pRefPoint.y;
-            this.pointOfReference.z = pRefPoint.z;
+            this.pointOfReference.fX = pRefPoint.fX;
+            this.pointOfReference.fY = pRefPoint.fY;
+            this.pointOfReference.fZ = pRefPoint.fZ;
         }
 
         mRotation = new Point3d(); // Constructor sets x, y and z members to 0.0f
         if(pRtPt != null) { 
-            mRotation.x = pRtPt.x;
-            mRotation.y = pRtPt.y;
-            mRotation.z = pRtPt.z;
+            mRotation.fX = pRtPt.fX;
+            mRotation.fY = pRtPt.fY;
+            mRotation.fZ = pRtPt.fZ;
         }
 
         mScale = new Point3d(); // Constructor sets x, y and z members to 0.0f
         if(pScPt != null) {
-            mScale.x = pScPt.x;
-            mScale.y = pScPt.y;
-            mScale.z = pScPt.z;
+            mScale.fX = pScPt.fX;
+            mScale.fY = pScPt.fY;
+            mScale.fZ = pScPt.fZ;
         }
 
         mTranslation = new Point3d(); // Constructor sets x, y and z members to 0.0f
         if(pTrPt != null) {
-            mTranslation.x = pTrPt.x;
-            mTranslation.y = pTrPt.y;
-            mTranslation.z = pTrPt.z;
+            mTranslation.fX = pTrPt.fX;
+            mTranslation.fY = pTrPt.fY;
+            mTranslation.fZ = pTrPt.fZ;
         }
     
         this.mScreenRdrObject = null;
@@ -260,15 +260,15 @@ public class SceneElement {
     public String toString() {
         String thisObject = "\n"
         + "Model: " + msModelName	+ "modelType: " + miModelType + "\n"
-        + " Centroid: " + pointOfReference.x + ", " + pointOfReference.y + ", " + pointOfReference.z + "\n"
+        + " Centroid: " + pointOfReference.fX + ", " + pointOfReference.fY + ", " + pointOfReference.fZ + "\n"
         + " Blend: " + mbBlendIndicator +
         " Warp: " + mbWarpIndicator +
         " aScale: " + mfAlphaScale +
         " File: " + msFileName + " Motion: " + msModelMotionPath + "\n" +
         " R S T: " +
-        mRotation.x    + " " + mRotation.y    + " " + mRotation.z    + " " +
-        mScale.x       + " " + mScale.y       + " " + mScale.z       + " " +
-        mTranslation.x + " " + mTranslation.y + " " + mTranslation.z + "\n"
+        mRotation.fX    + " " + mRotation.fY    + " " + mRotation.fZ    + " " +
+        mScale.fX       + " " + mScale.fY       + " " + mScale.fZ       + " " +
+        mTranslation.fX + " " + mTranslation.fY + " " + mTranslation.fZ + "\n"
         + " prev " + mPrevEntry + " next " + mNextEntry;
 
         return thisObject;
@@ -337,11 +337,11 @@ public class SceneElement {
                 "FileName " + this.msFileName + "\n" +
                 "MotionPath " + this.msModelMotionPath + "\n" +
                 "AlphaImagePath " + this.msAlphaPath + "\n" +
-                "Rotation "    + this.mRotation.x    + "," + this.mRotation.y    + "," + this.mRotation.z + "\n" +
-                "Scale "       + this.mScale.x       + "," + this.mScale.y       + "," + this.mScale.z + "\n" +
-                "Translation " + this.mTranslation.x + "," + this.mTranslation.y + "," + this.mTranslation.z + "\n" +
-                "ReferencePoint " + this.pointOfReference.x + "," + this.pointOfReference.y + 
-                "," + this.pointOfReference.z + "\n\n";
+                "Rotation "    + this.mRotation.fX    + "," + this.mRotation.fY    + "," + this.mRotation.fZ + "\n" +
+                "Scale "       + this.mScale.fX       + "," + this.mScale.fY       + "," + this.mScale.fZ + "\n" +
+                "Translation " + this.mTranslation.fX + "," + this.mTranslation.fY + "," + this.mTranslation.fZ + "\n" +
+                "ReferencePoint " + this.pointOfReference.fX + "," + this.pointOfReference.fY + 
+                "," + this.pointOfReference.fZ + "\n\n";
         } else {
             thisObjectAsString = "Model " + sModelNameArray + 
                 " " + sBlendArray + " " + sWarpArray +
@@ -349,9 +349,9 @@ public class SceneElement {
                 "FileName " + this.msFileName + "\n" +
                 "MotionPath " + this.msModelMotionPath + "\n" +
                 "AlphaImagePath " + this.msAlphaPath + "\n" +
-                "Rotation "    + this.mRotation.x    + "," + this.mRotation.y    + "," + this.mRotation.z + "\n" +
-                "Scale "       + this.mScale.x       + "," + this.mScale.y       + "," + this.mScale.z + "\n" +
-                "Translation " + this.mTranslation.x + "," + this.mTranslation.y + "," + this.mTranslation.z + "\n\n";
+                "Rotation "    + this.mRotation.fX    + "," + this.mRotation.fY    + "," + this.mRotation.fZ + "\n" +
+                "Scale "       + this.mScale.fX       + "," + this.mScale.fY       + "," + this.mScale.fZ + "\n" +
+                "Translation " + this.mTranslation.fX + "," + this.mTranslation.fY + "," + this.mTranslation.fZ + "\n\n";
         }
         
         try {

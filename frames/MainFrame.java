@@ -1508,9 +1508,9 @@ POPUP "Tools"
         Globals.aGraphicPipe.setLighting(true);
 
         Point3d aLight = new Point3d();
-        aLight.x =    0.0f;
-        aLight.y =    0.0f;
-        aLight.z = -100.0f;
+        aLight.fX =    0.0f;
+        aLight.fY =    0.0f;
+        aLight.fZ = -100.0f;
         Globals.aGraphicPipe.setLightSource(aLight);
         
         int x, y, translationX, translationY;
@@ -1526,21 +1526,21 @@ POPUP "Tools"
         Point3d p3 = new Point3d(); 
         Point3d p4 = new Point3d();
         float fHalfFace = 10.0f;
-        p1.x = -fHalfFace;
-        p1.y = -fHalfFace;
-        p1.z = 0.0f;
+        p1.fX = -fHalfFace;
+        p1.fY = -fHalfFace;
+        p1.fZ = 0.0f;
         
-        p2.x =  fHalfFace;
-        p2.y = -fHalfFace;
-        p2.z = 0.0f;
+        p2.fX =  fHalfFace;
+        p2.fY = -fHalfFace;
+        p2.fZ = 0.0f;
         
-        p3.x = fHalfFace;
-        p3.y = fHalfFace;
-        p3.z = 0.0f;
+        p3.fX = fHalfFace;
+        p3.fY = fHalfFace;
+        p3.fZ = 0.0f;
         
-        p4.x = -fHalfFace;
-        p4.y =  fHalfFace;
-        p4.z = 0.0f;
+        p4.fX = -fHalfFace;
+        p4.fY =  fHalfFace;
+        p4.fZ = 0.0f;
 
         for(y = 0; y < 360; y += (360/numImages)) {
             for(x = 0; x < 360; x += (360/numImages)) {

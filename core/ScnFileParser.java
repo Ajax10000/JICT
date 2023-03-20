@@ -255,9 +255,9 @@ public class ScnFileParser {
                         iNotFound = THREE_NUMBERS_NOT_FOUND;
                     } else {
                         numtok = new StringTokenizer(sRt, ",");
-                        rtPt.x = Float.parseFloat(numtok.nextToken());
-                        rtPt.y = Float.parseFloat(numtok.nextToken());
-                        rtPt.z = Float.parseFloat(numtok.nextToken());
+                        rtPt.fX = Float.parseFloat(numtok.nextToken());
+                        rtPt.fY = Float.parseFloat(numtok.nextToken());
+                        rtPt.fZ = Float.parseFloat(numtok.nextToken());
                         iNotFound = FALSE;
                     }
                 }
@@ -280,9 +280,9 @@ public class ScnFileParser {
                         iNotFound = THREE_NUMBERS_NOT_FOUND;
                     } else {
                         numtok = new StringTokenizer(sTr, ",");
-                        trPt.x = Float.parseFloat(numtok.nextToken());
-                        trPt.y = Float.parseFloat(numtok.nextToken());
-                        trPt.z = Float.parseFloat(numtok.nextToken());
+                        trPt.fX = Float.parseFloat(numtok.nextToken());
+                        trPt.fY = Float.parseFloat(numtok.nextToken());
+                        trPt.fZ = Float.parseFloat(numtok.nextToken());
                         iNotFound = FALSE;
                     }
                 }
@@ -567,9 +567,9 @@ public class ScnFileParser {
                         iNotFound = THREE_NUMBERS_NOT_FOUND;
                     } else {
                         numtok = new StringTokenizer(sRef, ",");
-                        pointOfReference.x = Float.parseFloat(numtok.nextToken());
-                        pointOfReference.y = Float.parseFloat(numtok.nextToken());
-                        pointOfReference.z = Float.parseFloat(numtok.nextToken());
+                        pointOfReference.fX = Float.parseFloat(numtok.nextToken());
+                        pointOfReference.fY = Float.parseFloat(numtok.nextToken());
+                        pointOfReference.fZ = Float.parseFloat(numtok.nextToken());
                         bDefinedRefPoint = true;
                         iNotFound = FALSE;
                     }
@@ -592,9 +592,9 @@ public class ScnFileParser {
                         iNotFound = THREE_NUMBERS_NOT_FOUND;
                     } else {
                         numtok = new StringTokenizer(sRt, ",");
-                        rtPt.x = Float.parseFloat(numtok.nextToken());
-                        rtPt.y = Float.parseFloat(numtok.nextToken());
-                        rtPt.z = Float.parseFloat(numtok.nextToken());
+                        rtPt.fX = Float.parseFloat(numtok.nextToken());
+                        rtPt.fY = Float.parseFloat(numtok.nextToken());
+                        rtPt.fZ = Float.parseFloat(numtok.nextToken());
                         iNotFound = FALSE;
                     }
                 }
@@ -615,9 +615,9 @@ public class ScnFileParser {
                         iNotFound = THREE_NUMBERS_NOT_FOUND;
                     } else {
                         numtok = new StringTokenizer(sSc, ",");
-                        scPt.x = Float.parseFloat(numtok.nextToken());
-                        scPt.y = Float.parseFloat(numtok.nextToken());
-                        scPt.z = Float.parseFloat(numtok.nextToken());
+                        scPt.fX = Float.parseFloat(numtok.nextToken());
+                        scPt.fY = Float.parseFloat(numtok.nextToken());
+                        scPt.fZ = Float.parseFloat(numtok.nextToken());
                         iNotFound = FALSE;
                     }
                 }
@@ -639,9 +639,9 @@ public class ScnFileParser {
                         iNotFound = THREE_NUMBERS_NOT_FOUND;
                     } else {
                         numtok = new StringTokenizer(sTr, ",");
-                        trPt.x = Float.parseFloat(numtok.nextToken());
-                        trPt.y = Float.parseFloat(numtok.nextToken());
-                        trPt.z = Float.parseFloat(numtok.nextToken());
+                        trPt.fX = Float.parseFloat(numtok.nextToken());
+                        trPt.fY = Float.parseFloat(numtok.nextToken());
+                        trPt.fZ = Float.parseFloat(numtok.nextToken());
                         iNotFound = FALSE;
                     }
                 }

@@ -215,7 +215,7 @@ protected:
                 bValidCurrentShape = false;
             } else {
                 if(pbUserPOR) {  // If the user has defined a Point of Reference
-                  mCurrentShape.setReferencePoint(POR.x, POR.y, POR.z);
+                  mCurrentShape.setReferencePoint(POR.fX, POR.fY, POR.fZ);
                 } else {
                     // Make certain the shape is centered in the X-Y plane.
                     mCurrentShape.getWCentroid(fCentroidX, fCentroidY, fCentroidZ);
@@ -254,7 +254,7 @@ protected:
                 bValidCurrentShape = false;
             } else {
                 if(pbUserPOR) {  // If the user has defined a Point of Reference
-                    mCurrentShape.setReferencePoint(POR.x, POR.y, POR.z);
+                    mCurrentShape.setReferencePoint(POR.fX, POR.fY, POR.fZ);
                 } else {
                     mCurrentShape.getWCentroid(fCentroidX, fCentroidY, fCentroidZ);
 
@@ -1285,9 +1285,9 @@ protected:
         Point3d p2 = new Point3d();
         Point3d centroid = new Point3d(); 
         Point3d lightSource = new Point3d();  // A lightsource location
-        lightSource.x = 100.0f;
-        lightSource.y = 255.0f;
-        lightSource.z =  20.0f;
+        lightSource.fX = 100.0f;
+        lightSource.fY = 255.0f;
+        lightSource.fZ =  20.0f;
         Vect.vectorNormalize(lightSource);
 
         Point3d np1 = new Point3d();
@@ -1367,63 +1367,64 @@ protected:
                     ///////////////////////////////////////////////
                     boolean shading = false;
                     if(shading) {
-                        c2.x = mXImage.getMPixel32(col, row);
-                        c2.y = mYImage.getMPixel32(col, row);
-                        c2.z = mZImage.getMPixel32(col, row);
+                        c2.fX = mXImage.getMPixel32(col, row);
+                        c2.fY = mYImage.getMPixel32(col, row);
+                        c2.fZ = mZImage.getMPixel32(col, row);
           
-                        c1.x = mXImage.getMPixel32(col-1, row);
-                        c1.y = mYImage.getMPixel32(col-1, row);
-                        c1.z = mZImage.getMPixel32(col-1, row);
+                        c1.fX = mXImage.getMPixel32(col-1, row);
+                        c1.fY = mYImage.getMPixel32(col-1, row);
+                        c1.fZ = mZImage.getMPixel32(col-1, row);
                   
-                        p1.x = mXImage.getMPixel32(col-1, row-1);
-                        p1.y = mYImage.getMPixel32(col-1, row-1);
-                        p1.z = mZImage.getMPixel32(col-1, row-1);
+                        p1.fX = mXImage.getMPixel32(col-1, row-1);
+                        p1.fY = mYImage.getMPixel32(col-1, row-1);
+                        p1.fZ = mZImage.getMPixel32(col-1, row-1);
           
-                        p2.x = mXImage.getMPixel32(col, row-1);
-                        p2.y = mYImage.getMPixel32(col, row-1);
-                        p2.z = mZImage.getMPixel32(col, row-1);
+                        p2.fX = mXImage.getMPixel32(col, row-1);
+                        p2.fY = mYImage.getMPixel32(col, row-1);
+                        p2.fZ = mZImage.getMPixel32(col, row-1);
 
-                        float xMax = c1.x;
-                        float yMax = c1.y;
-                        float zMax = c1.z;
-                        float xMin = c1.x;
-                        float yMin = c1.y;
-                        float zMin = c1.z;
+                        float xMax = c1.fX;
+                        float yMax = c1.fY;
+                        float zMax = c1.fZ;
+                        
+                        float xMin = c1.fX;
+                        float yMin = c1.fY;
+                        float zMin = c1.fZ;
 
                         // Get the 3D bounding box
-                        if(c2.x > xMax) xMax = c2.x;
-                        if(p1.x > xMax) xMax = p1.x;
-                        if(p2.x > xMax) xMax = p2.x;
+                        if(c2.fX > xMax) xMax = c2.fX;
+                        if(p1.fX > xMax) xMax = p1.fX;
+                        if(p2.fX > xMax) xMax = p2.fX;
 
-                        if(c2.x < xMin) xMin = c2.x;
-                        if(p1.x < xMin) xMin = p1.x;
-                        if(p2.x < xMin) xMin = p2.x;
+                        if(c2.fX < xMin) xMin = c2.fX;
+                        if(p1.fX < xMin) xMin = p1.fX;
+                        if(p2.fX < xMin) xMin = p2.fX;
 
-                        if(c2.y > yMax) yMax = c2.y;
-                        if(p1.y > yMax) yMax = p1.y;
-                        if(p2.y > yMax) yMax = p2.y;
+                        if(c2.fY > yMax) yMax = c2.fY;
+                        if(p1.fY > yMax) yMax = p1.fY;
+                        if(p2.fY > yMax) yMax = p2.fY;
 
-                        if(c2.y < yMin) yMin = c2.y;
-                        if(p1.y < yMin) yMin = p1.y;
-                        if(p2.y < yMin) yMin = p2.y;
+                        if(c2.fY < yMin) yMin = c2.fY;
+                        if(p1.fY < yMin) yMin = p1.fY;
+                        if(p2.fY < yMin) yMin = p2.fY;
 
-                        if(c2.z > zMax) zMax = c2.z;
-                        if(p1.z > zMax) zMax = p1.z;
-                        if(p2.z > zMax) zMax = p2.z;
+                        if(c2.fZ > zMax) zMax = c2.fZ;
+                        if(p1.fZ > zMax) zMax = p1.fZ;
+                        if(p2.fZ > zMax) zMax = p2.fZ;
 
-                        if(c2.z < zMin) zMin = c2.z;
-                        if(p1.z < zMin) zMin = p1.z;
-                        if(p2.z < zMin) zMin = p2.z;
+                        if(c2.fZ < zMin) zMin = c2.fZ;
+                        if(p1.fZ < zMin) zMin = p1.fZ;
+                        if(p2.fZ < zMin) zMin = p2.fZ;
 
                         // Use the 3D bounding box to calculate the point centroid
-                        centroid.x = (xMax + xMin) / 2.0f;
-                        centroid.y = (yMax + yMin) / 2.0f;
-                        centroid.z = (zMax + zMin) / 2.0f;
+                        centroid.fX = (xMax + xMin) / 2.0f;
+                        centroid.fY = (yMax + yMin) / 2.0f;
+                        centroid.fZ = (zMax + zMin) / 2.0f;
 
                         // Get the 3-dimensional distance between points lightSource and centroid
                         float dCentroid = MathUtils.getDistance3d(
-                            lightSource.x, lightSource.y, lightSource.z, 
-                            centroid.x,    centroid.y,    centroid.z);
+                            lightSource.fX, lightSource.fY, lightSource.fZ, 
+                            centroid.fX,    centroid.fY,    centroid.fZ);
 
                         // Calculate the normals np1, np2, nc1 and nc2
                         Vect.getNormal2(np1, p1, centroid, p2);
@@ -1572,25 +1573,25 @@ protected:
 
         // Define the Center of Projection (COP)
         Point3d COP = new Point3d();
-        COP.x =    0.0f;
-        COP.y =    0.0f;
-        COP.z = -512.0f;
+        COP.fX =    0.0f;
+        COP.fY =    0.0f;
+        COP.fZ = -512.0f;
 
         // viewplane (0,0,zp)
         Point3d p = new Point3d();
-        p.x = 0.0f;
-        p.y = 0.0f;
-        p.z = 0.0f;
+        p.fX = 0.0f;
+        p.fY = 0.0f;
+        p.fZ = 0.0f;
 
         Point3d d = new Point3d();
         // Calculate d = COP - p
         Vect.vectorSubtract(d, COP, p);
 
         // Calculate Q = 3-dimensional distance between points COP and p
-        float Q = MathUtils.getDistance3d(COP.x, COP.y, COP.z, p.x, p.y, p.z);
-        float fDenom = ((p.z - tz) / (Q * d.z)) + 1.0f;
-        float fXp = (tx - (tz * d.x / d.z) + (p.z * d.x / d.z)) / fDenom;
-        float fYp = (ty - (tz * d.y / d.z) + (p.z * d.y / d.z)) / fDenom;
+        float Q = MathUtils.getDistance3d(COP.fX, COP.fY, COP.fZ, p.fX, p.fY, p.fZ);
+        float fDenom = ((p.fZ - tz) / (Q * d.fZ)) + 1.0f;
+        float fXp = (tx - (tz * d.fX / d.fZ) + (p.fZ * d.fX / d.fZ)) / fDenom;
+        float fYp = (ty - (tz * d.fY / d.fZ) + (p.fZ * d.fY / d.fZ)) / fDenom;
 
         // Set output parameters sx and sy
         pScreenVtx.iSx = (int)(fXp + 0.5f);
@@ -1771,10 +1772,10 @@ protected:
                 I2d = MathUtils.getDistance3d(vx, vy, vz, tx2, ty2, tz2);
                 I3d = MathUtils.getDistance3d(vx, vy, vz, tx3, ty3, tz3);
                 I4d = MathUtils.getDistance3d(vx, vy, vz, tx4, ty4, tz4);
-                p1.x = tx1; p1.y = ty1; p1.z = tz1;
-                p2.x = tx2; p2.y = ty2; p2.z = tz2;
-                p3.x = tx3; p3.y = ty3; p3.z = tz3;
-                p4.x = tx4; p4.y = ty4; p4.z = tz4;
+                p1.fX = tx1; p1.fY = ty1; p1.fZ = tz1;
+                p2.fX = tx2; p2.fY = ty2; p2.fZ = tz2;
+                p3.fX = tx3; p3.fY = ty3; p3.fZ = tz3;
+                p4.fX = tx4; p4.fY = ty4; p4.fZ = tz4;
                 I1p = Globals.getLight(p1, p2, p3, p4);
 
                 pOutputMImage.fillPolyz(

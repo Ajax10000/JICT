@@ -5,9 +5,9 @@ import structs.Point3d;
 public class Vect {
     // This method originally came from VECTOR.CPP
     public static void vectorAdd(Point3d result, Point3d p1, Point3d p2) {
-        result.x = p1.x + p2.x;
-        result.y = p1.y + p2.y;
-        result.z = p1.z + p2.z;
+        result.fX = p1.fX + p2.fX;
+        result.fY = p1.fY + p2.fY;
+        result.fZ = p1.fZ + p2.fZ;
         return;
     } // vectorAdd
     
@@ -17,9 +17,9 @@ public class Vect {
     // Called from:
     //     RenderObject.transformAndProjectPoint2
     public static void vectorSubtract(Point3d result, Point3d p1, Point3d p2) {
-        result.x = p1.x - p2.x;
-        result.y = p1.y - p2.y;
-        result.z = p1.z - p2.z;
+        result.fX = p1.fX - p2.fX;
+        result.fY = p1.fY - p2.fY;
+        result.fZ = p1.fZ - p2.fZ;
 
         return;
     } // vectorSubtract
@@ -28,7 +28,7 @@ public class Vect {
     // This method originally came from VECTOR.CPP
     public static float vectorMagnitude2(Point3d p1, Point3d p2) {
         float fResult;
-        fResult = (float)Math.sqrt((p1.x * p2.x) + (p1.y * p2.y) + (p1.z * p2.z));
+        fResult = (float)Math.sqrt((p1.fX * p2.fX) + (p1.fY * p2.fY) + (p1.fZ * p2.fZ));
 
         return fResult;
     } // vectorMagnitude2
@@ -37,7 +37,7 @@ public class Vect {
     // This method originally came from VECTOR.CPP
     public static float vectorMagnitude1(Point3d p1) {
         float fResult;
-        fResult = (float)Math.sqrt((p1.x * p1.x) + (p1.y * p1.y) + (p1.z * p1.z));
+        fResult = (float)Math.sqrt((p1.fX * p1.fX) + (p1.fY * p1.fY) + (p1.fZ * p1.fZ));
 
         return fResult;
     } // vectorMagnitude1
@@ -50,9 +50,9 @@ public class Vect {
     public static void vectorNormalize(Point3d p1) {
         float fMag = vectorMagnitude1(p1);
         if(fMag > 1.0f) {
-            p1.x /= fMag;
-            p1.y /= fMag;
-            p1.z /= fMag;
+            p1.fX /= fMag;
+            p1.fY /= fMag;
+            p1.fZ /= fMag;
         }
 
         return;
@@ -62,17 +62,17 @@ public class Vect {
     // This method originally came from VECTOR.CPP
     public static void crossProduct(Point3d result, Point3d p1, Point3d p2, Point3d p3) {
         //  Watt's definition. p 15. P2 is the origin common to p1 and p3.
-        float fV1 = p3.x - p2.x;
-        float fV2 = p3.y - p2.y;
-        float fV3 = p3.z - p2.z;
+        float fV1 = p3.fX - p2.fX;
+        float fV2 = p3.fY - p2.fY;
+        float fV3 = p3.fZ - p2.fZ;
         
-        float fW1 = p1.x - p2.x;
-        float fW2 = p1.y - p2.y;
-        float fW3 = p1.z - p2.z;
+        float fW1 = p1.fX - p2.fX;
+        float fW2 = p1.fY - p2.fY;
+        float fW3 = p1.fZ - p2.fZ;
         
-        result.x = (fV2 * fW3) - (fV3 * fW2);
-        result.y = (fV3 * fW1) - (fV1 * fW3);
-        result.z = (fV1 * fW2) - (fV2 * fW1);
+        result.fX = (fV2 * fW3) - (fV3 * fW2);
+        result.fY = (fV3 * fW1) - (fV1 * fW3);
+        result.fZ = (fV1 * fW2) - (fV2 * fW1);
     
         return;
     } // crossProduct
@@ -81,7 +81,7 @@ public class Vect {
     // This method originally came from VECTOR.CPP
     public static float dotProduct(Point3d p1, Point3d p2) {
         float fResult;
-        fResult = (p1.x * p2.x) + (p1.y * p2.y) + (p1.z * p2.z);
+        fResult = (p1.fX * p2.fX) + (p1.fY * p2.fY) + (p1.fZ * p2.fZ);
 
         return fResult;
     } // dotProduct
@@ -114,17 +114,17 @@ public class Vect {
     public static void getNormal2(Point3d result, 
     Point3d p0, Point3d p1, Point3d p2) {
         //  Compute the surface normal of the three input points
-        float xv = p1.x - p0.x;
-        float yv = p1.y - p0.y;
-        float zv = p1.z - p0.z;
+        float xv = p1.fX - p0.fX;
+        float yv = p1.fY - p0.fY;
+        float zv = p1.fZ - p0.fZ;
         
-        float xw = p2.x - p1.x;
-        float yw = p2.y - p1.y;
-        float zw = p2.z - p1.z;
+        float xw = p2.fX - p1.fX;
+        float yw = p2.fY - p1.fY;
+        float zw = p2.fZ - p1.fZ;
         
-        result.x = (yv * zw) - (zv * yw);
-        result.y = (zv * xw) - (xv * zw);
-        result.z = (xv * yw) - (yv * xw);
+        result.fX = (yv * zw) - (zv * yw);
+        result.fY = (zv * xw) - (xv * zw);
+        result.fZ = (xv * yw) - (yv * xw);
         return;
     } // getNormal2
 } // class Vect

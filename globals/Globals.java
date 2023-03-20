@@ -3862,51 +3862,54 @@ public class Globals {
         //
         //  Assume a face is planar.  Thus only one surface normal
         ////////////////////////////////////////////////////////////
-        float xMax = c1.x;
-        float yMax = c1.y;
-        float zMax = c1.z;
-        float xMin = c1.x;
-        float yMin = c1.y;
-        float zMin = c1.z;
+        float xMax = c1.fX;
+        float yMax = c1.fY;
+        float zMax = c1.fZ;
+
+        float xMin = c1.fX;
+        float yMin = c1.fY;
+        float zMin = c1.fZ;
 
         // Get the 3D bounding box
-        if(p1.x > xMax) xMax = p1.x;
-        if(p2.x > xMax) xMax = p2.x;
+        if(p1.fX > xMax) xMax = p1.fX;
+        if(p2.fX > xMax) xMax = p2.fX;
         
-        if(p1.x < xMin) xMin = p1.x;
-        if(p2.x < xMin) xMin = p2.x;
+        if(p1.fX < xMin) xMin = p1.fX;
+        if(p2.fX < xMin) xMin = p2.fX;
         
-        if(p1.y > yMax) yMax = p1.y;
-        if(p2.y > yMax) yMax = p2.y;
+        if(p1.fY > yMax) yMax = p1.fY;
+        if(p2.fY > yMax) yMax = p2.fY;
         
-        if(p1.y < yMin) yMin = p1.y;
-        if(p2.y < yMin) yMin = p2.y;
+        if(p1.fY < yMin) yMin = p1.fY;
+        if(p2.fY < yMin) yMin = p2.fY;
         
-        if(p1.z > zMax) zMax = p1.z;
-        if(p2.z > zMax) zMax = p2.z;
+        if(p1.fZ > zMax) zMax = p1.fZ;
+        if(p2.fZ > zMax) zMax = p2.fZ;
         
-        if(p1.z < zMin) zMin = p1.z;
-        if(p2.z < zMin) zMin = p2.z;
+        if(p1.fZ < zMin) zMin = p1.fZ;
+        if(p2.fZ < zMin) zMin = p2.fZ;
         
         if(c2 != null) {
-            if(c2.z < zMin) zMin = c2.z;
-            if(c2.z > zMax) zMax = c2.z;
-            if(c2.x > xMax) xMax = c2.x;
-            if(c2.x < xMin) xMin = c2.x;
-            if(c2.y > yMax) yMax = c2.y;
-            if(c2.y < yMin) yMin = c2.y;
+            if(c2.fZ < zMin) zMin = c2.fZ;
+            if(c2.fZ > zMax) zMax = c2.fZ;
+
+            if(c2.fX > xMax) xMax = c2.fX;
+            if(c2.fX < xMin) xMin = c2.fX;
+
+            if(c2.fY > yMax) yMax = c2.fY;
+            if(c2.fY < yMin) yMin = c2.fY;
         }
 
-        centroid.x = (xMax + xMin) / 2.0f;
-        centroid.y = (yMax + yMin) / 2.0f;
-        centroid.z = (zMax + zMin) / 2.0f;
+        centroid.fX = (xMax + xMin) / 2.0f;
+        centroid.fY = (yMax + yMin) / 2.0f;
+        centroid.fZ = (zMax + zMin) / 2.0f;
         
-        lightSource.x =   0.0f;
-        lightSource.y =   0.0f;
-        lightSource.z = 512.0f;
+        lightSource.fX =   0.0f;
+        lightSource.fY =   0.0f;
+        lightSource.fZ = 512.0f;
         
-        float dCentroid = MathUtils.getDistance3d(lightSource.x, lightSource.y, lightSource.z, 
-            centroid.x, centroid.y, centroid.z);
+        float dCentroid = MathUtils.getDistance3d(lightSource.fX, lightSource.fY, lightSource.fZ, 
+            centroid.fX, centroid.fY, centroid.fZ);
         
         Vect.getNormal2(np1, p1, centroid, p2);
         

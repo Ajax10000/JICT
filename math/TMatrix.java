@@ -282,9 +282,9 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
     // Called from:
     //     transformAndProjectPoint1
     public void transformPoint1(Point3d in, Point3d out) {
-        out.x = (in.x * mMatrix[0][0]) + (in.y * mMatrix[1][0]) + (in.z * mMatrix[2][0]) + mMatrix[3][0];
-        out.y = (in.x * mMatrix[0][1]) + (in.y * mMatrix[1][1]) + (in.z * mMatrix[2][1]) + mMatrix[3][1];
-        out.z = (in.x * mMatrix[0][2]) + (in.y * mMatrix[1][2]) + (in.z * mMatrix[2][2]) + mMatrix[3][2];
+        out.fX = (in.fX * mMatrix[0][0]) + (in.fY * mMatrix[1][0]) + (in.fZ * mMatrix[2][0]) + mMatrix[3][0];
+        out.fY = (in.fX * mMatrix[0][1]) + (in.fY * mMatrix[1][1]) + (in.fZ * mMatrix[2][1]) + mMatrix[3][1];
+        out.fZ = (in.fX * mMatrix[0][2]) + (in.fY * mMatrix[1][2]) + (in.fZ * mMatrix[2][2]) + mMatrix[3][2];
     } // transformPoint1
     
 
@@ -450,16 +450,16 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
 
     public void transformAndProjectPoint1(Point3d p, Point2d s, Point3d ref, 
     int piOutHeight, int piOutWidth, Point3d t) {
-        p.x -= ref.x;
-        p.y -= ref.y;
-        p.z -= ref.z;
+        p.fX -= ref.fX;
+        p.fY -= ref.fY;
+        p.fZ -= ref.fZ;
         transformPoint1(p, t);
         
         // Project to the screen
         float fD = -512.0f; // Distance from screen to center of projection: (0,0,-d)
-        float fW = (fD / (t.z + fD));
-        s.x = ((t.x * fW) + ref.x) + (piOutWidth/2); // Center in output image
-        s.y = ((t.y * fW) + ref.y) + (piOutHeight/2);
+        float fW = (fD / (t.fZ + fD));
+        s.x = ((t.fX * fW) + ref.fX) + (piOutWidth/2); // Center in output image
+        s.y = ((t.fY * fW) + ref.fY) + (piOutHeight/2);
     } // transformAndProjectPoint1
     
     

@@ -209,17 +209,17 @@ public:
         scene = scene.mNextEntry; // Point to the scene Node
         currentModelSE = scene.mCurrentSceneElement;
 
-        currentModelSE.mRotation.x = pfRx;
-        currentModelSE.mRotation.y = pfRy;
-        currentModelSE.mRotation.z = pfRz;
+        currentModelSE.mRotation.fX = pfRx;
+        currentModelSE.mRotation.fY = pfRy;
+        currentModelSE.mRotation.fZ = pfRz;
 
-        currentModelSE.mScale.x = pfSx;
-        currentModelSE.mScale.y = pfSy;
-        currentModelSE.mScale.z = pfSz;
+        currentModelSE.mScale.fX = pfSx;
+        currentModelSE.mScale.fY = pfSy;
+        currentModelSE.mScale.fZ = pfSz;
         
-        currentModelSE.mTranslation.x = pfTx;
-        currentModelSE.mTranslation.y = pfTy;
-        currentModelSE.mTranslation.z = pfTz;
+        currentModelSE.mTranslation.fX = pfTx;
+        currentModelSE.mTranslation.fY = pfTy;
+        currentModelSE.mTranslation.fZ = pfTz;
     } // setCurrentModelTransform
 
 
@@ -238,17 +238,17 @@ public:
         currentModelSE = scene.mCurrentSceneElement;
 
         // Set the output parameters
-        pFRx = currentModelSE.mRotation.x;
-        pFRy = currentModelSE.mRotation.y;
-        pFRz = currentModelSE.mRotation.z;
+        pFRx = currentModelSE.mRotation.fX;
+        pFRy = currentModelSE.mRotation.fY;
+        pFRz = currentModelSE.mRotation.fZ;
 
-        pFSx = currentModelSE.mScale.x;
-        pFSy = currentModelSE.mScale.y;
-        pFSz = currentModelSE.mScale.z;
+        pFSx = currentModelSE.mScale.fX;
+        pFSy = currentModelSE.mScale.fY;
+        pFSz = currentModelSE.mScale.fZ;
 
-        pFTx = currentModelSE.mTranslation.x;
-        pFTy = currentModelSE.mTranslation.y;
-        pFTz = currentModelSE.mTranslation.z;
+        pFTx = currentModelSE.mTranslation.fX;
+        pFTy = currentModelSE.mTranslation.fY;
+        pFTz = currentModelSE.mTranslation.fZ;
     } // getCurrentModelTransform
 
 
@@ -364,13 +364,13 @@ public:
 
         // Assume the default viewer location is centered in the output frame
         // Set the output parameters
-        pFViewX = scene.mTranslationPt.x;
-        pFViewY = scene.mTranslationPt.y;
-        pFViewZ = scene.mTranslationPt.z;
+        pFViewX = scene.mTranslationPt.fX;
+        pFViewY = scene.mTranslationPt.fY;
+        pFViewZ = scene.mTranslationPt.fZ;
 
-        pFRotateX = scene.mRotationPt.x;
-        pFRotateY = scene.mRotationPt.y;
-        pFRotateZ = scene.mRotationPt.z;
+        pFRotateX = scene.mRotationPt.fX;
+        pFRotateY = scene.mRotationPt.fY;
+        pFRotateZ = scene.mRotationPt.fZ;
 
         return 0;
     } // getViewTransform
@@ -392,13 +392,13 @@ public:
             return -1;
         }
 
-        scene.mTranslationPt.x = pfViewX;
-        scene.mTranslationPt.y = pfViewY;
-        scene.mTranslationPt.z = pfViewZ;
+        scene.mTranslationPt.fX = pfViewX;
+        scene.mTranslationPt.fY = pfViewY;
+        scene.mTranslationPt.fZ = pfViewZ;
         
-        scene.mRotationPt.x = pfRotateX;
-        scene.mRotationPt.y = pfRotateY;
-        scene.mRotationPt.z = pfRotateZ;
+        scene.mRotationPt.fX = pfRotateX;
+        scene.mRotationPt.fY = pfRotateY;
+        scene.mRotationPt.fZ = pfRotateZ;
 
         return 0;
     } // setViewTransform
@@ -422,15 +422,15 @@ public:
         // and translated 512 units along the positive z axis.
         // Add to this location any viewpoint translation and rotation 
         // the user specified.
-        pFViewX =   0.0f + scene.mTranslationPt.x;
-        pFViewY =   0.0f + scene.mTranslationPt.y;
-        pFViewZ = 512.0f + scene.mTranslationPt.z;
+        pFViewX =   0.0f + scene.mTranslationPt.fX;
+        pFViewY =   0.0f + scene.mTranslationPt.fY;
+        pFViewZ = 512.0f + scene.mTranslationPt.fZ;
 
         // Since the default viewer rotations are (0,0,0), just output
         // whatever the user specified in the scene file.
-        pFRotateX = 0.0f + scene.mRotationPt.x;
-        pFRotateY = 0.0f + scene.mRotationPt.y;
-        pFRotateZ = 0.0f + scene.mRotationPt.z;
+        pFRotateX = 0.0f + scene.mRotationPt.fX;
+        pFRotateY = 0.0f + scene.mRotationPt.fY;
+        pFRotateZ = 0.0f + scene.mRotationPt.fZ;
 
         return 0;
     } // getViewPoint
@@ -707,9 +707,9 @@ public:
                         modelSE.miModelType, modelSE.mbDefinedRefPoint, modelSE.pointOfReference);
                     if(modelSE.miModelType == JICTConstants.I_COMPOUND) {	
                         // Initialize a compound model centroid
-                        modelSE.pointOfReference.x = 0.0f;
-                        modelSE.pointOfReference.y = 0.0f;
-                        modelSE.pointOfReference.z = 0.0f;
+                        modelSE.pointOfReference.fX = 0.0f;
+                        modelSE.pointOfReference.fY = 0.0f;
+                        modelSE.pointOfReference.fZ = 0.0f;
                     }
 
                     bFirstTime = true;  // This variable used to create the output image rectangle
@@ -1055,9 +1055,9 @@ public:
                                     pViewMatrix,
                                     modelSE.mbWarpIndicator, modelSE.mbBlendIndicator, 
                                     xfrm.alpha,
-                                    modelSE.pointOfReference.x,
-                                    modelSE.pointOfReference.y,
-                                    modelSE.pointOfReference.z);
+                                    modelSE.pointOfReference.fX,
+                                    modelSE.pointOfReference.fY,
+                                    modelSE.pointOfReference.fZ);
                                 break;
 
                             case JICTConstants.I_QUADMESH:
@@ -1080,9 +1080,9 @@ public:
                                 viewModelMatrix.multiply(pViewMatrix, forwardMatrix);
                                 viewModelMatrix.transformAndProject(modelSE.mScreenRdrObject.mCurrentShape,
                                     iOutputRows, iOutputColumns, true, 		   
-                                    modelSE.pointOfReference.x,
-                                    modelSE.pointOfReference.y,
-                                    modelSE.pointOfReference.z);
+                                    modelSE.pointOfReference.fX,
+                                    modelSE.pointOfReference.fY,
+                                    modelSE.pointOfReference.fZ);
 
                                 iStatus = modelSE.mScreenRdrObject.renderShapez(outputMImage, alphaMImage,
                                     zBuffMImage, fVx, fVy, fVz);
@@ -1101,9 +1101,9 @@ public:
                                     pViewMatrix,
                                     modelSE.mbWarpIndicator, modelSE.mbBlendIndicator, 
                                     xfrm.alpha,
-                                    modelSE.pointOfReference.x,
-                                    modelSE.pointOfReference.y,
-                                    modelSE.pointOfReference.z);
+                                    modelSE.pointOfReference.fX,
+                                    modelSE.pointOfReference.fY,
+                                    modelSE.pointOfReference.fZ);
                                 break;
     
                             case JICTConstants.I_QUADMESH:
@@ -1264,17 +1264,17 @@ public:
             pXfrm.alpha = pMotnNode.mfAlpha;
         } else {
             // Set output parameter xfrm
-            pXfrm.rx = pModelSE.mRotation.x;
-            pXfrm.ry = pModelSE.mRotation.y;
-            pXfrm.rz = pModelSE.mRotation.z;
+            pXfrm.rx = pModelSE.mRotation.fX;
+            pXfrm.ry = pModelSE.mRotation.fY;
+            pXfrm.rz = pModelSE.mRotation.fZ;
 
-            pXfrm.sx = pModelSE.mScale.x;
-            pXfrm.sy = pModelSE.mScale.y;
-            pXfrm.sz = pModelSE.mScale.z;
+            pXfrm.sx = pModelSE.mScale.fX;
+            pXfrm.sy = pModelSE.mScale.fY;
+            pXfrm.sz = pModelSE.mScale.fZ;
 
-            pXfrm.tx = pModelSE.mTranslation.x;
-            pXfrm.ty = pModelSE.mTranslation.y;
-            pXfrm.tz = pModelSE.mTranslation.z;
+            pXfrm.tx = pModelSE.mTranslation.fX;
+            pXfrm.ty = pModelSE.mTranslation.fY;
+            pXfrm.tz = pModelSE.mTranslation.fZ;
             pXfrm.alpha = pModelSE.mfAlphaScale;
         }
     } // adjustTransforms
@@ -1302,16 +1302,16 @@ public:
             fYRadians = motnNode.mfRy * JICTConstants.F_DTR;
             fZRadians = motnNode.mfRz * JICTConstants.F_DTR;
         } else {
-            fXRadians = pScene.mRotationPt.x * JICTConstants.F_DTR;
-            fYRadians = pScene.mRotationPt.y * JICTConstants.F_DTR;
-            fZRadians = pScene.mRotationPt.z * JICTConstants.F_DTR;
+            fXRadians = pScene.mRotationPt.fX * JICTConstants.F_DTR;
+            fYRadians = pScene.mRotationPt.fY * JICTConstants.F_DTR;
+            fZRadians = pScene.mRotationPt.fZ * JICTConstants.F_DTR;
         }
 
         pViewMatrix.rotate(-fXRadians, -fYRadians, -fZRadians);
         if(pScene.mSensorMotion != null) {
             pViewMatrix.translate(-motnNode.mfTx, -motnNode.mfTy, -motnNode.mfTz);
         } else {
-            pViewMatrix.translate(-pScene.mTranslationPt.x, -pScene.mTranslationPt.y, -pScene.mTranslationPt.z);
+            pViewMatrix.translate(-pScene.mTranslationPt.fX, -pScene.mTranslationPt.fY, -pScene.mTranslationPt.fZ);
         }
     } // getViewMatrix
 
@@ -1341,14 +1341,14 @@ public:
         // Process each SceneElement of the containing Scene
         while (pModelSE != null) {
             // Build the model's transformation matrix
-            modelMatrix.scale(pModelSE.mScale.x, pModelSE.mScale.y, pModelSE.mScale.z);
+            modelMatrix.scale(pModelSE.mScale.fX, pModelSE.mScale.fY, pModelSE.mScale.fZ);
             // Convert the rotation angles from degrees to radians.
             // Note that F_DTR is a degrees-to-radians conversion factor.
-            float fXRadians = pModelSE.mRotation.x * JICTConstants.F_DTR;
-            float fYRadians = pModelSE.mRotation.y * JICTConstants.F_DTR;
-            float fZRadians = pModelSE.mRotation.z * JICTConstants.F_DTR;
+            float fXRadians = pModelSE.mRotation.fX * JICTConstants.F_DTR;
+            float fYRadians = pModelSE.mRotation.fY * JICTConstants.F_DTR;
+            float fZRadians = pModelSE.mRotation.fZ * JICTConstants.F_DTR;
             modelMatrix.rotate(fXRadians, fYRadians, fZRadians);
-            modelMatrix.translate(pModelSE.mTranslation.x, pModelSE.mTranslation.y, pModelSE.mTranslation.z);
+            modelMatrix.translate(pModelSE.mTranslation.fX, pModelSE.mTranslation.fY, pModelSE.mTranslation.fZ);
 
             // If the model's RenderObject has not been created, create it.
             if(pModelSE.mScreenRdrObject == null) {
@@ -1566,9 +1566,9 @@ public:
 
         while (modelSE != null) {
             if(psModelName.equalsIgnoreCase(modelSE.msModelName)) {
-                modelSE.pointOfReference.x = pfCentroidX;
-                modelSE.pointOfReference.y = pfCentroidY;
-                modelSE.pointOfReference.z = pfCentroidZ;
+                modelSE.pointOfReference.fX = pfCentroidX;
+                modelSE.pointOfReference.fY = pfCentroidY;
+                modelSE.pointOfReference.fZ = pfCentroidZ;
                 bFound = true;
             }
             modelSE = modelSE.mNextEntry;  // Get the pointer to next model
@@ -1615,9 +1615,9 @@ public:
             }
 
             if(modelSE.mbCompoundModelMember) {
-                fBucketX += modelSE.pointOfReference.x;
-                fBucketY += modelSE.pointOfReference.y;
-                fBucketZ += modelSE.pointOfReference.z;
+                fBucketX += modelSE.pointOfReference.fX;
+                fBucketY += modelSE.pointOfReference.fY;
+                fBucketZ += modelSE.pointOfReference.fZ;
                 modelCounter++;
             }
 
@@ -1680,9 +1680,9 @@ public:
                 // (all of type Float)
                 modelSE.mScreenRdrObject.mCurrentShape.getReferencePoint(fCentroidX, fCentroidY, fCentroidZ);
 
-                modelSE.pointOfReference.x = fCentroidX; 
-                modelSE.pointOfReference.y = fCentroidY;
-                modelSE.pointOfReference.z = fCentroidZ;
+                modelSE.pointOfReference.fX = fCentroidX; 
+                modelSE.pointOfReference.fY = fCentroidY;
+                modelSE.pointOfReference.fZ = fCentroidZ;
             }
 
             modelSE = modelSE.mNextEntry;  // Get the pointer to next model
