@@ -1,7 +1,10 @@
 package core;
 
 import apps.IctApp;
+
 import dialogs.ImageView;
+
+import dtos.OneInt;
 
 import fileUtils.FileUtils;
 
@@ -441,7 +444,8 @@ public:
     //
     // Called from:
     //     ScenePreviewDlg.onOK
-    public int writeList(String psErrorText, String psFileName) {
+    public int writeList(StringBuffer psbErrorText, String psFileName) {
+        String sMsgText;
         Scene scene = this.mSceneListHead;
         scene = scene.mNextEntry;  // Skip over the list header
 
@@ -450,7 +454,9 @@ public:
         try {
             fos = new FileOutputStream(sceneFile);
         } catch (FileNotFoundException fnfe) {
-            Globals.statusPrint("writeList: File was not found: " + psFileName);
+            sMsgText = "writeList: File was not found: " + psFileName;
+            psbErrorText.append(sMsgText);
+            Globals.statusPrint(sMsgText);
             return -1;
         }
         BufferedWriter fileOut = new BufferedWriter(new OutputStreamWriter(fos));
@@ -900,7 +906,7 @@ public:
         SceneElement modelSE = scene.mHead;
         SceneElement[] models = new SceneElement[JICTConstants.I_MAXMODELS];
         float[] fDistances = new float[JICTConstants.I_MAXMODELS];
-        Integer iNumModels = 0; 
+        OneInt numModelsOI = new OneInt(); 
         int iStatus = 0;
         iFirstFrame = iLastFrame = 0;
 
@@ -929,7 +935,7 @@ public:
 
         for(iFrameCounter = iFirstFrame; iFrameCounter <= iLastFrame; iFrameCounter++) {
             // Depth Sort the models
-            depthSort(models, fDistances, iNumModels, pbDepthSortingEnabled);
+            depthSort(models, fDistances, numModelsOI, pbDepthSortingEnabled);
             if(iEffectType == JICTConstants.I_SEQUENCE) {
                 getViewMatrix(pViewMatrix, iFrameCounter, scene);
             }
@@ -950,7 +956,7 @@ public:
                 }
 
                 // Loop through each model in the scene list
-                for(int iCurrentModel = 0; iCurrentModel <= iNumModels - 1; iCurrentModel++) {
+                for(int iCurrentModel = 0; iCurrentModel <= numModelsOI.i - 1; iCurrentModel++) {
                     modelSE = models[iCurrentModel];
                     if (modelSE.miStatusIndicator == 0) {
                         // Use the projected cornerpoints in the renderObject to
@@ -1706,7 +1712,7 @@ public:
     // which in turn is called from either
     // MainFrame.onRenderScene or MainFrame.onRenderSequence
     public int depthSort(SceneElement[] paModels, float[] pafDistances,
-    Integer pINumModels, boolean pbDepthSortingEnabled) {
+    OneInt pINumModels, boolean pbDepthSortingEnabled) {
         Float fViewX = 0f, fViewY = 0f, fViewZ = 0f;
         Float fRotateX = 0f, fRotateY = 0f, fRotateZ = 0f;
         float fCentroidX, fCentroidY, fCentroidZ;
@@ -1760,9 +1766,9 @@ public:
             modelSE = modelSE.mNextEntry;
         } // while (modelSE != null)
 
-        pINumModels = iModelCounter;
+        pINumModels.i = iModelCounter;
         if(pbDepthSortingEnabled) {
-            Globals.insertionSort2(pafDistances, paModels, pINumModels);
+            Globals.insertionSort2(pafDistances, paModels, pINumModels.i);
         }
         
         return 0;
