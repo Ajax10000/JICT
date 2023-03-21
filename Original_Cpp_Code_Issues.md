@@ -21,6 +21,55 @@ sceneElement - see SCENELST.H\
 sceneList - see SCENELST.H and SCENELST.CPP\
 tMatrix - see TMATRIX.H and TMATRIX.CPP
 
+## Unused parameters in methods of renderObject
+
+In method previewMesh, parameters xOff and yOff are only used to modify local variables xOffset and yOffset, but these local variables are thereafter not used. Hence parameters xOff and yOff can be deleted assuming that local variables xOffset and yOffset are also deleted. Below is the method signature of previewMesh.
+
+```cpp
+    void renderObject::previewMesh(HDC theDC, char *modelName,
+    float xOff, float yOff,
+    int screenHeight, int screenWidth)
+```
+
+In method renderMesh, parameter blendIndicator is not used.
+
+```cpp
+    int renderObject::renderMesh(memImage *outputImage, memImage *inputImage,
+    int blendIndicator)
+```
+
+In method renderMeshz, parameter maskImage is not used.
+
+```cpp
+    int renderObject::renderMeshz(memImage *outputImage, memImage *maskImage,
+    memImage *inputImage, memImage *zBuffer,
+    float vx, float vy, float vz)
+```
+
+In method transformAndProjectPoint2, parameters outHeight and outWidth are not used.
+
+```cpp
+    void transformAndProjectPoint2(tMatrix *aMatrix,
+    float x, float y, float z,
+    int *sx, int *sy,
+    float refX, float refY, float refZ,
+    int outHeight, int outWidth)
+```
+
+In method renderShape, parameter blendIndicator is not used.
+
+```cpp
+    int renderObject::renderShape(memImage *outputImage, int blendIndicator)
+```
+
+In method renderShapez, parameter alphaImage is not used.
+
+```cpp
+    int renderObject::renderShapez(memImage *outputImage,
+    memImage *alphaImage, memImage *zBuffer,
+    float vx, float vy, float vz)
+```
+
 # Minor Issues
 
 This is what I've found so far.
