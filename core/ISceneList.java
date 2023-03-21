@@ -2,6 +2,8 @@ package core;
 
 import dialogs.ImageView;
 
+import dtos.OneInt;
+
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 
@@ -38,7 +40,7 @@ public interface ISceneList {
     int setViewTransform(float pfViewX, float pfViewY, float pfViewZ,
     float pfRotateX, float pfRotateY, float pfRotateZ);
 
-    int writeList(String psErrorText, String psFileName);
+    int writeList(StringBuffer psbErrorText, String psFileName);
 
     int preview(BufferedImage buffImg, TMatrix modelMatrix, TMatrix viewMatrix);
 
@@ -73,5 +75,5 @@ public interface ISceneList {
     int setCompoundRefPoints();
 
     int depthSort(SceneElement[] models, float[] distances,
-    Integer numModels, boolean depthSortingEnabled);
+    OneInt numModels, boolean depthSortingEnabled);
 } // interface ISceneList
