@@ -1176,10 +1176,18 @@ POPUP "Tools"
         mSceneList.getSceneInfo(msSceneName, mIEffectType, mIColorMode, 
             mIOutputRows, mIOutputColumns);
 
-        // The following method sets fields mViewTranslateX, mViewTranslateY, mViewTranslateZ, 
-        // mViewRotateX, mViewRotateY, and mViewRotateZ
-        mSceneList.getViewTransform(mViewTranslateX, mViewTranslateY, mViewTranslateZ,
-            mViewRotateX, mViewRotateY, mViewRotateZ);
+        Point3d viewTrans = new Point3d();
+        Point3d viewRot = new Point3d();
+        // The following method modifies parameters viewTran and viewRot
+        mSceneList.getViewTransform(viewTrans, viewRot);
+        mViewTranslateX = viewTrans.fX;
+        mViewTranslateY = viewTrans.fY;
+        mViewTranslateZ = viewTrans.fZ;
+
+        mViewRotateX = viewRot.fX;
+        mViewRotateY = viewRot.fY;
+        mViewRotateZ = viewRot.fZ;
+
         getViewMatrix();
 
         if((this.mIEffectType == JICTConstants.I_SEQUENCE) || (this.mIEffectType == JICTConstants.I_MORPH)) {
