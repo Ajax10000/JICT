@@ -232,26 +232,26 @@ public:
     // Called from:
     //     ScenePreviewDlg.chooseModel
     //     ScenePreviewDlg.onSelChangeCmbModels
-    public void getCurrentModelTransform(Float pFRx, Float pFRy, Float pFRz,
-    Float pFSx, Float pFSy, Float pFSz, 
-    Float pFTx, Float pFTy, Float pFTz) {
+    public void getCurrentModelTransform(Point3d pRotation, 
+    Point3d pScale,  
+    Point3d pTranslation) {
         Scene scene = this.mSceneListHead;
         SceneElement currentModelSE;
         scene = scene.mNextEntry; // Point to the scene Node
         currentModelSE = scene.mCurrentSceneElement;
 
         // Set the output parameters
-        pFRx = currentModelSE.mRotation.fX;
-        pFRy = currentModelSE.mRotation.fY;
-        pFRz = currentModelSE.mRotation.fZ;
+        pRotation.fX = currentModelSE.mRotation.fX;
+        pRotation.fY = currentModelSE.mRotation.fY;
+        pRotation.fZ = currentModelSE.mRotation.fZ;
 
-        pFSx = currentModelSE.mScale.fX;
-        pFSy = currentModelSE.mScale.fY;
-        pFSz = currentModelSE.mScale.fZ;
+        pScale.fX = currentModelSE.mScale.fX;
+        pScale.fY = currentModelSE.mScale.fY;
+        pScale.fZ = currentModelSE.mScale.fZ;
 
-        pFTx = currentModelSE.mTranslation.fX;
-        pFTy = currentModelSE.mTranslation.fY;
-        pFTz = currentModelSE.mTranslation.fZ;
+        pTranslation.fX = currentModelSE.mTranslation.fX;
+        pTranslation.fY = currentModelSE.mTranslation.fY;
+        pTranslation.fZ = currentModelSE.mTranslation.fZ;
     } // getCurrentModelTransform
 
 
@@ -356,9 +356,7 @@ public:
     // Called from:
     //     depthSort
     //     MainFrame.onToolsCreateASceneList
-    public int getViewTransform(
-    Float pFViewX,   Float pFViewY,   Float pFViewZ, 
-    Float pFRotateX, Float pFRotateY, Float pFRotateZ) {
+    public int getViewTransform(Point3d pView, Point3d pRot) {
         Scene scene = this.mSceneListHead;
         scene = scene.mNextEntry;  // Skip over the list header
         if (scene == null) { 
@@ -367,13 +365,13 @@ public:
 
         // Assume the default viewer location is centered in the output frame
         // Set the output parameters
-        pFViewX = scene.mTranslationPt.fX;
-        pFViewY = scene.mTranslationPt.fY;
-        pFViewZ = scene.mTranslationPt.fZ;
+        pView.fX = scene.mTranslationPt.fX;
+        pView.fY = scene.mTranslationPt.fY;
+        pView.fZ = scene.mTranslationPt.fZ;
 
-        pFRotateX = scene.mRotationPt.fX;
-        pFRotateY = scene.mRotationPt.fY;
-        pFRotateZ = scene.mRotationPt.fZ;
+        pRot.fX = scene.mRotationPt.fX;
+        pRot.fY = scene.mRotationPt.fY;
+        pRot.fZ = scene.mRotationPt.fZ;
 
         return 0;
     } // getViewTransform
@@ -1713,13 +1711,14 @@ public:
     // MainFrame.onRenderScene or MainFrame.onRenderSequence
     public int depthSort(SceneElement[] paModels, float[] pafDistances,
     OneInt pINumModels, boolean pbDepthSortingEnabled) {
-        Float fViewX = 0f, fViewY = 0f, fViewZ = 0f;
-        Float fRotateX = 0f, fRotateY = 0f, fRotateZ = 0f;
+        Point3d view = new Point3d();
+        Point3d rot = new Point3d();
         float fCentroidX, fCentroidY, fCentroidZ;
         float fModelDistance;
 
-        // The following method sets all the parameters
-        getViewTransform(fViewX, fViewY, fViewZ, fRotateX, fRotateY, fRotateZ);
+        // The following method sets parameters view and rot
+        // However parameter rot will not henceforth be used
+        getViewTransform(view, rot);
 
         // Preview the Scene Models
         Scene scene = this.mSceneListHead;
@@ -1746,7 +1745,7 @@ public:
                     fCentroidX = modelSE.mScreenRdrObject.mCurrentShape.mfOriginX;
                     fCentroidY = modelSE.mScreenRdrObject.mCurrentShape.mfOriginY;
                     fCentroidZ = modelSE.mScreenRdrObject.mCurrentShape.mfOriginZ;
-                    fModelDistance = MathUtils.getDistance3d(fViewX, fViewY, fViewZ, fCentroidX, fCentroidY, fCentroidZ);
+                    fModelDistance = MathUtils.getDistance3d(view.fX, view.fY, view.fZ, fCentroidX, fCentroidY, fCentroidZ);
                     pafDistances[iModelCounter] = fModelDistance;
                     paModels[iModelCounter] = modelSE;
                     iModelCounter++;
@@ -1756,7 +1755,7 @@ public:
                     fCentroidX = 0.0f;
                     fCentroidY = 0.0f;
                     fCentroidZ = 0.0f;
-                    fModelDistance = MathUtils.getDistance3d(fViewX, fViewY, fViewZ, fCentroidX, fCentroidY, fCentroidZ);
+                    fModelDistance = MathUtils.getDistance3d(view.fX, view.fY, view.fZ, fCentroidX, fCentroidY, fCentroidZ);
                     pafDistances[iModelCounter] = fModelDistance;
                     paModels[iModelCounter] = modelSE;
                     iModelCounter++;
