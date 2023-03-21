@@ -21,6 +21,8 @@ import javax.swing.JTextField;
 
 import math.MathUtils;
 
+import structs.Point3d;
+
 // This dialog is displayed when the user selects the 
 // "Still" or "Sequence" menu item from the Preview menu.
 // See methods onPreviewStillScene and onPreviewSequenceScene of the MainFrame class.
@@ -358,9 +360,9 @@ protected:
     // ON_CBN_SELCHANGE(IDC_cmbModels, OnSelchangecmbModels)
     void onSelChangeCmbModels() {
         String sSelectedModel;
-        Float fRx = 0f, fRy = 0f, fRz = 0f;
-        Float fSx = 0f, fSy = 0f, fSz = 0f;
-        Float fTx = 0f, fTy = 0f, fTz = 0f;
+        Point3d rot = new Point3d();
+        Point3d scale = new Point3d();
+        Point3d tran = new Point3d();
 
         int iChoice = cboModel.getSelectedIndex();
 
@@ -370,21 +372,21 @@ protected:
 
             // The following method sets all of the parameters
             mMainFrame.mSceneList.getCurrentModelTransform(
-                fRx, fRy, fRz, 
-                fSx, fSy, fSz, 
-                fTx, fTy, fTz);
+                rot, 
+                scale, 
+                tran);
                 
-            mMainFrame.mWarpTranslateX = fTx;
-            mMainFrame.mWarpTranslateY = fTy;
-            mMainFrame.mWarpTranslateZ = fTz;
+            mMainFrame.mWarpTranslateX = tran.fX;
+            mMainFrame.mWarpTranslateY = tran.fY;
+            mMainFrame.mWarpTranslateZ = tran.fZ;
 
-            mMainFrame.mWarpScaleX = fSx;
-            mMainFrame.mWarpScaleY = fSy;
-            mMainFrame.mWarpScaleZ = fSz;
+            mMainFrame.mWarpScaleX = scale.fX;
+            mMainFrame.mWarpScaleY = scale.fY;
+            mMainFrame.mWarpScaleZ = scale.fZ;
 
-            mMainFrame.mWarpRotateX = fRx;
-            mMainFrame.mWarpRotateY = fRy;
-            mMainFrame.mWarpRotateZ = fRz;
+            mMainFrame.mWarpRotateX = rot.fX;
+            mMainFrame.mWarpRotateY = rot.fY;
+            mMainFrame.mWarpRotateZ = rot.fZ;
 
             setTextBoxesWithModelTransform();
         }
@@ -694,25 +696,27 @@ protected:
     //     onCmdPlus
     void chooseModel() {
         String sSelectedModel;
-        Float fRx = 0f, fRy = 0f, fRz = 0f;
-        Float fSx = 0f, fSy = 0f, fSz = 0f;
-        Float fTx = 0f, fTy = 0f, fTz = 0f;
+        Point3d rot = new Point3d();
+        Point3d scale = new Point3d();
+        Point3d tran = new Point3d();
 
         sSelectedModel = (String)cboModel.getSelectedItem();
         mMainFrame.mSceneList.setCurrentModel(sSelectedModel);
-        mMainFrame.mSceneList.getCurrentModelTransform(fRx, fRy, fRz, fSx, fSy, fSz, fTx, fTy, fTz);
 
-        mMainFrame.mWarpTranslateX = fTx;
-        mMainFrame.mWarpTranslateY = fTy;
-        mMainFrame.mWarpTranslateZ = fTz;
+        // The following method modifies parameters rot, scale and tran
+        mMainFrame.mSceneList.getCurrentModelTransform(rot, scale, tran);
+
+        mMainFrame.mWarpTranslateX = tran.fX;
+        mMainFrame.mWarpTranslateY = tran.fY;
+        mMainFrame.mWarpTranslateZ = tran.fZ;
         
-        mMainFrame.mWarpScaleX = fSx;
-        mMainFrame.mWarpScaleY = fSy;
-        mMainFrame.mWarpScaleZ = fSz;
+        mMainFrame.mWarpScaleX = scale.fX;
+        mMainFrame.mWarpScaleY = scale.fY;
+        mMainFrame.mWarpScaleZ = scale.fZ;
         
-        mMainFrame.mWarpRotateX = fRx;
-        mMainFrame.mWarpRotateY = fRy;
-        mMainFrame.mWarpRotateZ = fRz;
+        mMainFrame.mWarpRotateX = rot.fX;
+        mMainFrame.mWarpRotateY = rot.fY;
+        mMainFrame.mWarpRotateZ = rot.fZ;
 
         setTextBoxesWithModelTransform();
         mMainFrame.mbChangeViewPoint = false;
