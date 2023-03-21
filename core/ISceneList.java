@@ -21,9 +21,9 @@ public interface ISceneList {
     float sx, float sy, float sz, 
     float tx, float ty, float tz);
 
-    void getCurrentModelTransform(Float rx, Float ry, Float rz,
-    Float sx, Float sy, Float sz, 
-    Float tx, Float ty, Float tz);
+    void getCurrentModelTransform(Point3d pRot,
+    Point3d pScale, 
+    Point3d pTran);
 
     void showModels(JComboBox<String> theCombo);
 
@@ -34,8 +34,7 @@ public interface ISceneList {
 
     int setSceneOutImageSize(int piOutRows, int piOutCols);
 
-    int getViewTransform(Float pFViewX, Float pFViewY, Float pFViewZ, 
-    Float pFRotateX, Float pFRotateY, Float pFRotateZ);
+    int getViewTransform(Point3d pView, Point3d pRot);
 
     int setViewTransform(float pfViewX, float pfViewY, float pfViewZ,
     float pfRotateX, float pfRotateY, float pfRotateZ);
