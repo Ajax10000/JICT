@@ -586,7 +586,7 @@ protected:
     //
     // Called when the user clicks on the OK button in the dialog.
     void onOK() {
-        String sBuffer = "";
+        StringBuffer sbBuffer = new StringBuffer();
 
         mMainFrame.mSceneList.setViewTransform(
             mMainFrame.mViewTranslateX, mMainFrame.mViewTranslateY, mMainFrame.mViewTranslateZ, 
@@ -601,13 +601,14 @@ protected:
 
             switch(iResult) {
             case JOptionPane.YES_OPTION:
-                mMainFrame.mSceneList.writeList(sBuffer, mMainFrame.msSceneFileName);
+                mMainFrame.mSceneList.writeList(sbBuffer, mMainFrame.msSceneFileName);
+                // TODO: Returned error code is ignored
             } // switch
 
             mMainFrame.repaint();
         } // if (mbIsDirty)
     } // onOK
-    
+
 
     // This method originally came from SCENEPREVIEWDLG.CPP
     //
