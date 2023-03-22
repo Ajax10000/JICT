@@ -1326,7 +1326,7 @@ public:
     Point3d pCentroid) {
         // SceneElement saveModel; // this variable is not used
         float fBucketX = 0f, fBucketY = 0f, fBucketZ = 0f;
-        Float fCentroidX = 0f, fCentroidY = 0f, fCentroidZ = 0f;
+        Point3d centroid = new Point3d();
         boolean bPrevModelIsACompoundMember = false; // changed from int to boolean
         int iModelCounter = 0;
         TMatrix modelMatrix = new TMatrix();
@@ -1368,17 +1368,17 @@ public:
             if(pModelSE.mbCompoundModelMember) {
                 // Transform the individual model
                 pModelSE.mScreenRdrObject.transformAndProject(modelMatrix, piOutputRows, piOutputColumns);
-                pModelSE.mScreenRdrObject.mCurrentShape.getTCentroid(fCentroidX, fCentroidY, fCentroidZ);
+                pModelSE.mScreenRdrObject.mCurrentShape.getTCentroid(centroid);
       
                 String sMsgText;
                 sMsgText = "calcCmModelRefPoint. model: " + pModelSE.msModelName;
                 Globals.statusPrint(sMsgText);
-                sMsgText = "calcCmModelRefPoint. modelCentroid: " + fCentroidX + " " + fCentroidY + " " + fCentroidZ;
+                sMsgText = "calcCmModelRefPoint. modelCentroid: " + centroid.fX + " " + centroid.fY + " " + centroid.fZ;
                 Globals.statusPrint(sMsgText);
 
-                fBucketX += fCentroidX;
-                fBucketY += fCentroidY;
-                fBucketZ += fCentroidZ;
+                fBucketX += centroid.fX;
+                fBucketY += centroid.fY;
+                fBucketZ += centroid.fZ;
                 iModelCounter++;
             }
 
@@ -1662,7 +1662,7 @@ public:
         // renderObject
         Scene scene = this.mSceneListHead;
         SceneElement modelSE;
-        Float fCentroidX = 0.0f, fCentroidY = 0.0f, fCentroidZ = 0.0f;
+        Point3d refPt = new Point3d();
 
         if(scene.mNextEntry == null) {
             Globals.statusPrint("copyRefPoints: sceneList has no scene object.");
@@ -1675,13 +1675,12 @@ public:
             if(
             (!modelSE.mbDefinedRefPoint) && 
             (modelSE.miModelType != JICTConstants.I_COMPOUND)) {
-                // The following method sets parameters fCentroidX, fCentroidY, and fCentroidZ 
-                // (all of type Float)
-                modelSE.mScreenRdrObject.mCurrentShape.getReferencePoint(fCentroidX, fCentroidY, fCentroidZ);
+                // The following method modifies parameter refPt
+                modelSE.mScreenRdrObject.mCurrentShape.getReferencePoint(refPt);
 
-                modelSE.pointOfReference.fX = fCentroidX; 
-                modelSE.pointOfReference.fY = fCentroidY;
-                modelSE.pointOfReference.fZ = fCentroidZ;
+                modelSE.pointOfReference.fX = refPt.fX; 
+                modelSE.pointOfReference.fY = refPt.fY;
+                modelSE.pointOfReference.fZ = refPt.fZ;
             }
 
             modelSE = modelSE.mNextEntry;  // Get the pointer to next model
