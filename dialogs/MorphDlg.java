@@ -34,6 +34,8 @@ import javax.swing.border.EtchedBorder;
 
 import math.TMatrix;
 
+import structs.Point3d;
+
 // This dialog is displayed  when the user selects the 
 // "Create a Morph Sequence..." menu item from the Tools menu.
 // See method onToolsMorphSequence of the MainFrame class.
@@ -660,7 +662,7 @@ protected:
             fractionIncrement = 1.0f/((float)m_numFrames - 1.0f);
             
             TMatrix aMatrix = new TMatrix();
-            Float centroidX = 0f, centroidY = 0f, centroidZ = 0f;
+            Point3d centroid = new Point3d();
 
             for (i = 1; i <= m_numFrames; i++) {
                 msgText = "tweenMesh. Frame " + i + "  aFraction: " + aFraction;
@@ -672,10 +674,10 @@ protected:
 
                 // Move the mesh to the center of the view screen
                 aStatus = Globals.getMeshCentroid(oX, oY, oZ,
-                    centroidX, centroidY, centroidZ);
+                    centroid);
 
                 aStatus = Globals.translateMesh(oX, oY, oZ,
-                    -centroidX, -centroidY, -centroidZ);
+                    -centroid.fX, -centroid.fY, -centroid.fZ);
 
                 // sprintf(imagePath, "%s%s%#04d%c.bmp", directory, prefix, i, suffix);
                 imagePath = directory + prefix + String.format("%04o", i) + suffix + ".shp";
