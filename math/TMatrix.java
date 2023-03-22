@@ -475,17 +475,17 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
         // See p 66 - 68 of the book Visual Special Effects Toolkit in C++.
         // If useExternalCentroid is true then the object is rotated about
         // the point (pfCentroidX, pfCentroidY, pfCentroidZ).
-        Float fCx = 0f, fCy = 0f, fCz = 0f;	   //  The translation that moves the shape to the origin
+        Point3d refPt = new Point3d();	   //  The translation that moves the shape to the origin
         int iSx, iSy;
     
         if(!pbUseExternalCentroid) {
-            pShape.getReferencePoint(fCx, fCy, fCz);
+            pShape.getReferencePoint(refPt);
         } else {
-            fCx = pfCentroidX;
-            fCy = pfCentroidY;
-            fCz = pfCentroidZ;
+            refPt.fX = pfCentroidX;
+            refPt.fY = pfCentroidY;
+            refPt.fZ = pfCentroidZ;
         }
-        pShape.translateW(-fCx, -fCy, -fCz);
+        pShape.translateW(-refPt.fX, -refPt.fY, -refPt.fZ);
     
         pShape.initCurrentVertex();
         float fMaxtX = 0f, fMaxtY = 0f, fMaxtZ = 0f;
@@ -544,7 +544,7 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
             pShape.incCurrentVertex();
         }
     
-        pShape.translateW(fCx, fCy, fCz);    // Move world coords back
-        pShape.translateS((int)fCx.floatValue(), (int)fCy.floatValue()); // Move screen coords back
+        pShape.translateW(refPt.fX, refPt.fY, refPt.fZ); // Move world coords back
+        pShape.translateS((int)refPt.fX, (int)refPt.fY); // Move screen coords back
     } // transformAndProject
 } // class TMatrix
