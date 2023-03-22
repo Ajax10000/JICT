@@ -405,13 +405,12 @@ public:
     } // setViewTransform
 
 
-    // getViewPoint returns the viewer location (pFViewX, pFViewY, pFViewZ) 
-    // and orientation using the six parameters supplied
+    // getViewPoint returns the viewer location 
+    // and orientation using the two parameters supplied
     //
     // Called from:
     //     render
-    private int getViewPoint(Float pFViewX, Float pFViewY, Float pFViewZ,
-    Float pFRotateX, Float pFRotateY, Float pFRotateZ) {
+    private int getViewPoint(Point3d pView, Point3d pRot) {
         Scene scene = this.mSceneListHead;
         scene = scene.mNextEntry;  // Skip over the list header
         if (scene == null) { 
@@ -423,15 +422,15 @@ public:
         // and translated 512 units along the positive z axis.
         // Add to this location any viewpoint translation and rotation 
         // the user specified.
-        pFViewX =   0.0f + scene.mTranslationPt.fX;
-        pFViewY =   0.0f + scene.mTranslationPt.fY;
-        pFViewZ = 512.0f + scene.mTranslationPt.fZ;
+        pView.fX =   0.0f + scene.mTranslationPt.fX;
+        pView.fY =   0.0f + scene.mTranslationPt.fY;
+        pView.fZ = 512.0f + scene.mTranslationPt.fZ;
 
         // Since the default viewer rotations are (0,0,0), just output
         // whatever the user specified in the scene file.
-        pFRotateX = 0.0f + scene.mRotationPt.fX;
-        pFRotateY = 0.0f + scene.mRotationPt.fY;
-        pFRotateZ = 0.0f + scene.mRotationPt.fZ;
+        pRot.fX = 0.0f + scene.mRotationPt.fX;
+        pRot.fY = 0.0f + scene.mRotationPt.fY;
+        pRot.fZ = 0.0f + scene.mRotationPt.fZ;
 
         return 0;
     } // getViewPoint
@@ -738,7 +737,7 @@ public:
                 }
 
                 if(modelSE.miStatusIndicator == 0) {  // if this is a valid model...
-                    Float fCmCentroidx = 0.0f, fCmCentroidy = 0.0f, fCmCentroidz = 0.0f;
+                    Point3d centroid = new Point3d();
                     pModelMatrix.setIdentity();
 
                     // Compose the appropriate transforms
@@ -781,9 +780,9 @@ public:
                     // If this model is compound, calculate the compound model reference point
                     if(modelSE.miModelType == JICTConstants.I_COMPOUND) {
                         saveModelSE = modelSE;
-                        // The following method sets parameters fCmCentroidx, fCmCentroidy, and fCmCentroidz
+                        // The following method modifies parameter centroid
                         calcCompoundModelRefPoint(modelSE, iOutputRows, iOutputColumns, 
-                            fCmCentroidx, fCmCentroidy, fCmCentroidz);
+                            centroid);
                         modelSE = saveModelSE;
                     }
 
@@ -803,7 +802,7 @@ public:
                         // Apply the matrix
                         modelSE.mScreenRdrObject.transformAndProject(viewModelMatrix,
                             iOutputRows, iOutputColumns, modelSE.mbCompoundModelMember, 
-                            fCmCentroidx, fCmCentroidy, fCmCentroidz);
+                            centroid.fX, centroid.fY, centroid.fZ);
                     }
 
                     // Draw the points
@@ -878,8 +877,8 @@ public:
         Integer iOutputRows = 0, iOutputColumns = 0;
         int iFirstFrame, iLastFrame;
         int iFrameCounter;
-        Float fVx = 0.0f, fVy = 0.0f, fVz = 0.0f;    // Viewpoint
-        Float fVRx = 0.0f, fVRy = 0.0f, fVRz = 0.0f;       
+        Point3d view = new Point3d();
+        Point3d rot = new Point3d();
         MotionNode motnNode = new MotionNode();      // Current model location and orientation if moving.
         Bundle xfrm = new Bundle();                  // Create a bundle of transforms
         Instant timeStart, timeEnd;
@@ -898,9 +897,9 @@ public:
             return -1;
         }
 
-        // The following method sets fVx, fVy, fVz, 
-        // and fVRx, fVRy, and fVRz as well
-        getViewPoint(fVx, fVy, fVz, fVRx, fVRy, fVRz);
+        // The following method modifies parameters view and rot.
+        // However rot will henceforth not be used.
+        getViewPoint(view, rot);
         SceneElement modelSE = scene.mHead;
         SceneElement[] models = new SceneElement[JICTConstants.I_MAXMODELS];
         float[] fDistances = new float[JICTConstants.I_MAXMODELS];
@@ -1055,7 +1054,7 @@ public:
                                     xfrm.rx, xfrm.ry, xfrm.rz, 
                                     xfrm.sx, xfrm.sy, xfrm.sz,
                                     xfrm.tx, xfrm.ty, xfrm.tz, 
-                                    fVx,     fVy,     fVz,
+                                    view.fX, view.fY, view.fZ,
                                     pViewMatrix,
                                     modelSE.mbWarpIndicator, modelSE.mbBlendIndicator, 
                                     xfrm.alpha,
@@ -1069,7 +1068,7 @@ public:
                                 // The rendered mesh is then blended into the final image using the scene ZBuffer and alpha options
                                 iStatus = 0;	//this line for debugging
                                 iStatus = modelSE.mScreenRdrObject.renderMeshz(outputMImage, alphaMImage, inputMImage,
-                                    zBuffMImage, fVx, fVy, fVz);
+                                    zBuffMImage, view.fX, view.fY, view.fZ);
                                 break;
 
                             case JICTConstants.I_SHAPE:
@@ -1089,7 +1088,7 @@ public:
                                     modelSE.pointOfReference.fZ);
 
                                 iStatus = modelSE.mScreenRdrObject.renderShapez(outputMImage, alphaMImage,
-                                    zBuffMImage, fVx, fVy, fVz);
+                                    zBuffMImage, view.fX, view.fY, view.fZ);
                                 break;
                             }
                         } else {            // no zbuffer
@@ -1101,7 +1100,7 @@ public:
                                     xfrm.rx, xfrm.ry, xfrm.rz, 
                                     xfrm.sx, xfrm.sy, xfrm.sz,
                                     xfrm.tx, xfrm.ty, xfrm.tz, 
-                                    fVx,     fVy,     fVz,
+                                    view.fX, view.fY, view.fZ,
                                     pViewMatrix,
                                     modelSE.mbWarpIndicator, modelSE.mbBlendIndicator, 
                                     xfrm.alpha,
@@ -1324,10 +1323,7 @@ public:
     //     previewStill
     private int calcCompoundModelRefPoint(SceneElement pModelSE, 
     int piOutputRows, int piOutputColumns, 
-    Float pFCmCentroidX, Float pFCmCentroidY, Float pFCmCentroidZ) {
-        pFCmCentroidX = 0.0f;
-        pFCmCentroidY = 0.0f;
-        pFCmCentroidZ = 0.0f;
+    Point3d pCentroid) {
         // SceneElement saveModel; // this variable is not used
         float fBucketX = 0f, fBucketY = 0f, fBucketZ = 0f;
         Float fCentroidX = 0f, fCentroidY = 0f, fCentroidZ = 0f;
@@ -1387,14 +1383,13 @@ public:
             }
 
             if(!pModelSE.mbCompoundModelMember && bPrevModelIsACompoundMember) {
-                // Set the output parameters, the compound model centroid
-                // = (pFCmCentroidX, pFCmCentroidY, pFCmCentroidZ)
-                pFCmCentroidX = fBucketX / iModelCounter;
-                pFCmCentroidY = fBucketY / iModelCounter;
-                pFCmCentroidZ = fBucketZ / iModelCounter;
+                // Set the output parameter
+                pCentroid.fX = fBucketX / iModelCounter;
+                pCentroid.fY = fBucketY / iModelCounter;
+                pCentroid.fZ = fBucketZ / iModelCounter;
 
                 String sMsgText = "calcCmModelRefPoint. cmCentroid: " 
-                    + pFCmCentroidX + " " + pFCmCentroidY + " " + pFCmCentroidZ;
+                    + pCentroid.fX + " " + pCentroid.fY + " " + pCentroid.fZ;
                 Globals.statusPrint(sMsgText);
             }
 
@@ -1405,10 +1400,10 @@ public:
         // Handle the case where a compound model is the last model in the
         // scene list.
         if(bPrevModelIsACompoundMember) {
-            // Set the output parameters
-            pFCmCentroidX = fBucketX / iModelCounter;
-            pFCmCentroidY = fBucketY / iModelCounter;
-            pFCmCentroidZ = fBucketZ / iModelCounter;
+            // Set the output parameter
+            pCentroid.fX = fBucketX / iModelCounter;
+            pCentroid.fY = fBucketY / iModelCounter;
+            pCentroid.fZ = fBucketZ / iModelCounter;
         }
 
         return 0;
