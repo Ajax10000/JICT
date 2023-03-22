@@ -31,6 +31,8 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+import structs.Point3d;
+
 public class ImageView extends JDialog implements MouseListener {
 /*
 class imageView : public CScrollView{
@@ -496,10 +498,11 @@ protected:
             hpen = CreatePen(PS_SOLID, 1, Color.WHITE);
             SelectObject(hpen);
 
+            Point3d prevWrldVertex = new Point3d();
             float fX, fY, fZ;
-            iStatus = mShape.getPreviousWorldVertex(fX, fY, fZ);
+            iStatus = mShape.getPreviousWorldVertex(prevWrldVertex);
             if (iStatus == 0) {
-                MoveToEx((int)(fX - iXOffset + 0.5), (int)(fY + iYOffset + 0.5), 0L);
+                MoveToEx((int)(prevWrldVertex.fX - iXOffset + 0.5), (int)(prevWrldVertex.fY + iYOffset + 0.5), 0L);
                 LineTo(point.x, point.y);
             } else {
                 MoveToEx(point.x, point.y, 0L); // draw a single point
@@ -565,13 +568,13 @@ protected:
             SelectObject(hpen);
             int iStatus;
 
-            Float fX = 0.0f, fY = 0.0f, fZ = 0.0f;
-            Float fPx = 0.0f, fPy = 0.0f, fPz = 0.0f;
-            mShape.getLastWorldVertex(fX, fY, fZ);
-            mShape.getPreviousWorldVertex(fPx, fPy, fPz);
+            Point3d wrldVertex = new Point3d();
+            Point3d prevWrldVertex = new Point3d();
+            mShape.getLastWorldVertex(wrldVertex);
+            mShape.getPreviousWorldVertex(prevWrldVertex);
 
-            MoveToEx((int)(fPx + 0.5f), (int)(fPy + 0.5f), 0L);
-            LineTo((int)(fX + 0.5f), (int)(fY + 0.5f));
+            MoveToEx((int)(prevWrldVertex.fX + 0.5f), (int)(prevWrldVertex.fY + 0.5f), 0L);
+            LineTo((int)(wrldVertex.fX + 0.5f), (int)(wrldVertex.fY + 0.5f));
             iStatus = mShape.deleteLastWorldVertex();
             // TODO: We are not looking at the return value for an error status
         } // if(mbCutoutEnabled)
