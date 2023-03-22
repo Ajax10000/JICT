@@ -3,6 +3,7 @@ package core;
 import apps.IctApp;
 
 import dtos.LineEqn;
+import dtos.OneInt;
 import dtos.ScreenVertex;
 
 import frames.MainFrame;
@@ -1873,14 +1874,16 @@ public:
     // 
     // Not called from within this file.
     // Called from: 
+    //     RenderObject.previewMesh
+    //     RenderObject.renderMesh
     //     RenderObject.renderMeshz
     //     SceneList.copyRefPoints
     //     TMatrix.transformAndProject
-    public void getReferencePoint(Float pFCentroidX, Float pFCentroidY, Float pFCentroidZ) {
+    public void getReferencePoint(Point3d pVertex) {
         // Set the output parameters
-        pFCentroidX = this.pointOfReference.fX;
-        pFCentroidY = this.pointOfReference.fY;
-        pFCentroidZ = this.pointOfReference.fZ;
+        pVertex.fX = this.pointOfReference.fX;
+        pVertex.fY = this.pointOfReference.fY;
+        pVertex.fZ = this.pointOfReference.fZ;
     } // getReferencePoint
 
 
@@ -1928,7 +1931,7 @@ public:
     // Not called from within this file.
     // Called from:
     //     RenderObject.renderShapez
-    public int getTransformedVertex(int piIndex, Float pFTx, Float pFTy, Float pFTz) {
+    public int getTransformedVertex(int piIndex, Point3d pTransfVtx) {
         if((piIndex < 0) || (piIndex > this.miNumVertices - 1)) {
             String sMsgText = "getTransformedVertex.  index < 0 or >= numVertices: " + piIndex;
             Globals.statusPrint(sMsgText);
@@ -1938,9 +1941,9 @@ public:
         VertexSet aVertex = this.mVertices[piIndex];
 
         // Set the output parameters
-        pFTx = aVertex.tx;
-        pFTy = aVertex.ty;
-        pFTz = aVertex.tz;
+        pTransfVtx.fX = aVertex.tx;
+        pTransfVtx.fY = aVertex.ty;
+        pTransfVtx.fZ = aVertex.tz;
 
         return 0;
     } // getTransformedVertex
@@ -2002,8 +2005,8 @@ public:
     // 
     // Not called from within this file.
     // Can't find where this is called from.
-    public int getWorldVertex(float pfDistanceFraction, Integer pIVertex, 
-    Float pFX, Float pFY, Float pFZ) {
+    public int getWorldVertex(float pfDistanceFraction, OneInt pVertex, 
+    Point3d pCentroid) {
         // Determine the world coordinate that corresponds to the supplied distance fraction.
         // The resulting coordinate is interpolated linearly from the two vertices
         // that are located between the corresponding distanceFraction.
@@ -2050,18 +2053,18 @@ public:
             (fDf1 <= pfDistanceFraction) && 
             (pfDistanceFraction <= fDf2)) {
                 // Set the output parameters
-                pFX = MathUtils.interpolate(fX1, fX2, fDf1, fDf2, pfDistanceFraction);
-                pFY = MathUtils.interpolate(fY1, fY2, fDf1, fDf2, pfDistanceFraction);
-                pFZ = MathUtils.interpolate(fZ1, fZ2, fDf1, fDf2, pfDistanceFraction);
-                pIVertex = index;
+                pCentroid.fX = MathUtils.interpolate(fX1, fX2, fDf1, fDf2, pfDistanceFraction);
+                pCentroid.fY = MathUtils.interpolate(fY1, fY2, fDf1, fDf2, pfDistanceFraction);
+                pCentroid.fZ = MathUtils.interpolate(fZ1, fZ2, fDf1, fDf2, pfDistanceFraction);
+                pVertex.i = index;
                 return 0;
             }
         } // for
 
         Globals.statusPrint("getWorldVertex: Could not find vertex");
-        pFX = -1.0f;
-        pFY = -1.0f;
-        pFZ = -1.0f;
+        pCentroid.fX = -1.0f;
+        pCentroid.fY = -1.0f;
+        pCentroid.fZ = -1.0f;
 
         return -1;
     } // getWorldVertex
@@ -2143,7 +2146,7 @@ public:
     // Not called from within this file.
     // Called from:
     //     SceneList.calcCompoundModelRefPoint
-    public void getTCentroid(Float pFCentroidX, Float pFCentroidY, Float pFCentroidZ) {
+    public void getTCentroid(Point3d pCentroid) {
         initCurrentVertex();
         float fMaxtX = mCurrentVertex.tx;
         float fMaxtY = mCurrentVertex.ty;
@@ -2168,9 +2171,9 @@ public:
         } // for
 
         // Set output parameters
-        pFCentroidX = (fMaxtX - fMintX)/2.0f;
-        pFCentroidY = (fMaxtY - fMintY)/2.0f;
-        pFCentroidZ = (fMaxtZ - fMintZ)/2.0f;
+        pCentroid.fX = (fMaxtX - fMintX)/2.0f;
+        pCentroid.fY = (fMaxtY - fMintY)/2.0f;
+        pCentroid.fZ = (fMaxtZ - fMintZ)/2.0f;
     } // getTCentroid
 
 
