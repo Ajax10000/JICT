@@ -21,6 +21,48 @@ sceneElement - see SCENELST.H\
 sceneList - see SCENELST.H and SCENELST.CPP\
 tMatrix - see TMATRIX.H and TMATRIX.CPP
 
+## Repeated code in RENDER.CPP
+
+In the renderObject constructor that takes 4 parameters (a char \*, two ints, and a point3d), there are two consecutive calls to getWCentroid, with the same parameters. The code snippet I'm talking about is shown below.
+
+```cpp
+        case SHAPE:
+            currentShape = new shape3d(fileName, modelType);
+            if(!currentShape->isValid()) {
+                validCurrentShape = 0;
+            } else{
+                if(userPOR) {  //if the user has defined a Point of Reference
+                    currentShape->setReferencePoint(POR->x, POR->y, POR->z);
+                } else {
+                    currentShape->getWCentroid(&centroidX, &centroidY, &centroidZ); /// FIRST CALL TO getWCentroid
+
+                    // Make certain the shape is centered in the X-Y plane.
+                    currentShape->getWCentroid(&centroidX, &centroidY, &centroidZ); /// SECOND CALL TO getWCentroid
+                    if(
+                    (centroidX > 0.5 || centroidX < -0.5) ||
+                    (centroidY > 0.5 || centroidY < -0.5) ||
+                    (centroidZ > 0.5 || centroidZ < -0.5) ) {
+                        sprintf(g_msgText, "renderObject 2b. centering Shape: xCent: %f, yCent: %f zCent: %f",
+                            centroidX, centroidY, centroidZ);
+                        statusPrint(g_msgText);
+                        currentShape->translateW(-centroidX, -centroidY, -centroidZ);
+                    }
+                    currentShape->getWCentroid(&centroidX, &centroidY, &centroidZ);
+                    currentShape->setReferencePoint(centroidX, centroidY, centroidZ);
+                }
+            }
+            // Create an n vertex shape with coords set to 0
+            lastShape = new shape3d(currentShape->getNumVertices());
+            if(!lastShape->isValid()) validLastShape = 0;
+
+            // the shape3d constructor will issue a message if either of these
+            // objects are not successfully created.
+            if(validCurrentShape == 0 || validLastShape == 0) {
+                valid = 0;
+            }
+            break;
+```
+
 ## Unused parameters in methods of renderObject
 
 In method previewMesh, parameters xOff and yOff are only used to modify local variables xOffset and yOffset, but these local variables are thereafter not used. Hence parameters xOff and yOff can be deleted assuming that local variables xOffset and yOffset are also deleted. Below is the method signature of previewMesh.
