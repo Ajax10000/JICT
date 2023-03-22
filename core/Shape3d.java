@@ -359,14 +359,14 @@ public:
         }
 
         if(this.miNumAllocatedVertices != 0) {
-            Float fCX = 0f, fCY = 0f, fCZ = 0f;
-            // The following method sets parameters cX, cY and cZ
-            getWCentroid(fCX, fCY, fCZ);  // calculate and save the world coord centroid
+            Point3d centroid = new Point3d();
+            // The following method modifies parameter centroid
+            getWCentroid(centroid);  // calculate and save the world coord centroid
 
             this.pointOfReference = new Point3d();
-            pointOfReference.fX = fCX;
-            pointOfReference.fY = fCY;
-            pointOfReference.fZ = fCZ;
+            pointOfReference.fX = centroid.fX;
+            pointOfReference.fY = centroid.fY;
+            pointOfReference.fZ = centroid.fZ;
         }
     } // Shape3d ctor
 
@@ -383,14 +383,14 @@ public:
         // miCurrVtxIdx, mCurrentVertex, 
         readShape(psPathName);
 
-        Float fCX = 0f, fCY = 0f, fCZ = 0f;
-        // The following method sets parameters cX, cY and cZ
-        getWCentroid(fCX, fCY, fCZ);  // calculate and save the world coord centroid
+        Point3d centroid = new Point3d();
+        // The following method modifies parameter centroid
+        getWCentroid(centroid);  // calculate and save the world coord centroid
 
         this.pointOfReference = new Point3d();
-        pointOfReference.fX = fCX;
-        pointOfReference.fY = fCY;
-        pointOfReference.fZ = fCZ;
+        pointOfReference.fX = centroid.fX;
+        pointOfReference.fY = centroid.fY;
+        pointOfReference.fZ = centroid.fZ;
     } // Shape3d ctor
 
 
@@ -499,14 +499,14 @@ public:
             pTransformedShape.incCurrentVertex();
         }
 
-        Float fCX = 0f, fCY = 0f, fCZ = 0f;
-        // The following method sets parameters cX, cY and cZ
-        getWCentroid(fCX, fCY, fCZ);  // calculate and save the world coord centroid
+        Point3d centroid = new Point3d();
+        // The following method modifies parameter centroid
+        getWCentroid(centroid);  // calculate and save the world coord centroid
 
         this.pointOfReference = new Point3d();
-        pointOfReference.fX = fCX;
-        pointOfReference.fY = fCY;
-        pointOfReference.fZ = fCZ;
+        pointOfReference.fX = centroid.fX;
+        pointOfReference.fY = centroid.fY;
+        pointOfReference.fZ = centroid.fZ;
     } // Shape3d ctor
 
 
@@ -590,14 +590,14 @@ public:
         mCurrentVertex.ty = 0.0f;
         mCurrentVertex.tz = 0.0f;
 
-        Float fCX = 0f, fCY = 0f, fCZ = 0f;
-        // The following method sets parameters cX, cY and cZ
-        getWCentroid(fCX, fCY, fCZ);  // calculate and save the world coord centroid
+        Point3d centroid = new Point3d();
+        // The following method modifies parameter centroid
+        getWCentroid(centroid);  // calculate and save the world coord centroid
 
         this.pointOfReference = new Point3d();
-        pointOfReference.fX = fCX;
-        pointOfReference.fY = fCY;
-        pointOfReference.fZ = fCZ;
+        pointOfReference.fX = centroid.fX;
+        pointOfReference.fY = centroid.fY;
+        pointOfReference.fZ = centroid.fZ;
     } // Shape3d ctor
 
 
@@ -967,16 +967,16 @@ public:
         mCurrentVertex.ty =  fHalfHeight;
         mCurrentVertex.tz = 0.0f;
 
-        Float fCX = 0f, fCY = 0f, fCZ = 0f;
-        // The following method sets parameters cX, cY and cZ
-        getWCentroid(fCX, fCY, fCZ);  // Calculate and save the world coord centroid
+        Point3d centroid = new Point3d();
+        // The following method modifies parameter centroid
+        getWCentroid(centroid);  // Calculate and save the world coord centroid
         if(this.pointOfReference == null) {
             this.pointOfReference = new Point3d();
         }
 
-        pointOfReference.fX = fCX;
-        pointOfReference.fY = fCY;
-        pointOfReference.fZ = fCZ;
+        pointOfReference.fX = centroid.fX;
+        pointOfReference.fY = centroid.fY;
+        pointOfReference.fZ = centroid.fZ;
 
         return 0;
     } // shapeFromBMP
@@ -1318,7 +1318,7 @@ public:
     // 
     // Called from:
     //     ImageView.onRButtonDown
-    public int getLastWorldVertex(Float pFX, Float pFY, Float pFZ) {
+    public int getLastWorldVertex(Point3d pVertex) {
       if(miNumVertices < 1) {
           return -1;
       }
@@ -1330,9 +1330,9 @@ public:
       pfZ = (currentVertex - 1).z;
       */
 
-      pFX = mVertices[miCurrVtxIdx - 1].x;
-      pFY = mVertices[miCurrVtxIdx - 1].y;
-      pFZ = mVertices[miCurrVtxIdx - 1].z;
+      pVertex.fX = mVertices[miCurrVtxIdx - 1].x;
+      pVertex.fY = mVertices[miCurrVtxIdx - 1].y;
+      pVertex.fY = mVertices[miCurrVtxIdx - 1].z;
 
       return 0;
     } // getLastWorldVertex
@@ -1343,7 +1343,7 @@ public:
     // Called from:
     //     ImageView.onLButtonUp
     //     ImageView.onRButtonDown
-    public int getPreviousWorldVertex(Float pFX, Float pFY, Float pFZ) {
+    public int getPreviousWorldVertex(Point3d pVertex) {
         if(this.miNumVertices < 2) {
             return -1;
         }
@@ -1354,9 +1354,9 @@ public:
         pFY = (currentVertex - 2).y;
         pFZ = (currentVertex - 2).z;
         */
-        pFX = mVertices[miCurrVtxIdx - 2].x;
-        pFY = mVertices[miCurrVtxIdx - 2].y;
-        pFZ = mVertices[miCurrVtxIdx - 2].z;
+        pVertex.fX = mVertices[miCurrVtxIdx - 2].x;
+        pVertex.fY = mVertices[miCurrVtxIdx - 2].y;
+        pVertex.fZ = mVertices[miCurrVtxIdx - 2].z;
 
         return 0;
     } // getPreviousWorldVertex
@@ -1392,7 +1392,7 @@ public:
     //     shapeFromBMP
     //     RenderObject ctor that takes 4 Point3d parameters
     //     RenderObject ctor that takes 4 parameters: a String, int, boolean and Point3d
-    public void getWCentroid(Float pFCentroidX, Float pFCentroidY, Float pFCentroidZ) {
+    public void getWCentroid(Point3d pCentroid) {
         if(this.miNumAllocatedVertices > 0) {
             initCurrentVertex();
             float fMaxX = mCurrentVertex.x, fMaxY = mCurrentVertex.y, fMaxZ = mCurrentVertex.z;
@@ -1417,9 +1417,9 @@ public:
             this.mfOriginZ = fMinZ + ((fMaxZ - fMinZ) / 2.0f);
 
             // Set the output parameters
-            pFCentroidX = this.mfOriginX;
-            pFCentroidY = this.mfOriginY;
-            pFCentroidZ = this.mfOriginZ;
+            pCentroid.fX = this.mfOriginX;
+            pCentroid.fY = this.mfOriginY;
+            pCentroid.fZ = this.mfOriginZ;
         } // if(this.miNumAllocatedVertices > 0)
     } // getWCentroid
 
@@ -1650,11 +1650,11 @@ public:
         // Get the centroid of the shape, and the translation which will center the shape
         // on the ray centroid.  This will adjustment normalize line equation and angle calculations.
       
-        Float fShapeCentX = 0f, fShapeCentY = 0f, fShapeCentZ = 0f;
+        Point3d centroid = new Point3d();
         // float translationX, translationY; // these variables are not used
       
         // The following method will set fShapeCentX, fShapeCentY, and fShapeCentZ
-        pShape.getWCentroid(fShapeCentX, fShapeCentY, fShapeCentZ);
+        pShape.getWCentroid(centroid);
 
         // Scan through the shape
         tempShape.initCurrentVertex();
@@ -1741,7 +1741,7 @@ public:
             if (
             (fIntX >= fMinX && fIntX <= fMaxX) && 
             (fIntY >= fMinY && fIntY <= fMaxY)) {
-                float fSegmentAngle = MathUtils.polarAtan(fIntX - fShapeCentX, fIntY - fShapeCentY);
+                float fSegmentAngle = MathUtils.polarAtan(fIntX - centroid.fX, fIntY - centroid.fY);
 
                 if(Math.abs(fSegmentAngle - fRayAngle) <= 0.01f) { // eliminate matches that are 180 degs out of phase
                     fDistance = MathUtils.getDistance2d(fIntX, fIntY, pfLastX, pfLastY);
@@ -1794,11 +1794,11 @@ public:
     public int addVertices(Shape3d pChildShape) {
         // Add the vertices of the child shape to the shape pointed to by this 
         int iNumVertices = pChildShape.getNumVertices();
-        Float fmCentroidX = 0f, fmCentroidY = 0f, fmCentroidZ = 0f;
-        Float fcCentroidX = 0f, fcCentroidY = 0f, fcCentroidZ = 0f;
+        Point3d currCentroid = new Point3d();
+        Point3d chldCentroid = new Point3d();
 
-        this.getWCentroid(fmCentroidX, fmCentroidY, fmCentroidZ);
-        pChildShape.getWCentroid(fcCentroidX, fcCentroidY, fcCentroidZ);
+        this.getWCentroid(currCentroid);
+        pChildShape.getWCentroid(chldCentroid);
 
         int i, j, iNumMVertices; 
         float fcx, fcy, fmx1, fmy1, fmx2, fmy2;
@@ -1818,21 +1818,21 @@ public:
         for (j = 1; j <= iNumVertices; j++) {
             fcx = pChildShape.mCurrentVertex.x;
             fcy = pChildShape.mCurrentVertex.y;
-            fChildAngle = MathUtils.polarAtan(fcx - fcCentroidX, fcy - fcCentroidY);
+            fChildAngle = MathUtils.polarAtan(fcx - chldCentroid.fX, fcy - chldCentroid.fY);
 
             iNumMVertices = this.getNumVertices();
             this.initCurrentVertex();
             for(i = 1; i <= iNumMVertices; i++) {
                 fmx1 = this.mCurrentVertex.x;
                 fmy1 = this.mCurrentVertex.y;
-                fmAngle1 = MathUtils.polarAtan(fmx1 - fmCentroidX, fmy1 - fmCentroidY);
+                fmAngle1 = MathUtils.polarAtan(fmx1 - currCentroid.fX, fmy1 - currCentroid.fY);
                 
                 // this.currentVertex++;
                 this.incCurrentVertex();
 
                 fmx2 = this.mCurrentVertex.x;
                 fmy2 = this.mCurrentVertex.y;
-                fmAngle2 = MathUtils.polarAtan(fmx2 - fmCentroidX, fmy2 - fmCentroidY);
+                fmAngle2 = MathUtils.polarAtan(fmx2 - currCentroid.fX, fmy2 - currCentroid.fY);
                 if (fmAngle2 > fmAngle1) { 
                     iCClockWise++;
                 } else {
