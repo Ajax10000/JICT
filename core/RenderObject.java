@@ -102,24 +102,24 @@ protected:
         }
 
         this.mCurrentShape = new Shape3d(pULPt, pURPt, pLRPt, pLLPt);
-        Float fCentroidX = 0f, fCentroidY = 0f, fCentroidZ = 0f;
-        // The following method sets all 3 parameters
-        this.mCurrentShape.getWCentroid(fCentroidX, fCentroidY, fCentroidZ);
+        Point3d centroid = new Point3d();
+        // The following method modifies parameter centroid
+        this.mCurrentShape.getWCentroid(centroid);
 
         // Make certain the shape is centered in the X-Y plane.
         if(
-        (fCentroidX > 0.5f || fCentroidX < -0.5f) ||
-        (fCentroidY > 0.5f || fCentroidY < -0.5f) ||
-        (fCentroidZ > 0.5f || fCentroidZ < -0.5f) ) {
+        (centroid.fX > 0.5f || centroid.fX < -0.5f) ||
+        (centroid.fY > 0.5f || centroid.fY < -0.5f) ||
+        (centroid.fZ > 0.5f || centroid.fZ < -0.5f) ) {
             String sMsgText = String.format("RenderObject Constructor 1: Centering shape - xCent: %f, yCent: %f zCent: %f",
-                fCentroidX, fCentroidY, fCentroidZ);
+                centroid.fX, centroid.fY, centroid.fZ);
             Globals.statusPrint(sMsgText);
-            mCurrentShape.translateW(-fCentroidX, -fCentroidY, -fCentroidZ);   
+            mCurrentShape.translateW(-centroid.fX, -centroid.fY, -centroid.fZ);   
             mCurrentShape.floor();   
-            mCurrentShape.getWCentroid(fCentroidX, fCentroidY, fCentroidZ);
+            mCurrentShape.getWCentroid(centroid);
         }
 
-        mCurrentShape.setReferencePoint(fCentroidX, fCentroidY, fCentroidZ);
+        mCurrentShape.setReferencePoint(centroid.fX, centroid.fY, centroid.fZ);
         this.mLastShape = new Shape3d(4); // 4 vertex shape with coords set to 0
         this.mMatrix = new TMatrix();
         this.mbValid = true;
@@ -133,7 +133,7 @@ protected:
     public RenderObject(String psFileName, int piModelType, boolean pbUserPOR, Point3d POR) {
         boolean bValidCurrentShape = true;
         boolean bValidLastShape = true;
-        Float fCentroidX = 0f, fCentroidY = 0f, fCentroidZ = 0f;
+        Point3d centroid = new Point3d();
 
         this.mCurrentShape = null;
         this.mLastShape = null;
@@ -175,17 +175,17 @@ protected:
                 JICTConstants.I_RANDOM, 'R', 0);
 
             // Make certain the QuadMesh is centered in the X-Y plane.
-            Globals.getMeshCentroid(mXImage, mYImage, mZImage, fCentroidX, fCentroidY, fCentroidZ);
+            Globals.getMeshCentroid(mXImage, mYImage, mZImage, centroid);
             if(
-            (fCentroidX > 0.5f || fCentroidX < -0.5f) ||
-            (fCentroidY > 0.5f || fCentroidY < -0.5f) ||
-            (fCentroidZ > 0.5f || fCentroidZ < -0.5f) ) {
-                String msgText = "RenderObject Constructor 2: Centering QuadMesh - " + 
-                    "xCent: "   + fCentroidX + 
-                    ", yCent: " + fCentroidY + 
-                    ", zCent: " + fCentroidZ;
+            (centroid.fX > 0.5f || centroid.fX < -0.5f) ||
+            (centroid.fY > 0.5f || centroid.fY < -0.5f) ||
+            (centroid.fZ > 0.5f || centroid.fZ < -0.5f) ) {
+                String msgText = "RenderObject Constructor 2: Centering QuadMesh -" + 
+                    " xCent: "  + centroid.fX + 
+                    ", yCent: " + centroid.fY + 
+                    ", zCent: " + centroid.fZ;
                 Globals.statusPrint(msgText);
-                Globals.translateMesh(mXImage, mYImage, mZImage, -fCentroidX, -fCentroidY, -fCentroidZ);
+                Globals.translateMesh(mXImage, mYImage, mZImage, -centroid.fX, -centroid.fY, -centroid.fZ);
             }
 
             // Create shape objects. store the quadmesh centroid in the currentshape
@@ -218,20 +218,20 @@ protected:
                   mCurrentShape.setReferencePoint(POR.fX, POR.fY, POR.fZ);
                 } else {
                     // Make certain the shape is centered in the X-Y plane.
-                    mCurrentShape.getWCentroid(fCentroidX, fCentroidY, fCentroidZ);
+                    mCurrentShape.getWCentroid(centroid);
                     if(
-                    (fCentroidX > 0.5f || fCentroidX < -0.5f) ||
-                    (fCentroidY > 0.5f || fCentroidY < -0.5f) ||
-                    (fCentroidZ > 0.5f || fCentroidZ < -0.5f) ) {
+                    (centroid.fX > 0.5f || centroid.fX < -0.5f) ||
+                    (centroid.fY > 0.5f || centroid.fY < -0.5f) ||
+                    (centroid.fZ > 0.5f || centroid.fZ < -0.5f) ) {
                         String msgText = "RenderObject Constructor 2: Centering Shape - " + 
-                            "xCent: "   + fCentroidX + 
-                            ", yCent: " + fCentroidY + 
-                            ", zCent: " + fCentroidZ;
+                            "xCent: "   + centroid.fX + 
+                            ", yCent: " + centroid.fY + 
+                            ", zCent: " + centroid.fZ;
                         Globals.statusPrint(msgText);
-                        mCurrentShape.translateW(-fCentroidX, -fCentroidY, -fCentroidZ);   
+                        mCurrentShape.translateW(-centroid.fX, -centroid.fY, -centroid.fZ);   
                     }
-                    mCurrentShape.getWCentroid(fCentroidX, fCentroidY, fCentroidZ);
-                    mCurrentShape.setReferencePoint(fCentroidX, fCentroidY, fCentroidZ);
+                    mCurrentShape.getWCentroid(centroid);
+                    mCurrentShape.setReferencePoint(centroid.fX, centroid.fY, centroid.fZ);
                 }
             }
 
@@ -256,23 +256,21 @@ protected:
                 if(pbUserPOR) {  // If the user has defined a Point of Reference
                     mCurrentShape.setReferencePoint(POR.fX, POR.fY, POR.fZ);
                 } else {
-                    mCurrentShape.getWCentroid(fCentroidX, fCentroidY, fCentroidZ);
-
                     // Make certain the shape is centered in the X-Y plane.
-                    mCurrentShape.getWCentroid(fCentroidX, fCentroidY, fCentroidZ);
+                    mCurrentShape.getWCentroid(centroid);
                     if(
-                    (fCentroidX > 0.5f || fCentroidX < -0.5f) ||
-                    (fCentroidY > 0.5f || fCentroidY < -0.5f) ||
-                    (fCentroidZ > 0.5f || fCentroidZ < -0.5f) ) {
-                        String sMsgText = "RenderObject Constructor 2: Centering Shape: " + 
-                            "xCent: "   + fCentroidX + 
-                            ", yCent: " + fCentroidY + 
-                            ", zCent: " + fCentroidZ;
+                    (centroid.fX > 0.5f || centroid.fX < -0.5f) ||
+                    (centroid.fY > 0.5f || centroid.fY < -0.5f) ||
+                    (centroid.fZ > 0.5f || centroid.fZ < -0.5f) ) {
+                        String sMsgText = "RenderObject Constructor 2: Centering Shape:" + 
+                            " xCent: "  + centroid.fX + 
+                            ", yCent: " + centroid.fY + 
+                            ", zCent: " + centroid.fZ;
                         Globals.statusPrint(sMsgText);
-                        mCurrentShape.translateW(-fCentroidX, -fCentroidY, -fCentroidZ);   
+                        mCurrentShape.translateW(-centroid.fX, -centroid.fY, -centroid.fZ);   
                     }
-                    mCurrentShape.getWCentroid(fCentroidX, fCentroidY, fCentroidZ);
-                    mCurrentShape.setReferencePoint(fCentroidX, fCentroidY, fCentroidZ);
+                    mCurrentShape.getWCentroid(centroid);
+                    mCurrentShape.setReferencePoint(centroid.fX, centroid.fY, centroid.fZ);
                 }
             }
 
