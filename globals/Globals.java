@@ -3073,9 +3073,10 @@ public class Globals {
     // This method originally came from QMESHMODEL.CPP
     // 
     // Called from:
+    //     MorphDlg.onOK
     //     RenderObject ctor that takes 4 parameters: a String, int, boolean and Point3d
     public static int getMeshCentroid(MemImage pxMImage, MemImage pyMImage, MemImage pzMImage,
-    Float pFCentroidX, Float pFCentroidY, Float pFCentroidZ) {
+    Point3d pCentroid) {
         String sMsgText;
         statusPrint("Calculating mesh centroid");
 
@@ -3117,11 +3118,11 @@ public class Globals {
         } // for iRow
 
         // Set the output parameters
-        pFCentroidX = fX1/fTotalCells;
-        pFCentroidY = fY1/fTotalCells;
-        pFCentroidZ = fZ1/fTotalCells;
+        pCentroid.fX = fX1/fTotalCells;
+        pCentroid.fY = fY1/fTotalCells;
+        pCentroid.fZ = fZ1/fTotalCells;
 
-        sMsgText = "Mesh centroid calculated: " + pFCentroidX + " " + pFCentroidY + " " + pFCentroidZ;
+        sMsgText = "Mesh centroid calculated: " + pCentroid.fX + " " + pCentroid.fY + " " + pCentroid.fZ;
         statusPrint(sMsgText);
 
         return 0;
