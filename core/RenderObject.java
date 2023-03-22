@@ -894,11 +894,11 @@ protected:
         float tx = 0.0f, ty = 0.0f, tz = 0.0f;
         byte i1;
         Integer sx1 = 0, sy1 = 0;
-        Float refX = 0f, refY = 0f, refZ = 0f;
+        Point3d refPt = new Point3d();
         int meshIncrement = 6;
 
         // Get the model's referencePoint
-        mCurrentShape.getReferencePoint(refX, refY, refZ);
+        mCurrentShape.getReferencePoint(refPt);
 
         // Preview the mesh
         for (row = 1; row <= imHeight; row += meshIncrement) {
@@ -911,7 +911,7 @@ protected:
                 // Project to the screen
                 mMatrix.transformAndProjectPoint(x1, y1, z1, 
                     sx1, sy1, 
-                    refX, refY, refZ, 
+                    refPt.fX, refPt.fY, refPt.fZ, 
                     piScreenHeight, piScreenWidth, 
                     tx, ty, tz);
                 
@@ -1085,11 +1085,11 @@ protected:
         Float tx = 0f, ty = 0f, tz = 0f;
         byte i1;
         Integer sx1 = 0, sy1 = 0;
-        Float refX = 0f, refY = 0f, refZ = 0f;
+        Point3d refPt = new Point3d();
         // int meshIncrement = 6; // variable not used
 
         // Get the model's referencePoint
-        mCurrentShape.getReferencePoint(refX, refY, refZ);
+        mCurrentShape.getReferencePoint(refPt);
 
         // Render the mesh
         mMatrix.display("RenderObject.renderMesh");
@@ -1103,7 +1103,7 @@ protected:
 
                 // Project to the screen
                 mMatrix.transformAndProjectPoint(x1, y1, z1, sx1, sy1, 
-                    refX, refY, refZ, 
+                    refPt.fX, refPt.fY, refPt.fZ, 
                     outHeight, outWidth, 
                     tx, ty, tz);
                 if(row == 1) {
@@ -1276,7 +1276,7 @@ protected:
         float x1, y1, z1;
         byte i1;
         Integer sx1 = 0, sy1 = 0;
-        Float refX = 0f, refY = 0f, refZ = 0f;
+        Point3d refPt = new Point3d();
         Point3d c1 = new Point3d();
         Point3d c2 = new Point3d();
         Point3d p1 = new Point3d();
@@ -1294,7 +1294,7 @@ protected:
         Point3d nc2 = new Point3d();;
 
         // Get the model's referencePoint
-        mCurrentShape.getReferencePoint(refX, refY, refZ);
+        mCurrentShape.getReferencePoint(refPt);
         float tx = 0.0f, ty = 0.0f, tz = 0.0f;
 
         for (row = 1; row <= imHeight; row++) {
@@ -1306,7 +1306,7 @@ protected:
 
                 // Project to the screen
                 mMatrix.transformAndProjectPoint(x1, y1, z1, sx1, sy1, 
-                    refX, refY, refZ, 
+                    refPt.fX, refPt.fY, refPt.fZ, 
                     outHeight, outWidth, 
                     tx, ty, tz);
 
@@ -1714,10 +1714,10 @@ protected:
         float I1d, I2d, I3d, I4d;
         int index, index1, index2, index3, index4;
         // int myStatus; // this variable is not used
-        Float tx1 = 0f, ty1 = 0f, tz1 = 0f;
-        Float tx2 = 0f, ty2 = 0f, tz2 = 0f; 
-        Float tx3 = 0f, ty3 = 0f, tz3 = 0f; 
-        Float tx4 = 0f, ty4 = 0f, tz4 = 0f;
+        Point3d trnsfVtx01 = new Point3d();
+        Point3d trnsfVtx02 = new Point3d();
+        Point3d trnsfVtx03 = new Point3d(); 
+        Point3d trnsfVtx04 = new Point3d();
         Point3d p1 = new Point3d();
         Point3d p2 = new Point3d();
         Point3d p3 = new Point3d();
@@ -1753,27 +1753,27 @@ protected:
 
             // Draw the face
             if(index4 > 0) {
-                // The following method sets parameters tx1, ty1, and tz1
-                mCurrentShape.getTransformedVertex(index1, tx1, ty1, tz1);
+                // The following method modifies parameter trnsfVtx01
+                mCurrentShape.getTransformedVertex(index1, trnsfVtx01);
 
-                // The following method sets parameters tx2, ty2, and tz2
-                mCurrentShape.getTransformedVertex(index2, tx2, ty2, tz2);
+                // The following method modifies paramter trnsfVtx02
+                mCurrentShape.getTransformedVertex(index2, trnsfVtx02);
 
-                // The following method sets parameters tx3, ty3, and tz3
-                mCurrentShape.getTransformedVertex(index3, tx3, ty3, tz3);
+                // The following method modifies parameter trnsfVtx03
+                mCurrentShape.getTransformedVertex(index3, trnsfVtx03);
 
-                // The following method sets parameters tx4, ty4, and tz4
-                mCurrentShape.getTransformedVertex(index4, tx4, ty4, tz4);
+                // The following method modifies parameter trnsfVtx04
+                mCurrentShape.getTransformedVertex(index4, trnsfVtx04);
 
                 // I1d, I2d, I3d, and I4d will be used later as parameters to MemImage.fillPolyz
-                I1d = MathUtils.getDistance3d(vx, vy, vz, tx1, ty1, tz1);
-                I2d = MathUtils.getDistance3d(vx, vy, vz, tx2, ty2, tz2);
-                I3d = MathUtils.getDistance3d(vx, vy, vz, tx3, ty3, tz3);
-                I4d = MathUtils.getDistance3d(vx, vy, vz, tx4, ty4, tz4);
-                p1.fX = tx1; p1.fY = ty1; p1.fZ = tz1;
-                p2.fX = tx2; p2.fY = ty2; p2.fZ = tz2;
-                p3.fX = tx3; p3.fY = ty3; p3.fZ = tz3;
-                p4.fX = tx4; p4.fY = ty4; p4.fZ = tz4;
+                I1d = MathUtils.getDistance3d(vx, vy, vz, trnsfVtx01.fX, trnsfVtx01.fY, trnsfVtx01.fZ);
+                I2d = MathUtils.getDistance3d(vx, vy, vz, trnsfVtx02.fX, trnsfVtx02.fY, trnsfVtx02.fZ);
+                I3d = MathUtils.getDistance3d(vx, vy, vz, trnsfVtx03.fX, trnsfVtx03.fY, trnsfVtx03.fZ);
+                I4d = MathUtils.getDistance3d(vx, vy, vz, trnsfVtx04.fX, trnsfVtx04.fY, trnsfVtx04.fZ);
+                p1.fX = trnsfVtx01.fX; p1.fY = trnsfVtx01.fY; p1.fZ = trnsfVtx01.fZ;
+                p2.fX = trnsfVtx02.fX; p2.fY = trnsfVtx02.fY; p2.fZ = trnsfVtx02.fZ;
+                p3.fX = trnsfVtx03.fX; p3.fY = trnsfVtx03.fY; p3.fZ = trnsfVtx03.fZ;
+                p4.fX = trnsfVtx04.fX; p4.fY = trnsfVtx04.fY; p4.fZ = trnsfVtx04.fZ;
                 I1p = Globals.getLight(p1, p2, p3, p4);
 
                 pOutputMImage.fillPolyz(
