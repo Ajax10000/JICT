@@ -322,7 +322,7 @@ protected:
         int iYOffset = piScreenHeight / 2;
       
         if (this.miModelType == JICTConstants.I_QUADMESH) {
-            previewMesh(graphics2D, psModelName, iXOffset, iYOffset, piScreenHeight, piScreenWidth);
+            previewMesh(graphics2D, psModelName, piScreenHeight, piScreenWidth);
             return;
         }
 
@@ -421,7 +421,7 @@ protected:
         int iYOffset = piScreenHeight / 2;
         
         if (miModelType == JICTConstants.I_QUADMESH) {
-            previewMesh(graphics2D, psModelName, iXOffset, iYOffset, piScreenHeight, piScreenWidth);
+            previewMesh(graphics2D, psModelName, piScreenHeight, piScreenWidth);
             return;
         }
         
@@ -824,9 +824,9 @@ protected:
     // wireframe view of the model.
     // See p 172 of Visual Special Effects Toolkit in C++.
     // Called from:
+    //     drawSequence
     //     drawStill
     private void previewMesh(Graphics2D pGraphics2D, String psModelName, 
-    float pfXOff, float pfYOff, // are these 2 parameters used?
     int piScreenHeight, int piScreenWidth) {
         // Create the line buffer data structure
         int[] xBuffer, yBuffer;
@@ -1025,8 +1025,7 @@ protected:
     // 6 parameters: a String, 4 MemImage ojbects, and a TMatrix.
     // Called from:
     //     SceneList.render
-    public int renderMesh(MemImage pOutputMImage, MemImage pInputMImage, 
-    boolean pbBlendIndicator) { // parameter pbBlendIndicator is not used
+    public int renderMesh(MemImage pOutputMImage, MemImage pInputMImage) { 
         // Create the line buffer data structure
         int[] xBuffer, yBuffer;
         int xBufferIdx, yBufferIdx;
@@ -1180,7 +1179,6 @@ protected:
     // Called from:
     //     SceneList.render
     public int renderMeshz(MemImage pOutputMImage, 
-    MemImage pMaskMImage, // this parameter is not used
     MemImage pInputMImage, MemImage pZBuffMImage, float pfVx, float pfVy, float pfVz) {
         String msgText;
 
@@ -1547,13 +1545,10 @@ protected:
     // TODO: Not a method of RenderObject in the original C++ code
     // 
     // Could not find where this method is called from.
-    // TODO: Parameters piOutHeight and piOutWidth are not used.
     void transformAndProjectPoint2(TMatrix pTMatrix, 
     float pfX, float pfY, float pfZ, 
     ScreenVertex pScreenVtx, 
-    float pfRefX, float pfRefY, float pfRefZ, 
-    int piOutHeight, int piOutWidth) {
-        // Note that parameters piOutHeight and piOutWidth are not used.
+    float pfRefX, float pfRefY, float pfRefZ) {
         // Use Wein87 projection, described in the book 
         // Computer Graphcs: Principles and Practice, 2nd ed.,
         // by Foley, van Dam, Feiner and Hughes, p 256
@@ -1642,8 +1637,7 @@ protected:
     // Not called from within this file
     // Called from:
     //     SceneList.render
-    // TODO: Parameter pbBlendIndicator is not used
-    public int renderShape(MemImage pOutputMImage, boolean pbBlendIndicator) {
+    public int renderShape(MemImage pOutputMImage) {
         if(mCurrentShape.getNumFaces() == 0) {
             Globals.statusPrint("RenderObject.renderShape: Shape has no faces - cannot be rendered");
             return 0;
@@ -1699,9 +1693,8 @@ protected:
     // Not called from within this file
     // Called from:
     //     SceneList.render
-    // TODO: Parameter pAlphaMImage is not used
     public int renderShapez(MemImage pOutputMImage, 
-    MemImage pAlphaMImage, MemImage pZBufMImage, 
+    MemImage pZBufMImage, 
     float vx, float vy, float vz) {
         
         // The shape object is already transformed upon entry to this procedure
