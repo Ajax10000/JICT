@@ -201,10 +201,12 @@ public:
                 */
                 // nullPointer will be used to set firstVertex
 
-                Integer iWidth = 0, iHeight = 0;
+                
                 StringBuffer sbSceneName = new StringBuffer();
-                Integer iEffectType = 0; 
-                Integer iColorMode = 0;
+                OneInt widthOI = new OneInt();
+                OneInt heightOI = new OneInt();
+                OneInt effectTypeOI = new OneInt(); 
+                OneInt colorModeOI = new OneInt();
 
                 // Get the pointer to the sceneList object in order to get the output image size.
                 // Get the sceneList object from the application
@@ -212,9 +214,9 @@ public:
                 SceneList aSceneList = theFrame.mSceneList;
 
                 // The following method sets all the parameters
-                // However parameters sSceneName, iEffectType and iColorMode will
+                // However parameters sbSceneName, effectTypeOI and colorModeOI will
                 // not henceforth be used in this constructor.
-                aSceneList.getSceneInfo(sbSceneName, iEffectType, iColorMode, iHeight, iWidth); 
+                aSceneList.getSceneInfo(sbSceneName, effectTypeOI, colorModeOI, heightOI, widthOI); 
 
                 // Using the scene information, populate this object's fields.
                 this.mVertices = nullPointer;
@@ -222,8 +224,8 @@ public:
                 // this.currentVertex = this.firstVertex;
                 this.miCurrVtxIdx = 0;
                 this.miNumAllocatedVertices = this.miNumVertices;
-                float fHalfHeight = iHeight/ 2.0f;
-                float fHalfWidth  = iWidth / 2.0f;
+                float fHalfHeight = heightOI.i / 2.0f;
+                float fHalfWidth  = widthOI.i / 2.0f;
 
                 mCurrentVertex.sx = -fHalfWidth;
                 mCurrentVertex.sy = -fHalfHeight;
