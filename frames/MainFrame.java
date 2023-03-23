@@ -17,6 +17,8 @@ import dialogs.QuadMeshDlg;
 import dialogs.ScenePreviewDlg;
 import dialogs.WarpParamDlg;
 
+import dtos.OneInt;
+
 import fileUtils.BMPFileFilter;
 import fileUtils.FileUtils;
 import fileUtils.SCNFileFilter;
@@ -226,7 +228,7 @@ protected:
 
     // Set in:
     //     onToolsCreateASceneList (when SceneList.getSceneInfo is called)
-    public StringBuffer msSceneName = new StringBuffer();
+    public StringBuffer msbSceneName = new StringBuffer();
 
     // Set in:
     //     onToolsCreateASceneList
@@ -238,15 +240,16 @@ protected:
     //     onToolsCreateASceneList
     // Set in:
     //     onToolsCreateASceneList (set when method SceneList.getSceneInfo is called)
-    public Integer mIEffectType;
+    public int miEffectType;
 
     // Set in:
     //     onToolsCreateASceneList (set when method SceneList.getSceneInfo is called)
-    public Integer mIColorMode;
+    public int miColorMode;
     public int miMode;
 
     // Initialized in the constructor when it calls initFields
-    public Integer mIOutputRows = 0, mIOutputColumns = 0;
+    public int miOutputRows = 0; 
+    public int miOutputColumns = 0;
 
     // Changed from int to boolean
     // Initialized to false in initFields
@@ -518,8 +521,8 @@ protected:
         this.mbImageSamplingEnabled = false;
         this.mbPreviewingScene = false;
         this.mbPreviewingSequence = false;
-        this.mIOutputRows = 250;  // Set these in case a SceneList is not read in
-        this.mIOutputColumns = 250;
+        this.miOutputRows = 250;  // Set these in case a SceneList is not read in
+        this.miOutputColumns = 250;
         this.mbChangeViewPoint = false;
         this.mSceneList = new SceneList();
         this.mViewMatrix = new TMatrix();
@@ -1169,13 +1172,21 @@ POPUP "Tools"
 
         msSceneFileName = dlg.getSelectedFile().getName();  // save the file name
 
-        // Load the scene information into the client object
-        // The following method sets fields msSceneName, mIEffectType, mIColorMode, 
-        // mIOutputRows and mIOutputColumns
-        // Class SceneList stored the information after ScnFileParser parsed file aFileName
-        mSceneList.getSceneInfo(msSceneName, mIEffectType, mIColorMode, 
-            mIOutputRows, mIOutputColumns);
+        OneInt effectTypeOI = new OneInt();
+        OneInt colorModeOI = new OneInt();
+        OneInt outputRowsOI = new OneInt();
+        OneInt outputColsOI = new OneInt();
 
+        // Load the scene information into the client object
+        // The following method sets all the parameters.
+        // Class SceneList stored the information after ScnFileParser parsed file aFileName
+        mSceneList.getSceneInfo(msbSceneName, effectTypeOI, colorModeOI, 
+            outputRowsOI, outputColsOI);
+
+        miEffectType = effectTypeOI.i;
+        miColorMode = colorModeOI.i;
+        miOutputRows = outputRowsOI.i;
+        miOutputColumns = outputColsOI.i;
         Point3d viewTrans = new Point3d();
         Point3d viewRot = new Point3d();
         // The following method modifies parameters viewTran and viewRot
@@ -1190,7 +1201,7 @@ POPUP "Tools"
 
         getViewMatrix();
 
-        if((this.mIEffectType == JICTConstants.I_SEQUENCE) || (this.mIEffectType == JICTConstants.I_MORPH)) {
+        if((this.miEffectType == JICTConstants.I_SEQUENCE) || (this.miEffectType == JICTConstants.I_MORPH)) {
             this.mbPreviewSequenceEnabled = true;
             this.mbPreviewSceneEnabled    = false;
             this.mbRenderSceneEnabled     = false;
@@ -1683,7 +1694,7 @@ POPUP "Tools"
 
         getViewMatrix();
         mSceneList.render(renderView, mViewMatrix, mbDepthSortingEnabled, mbZBufferEnabled, 
-            mbAntiAliasEnabled, mbHazeFogEnabled);
+            mbAntiAliasEnabled);
         mbRenderSceneEnabled = false;
 
         mbIsDirty = true;	
@@ -1716,7 +1727,7 @@ POPUP "Tools"
 
         getViewMatrix();
         mSceneList.render(renderView, mViewMatrix, mbDepthSortingEnabled, 
-            mbZBufferEnabled, mbAntiAliasEnabled, mbHazeFogEnabled);
+            mbZBufferEnabled, mbAntiAliasEnabled);
         mbRenderSequenceEnabled = false;
         mbIsDirty = true;
     } // onRenderSequence
