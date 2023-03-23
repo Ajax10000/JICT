@@ -30,7 +30,7 @@ public interface ISceneList {
     int listLength();
 
     int getSceneInfo(StringBuffer psbName, 
-    Integer pIType, Integer pICMode, Integer pIOutRows, Integer piOutCols);
+    OneInt pTypeOI, OneInt pCModeOI, OneInt pOutRowsOI, OneInt pOutColsOI);
 
     int setSceneOutImageSize(int piOutRows, int piOutCols);
 
@@ -46,8 +46,7 @@ public interface ISceneList {
     int previewStill(BufferedImage buffImg, TMatrix modelMatrix, TMatrix viewMatrix);
 
     int render(ImageView displayWindow, TMatrix viewMatrix,
-    boolean depthSortingEnabled, boolean zBufferEnabled, boolean antiAliasEnabled, 
-    boolean hazeFogEnabled);
+    boolean depthSortingEnabled, boolean zBufferEnabled, boolean antiAliasEnabled);
 
     void getFileName(StringBuffer psbOutputFileName, String psPrefix, 
     int piCounter, int piTheColor);
