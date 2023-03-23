@@ -312,8 +312,9 @@ public:
     //     preview
     //     previewStill
     //     render
+    //     Shape3d constructor that takes 2 parameters, a String and an int
     public int getSceneInfo(StringBuffer psbName, 
-    Integer pIType, Integer pICMode, Integer pIOutRows, Integer piOutCols) {
+    OneInt pTypeOI, OneInt pCModeOI, OneInt pOutRowsOI, OneInt pOutColsOI) {
         Scene scene = this.mSceneListHead;
         scene = scene.mNextEntry;  // Skip over the list header
         if (scene == null) {
@@ -322,10 +323,10 @@ public:
 
         // Set the output parameters
         psbName   = psbName.append(scene.msSceneName);
-        pIType    = scene.miSequenceType;
-        pICMode   = scene.miColorMode;
-        pIOutRows = scene.miOutputRows;
-        piOutCols = scene.miOutputColumns;
+        pTypeOI.i    = scene.miSequenceType;
+        pCModeOI.i   = scene.miColorMode;
+        pOutRowsOI.i = scene.miOutputRows;
+        pOutColsOI.i = scene.miOutputColumns;
 
         return 0;
     } // getSceneInfo
@@ -503,9 +504,10 @@ public:
         String sMsgText;
         int iStatus = 0;
         StringBuffer sbSceneName = new StringBuffer();
-        Integer iEffectType = 0;
-        Integer iColorMode = 0;
-        Integer iOutputRows = 0, iOutputColumns = 0;
+        OneInt effectTypeOI = new OneInt();
+        OneInt colorModeOI = new OneInt();
+        OneInt outputRowsOI = new OneInt();
+        OneInt outputColumnsOI = new OneInt();
         Integer iFirstFrame = 0, iLastFrame = 0;
         int iFrameCounter;
         int iModelCounter;
@@ -516,11 +518,11 @@ public:
         TMatrix viewModelMatrix = new TMatrix();
 
         // The following method sets all the parameters,
-        // but we will not use sSceneName nor iColorMode
-        getSceneInfo(sbSceneName, iEffectType, iColorMode, iOutputRows, iOutputColumns);
+        // but we will not use sbSceneName nor colorModeOI
+        getSceneInfo(sbSceneName, effectTypeOI, colorModeOI, outputRowsOI, outputColumnsOI);
 
         // Setup for smooth animation.
-        MemImage tempImage = new MemImage(iOutputRows, iOutputColumns);
+        MemImage tempImage = new MemImage(outputRowsOI.i, outputColumnsOI.i);
         /* TODO: Replace this with Java code
         hBitmap = CreateBitmap((int)iOutputColumns, (int)iOutputRows, 1,
             1, tempImage.getBytes());
@@ -531,7 +533,7 @@ public:
         */
 
         RECT myRect;
-        SetRect(myRect, 0, 0, iOutputColumns, iOutputRows);
+        SetRect(myRect, 0, 0, outputColumnsOI.i, outputRowsOI.i);
 
         // Preview the scene models
         scene = this.mSceneListHead;
@@ -542,7 +544,7 @@ public:
         }
 
         iFirstFrame = iLastFrame = 0;
-        if(iEffectType == JICTConstants.I_SEQUENCE) {
+        if(effectTypeOI.i == JICTConstants.I_SEQUENCE) {
             // The following method sets both iFirstFrame and iLastFrame (of type Integer)
             scene.mSensorMotion.getFirstLastFrame(iFirstFrame, iLastFrame);
         }
@@ -551,7 +553,7 @@ public:
             // Clear the memoryDC by drawing a filled white rectangle
             //FillRect(memoryDC, myRect, GetStockObject(WHITE_BRUSH));
             modelSE = scene.mHead;
-            if(iEffectType == JICTConstants.I_SEQUENCE) {
+            if(effectTypeOI.i == JICTConstants.I_SEQUENCE) {
                 // The following method sets parameter pViewMatrix
                 getViewMatrix(pViewMatrix, iFrameCounter, scene);
             }
@@ -592,14 +594,14 @@ public:
 
                     // Compose the model transforms
                     if(
-                    (iEffectType == JICTConstants.I_SEQUENCE) && 
+                    (effectTypeOI.i == JICTConstants.I_SEQUENCE) && 
                     (modelSE.mModelMotion != null)) {
                         // The following method modifies motnNode (of type MotionNode)
                         modelSE.mModelMotion.getNode(iFrameCounter, motnNode);
                     }
 
                     // The following method sets the fields of parameter xfrm (of type Bundle)
-                    adjustTransforms(iEffectType, modelSE, motnNode, xfrm);
+                    adjustTransforms(effectTypeOI.i, modelSE, motnNode, xfrm);
 
                     pModelMatrix.scale(xfrm.sx, xfrm.sy, xfrm.sz);
                     float fXRadians = xfrm.rx * JICTConstants.F_DTR;
@@ -613,7 +615,7 @@ public:
                     viewModelMatrix.multiply(pViewMatrix, pModelMatrix);
 
                     // Apply the matrix
-                    modelSE.mScreenRdrObject.transformAndProject(viewModelMatrix, iOutputRows, iOutputColumns);
+                    modelSE.mScreenRdrObject.transformAndProject(viewModelMatrix, outputRowsOI.i, outputColumnsOI.i);
 
                     // If this is a background plate, copy it to the screen
                     if(
@@ -621,11 +623,11 @@ public:
                     modelSE.mbWarpIndicator == false &&
                     modelSE.mbBlendIndicator == false) {
                         // Display a MemImage object in the indicated BufferedImage
-                        mBkgndPlateMImage.display(iOutputColumns, iOutputRows);
+                        mBkgndPlateMImage.display(outputColumnsOI.i, outputRowsOI.i);
                     } else {
                         // Draw the object
                         modelSE.mScreenRdrObject.drawSequence(pBuffImg, modelSE.msModelName, 
-                            iOutputRows, iOutputColumns, iFrameCounter);
+                            outputRowsOI.i, outputColumnsOI.i, iFrameCounter);
                     }
                 } // end if valid screen object
 
@@ -653,9 +655,10 @@ public:
         String sMsgText;
         int iStatus = 0;
         StringBuffer sbSceneName = new StringBuffer();
-        Integer iEffectType = 0;
-        Integer iColorMode = 0;
-        Integer iOutputRows = 0, iOutputColumns = 0;
+        OneInt effectTypeOI = new OneInt();
+        OneInt colorModeOI = new OneInt();
+        OneInt outputRowsOI = new OneInt();
+        OneInt outputColumnsOI = new OneInt();
         Integer iFirstFrame = 0, iLastFrame = 0;
         int iFrameCounter;
         int iModelCounter;
@@ -673,8 +676,8 @@ public:
         TMatrix tempMatrix = new TMatrix();
         
         // The following method sets all the parameters
-        // but we will not use sSceneName nor iColorMode
-        getSceneInfo(sbSceneName, iEffectType, iColorMode, iOutputRows, iOutputColumns);
+        // but we will not use sbSceneName nor colorModeOI
+        getSceneInfo(sbSceneName, effectTypeOI, colorModeOI, outputRowsOI, outputColumnsOI);
         // int xOffset = iOutputColumns / 2; // this variable is not used
         // int yOffset = iOutputRows / 2; // this variable is not used
 
@@ -687,14 +690,14 @@ public:
         }
 
         iFirstFrame = iLastFrame = 0;
-        if(iEffectType == JICTConstants.I_SEQUENCE) {
+        if(effectTypeOI.i == JICTConstants.I_SEQUENCE) {
             // The following method sets both iFirstFrame and iLastFrame (of type Integer)
             scene.mSensorMotion.getFirstLastFrame(iFirstFrame, iLastFrame);
         }
 
         for(iFrameCounter = iFirstFrame; iFrameCounter <= iLastFrame; iFrameCounter++) {
             modelSE = scene.mHead;  // Point to the first model
-            if(iEffectType == JICTConstants.I_SEQUENCE) {
+            if(effectTypeOI.i == JICTConstants.I_SEQUENCE) {
                 // The following method sets parameter pViewMatrix
                 getViewMatrix(pViewMatrix, iFrameCounter, scene);
             }
@@ -742,14 +745,14 @@ public:
 
                     // Compose the appropriate transforms
                     if(
-                    (iEffectType == JICTConstants.I_SEQUENCE) && 
+                    (effectTypeOI.i == JICTConstants.I_SEQUENCE) && 
                     (modelSE.mModelMotion != null)) {
                         modelSE.mModelMotion.getNode(iFrameCounter, motnNode);
                     }
                 
                     if(modelSE.miModelType == JICTConstants.I_COMPOUND) {
                         // The following method sets the fields of parameter cxfrm (of type Bundle)
-                        adjustTransforms(iEffectType, modelSE, motnNode, cxfrm);
+                        adjustTransforms(effectTypeOI.i, modelSE, motnNode, cxfrm);
                         cModelMatrix.scale(cxfrm.sx, cxfrm.sy, cxfrm.sz);
                         float fXRadians = cxfrm.rx * JICTConstants.F_DTR;
                         float fYRadians = cxfrm.ry * JICTConstants.F_DTR;
@@ -758,7 +761,7 @@ public:
                         cModelMatrix.translate(cxfrm.tx, cxfrm.ty, cxfrm.tz);
                     } else {
                         // The following method sets the fields of parameter xfrm (of type Bundle)
-                        adjustTransforms(iEffectType, modelSE, motnNode, xfrm);
+                        adjustTransforms(effectTypeOI.i, modelSE, motnNode, xfrm);
                         pModelMatrix.scale(xfrm.sx, xfrm.sy, xfrm.sz);
                         float fXRadians = xfrm.rx * JICTConstants.F_DTR;
                         float fYRadians = xfrm.ry * JICTConstants.F_DTR;
@@ -781,7 +784,7 @@ public:
                     if(modelSE.miModelType == JICTConstants.I_COMPOUND) {
                         saveModelSE = modelSE;
                         // The following method modifies parameter centroid
-                        calcCompoundModelRefPoint(modelSE, iOutputRows, iOutputColumns, 
+                        calcCompoundModelRefPoint(modelSE, outputRowsOI.i, outputColumnsOI.i, 
                             centroid);
                         modelSE = saveModelSE;
                     }
@@ -792,7 +795,7 @@ public:
                     modelSE.mbCompoundModelMember == false) {
                         // Apply the matrix
                         modelSE.mScreenRdrObject.transformAndProject(viewModelMatrix, 
-                            iOutputRows, iOutputColumns);
+                            outputRowsOI.i, outputColumnsOI.i);
                     }
 
                     if(
@@ -801,7 +804,7 @@ public:
                     modelSE.mbCompoundModelMember) {
                         // Apply the matrix
                         modelSE.mScreenRdrObject.transformAndProject(viewModelMatrix,
-                            iOutputRows, iOutputColumns, modelSE.mbCompoundModelMember, 
+                            outputRowsOI.i, outputColumnsOI.i, modelSE.mbCompoundModelMember, 
                             centroid.fX, centroid.fY, centroid.fZ);
                     }
 
@@ -814,11 +817,11 @@ public:
                     modelSE.mbWarpIndicator == false &&
                     modelSE.mbBlendIndicator == false) {
                         // Display a MemImage object in the indicated BufferedImage
-                        mBkgndPlateMImage.display(iOutputColumns, iOutputRows);
+                        mBkgndPlateMImage.display(outputColumnsOI.i, outputRowsOI.i);
                     } else {
                         // Draw the model boundary
                         if(modelSE.miModelType != JICTConstants.I_COMPOUND) {
-                            modelSE.mScreenRdrObject.drawStill(pBuffImg, modelSE.msModelName, iOutputRows, iOutputColumns);
+                            modelSE.mScreenRdrObject.drawStill(pBuffImg, modelSE.msModelName, outputRowsOI.i, outputColumnsOI.i);
                         }
                     }
                 } // end if valid screen object
@@ -862,19 +865,18 @@ public:
     // Called from:
     //     MainFrame.onRenderScene
     //     MainFrame.onRenderSequence
-    // TODO: Parameter pHazeFogEnabled is not used
     // TODO: Parameter pDisplayWindow is not used
     public int render(ImageView pDisplayWindow, TMatrix pViewMatrix,
-    boolean pbDepthSortingEnabled, boolean pbZBufferEnabled, boolean pbAntiAliasEnabled, 
-    boolean pbHazeFogEnabled) {
+    boolean pbDepthSortingEnabled, boolean pbZBufferEnabled, boolean pbAntiAliasEnabled) {
         StringBuffer sbOutputFileName = new StringBuffer();
         StringBuffer sbSceneName = new StringBuffer();
         String sRedFileName = "", sGreenFileName = "", sBlueFileName = ""; 
         StringBuffer sbRGBFileName = new StringBuffer();
         String sCurrentColor = "";
-        Integer iEffectType = 0;
-        Integer iColorMode = 0;
-        Integer iOutputRows = 0, iOutputColumns = 0;
+        OneInt effectTypeOI = new OneInt();
+        OneInt colorModeOI = new OneInt();
+        OneInt outputRowsOI = new OneInt();
+        OneInt outputColumnsOI = new OneInt();
         int iFirstFrame, iLastFrame;
         int iFrameCounter;
         Point3d view = new Point3d();
@@ -887,8 +889,8 @@ public:
         TMatrix viewModelMatrix = new TMatrix();
 
         // The following method sets all the parameters
-        // but we will not use sSceneName
-        getSceneInfo(sbSceneName, iEffectType, iColorMode, iOutputRows, iOutputColumns);
+        // but we will not use sbSceneName
+        getSceneInfo(sbSceneName, effectTypeOI, colorModeOI, outputRowsOI, outputColumnsOI);
 
         Scene scene = this.mSceneListHead;
         scene = scene.mNextEntry;        // Skip over the list header
@@ -911,7 +913,7 @@ public:
         MemImage aliasMImage, zBuffMImage;
         zBuffMImage = null;
         if(pbZBufferEnabled) {
-            zBuffMImage = new MemImage(iOutputRows, iOutputColumns, 32);
+            zBuffMImage = new MemImage(outputRowsOI.i, outputColumnsOI.i, 32);
             if (!zBuffMImage.isValid()) {
                 Globals.statusPrint("SceneList.render: Could not open Z Buffer");
                 return -1;
@@ -921,7 +923,7 @@ public:
             zBuffMImage.init32(JICTConstants.F_ZBUFFERMAXVALUE); 
         }
 
-        if(iEffectType == JICTConstants.I_SEQUENCE) {
+        if(effectTypeOI.i == JICTConstants.I_SEQUENCE) {
             // The following method sets Integers iFirstFrame and iLastFrame
             scene.mSensorMotion.getFirstLastFrame(iFirstFrame, iLastFrame);
         }
@@ -933,20 +935,20 @@ public:
         for(iFrameCounter = iFirstFrame; iFrameCounter <= iLastFrame; iFrameCounter++) {
             // Depth Sort the models
             depthSort(models, fDistances, numModelsOI, pbDepthSortingEnabled);
-            if(iEffectType == JICTConstants.I_SEQUENCE) {
+            if(effectTypeOI.i == JICTConstants.I_SEQUENCE) {
                 getViewMatrix(pViewMatrix, iFrameCounter, scene);
             }
 
             // Setup the Color Mode
             int iFirstColor = JICTConstants.I_GREEN;
             int iLastColor  = JICTConstants.I_GREEN;
-            if (iColorMode == JICTConstants.I_COLOR) {
+            if (colorModeOI.i == JICTConstants.I_COLOR) {
                 iFirstColor = JICTConstants.I_RED;
                 iLastColor  = JICTConstants.I_BLUE;
             }
 
             for (int iColor = iFirstColor; iColor <= iLastColor; iColor++) {
-                MemImage outputMImage = new MemImage(iOutputRows, iOutputColumns);
+                MemImage outputMImage = new MemImage(outputRowsOI.i, outputColumnsOI.i);
                 if (!outputMImage.isValid()) {
                     Globals.statusPrint("SceneList.render: Could not create output image");
                     return -1;
@@ -1025,7 +1027,7 @@ public:
                         // Optionally open the z Image;
                         // String sZName; // variable is not used
                         if((pbZBufferEnabled) && (zMImage == null)) {
-                            zMImage = new MemImage(iOutputRows, iOutputColumns, 32);
+                            zMImage = new MemImage(outputRowsOI.i, outputColumnsOI.i, 32);
                             if (!zMImage.isValid()) {
                                 Globals.statusPrint("SceneList.render: Not enough memory to open Z Image");
                                 return -1;
@@ -1037,12 +1039,12 @@ public:
                         // Get the desired transforms from either the model or the motion file
                         // Copy them to the xfrm object
                         if(
-                        (iEffectType == JICTConstants.I_SEQUENCE) && 
+                        (effectTypeOI.i == JICTConstants.I_SEQUENCE) && 
                         (modelSE.mModelMotion != null)) {
                             modelSE.mModelMotion.getNode(iFrameCounter, motnNode);
                         }
 
-                        adjustTransforms(iEffectType, modelSE, motnNode, xfrm);
+                        adjustTransforms(effectTypeOI.i, modelSE, motnNode, xfrm);
 
                         // Properly render the model, based on model type and other options
                         if(pbZBufferEnabled) {
@@ -1082,7 +1084,7 @@ public:
                                 forwardMatrix.translate(xfrm.tx, xfrm.ty, xfrm.tz);
                                 viewModelMatrix.multiply(pViewMatrix, forwardMatrix);
                                 viewModelMatrix.transformAndProject(modelSE.mScreenRdrObject.mCurrentShape,
-                                    iOutputRows, iOutputColumns, true, 		   
+                                    outputRowsOI.i, outputColumnsOI.i, true, 		   
                                     modelSE.pointOfReference.fX,
                                     modelSE.pointOfReference.fY,
                                     modelSE.pointOfReference.fZ);
@@ -1122,7 +1124,7 @@ public:
 
                         // Processing of one model is complete
                         // Update the display
-                        outputMImage.display(iOutputColumns, iOutputRows);
+                        outputMImage.display(outputColumnsOI.i, outputRowsOI.i);
                     } // if modelSE.statusIndicator == 0
                 } // for iCurrentModel
 
@@ -1138,7 +1140,7 @@ public:
 
                 // Optionally anti-alias the output image
                 if(pbAntiAliasEnabled) {
-                    aliasMImage = new MemImage(iOutputRows, iOutputColumns);
+                    aliasMImage = new MemImage(outputRowsOI.i, outputColumnsOI.i);
                     FileUtils.appendFileName(sbOutputFileName, sbRGBFileName.toString(), sCurrentColor);
                     Globals.antiAlias(outputMImage, aliasMImage);
                     aliasMImage.copy(outputMImage, 0, 0);
@@ -1157,7 +1159,7 @@ public:
 
             // Combine the color channels together
             iStatus = 0;
-            if(iColorMode == JICTConstants.I_COLOR) {
+            if(colorModeOI.i == JICTConstants.I_COLOR) {
                 // Prepare a pathname to the default output image location
                 getFileName(sbRGBFileName, scene.msSceneName, iFrameCounter, 0);
                 String sRGBPath, sRGBDir;
