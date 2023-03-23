@@ -428,8 +428,8 @@ protected:
 
         if(bChangingModel) {
             if(
-            (mMainFrame.mIEffectType == JICTConstants.I_SEQUENCE) || 
-            (mMainFrame.mIEffectType == JICTConstants.I_MORPH)) {
+            (mMainFrame.miEffectType == JICTConstants.I_SEQUENCE) || 
+            (mMainFrame.miEffectType == JICTConstants.I_MORPH)) {
                 cboModel.setSelectedIndex(0);    // Select the first model
                 chooseModel();
             } else {
