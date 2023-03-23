@@ -1067,7 +1067,7 @@ public:
                                 // Render the mesh.  The result is a zImage, and a temporary output image
                                 // The rendered mesh is then blended into the final image using the scene ZBuffer and alpha options
                                 iStatus = 0;	//this line for debugging
-                                iStatus = modelSE.mScreenRdrObject.renderMeshz(outputMImage, alphaMImage, inputMImage,
+                                iStatus = modelSE.mScreenRdrObject.renderMeshz(outputMImage, inputMImage,
                                     zBuffMImage, view.fX, view.fY, view.fZ);
                                 break;
 
@@ -1087,7 +1087,7 @@ public:
                                     modelSE.pointOfReference.fY,
                                     modelSE.pointOfReference.fZ);
 
-                                iStatus = modelSE.mScreenRdrObject.renderShapez(outputMImage, alphaMImage,
+                                iStatus = modelSE.mScreenRdrObject.renderShapez(outputMImage, 
                                     zBuffMImage, view.fX, view.fY, view.fZ);
                                 break;
                             }
@@ -1110,13 +1110,11 @@ public:
                                 break;
     
                             case JICTConstants.I_QUADMESH:
-                                iStatus = modelSE.mScreenRdrObject.renderMesh(outputMImage, inputMImage,
-                                    modelSE.mbBlendIndicator);
+                                iStatus = modelSE.mScreenRdrObject.renderMesh(outputMImage, inputMImage);
                                 break;
 
                             case JICTConstants.I_SHAPE:
-                                iStatus = modelSE.mScreenRdrObject.renderShape(outputMImage,
-                                    modelSE.mbBlendIndicator);
+                                iStatus = modelSE.mScreenRdrObject.renderShape(outputMImage);
                                 break;
                             } // end switch
                         } // end else (z buffer)
