@@ -112,6 +112,16 @@ In method renderShapez, parameter alphaImage is not used.
     float vx, float vy, float vz)
 ```
 
+## Unused parameters in methods of sceneList
+
+In method render, the parameter hazeFogEnabled is not used. The method signature for SceneList::render is shown below.
+
+```cpp
+    int sceneList::render(imageView *displayWindow, tMatrix *viewMatrix,
+    int depthSortingEnabled, int zBufferEnabled, int antiAliasEnabled,
+    int hazeFogEnabled)
+```
+
 # Minor Issues
 
 This is what I've found so far.
