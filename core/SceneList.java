@@ -508,7 +508,8 @@ public:
         OneInt colorModeOI = new OneInt();
         OneInt outputRowsOI = new OneInt();
         OneInt outputColumnsOI = new OneInt();
-        Integer iFirstFrame = 0, iLastFrame = 0;
+        OneInt firstFrameOI = new OneInt();
+        OneInt lastFrameOI = new OneInt();
         int iFrameCounter;
         int iModelCounter;
         Scene scene;
@@ -543,13 +544,12 @@ public:
             return 0;
         }
 
-        iFirstFrame = iLastFrame = 0;
         if(effectTypeOI.i == JICTConstants.I_SEQUENCE) {
             // The following method sets both iFirstFrame and iLastFrame (of type Integer)
-            scene.mSensorMotion.getFirstLastFrame(iFirstFrame, iLastFrame);
+            scene.mSensorMotion.getFirstLastFrame(firstFrameOI, lastFrameOI);
         }
 
-        for(iFrameCounter = iFirstFrame; iFrameCounter <= iLastFrame; iFrameCounter++) {
+        for(iFrameCounter = firstFrameOI.i; iFrameCounter <= lastFrameOI.i; iFrameCounter++) {
             // Clear the memoryDC by drawing a filled white rectangle
             //FillRect(memoryDC, myRect, GetStockObject(WHITE_BRUSH));
             modelSE = scene.mHead;
@@ -659,7 +659,8 @@ public:
         OneInt colorModeOI = new OneInt();
         OneInt outputRowsOI = new OneInt();
         OneInt outputColumnsOI = new OneInt();
-        Integer iFirstFrame = 0, iLastFrame = 0;
+        OneInt firstFrameOI = new OneInt();
+        OneInt lastFrameOI = new OneInt();
         int iFrameCounter;
         int iModelCounter;
         Scene scene;
@@ -689,13 +690,12 @@ public:
             return 0;
         }
 
-        iFirstFrame = iLastFrame = 0;
         if(effectTypeOI.i == JICTConstants.I_SEQUENCE) {
             // The following method sets both iFirstFrame and iLastFrame (of type Integer)
-            scene.mSensorMotion.getFirstLastFrame(iFirstFrame, iLastFrame);
+            scene.mSensorMotion.getFirstLastFrame(firstFrameOI, lastFrameOI);
         }
 
-        for(iFrameCounter = iFirstFrame; iFrameCounter <= iLastFrame; iFrameCounter++) {
+        for(iFrameCounter = firstFrameOI.i; iFrameCounter <= lastFrameOI.i; iFrameCounter++) {
             modelSE = scene.mHead;  // Point to the first model
             if(effectTypeOI.i == JICTConstants.I_SEQUENCE) {
                 // The following method sets parameter pViewMatrix
@@ -877,7 +877,8 @@ public:
         OneInt colorModeOI = new OneInt();
         OneInt outputRowsOI = new OneInt();
         OneInt outputColumnsOI = new OneInt();
-        int iFirstFrame, iLastFrame;
+        OneInt firstFrameOI = new OneInt();
+        OneInt lastFrameOI = new OneInt();
         int iFrameCounter;
         Point3d view = new Point3d();
         Point3d rot = new Point3d();
@@ -907,7 +908,6 @@ public:
         float[] fDistances = new float[JICTConstants.I_MAXMODELS];
         OneInt numModelsOI = new OneInt(); 
         int iStatus = 0;
-        iFirstFrame = iLastFrame = 0;
 
         // Open the zBuffer if necessary
         MemImage aliasMImage, zBuffMImage;
@@ -925,14 +925,14 @@ public:
 
         if(effectTypeOI.i == JICTConstants.I_SEQUENCE) {
             // The following method sets Integers iFirstFrame and iLastFrame
-            scene.mSensorMotion.getFirstLastFrame(iFirstFrame, iLastFrame);
+            scene.mSensorMotion.getFirstLastFrame(firstFrameOI, lastFrameOI);
         }
 
         MemImage alphaMImage, zMImage;
         alphaMImage = null;
         zMImage = null;
 
-        for(iFrameCounter = iFirstFrame; iFrameCounter <= iLastFrame; iFrameCounter++) {
+        for(iFrameCounter = firstFrameOI.i; iFrameCounter <= lastFrameOI.i; iFrameCounter++) {
             // Depth Sort the models
             depthSort(models, fDistances, numModelsOI, pbDepthSortingEnabled);
             if(effectTypeOI.i == JICTConstants.I_SEQUENCE) {
