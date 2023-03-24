@@ -126,77 +126,77 @@ public class MotionNode {
       strTok = new StringTokenizer(psBuffer, " ");
       sNodeNum = strTok.nextToken(" ");
       if(sNodeNum.length() > 0) {
-         miNodeNum = Integer.parseInt(sNodeNum);
+         this.miNodeNum = Integer.parseInt(sNodeNum);
       } else {
          return 1;
       }
    
       sRx = strTok.nextToken(" ");
       if(sRx.length() > 0) {
-         mfRx = Float.parseFloat(sRx);
+         this.mfRx = Float.parseFloat(sRx);
       } else {
          return 2;
       }
    
       sRy = strTok.nextToken(" ");
       if(sRy.length() > 0) {
-         mfRy = Float.parseFloat(sRy);
+         this.mfRy = Float.parseFloat(sRy);
       } else {
          return 3;
       }
    
       sRz = strTok.nextToken(" ");
       if(sRz.length() > 0) {
-         mfRz = Float.parseFloat(sRz);
+         this.mfRz = Float.parseFloat(sRz);
       } else {
          return 4;
       }
    
       sSx = strTok.nextToken(" ");
       if(sSx.length() > 0) {
-         mfSx = Float.parseFloat(sSx);
+         this.mfSx = Float.parseFloat(sSx);
       } else {
          return 5;
       }
    
       sSy = strTok.nextToken(" ");
       if(sSy.length() > 0) {
-         mfSy = Float.parseFloat(sSy);
+         this.mfSy = Float.parseFloat(sSy);
       } else {
          return 6;
       }
    
       sSz = strTok.nextToken(" ");
       if(sSz.length() > 0) {
-         mfSz = Float.parseFloat(sSz);
+         this.mfSz = Float.parseFloat(sSz);
       } else {
          return 7;
       }
    
       sTx = strTok.nextToken(" ");
       if(sTx.length() > 0) {
-         mfTx = Float.parseFloat(sTx);
+         this.mfTx = Float.parseFloat(sTx);
       } else {
          return 8;
       }
    
       sTy = strTok.nextToken(" ");
       if(sTy.length() > 0) {
-         mfTy = Float.parseFloat(sTy);
+         this.mfTy = Float.parseFloat(sTy);
       } else {
          return 9;
       }
    
       sTz = strTok.nextToken(" ");
       if(sTz.length() > 0) {
-         mfTz = Float.parseFloat(sTz);
+         this.mfTz = Float.parseFloat(sTz);
       } else {
          return 10;
       }
    
       sAlpha = strTok.nextToken(" ");
       if(sAlpha.length() > 0) {
-         mfAlpha = Float.parseFloat(sAlpha);
+         this.mfAlpha = Float.parseFloat(sAlpha);
       } else {
          return 11;
       }
