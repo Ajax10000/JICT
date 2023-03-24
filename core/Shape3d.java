@@ -3,6 +3,7 @@ package core;
 import apps.IctApp;
 
 import dtos.LineEqn;
+import dtos.OneFloat;
 import dtos.OneInt;
 import dtos.ScreenVertex;
 
@@ -622,22 +623,23 @@ public:
         String sMsgText;
         StringBuffer sText = new StringBuffer();
         String sKeyWord;
-        Integer iFileType = 0;
+        OneInt fileTypeOI = new OneInt();
         StringTokenizer strtok;
 
         this.miNumVertices = 0; // Initialize data members
         this.miNumFaces = 0;
-        Integer iNumVertices = 0, iNumFaces = 0;
+        OneInt numVerticesOI = new OneInt();
+        OneInt numFacesOI = new OneInt();
 
         // The following method will set iFileType, iNumVertices and iNumFaces
-        int iStatus = getShapeFileInfo(psPathName, iFileType, iNumVertices, iNumFaces);
+        int iStatus = getShapeFileInfo(psPathName, fileTypeOI, numVerticesOI, numFacesOI);
         if (iStatus != 0) {
             sMsgText = "readShape: getShapeFileInfo could not open file: " + psPathName;
             Globals.statusPrint(sMsgText);
             return -1;
         }
-        this.miNumVertices = iNumVertices;
-        this.miNumFaces = iNumFaces;
+        this.miNumVertices = numVerticesOI.i;
+        this.miNumFaces = numFacesOI.i;
 
         if (this.miNumVertices == 0) {
             sMsgText = "readShape: shape file has 0 vertices: " + psPathName;
@@ -672,7 +674,7 @@ public:
         VertexSet[] nullPointer;
         FaceSet[] facePointer;
       
-        switch (iFileType) {
+        switch (fileTypeOI.i) {
         case JICTConstants.I_WITHOUTFACES:
             sKeyWord = getNextLine(sText, iLineCounter, filein, 0);
             while(!sKeyWord.equalsIgnoreCase("EOF")) {
@@ -812,7 +814,7 @@ public:
     // Called from:
     //     readShape
     public int getShapeFileInfo(String psPathName,  
-    Integer pIFileType, Integer pINumVertices, Integer pINumFaces) {
+    OneInt pFileTypeOI, OneInt pNumVerticesOI, OneInt pNumFacesOI) {
         //ifstream filein;
         //filein.open(psPathName, ios.nocreate);
         File mtnPathFile = new File(psPathName);
@@ -831,18 +833,18 @@ public:
         boolean bFaces = false;
         Integer iLineCounter = 0;
         int iCounter = 0;
-        pINumVertices = 0;
-        pINumFaces = 0;
+        pNumVerticesOI.i = 0;
+        pNumFacesOI.i = 0;
 
         sKeyWord = getNextLine(sText, iLineCounter, filein, 0);
         while(!sKeyWord.equalsIgnoreCase("EOF")) {
             if (iCounter == 0) {      // Look for a number or 'Coordinate3'
                 if(sKeyWord.equalsIgnoreCase("Coordinate3")) {
-                    pIFileType = JICTConstants.I_WITHFACES;
+                    pFileTypeOI.i = JICTConstants.I_WITHFACES;
                 } else {
-                    pIFileType = JICTConstants.I_WITHOUTFACES;
-                    pINumVertices = Integer.parseInt(sKeyWord);
-                    pINumFaces = 0;
+                    pFileTypeOI.i = JICTConstants.I_WITHOUTFACES;
+                    pNumVerticesOI.i = Integer.parseInt(sKeyWord);
+                    pNumFacesOI.i = 0;
                     try {
                         filein.close();
                     } catch (IOException ioe) {
@@ -858,9 +860,9 @@ public:
                     bFaces = true;
                 } else {  // count a coordinate
                     if(bFaces) {
-                        pINumFaces++;
+                        pNumFacesOI.i++;
                     } else {
-                        pINumVertices++;
+                        pNumVerticesOI.i++;
                     }
                 }
             } // if(iCounter > 0)
@@ -1614,7 +1616,7 @@ public:
     public int getBoundaryPoint(Shape3d pShape, 
     float pfRayCentroidX, float pfRayCentroidY,
     float pfRayX2, float pfRayY2,
-    Float pFOutX, Float pFOutY, 
+    OneFloat outXOF, OneFloat outYOF, 
     float pfLastX, float pfLastY) {
         // Find the screen x,y coord where the
         // shape intersects the input ray.  
@@ -1778,8 +1780,8 @@ public:
             if(fTempDistance <= fLeastDistance) {
                 fLeastDistance = fTempDistance;
                 // Set the output parameters
-                pFOutX = fTempX;
-                pFOutY = fTempY;
+                outXOF.f = fTempX;
+                outYOF.f = fTempY;
             }
 
             // tempShape.currentVertex++;
