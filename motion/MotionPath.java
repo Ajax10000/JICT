@@ -1,5 +1,7 @@
 package motion;
 
+import dtos.OneInt;
+
 import globals.Globals;
 
 import java.io.File;
@@ -83,10 +85,10 @@ public class MotionPath {
     //     SceneList.preview
     //     SceneList.previewStill
     //     SceneList.render
-    public void getFirstLastFrame(Integer pIFirstFrame, Integer pILastFrame) {
+    public void getFirstLastFrame(OneInt pFirstFrameOI, OneInt pLastFrameOI) {
         // Set the output parameters
-        pIFirstFrame = mNodes[0].miNodeNum;
-        pILastFrame = mNodes[miNumNodes - 1].miNodeNum;
+        pFirstFrameOI.i = mNodes[0].miNodeNum;
+        pLastFrameOI.i  = mNodes[miNumNodes - 1].miNodeNum;
     } // getFirstLastFrame
 
 
@@ -107,18 +109,19 @@ public class MotionPath {
         float fDist, fMult, fDiff;
 
         // Filter the frameNumber
-        Integer firstFrame = 0, lastFrame = 0;
+        OneInt firstFrameOI = new OneInt();
+        OneInt lastFrameOI  = new OneInt();
 
-        // The following method sets firstFrame and lastFrame
-        getFirstLastFrame(firstFrame, lastFrame);
+        // The following method sets firstFrameOI and lastFrameOI
+        getFirstLastFrame(firstFrameOI, lastFrameOI);
 
         // Ensure that firstFrame <= piFrameNumber <= lastFrame, 
         // by changing piFrameNumber if necessary
-        if(piFrameNumber < firstFrame) {
-            piFrameNumber = firstFrame;
+        if(piFrameNumber < firstFrameOI.i) {
+            piFrameNumber = firstFrameOI.i;
         }
-        if(piFrameNumber > lastFrame) {
-            piFrameNumber = lastFrame;
+        if(piFrameNumber > lastFrameOI.i) {
+            piFrameNumber = lastFrameOI.i;
         }
       
         for(i = 0; i < miNumNodes; i++) {
