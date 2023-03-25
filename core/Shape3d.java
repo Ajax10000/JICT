@@ -668,7 +668,7 @@ public:
 
         LineNumberReader filein = new LineNumberReader(fileReader);
         // filein >> ws;
-        Integer iLineCounter = 0;
+        OneInt lineCounterOI = new OneInt();
         int iCheckCounter = 0;  // Make certain numVertices vertices are read in
         int iCounter = 0;
         VertexSet[] nullPointer;
@@ -676,7 +676,7 @@ public:
       
         switch (fileTypeOI.i) {
         case JICTConstants.I_WITHOUTFACES:
-            sKeyWord = getNextLine(sText, iLineCounter, filein, 0);
+            sKeyWord = getNextLine(sText, lineCounterOI, filein, 0);
             while(!sKeyWord.equalsIgnoreCase("EOF")) {
                 if (iCounter == 0) {
                     nullPointer = new VertexSet[this.miNumVertices];
@@ -710,7 +710,7 @@ public:
                 }
 
                 iCounter++;
-                sKeyWord = getNextLine(sText, iLineCounter, filein, 0);
+                sKeyWord = getNextLine(sText, lineCounterOI, filein, 0);
             } // while
 
             iStatus = 0;
@@ -723,7 +723,7 @@ public:
 
         case JICTConstants.I_WITHFACES:
             boolean bFaces = false;
-            sKeyWord = getNextLine(sText, iLineCounter, filein, 0);
+            sKeyWord = getNextLine(sText, lineCounterOI, filein, 0);
             while(!sKeyWord.equalsIgnoreCase("EOF")) {
                 if (iCounter == 0) {
                     // Allocate vertex and face memory
@@ -794,7 +794,7 @@ public:
                 } 
 
                 iCounter++;
-                sKeyWord = getNextLine(sText, iLineCounter, filein, 0);
+                sKeyWord = getNextLine(sText, lineCounterOI, filein, 0);
             } // while
             break;
         } // switch
@@ -831,12 +831,12 @@ public:
         StringBuffer sText = new StringBuffer();
         String sKeyWord;
         boolean bFaces = false;
-        Integer iLineCounter = 0;
+        OneInt lineCounterOI = new OneInt();
         int iCounter = 0;
         pNumVerticesOI.i = 0;
         pNumFacesOI.i = 0;
 
-        sKeyWord = getNextLine(sText, iLineCounter, filein, 0);
+        sKeyWord = getNextLine(sText, lineCounterOI, filein, 0);
         while(!sKeyWord.equalsIgnoreCase("EOF")) {
             if (iCounter == 0) {      // Look for a number or 'Coordinate3'
                 if(sKeyWord.equalsIgnoreCase("Coordinate3")) {
@@ -870,7 +870,7 @@ public:
             iCounter++;
             // Clear out the string buffer before we read the next line into it
             sText.delete(0, sText.length());
-            sKeyWord = getNextLine(sText, iLineCounter, filein, 0);
+            sKeyWord = getNextLine(sText, lineCounterOI, filein, 0);
         } // while
 
         try {
@@ -1515,7 +1515,7 @@ public:
     //     getShapeFileInfo
     //     readShape
     //     ScnFileParser.readListReal
-    public static String getNextLine(StringBuffer psTheText, Integer piLineNumber, 
+    public static String getNextLine(StringBuffer psTheText, OneInt pLineNumberOI, 
     LineNumberReader filein, int piMinLineLength) {
         boolean bComment;
         // int theLength = 80; // this variable is no longer used
@@ -1541,7 +1541,7 @@ public:
                 sKeyWord = "EOF";
                 return(sKeyWord);
             }
-            piLineNumber++;
+            pLineNumberOI.i++;
 
             // Minimum line length <= 4 to accomodate CR/LFs from scenefile maker utility
             if (
