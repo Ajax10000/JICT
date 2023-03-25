@@ -1163,7 +1163,7 @@ POPUP "Tools"
         // Have it parse the .scn file aFileName
         StringBuffer sBuff = new StringBuffer();
         iStatus = parser.readList(sBuff, sFileName);
-        Globals.statusPrint(sBuff.toString());
+        Globals.statusPrint("MainFrame.onToolsCreateASceneList: " + sBuff.toString());
 
         if(iStatus != 0) {
             mSceneList.clear();
