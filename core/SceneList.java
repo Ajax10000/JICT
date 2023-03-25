@@ -18,14 +18,10 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.LineNumberReader;
 import java.io.OutputStreamWriter;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.StringTokenizer;
 import java.util.prefs.Preferences;
 
 import javax.swing.JComboBox;
@@ -34,7 +30,6 @@ import math.MathUtils;
 import math.TMatrix;
 
 import motion.MotionNode;
-import motion.MotionPath;
 
 import structs.Bundle;
 import structs.Point3d;
@@ -533,8 +528,8 @@ public:
         }
         */
 
-        RECT myRect;
-        SetRect(myRect, 0, 0, outputColumnsOI.i, outputRowsOI.i);
+        //RECT myRect;
+        //SetRect(myRect, 0, 0, outputColumnsOI.i, outputRowsOI.i);
 
         // Preview the scene models
         scene = this.mSceneListHead;
@@ -1453,6 +1448,7 @@ public:
     boolean pbSortLayer, Color pAdjustmentColor, 
     String psAdjustmentType, String psColorAdjustedPath,
     boolean pbDefinedRefPt, Point3d pRefPoint) {
+        Globals.statusPrint("At SceneList.addSceneElement");
         Scene scene = this.mCurrentScene;  // Add an element to the current scene
         SceneElement aModelSE = scene.mHead;
 
@@ -1467,6 +1463,7 @@ public:
             pbDefinedRefPt, pRefPoint);
 
         if(!modelSE.isValid()) {
+            Globals.statusPrint("SceneList.addSceneElement: Leaving because SceneElement is not valid.");
             return 1;
         }
 
@@ -1480,15 +1477,19 @@ public:
         } else {
             // Add modelSE at the end of the list
             aModelSE = scene.mHead;  // Find the last element
+            assert(aModelSE != null);
             while (aModelSE.mNextEntry != null) {
                 aModelSE = aModelSE.mNextEntry;
             }
             aModelSE.mNextEntry = modelSE;
-            modelSE.mNextEntry = aModelSE;
+            modelSE.mPrevEntry = aModelSE;
         }
 
         // Update the tail pointer to point to modelSE
         scene.mTail = modelSE;
+        assert(scene.mTail != null);
+        Globals.statusPrint("SceneList.addSceneElement: Leaving normally.");
+        Globals.statusPrint("SceneList.addSceneListElement: Now has " + listLength() + " elements in list");
         return 0;
     } // addSceneElement
 
