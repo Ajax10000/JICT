@@ -14,10 +14,8 @@ import fileUtils.FileUtils;
 
 import globals.JICTConstants;
 
-import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.LineNumberReader;
 import java.util.Random;
@@ -48,7 +46,7 @@ public class Globals {
         boolean bErrWriting = false;
         File logFile;
         String sLogFileName;
-        FileOutputStream logFileOutputStream;
+        FileWriter fw;
 
         // If the mainframe window is not open, post the message to the log file.
         // else display the message on the status bar and post it to the log file.
@@ -58,17 +56,16 @@ public class Globals {
 
         // Open the log file
         try {
-            logFileOutputStream = new FileOutputStream(logFile, true);
-        } catch (FileNotFoundException fnfe) {
+            fw = new FileWriter(logFile, true);
+        } catch (IOException ioe) {
             System.out.println("Could not find file " + sLogFileName);
             lblStatus.setText("statusPrint: Unable to open the JICT log file jict.log");
             return;
         }
-        DataOutputStream logFileDataOutputStream = new DataOutputStream(logFileOutputStream);
 
         // We were able to open the log file, so write the msg to it
         try {
-            logFileDataOutputStream.writeChars(psMessage + "\n");
+            fw.write(psMessage + "\n");
         } catch (IOException ioe) {
             bErrWriting = true;
             String sErrMsg = "statusPrint:IOException while trying to write to file " + sLogFileName;
@@ -77,7 +74,7 @@ public class Globals {
         }
 
         try {
-            logFileDataOutputStream.close();
+            fw.close();
         } catch(IOException ioe) {
             String sErrMsg = "statusPrint: IOException while trying to close file " + sLogFileName;
             System.out.println(sErrMsg);
