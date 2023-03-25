@@ -227,9 +227,10 @@ public class SceneElement {
         !msModelMotionPath.equalsIgnoreCase("NONE")) {
             // The model is moving
             this.mModelMotion = new MotionPath();
+            Globals.statusPrint("SceneElement ctor: About to read model motion file " + msModelMotionPath);
             int iStatus = this.mModelMotion.readMotion(msModelMotionPath);
             if (iStatus != 0) {  // if the motion file could not be read,
-                Globals.statusPrint("SceneList.ReadList: Moving Model has invalid motion file");
+                Globals.statusPrint("SceneElement ctor: Moving Model has invalid motion file");
                 this.mModelMotion = null;
                 this.mbValid = false;
             }
