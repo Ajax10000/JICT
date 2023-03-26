@@ -342,6 +342,11 @@ protected:
         btnCancel.setMinimumSize(btnDim);
         btnCancel.setMaximumSize(btnDim);
         btnCancel.setPreferredSize(btnDim);
+        btnCancel.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ae) {
+                onCancel();
+            }
+        });
 
         vertBtnBox.add(smallRectSpacer);
         vertBtnBox.add(btnOK);
