@@ -86,7 +86,7 @@ public class FileUtils {
     //     MainFrame.onToolsCreateAlphaImage
     //     MorphDlg.onOK
     //     ScnFileParser.readList
-    public static void constructPathName(StringBuffer psOutPath, String psInPath, char pcLastLetter) {
+    public static void constructPathName(StringBuffer psbOutPath, String psInPath, char pcLastLetter) {
         String sFileWExt, sFile, sExt;
         
         File inputFile = new File(psInPath);
@@ -110,6 +110,6 @@ public class FileUtils {
         String sOutPath = inputFile.getParent() + File.separator + sFile + sExt;
 
         // Set the output parameter
-        psOutPath.append(sOutPath);
+        psbOutPath.append(sOutPath);
     } // constructPathName
 } // class FileUtils
