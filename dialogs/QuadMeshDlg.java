@@ -310,7 +310,7 @@ protected:
     }
     */
 
-    // This method came from QUADMESHDLG.CPP
+    // This method originally came from QUADMESHDLG.CPP
     void onOK() {
         String sTexturePath, sDestinationDir;
         String sTexture, sDirectory;
@@ -348,7 +348,7 @@ protected:
     }
 
 
-    // This method came from QUADMESHDLG.CPP
+    // This method originally came from QUADMESHDLG.CPP
     void onLocateTexture() {
         // Find a bmp file
         JFileChooser dlg = new JFileChooser();
@@ -362,7 +362,7 @@ protected:
     } // onLocateTexture
 
 
-    // This method came from QUADMESHDLG.CPP
+    // This method originally came from QUADMESHDLG.CPP
     void onLocateDestDir() {
         // Find a destination directory
         JFileChooser dlg = new JFileChooser();
