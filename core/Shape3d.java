@@ -146,6 +146,8 @@ public:
     //     SceneList.preview
     //     SceneList.previewStill
     public Shape3d(String psFileName, int piModelType) {
+        Globals.statusPrint(bIctDebug, "At Shape3d ctor 1");
+
         StringBuffer sbShapePath = new StringBuffer();
         String sShapeDir;
         int iStatus;
@@ -168,7 +170,7 @@ public:
             iStatus = readShape(sbShapePath.toString());
             if (iStatus != 0) {
                 // There was a problem reading the shape file
-                sMsgText = "Shape3d. Can't open shape file: " + iStatus + " " + sbShapePath.toString();
+                sMsgText = "Shape3d ctor 1: Can't open shape file: " + iStatus + " " + sbShapePath.toString();
                 Globals.statusPrint(sMsgText);
                 this.miNumAllocatedVertices = 0;
                 this.pointOfReference = null;
@@ -179,7 +181,7 @@ public:
                 iStatus = shapeFromBMP(psFileName);
                 if (iStatus != 0) {
                     // There was a problem reading the bmp file
-                    sMsgText = "Shape3d. shapeFromBMP error: " + iStatus + " " + psFileName;
+                    sMsgText = "Shape3d ctor 1: shapeFromBMP error: " + iStatus + " " + psFileName;
                     Globals.statusPrint(sMsgText);
                     this.miNumAllocatedVertices = 0;
                 }
@@ -192,17 +194,8 @@ public:
             if(psFileName.equalsIgnoreCase("Output Image Rectangle")) {
                 this.miNumVertices = 4;
                 VertexSet[] nullPointer = new VertexSet[this.miNumVertices];
-                // if nullPointer == null, then the JVM would have thrown an OutOfMemoryException
-                /*
-                if(nullPointer == null) {
-                    Globals.statusPrint("Shape3d ctor: Unable to allocate shape object");
-                    this.miNumAllocatedVertices = 0; //signal an error
-                    // Though an error has occurred, the code continues. Why?
-                }
-                */
-                // nullPointer will be used to set firstVertex
+                // nullPointer will be used to set mVertices
 
-                
                 StringBuffer sbSceneName = new StringBuffer();
                 OneInt widthOI = new OneInt();
                 OneInt heightOI = new OneInt();
@@ -281,7 +274,7 @@ public:
                 // Read the shape file (has a ".shp" extension)
                 iStatus = readShape(psFileName);
                 if (iStatus != 0) {
-                    sMsgText = "Shape3d. ReadShape error: " + iStatus + " " + psFileName;
+                    sMsgText = "Shape3d ctor 1: readShape error: " + iStatus + " " + psFileName;
                     Globals.statusPrint(sMsgText);
                     this.miNumAllocatedVertices = 0;
                 }
@@ -291,13 +284,6 @@ public:
         case JICTConstants.I_QUADMESH:
             this.miNumVertices = 4;
             VertexSet[] nullPointer = new VertexSet[this.miNumVertices];
-            // If nullPointer is null, then the JVM would have thrown an OutOfMemoryException
-            /* 
-            if(nullPointer == null) {
-                Globals.statusPrint("Shape3d constructor 1: Unable to allocate shape object (Quadmesh case)");
-                this.miNumAllocatedVertices = 0; //signal an error
-            }
-            */
 
             this.mVertices = nullPointer;
             this.mFaces = null;
@@ -358,10 +344,6 @@ public:
             break;
         } // switch
 
-        if (bIctDebug) {
-            Globals.statusPrint("Shape3d constructor 1.");
-        }
-
         if(this.miNumAllocatedVertices != 0) {
             Point3d centroid = new Point3d();
             // The following method modifies parameter centroid
@@ -377,9 +359,7 @@ public:
 
     // This constructor originally came from SHAPE3D.CPP
     public Shape3d(String psPathName) {
-        if(bIctDebug) {
-            Globals.statusPrint("Shape3d constructor 2 (calls readShape).");
-        }
+        Globals.statusPrint(bIctDebug, "At Shape3d ctor 2");
 
         this.miNumFaces = 0;
         // The following will set the following fields:
@@ -410,24 +390,13 @@ public:
     //     RenderObject ctor that takes 4 Point3d parameters
     //     RenderObject ctor that takes 4 parameters: a String, int, boolean and Point3d
     public Shape3d(int piNumVerts) {
-        if(bIctDebug) {
-            Globals.statusPrint("Shape3d constructor 3.");
-        }
+        Globals.statusPrint(bIctDebug, "At Shape3d ctor 3");
 
         this.miNumVertices = 0;
         this.miNumFaces = 0;
         this.miNumAllocatedVertices = piNumVerts;
 
         VertexSet[] nullPointer = new VertexSet[miNumAllocatedVertices];
-        // If nullPointer were = null, the JVM would throw an OutOfMemoryException
-        /* Dead code, per the compiler
-        if(nullPointer == null) {
-            Globals.statusPrint("Shape3d constructor 3: Unable to allocate shape object");
-            this.numAllocatedVertices = 0; // signal an error
-            return;
-        }
-        */
-
         this.mVertices = nullPointer;
         this.mFaces = null;
         this.miCurrVtxIdx = 0;
@@ -460,25 +429,14 @@ public:
 
     // This constructor originally came from SHAPE3D.CPP
     public Shape3d(Shape3d pTransformedShape) {
-        // Creates a new shape by copying the shape supplied.
-        if(bIctDebug) {
-            Globals.statusPrint("Shape3d constructor 4.");
-        }
+        Globals.statusPrint(bIctDebug, "At Shape3d ctor 4");
 
+        // Creates a new shape by copying the shape supplied.
         this.miNumFaces = 0;
         this.miNumVertices = pTransformedShape.miNumVertices;
         this.miNumAllocatedVertices = this.miNumVertices;
 
         VertexSet[] nullPointer = new VertexSet[this.miNumVertices];
-        // If nullPointer were = null, the JVM would throw an OutOfMemoryException
-        /* Dead code, per the compiler
-        if(nullPointer == null) {
-            Globals.statusPrint("Shape3d constructor 4: Unable to allocate shape object");
-            this.numAllocatedVertices = 0; // signal an error
-            return;
-        }
-        */
-
         this.mVertices = nullPointer;
         this.mFaces = null;
         this.mCurrentVertex = this.mVertices[0];
@@ -519,24 +477,13 @@ public:
     // Called from:
     //     RenderObject constructor that takes 4 Point3d parameters
     public Shape3d(Point3d pULPt, Point3d pURPt, Point3d pLRPt, Point3d pLLPt) {
-        if (bIctDebug) {
-            Globals.statusPrint("Shape3d constructor 5.");
-        }
+        Globals.statusPrint(bIctDebug, "At Shape3d ctor 5");
 
         this.miNumFaces = 0;
         this.miNumVertices = 4;
         this.miNumAllocatedVertices = this.miNumVertices;
 
         VertexSet[] nullPointer = new VertexSet[this.miNumVertices];
-        // If nullPointer were = null, the JVM would throw an OutOfMemoryException
-        /* Dead code, per the compiler
-        if(nullPointer == null) {
-            Globals.statusPrint("Shape3d constructor 5: Unable to allocate shape object");
-            this.numAllocatedVertices = 0; // signal an error
-            return;
-        }
-        */
-
         this.mVertices = nullPointer;
         this.mFaces = null;
         this.mCurrentVertex = this.mVertices[0];
@@ -608,7 +555,7 @@ public:
     // This destructor originally came from SHAPE3D.CPP
     public void finalize() {
         if(bIctDebug) {
-            Globals.statusPrint("Shape3d Destructor");
+            Globals.statusPrint("At Shape3d dtor");
         }
     } // finalize
 
@@ -620,6 +567,8 @@ public:
     // Called from:
     //     Shape3d ctor that takes 2 parameters, a String and an int
     public int readShape(String psPathName) {
+        Globals.statusPrint(bIctDebug, "At Shape3d.readShape");
+
         String sMsgText;
         StringBuffer sText = new StringBuffer();
         String sKeyWord;
@@ -634,7 +583,7 @@ public:
         // The following method will set iFileType, iNumVertices and iNumFaces
         int iStatus = getShapeFileInfo(psPathName, fileTypeOI, numVerticesOI, numFacesOI);
         if (iStatus != 0) {
-            sMsgText = "readShape: getShapeFileInfo could not open file: " + psPathName;
+            sMsgText = "Shape3d.readShape: getShapeFileInfo could not open file: " + psPathName;
             Globals.statusPrint(sMsgText);
             return -1;
         }
@@ -642,19 +591,17 @@ public:
         this.miNumFaces = numFacesOI.i;
 
         if (this.miNumVertices == 0) {
-            sMsgText = "readShape: shape file has 0 vertices: " + psPathName;
+            sMsgText = "Shape3d.readShape: shape file has 0 vertices: " + psPathName;
             Globals.statusPrint(sMsgText);
             return -2;
         }
 
-        //ifstream filein;
-        //filein.open(psPathName, ios.nocreate);
         File shapeFile = new File(psPathName);
         FileReader fileReader;
         try {
             fileReader = new FileReader(shapeFile);
         } catch(FileNotFoundException fnfe) {
-            sMsgText = "readShape: Unable to open file: " + psPathName;
+            sMsgText = "Shape3d.readShape: Unable to open file: " + psPathName;
             Globals.statusPrint(sMsgText) ;
             return -1;
         }
@@ -667,7 +614,6 @@ public:
         */
 
         LineNumberReader filein = new LineNumberReader(fileReader);
-        // filein >> ws;
         OneInt lineCounterOI = new OneInt();
         int iCheckCounter = 0;  // Make certain numVertices vertices are read in
         int iCounter = 0;
@@ -680,15 +626,6 @@ public:
             while(!sKeyWord.equalsIgnoreCase("EOF")) {
                 if (iCounter == 0) {
                     nullPointer = new VertexSet[this.miNumVertices];
-                    /* Dead code, per the compiler
-                    if (nullPointer == null) {
-                        Globals.statusPrint("readShape: could not allocate shape memory");
-                        this.miNumAllocatedVertices = 0;
-                        filein.close();
-                        return -3;
-                    }
-                    */
-
                     this.miNumAllocatedVertices = this.miNumVertices;
                     this.mVertices = nullPointer;
                     this.mFaces = null;
@@ -715,7 +652,7 @@ public:
 
             iStatus = 0;
             if (iCheckCounter != this.miNumVertices) {
-                sMsgText = "readShape: Vertex miscount in input file: " + psPathName;
+                sMsgText = "Shape3d.readShape: Vertex miscount in input file: " + psPathName;
                 Globals.statusPrint(sMsgText);
                 iStatus= -4;
             }
@@ -728,24 +665,8 @@ public:
                 if (iCounter == 0) {
                     // Allocate vertex and face memory
                     nullPointer = new VertexSet[this.miNumVertices];
-                    /* Dead code, per the compiler
-                    if (nullPointer == null) {
-                        Globals.statusPrint("readShape: Could not allocate shape vertex memory");
-                        this.miNumAllocatedVertices = 0;
-                        filein.close();
-                        return -5;
-                    }
-                    */
 
                     facePointer = new FaceSet[this.miNumFaces];
-                    /* Dead code, per the compiler
-                    if (facePointer == null) {
-                        Globals.statusPrint("readShape: Could not allocate shape face memory");
-                        this.miNumAllocatedVertices = 0;
-                        filein.close();
-                        return -6;
-                    }
-                    */
 
                     this.miNumAllocatedVertices = this.miNumVertices;
                     this.mVertices = nullPointer;
@@ -802,7 +723,7 @@ public:
         try {
             filein.close();
         } catch (IOException ioe) {
-            Globals.statusPrint("readShape: Could not close file " + psPathName);
+            Globals.statusPrint("Shape3d.readShape: Could not close file " + psPathName);
         }
 
         return 0;
@@ -815,14 +736,14 @@ public:
     //     readShape
     public int getShapeFileInfo(String psPathName,  
     OneInt pFileTypeOI, OneInt pNumVerticesOI, OneInt pNumFacesOI) {
-        //ifstream filein;
-        //filein.open(psPathName, ios.nocreate);
+        Globals.statusPrint(bIctDebug, "At Shape3d.getShapeFileInfo");
+
         File mtnPathFile = new File(psPathName);
         FileReader fileReader;
         try {
             fileReader = new FileReader(mtnPathFile);
         } catch(FileNotFoundException fnfe) {
-            String sMsgText = String.format("getShapeFileInfo: Unable to open file: %s", psPathName);
+            String sMsgText = String.format("Shape3d.getShapeFileInfo: Unable to open file: %s", psPathName);
             Globals.statusPrint(sMsgText) ;
             return -1;
         }
@@ -848,7 +769,7 @@ public:
                     try {
                         filein.close();
                     } catch (IOException ioe) {
-                        Globals.statusPrint("getShapeFileInfo: Could not close file " + psPathName);
+                        Globals.statusPrint("Shape3d.getShapeFileInfo: Could not close file " + psPathName);
                     }
                     return 0;
                 }
@@ -876,7 +797,7 @@ public:
         try {
             filein.close();
         } catch (IOException ioe) {
-            Globals.statusPrint("getShapeFileInfo: Could not close file " + psPathName);
+            Globals.statusPrint("Shape3d.getShapeFileInfo: Could not close file " + psPathName);
         }
 
         return 0;
@@ -888,6 +809,8 @@ public:
     // Called from:
     //     Shape3d ctor the one that takes 2 parameters, a String and an int
     public int shapeFromBMP(String psImageFileName) {
+        Globals.statusPrint(bIctDebug, "At Shape3d.shapeFromBMP");
+
         // Create a 4 vertex shape object from a rectangular image boundary
         int iStatus;
         Integer iHeight = 0, iWidth = 0, iBpp = 0;
@@ -898,20 +821,12 @@ public:
         }
 
         String sMsgText;
-        sMsgText = String.format("shapeFromBMP: %s  Height: %d  Width: %d  Bits/Pixel: %d", 
+        sMsgText = String.format("Shape3d.shapeFromBMP: %s  Height: %d  Width: %d  Bits/Pixel: %d", 
             psImageFileName, iHeight, iWidth, iBpp);
         Globals.statusPrint(sMsgText);
         this.miNumVertices = 4;
 
         VertexSet[] nullPointer = new VertexSet[this.miNumVertices];
-        /* Dead code, per the compiler
-        if(nullPointer == null) {
-            Globals.statusPrint("Shape3d.shapeFromBMP: Unable to allocate shape object");
-            this.numAllocatedVertices = 0; //signal an error
-            return -1;
-        }
-        */
-
         this.mVertices = nullPointer;
         this.mFaces = null;
         this.mCurrentVertex = this.mVertices[0];
@@ -994,13 +909,15 @@ public:
     //     Globals.createCutout
     //     MainFrame.onToolsCreateAlphaImage
     public int writeShape(String psPathName) {
+        Globals.statusPrint(bIctDebug, "At Shape3d.writeShape");
+
         OutputStream os;
         PrintWriter fileOut;
         try {
             os = new FileOutputStream(psPathName);
             fileOut = new PrintWriter(os);
         } catch (IOException ioe) {
-            String sMsgText = "writeShape: Unable to open file: " + psPathName;
+            String sMsgText = "Shape3d.writeShape: Unable to open file: " + psPathName;
             Globals.statusPrint(sMsgText);
             return -1;
         }
@@ -1027,9 +944,9 @@ public:
     // Called from:
     //     Globals.iwarpz
     public void printShape(String psComment) {
-        String sMsgText;
+        Globals.statusPrint(bIctDebug, "At Shape3d.printShape");
 
-        sMsgText = psComment + " numVertices: " + this.miNumVertices;
+        String sMsgText = psComment + " numVertices: " + this.miNumVertices;
         Globals.statusPrint(sMsgText);
         Globals.statusPrint("World         \t\tTransformed              \tScreen");
 
@@ -1043,7 +960,7 @@ public:
 
             // this.currentVertex++;
             incCurrentVertex();
-        }
+        } // for index
 
         return;
     } // printShape
@@ -1056,6 +973,8 @@ public:
     //     averageY
     //     Globals.iwarpz
     public void screenBoundingBox() {
+        Globals.statusPrint(bIctDebug, "At Shape3d.screenBoundingBox");
+
         initCurrentVertex();
         this.mfMaxX = mCurrentVertex.sx; 
         this.mfMaxY = mCurrentVertex.sy;
@@ -1111,12 +1030,16 @@ public:
     //     RenderObject.prepareCutout
     //     TMatrix.transformAndProject
     public void initCurrentVertex() {
+        Globals.statusPrint(bIctDebug, "At Shape3d.initCurrentVertex");
+
         // this.currentVertex = this.firstVertex;
         this.miCurrVtxIdx = 0;
     } // initCurrentVertex
 
 
     public void incCurrentVertex() {
+        Globals.statusPrint(bIctDebug, "At Shape3d.incCurrentVertex");
+
         this.miCurrVtxIdx++;
         this.mCurrentVertex = this.mVertices[miCurrVtxIdx];
     }
@@ -1125,6 +1048,8 @@ public:
     // This method has no corresponding method in the original C++ code.
     // It is new to the Java code.
     public void decCurrentVertex() {
+        Globals.statusPrint(bIctDebug, "At Shape3d.decCurrentVertex");
+
         this.miCurrVtxIdx--;
         this.mCurrentVertex = this.mVertices[miCurrVtxIdx];
     }
@@ -1132,6 +1057,8 @@ public:
 
     // This method originally came from SHAPE3D.CPP
     public void initCurrentFace() {
+        Globals.statusPrint(bIctDebug, "At Shape3d.initCurrentFace");
+
         // this.currentFace = this.firstFace;
         this.miCurrFaceIdx = 0;
         this.mCurrentFace = this.mFaces[0];
@@ -1141,6 +1068,8 @@ public:
     // This method has no corresponding method in the original C++ code.
     // It is new to the Java code.
     public void incCurrentFace() {
+        Globals.statusPrint(bIctDebug, "At Shape3d.incCurrentFace");
+
         this.miCurrFaceIdx++;
         this.mCurrentFace = this.mFaces[miCurrFaceIdx];
     } // initCurrentFace
@@ -1160,6 +1089,8 @@ public:
     //     RenderObject.drawStill
     //     RenderObject.prepareCutout
     public int getNumVertices() {
+        Globals.statusPrint(bIctDebug, "At Shape3d.getNumVertices");
+
         return this.miNumVertices;
     } // getNumVertices
 
@@ -1170,6 +1101,8 @@ public:
     //     RenderObject.renderShape
     //     RenderObject.renderShapez
     public int getNumFaces() {
+        Globals.statusPrint(bIctDebug, "At Shape3d.getNumFaces");
+
         return this.miNumFaces;
     } // getNumFaces
 
@@ -1179,6 +1112,8 @@ public:
     // Called from:
     //     copyAndExpand
     public void setNumVertices(int piNv) {
+        Globals.statusPrint(bIctDebug, "At Shape3d.setNumVertices");
+
         this.miNumVertices = piNv;
     } // setNumVertices
 
@@ -1188,6 +1123,8 @@ public:
     // Called from:
     //     Globals.tweenImage
     public void worldBoundingBox() {
+        Globals.statusPrint(bIctDebug, "At Shape3d.worldBoundingBox");
+
         initCurrentVertex();
         this.mfMaxX = mCurrentVertex.x; 
         this.mfMaxY = mCurrentVertex.y;
@@ -1213,6 +1150,8 @@ public:
     // Called from:
     //     Globals.iwarpz
     public void transformBoundingBox() {
+        Globals.statusPrint(bIctDebug, "At Shape3d.transformBoundingBox");
+
         initCurrentVertex();
         this.mfMaxTX = mCurrentVertex.tx; 
         this.mfMaxTY = mCurrentVertex.ty; 
@@ -1243,6 +1182,8 @@ public:
     // Called from:
     //     Globals.tweenImage
     public void invertY(int piScreenHeight) {
+        Globals.statusPrint(bIctDebug, "At Shape3d.invertY");
+
         initCurrentVertex();
 
         for (int index = 0; index < this.miNumVertices; index++) {
@@ -1261,8 +1202,10 @@ public:
     //     Globals.tweenShape
     //     ImageView.onLButtonUp
     public int addWorldVertex(float pfX, float pfY, float pfZ) {
+        Globals.statusPrint(bIctDebug, "At Shape3d.addWorldVertex");
+
         if (this.miNumVertices == this.miNumAllocatedVertices) {
-            Globals.statusPrint("addWorldVertex: Not enough memory to add vertex");
+            Globals.statusPrint("Shape3d.addWorldVertex: Not enough memory to add vertex");
             return -1;
         }
 
@@ -1283,8 +1226,10 @@ public:
     // Called from:
     //     getBoundaryPoint
     public int addTransformedVertex(float pfX, float pfY, float pfZ) {
+        Globals.statusPrint(bIctDebug, "At Shape3d.addTransformedVertex");
+
         if (this.miNumVertices == this.miNumAllocatedVertices) {
-            Globals.statusPrint("addTransformedVertex: Not enough memory to add vertex");
+            Globals.statusPrint("Shape3d.addTransformedVertex: Not enough memory to add vertex");
             return -1;
         }
 
@@ -1307,6 +1252,7 @@ public:
     //     ImageView.onLButtonDblClk
     //     ImageView.onRButtonDown
     public int deleteLastWorldVertex() {
+        Globals.statusPrint(bIctDebug, "At Shape3d.deleteLastWorldVertex");
         if(this.miNumVertices < 1) {
             return -1;
         }
@@ -1324,17 +1270,12 @@ public:
     // Called from:
     //     ImageView.onRButtonDown
     public int getLastWorldVertex(Point3d pVertex) {
-      if(miNumVertices < 1) {
+        Globals.statusPrint(bIctDebug, "At Shape3d.getLastWorldVertex");
+      if(this.miNumVertices < 1) {
           return -1;
       }
 
       // Set the output parameters
-      /*
-      pFX = (currentVertex - 1).x;
-      pFY = (currentVertex - 1).y;
-      pfZ = (currentVertex - 1).z;
-      */
-
       pVertex.fX = mVertices[miCurrVtxIdx - 1].x;
       pVertex.fY = mVertices[miCurrVtxIdx - 1].y;
       pVertex.fY = mVertices[miCurrVtxIdx - 1].z;
@@ -1349,16 +1290,13 @@ public:
     //     ImageView.onLButtonUp
     //     ImageView.onRButtonDown
     public int getPreviousWorldVertex(Point3d pVertex) {
+        Globals.statusPrint(bIctDebug, "At Shape3d.getPreviousWorldVertex");
+
         if(this.miNumVertices < 2) {
             return -1;
         }
 
         // Set the output parameters
-        /*
-        pFX = (currentVertex - 2).x;
-        pFY = (currentVertex - 2).y;
-        pFZ = (currentVertex - 2).z;
-        */
         pVertex.fX = mVertices[miCurrVtxIdx - 2].x;
         pVertex.fY = mVertices[miCurrVtxIdx - 2].y;
         pVertex.fZ = mVertices[miCurrVtxIdx - 2].z;
@@ -1373,6 +1311,8 @@ public:
     //     RenderObject.drawSequence
     //     RenderObject.drawStill
     public float averageX() {
+        Globals.statusPrint(bIctDebug, "At Shape3d.averageX");
+
         screenBoundingBox();
         return((this.mfMaxX - this.mfMinX)/2.0f);
     } // averageX
@@ -1384,6 +1324,8 @@ public:
     //     RenderObject.drawSequence
     //     RenderObject.drawStill
     public float averageY() {
+        Globals.statusPrint(bIctDebug, "At Shape3d.averageY");
+
         screenBoundingBox();
         return((this.mfMaxY - this.mfMinY)/2.0f);
     } // averageY
@@ -1398,6 +1340,8 @@ public:
     //     RenderObject ctor that takes 4 Point3d parameters
     //     RenderObject ctor that takes 4 parameters: a String, int, boolean and Point3d
     public void getWCentroid(Point3d pCentroid) {
+        Globals.statusPrint(bIctDebug, "At Shape3d.getWCentroid");
+
         if(this.miNumAllocatedVertices > 0) {
             initCurrentVertex();
             float fMaxX = mCurrentVertex.x, fMaxY = mCurrentVertex.y, fMaxZ = mCurrentVertex.z;
@@ -1438,6 +1382,8 @@ public:
     //     RenderObject ctor that takes 4 parameters: a String, int, boolean and Point3d
     //     TMatrix.transformAndProject
     public void translateW(float pfOffsetX, float pfOffsetY, float pfOffsetZ) {
+        Globals.statusPrint(bIctDebug, "At Shape3d.translateW");
+
         initCurrentVertex();
 
         for (int index = 0; index < this.miNumVertices; index++) {
@@ -1456,6 +1402,8 @@ public:
     // Called from:
     //     RenderObject ctor that takes 4 Point3d parameters
     public void floor() {
+        Globals.statusPrint(bIctDebug, "At Shape3d.floor");
+
         initCurrentVertex();
 
         for (int index = 0; index < this.miNumVertices; index++) {
@@ -1477,6 +1425,8 @@ public:
     // Not called from within this file
     // Could not find where this is called from
     public void translateT(float pfOffsetX, float pfOffsetY, float pfOffsetZ) {
+        Globals.statusPrint(bIctDebug, "At Shape3d.translateT");
+
         initCurrentVertex();
 
         for (int index = 0; index < this.miNumVertices; index++) {
@@ -1496,6 +1446,8 @@ public:
     // Called from:
     //     TMatrix.transformAndProject
     public void translateS(int piOffsetX, int piOffsetY) {
+        Globals.statusPrint(bIctDebug, "At Shape3d.translateS");
+
         initCurrentVertex();
 
         for (int index = 0; index < this.miNumVertices; index++) {
@@ -1508,9 +1460,9 @@ public:
     } // translateS
 
 
-    // TODO: Not a method of Shape3d in the original C++ code
     // This method originally came from SHAPE3D.CPP
-    // 
+    // TODO: Not a method of Shape3d in the original C++ code
+    //
     // Called from:
     //     getShapeFileInfo
     //     readShape
@@ -1571,6 +1523,8 @@ public:
     // Called from:
     //     Constructor that takes 2 parameters, a String and an int
     private void getShapePath(String psModelPath, String psShapeDir, StringBuffer psbShapePath) {
+        Globals.statusPrint(bIctDebug, "At Shape3d.getShapePath");
+
         String sFileWExt, sBaseFile;
         File modelPathFile = new File(psModelPath);
 
@@ -1587,7 +1541,7 @@ public:
             psbShapePath.append(sBaseFile);
             psbShapePath.append(".shp");
         } else {
-            Globals.statusPrint("getShapePath: Empty file name");
+            Globals.statusPrint("Shape3d.getShapePath: Empty file name");
         }
     } // getShapePath
 
@@ -1599,6 +1553,8 @@ public:
     //     getBoundaryPoint
     //     RenderObject ctor that takes 4 parameters: a String, int, boolean and Point3d
     public boolean isValid() {
+        Globals.statusPrint(bIctDebug, "At Shape3d.isValid");
+
         if(this.miNumAllocatedVertices == 0) {
             return false;
         } else {
@@ -1618,6 +1574,8 @@ public:
     float pfRayX2, float pfRayY2,
     OneFloat outXOF, OneFloat outYOF, 
     float pfLastX, float pfLastY) {
+        Globals.statusPrint(bIctDebug, "At Shape3d.getBoundaryPoint");
+
         // Find the screen x,y coord where the
         // shape intersects the input ray.  
         LineEqn lineEqn = new LineEqn();
@@ -1636,7 +1594,7 @@ public:
         float fRayAngle = MathUtils.polarAtan(pfRayX2 - pfRayCentroidX, pfRayY2 - pfRayCentroidY);
         Shape3d tempShape = new Shape3d(JICTConstants.I_TEMPVERTICES);
         if (!tempShape.isValid()) {
-            Globals.statusPrint("getBoundaryPoint: Unable to create temporary shape object");
+            Globals.statusPrint("Shape3d.getBoundaryPoint: Unable to create temporary shape object");
             return -1;
         }
 
@@ -1752,7 +1710,7 @@ public:
                     fDistance = MathUtils.getDistance2d(fIntX, fIntY, pfLastX, pfLastY);
                     iStatus = tempShape.addTransformedVertex(fIntX, fIntY, fDistance);
                     if(iStatus != 0) {
-                        Globals.statusPrint("getBoundaryPoint: Could not add temporary intersection point");
+                        Globals.statusPrint("Shape3d.getBoundaryPoint: Could not add temporary intersection point");
                         return -1;
                     }
                 }
@@ -1797,6 +1755,8 @@ public:
     // Not called from within this file.
     // Could not find where this is being called from.
     public int addVertices(Shape3d pChildShape) {
+        Globals.statusPrint(bIctDebug, "At Shape3d.addVertices");
+
         // Add the vertices of the child shape to the shape pointed to by this 
         int iNumVertices = pChildShape.getNumVertices();
         Point3d currCentroid = new Point3d();
@@ -1851,11 +1811,11 @@ public:
                     (fmAngle2 < fmAngle1) && 
                     ((fmAngle1 <= fChildAngle && fChildAngle <= twoPi) || (0.0 <= fChildAngle && fChildAngle <= fmAngle2))
                 )) {
-                    String sMsgText = "Adding Vertex: " + i + ". ";
+                    String sMsgText = "Shape3d.addVertices: Adding Vertex: " + i + ". ";
                     Globals.statusPrint(sMsgText);
                     iStatus = insertVertexAfter(i, fcx, fcy, 0.0f);
                     if(iStatus != 0) {
-                        Globals.statusPrint("Shape3d.addVertices.  Unable to add vertex.");
+                        Globals.statusPrint("Shape3d.addVertices:  Unable to add vertex.");
                         return -1;
                     }
 
@@ -1868,7 +1828,7 @@ public:
             pChildShape.incCurrentVertex();
         } // for j
 
-        String sMsgText = "cclockWise: " + iCClockWise + "  clockWise: " + iClockWise;
+        String sMsgText = "Shape3d.addVertices: cclockWise: " + iCClockWise + "  clockWise: " + iClockWise;
         Globals.statusPrint(sMsgText);
         return 0;
     } // addVertices
@@ -1884,6 +1844,8 @@ public:
     //     SceneList.copyRefPoints
     //     TMatrix.transformAndProject
     public void getReferencePoint(Point3d pVertex) {
+        Globals.statusPrint(bIctDebug, "At Shape3d.getReferencePoint");
+
         // Set the output parameters
         pVertex.fX = this.pointOfReference.fX;
         pVertex.fY = this.pointOfReference.fY;
@@ -1898,6 +1860,8 @@ public:
     //     RenderObject ctor that takes 4 Point3d parameters
     //     RenderObject ctor that takes 4 parameters: a String, int, boolean and Point3d
     public void setReferencePoint(float pfCentroidX, float pfCentroidY, float pfCentroidZ) {
+        Globals.statusPrint(bIctDebug, "At Shape3d.setReferencePoint");
+
         // Use the input parameters to set pointOfReference
         this.pointOfReference.fX = pfCentroidX;
         this.pointOfReference.fY = pfCentroidY;
@@ -1914,8 +1878,10 @@ public:
     //     RenderObject.renderShape
     //     RenderObject.renderShapez
     public int getScreenVertex(int piIndex, ScreenVertex pScreenVertex) {
+        Globals.statusPrint(bIctDebug, "At Shape3d.getScreenVertex");
+
         if((piIndex < 0) || (piIndex > this.miNumVertices - 1)) {
-            String sMsgText = "getScreenVertex.  index < 0 or >= numVertices: " + piIndex;
+            String sMsgText = "Shape3d.getScreenVertex:  index < 0 or >= numVertices: " + piIndex;
             Globals.statusPrint(sMsgText);
             return -1;
         }
@@ -1936,8 +1902,10 @@ public:
     // Called from:
     //     RenderObject.renderShapez
     public int getTransformedVertex(int piIndex, Point3d pTransfVtx) {
+        Globals.statusPrint(bIctDebug, "At Shape3d.getTransformedVertex");
+
         if((piIndex < 0) || (piIndex > this.miNumVertices - 1)) {
-            String sMsgText = "getTransformedVertex.  index < 0 or >= numVertices: " + piIndex;
+            String sMsgText = "Shape3d.getTransformedVertex:  index < 0 or >= numVertices: " + piIndex;
             Globals.statusPrint(sMsgText);
             return -1;
         }
@@ -1958,6 +1926,8 @@ public:
     // Called from:
     //     getWorldVertex
     public float getWorldDistance(int piVertexNumber) {
+        Globals.statusPrint(bIctDebug, "At Shape3d.getWorldDistance");
+
         // Calculate the sum of distances of the first vertexNumber line
         // segments in a shape.  VeertexNumber is 1 relative.  If vertexNumber 
         // is zero, the total shape boundary distance is returned.
@@ -1973,7 +1943,7 @@ public:
             return 0.0f;
         }
         if(piVertexNumber > this.miNumVertices) {
-            Globals.statusPrint("getWorldDistance: VertexNumber cannot be > numVertices");
+            Globals.statusPrint("Shape3d.getWorldDistance: VertexNumber cannot be > numVertices");
             return -1.0f;
         }
 
@@ -2011,12 +1981,14 @@ public:
     // Can't find where this is called from.
     public int getWorldVertex(float pfDistanceFraction, OneInt pVertex, 
     Point3d pCentroid) {
+        Globals.statusPrint(bIctDebug, "At Shape3d.getWorldVertex");
+
         // Determine the world coordinate that corresponds to the supplied distance fraction.
         // The resulting coordinate is interpolated linearly from the two vertices
         // that are located between the corresponding distanceFraction.
         // piVertex is the 0 relative index after which the vertex is to be added.
         if((pfDistanceFraction < 0.0f) || (pfDistanceFraction > 1.0f)) {
-            Globals.statusPrint("getWorldVertex: distanceFraction must be between 0 and 1");
+            Globals.statusPrint("Shape3d.getWorldVertex: distanceFraction must be between 0 and 1");
             return -1;
         }
 
@@ -2065,7 +2037,7 @@ public:
             }
         } // for
 
-        Globals.statusPrint("getWorldVertex: Could not find vertex");
+        Globals.statusPrint("Shape3d.getWorldVertex: Could not find vertex");
         pCentroid.fX = -1.0f;
         pCentroid.fY = -1.0f;
         pCentroid.fZ = -1.0f;
@@ -2081,6 +2053,8 @@ public:
     //     Globals.tweenImage
     // which in turn is called from MorphDlg.onOK (when morph type = JICTConstants.I_TWOD)
     public int removeDuplicates() {
+        Globals.statusPrint(bIctDebug, "At Shape3d.removeDuplicates");
+
         // If two successive world coords are equal, remove the second one.
         int i, j; // for loop variables
         int iNumVertsToCopy;
@@ -2151,6 +2125,8 @@ public:
     // Called from:
     //     SceneList.calcCompoundModelRefPoint
     public void getTCentroid(Point3d pCentroid) {
+        Globals.statusPrint(bIctDebug, "At Shape3d.getTCentroid");
+
         initCurrentVertex();
         float fMaxtX = mCurrentVertex.tx;
         float fMaxtY = mCurrentVertex.ty;
@@ -2187,6 +2163,8 @@ public:
     //     addVertices
     //     divideLongestArc
     public int insertVertexAfter(int piIndex, float pfX, float pfY, float pfZ) {
+        Globals.statusPrint(bIctDebug, "At Shape3d.insertVertexAfter");
+
         // This function assumes that there is enough room in the existing shape to accomodate
         // a new world vertex.  If there is not enough room in the shape to accomodate the new
         // vertex, an error results.
@@ -2195,14 +2173,14 @@ public:
         // be added
         int iNumVerts = getNumVertices();
         if(piIndex > iNumVerts) {
-            String sMsgText = String.format("insertVertexAfter: index: %d > num Vertices: %d", piIndex, iNumVerts);
+            String sMsgText = String.format("Shape3d.insertVertexAfter: index: %d > num Vertices: %d", piIndex, iNumVerts);
             Globals.statusPrint(sMsgText);
             return -1;
         }
         initCurrentVertex();
         
         if (iNumVerts + 1 > miNumAllocatedVertices) {
-            Globals.statusPrint("insertVertexAfter: Not enough memory in shape object to accomodate new vertex");
+            Globals.statusPrint("Shape3d.insertVertexAfter: Not enough memory in shape object to accomodate new vertex");
             return -2;
         }
 
@@ -2240,13 +2218,15 @@ public:
     // Called from:
     //     Globals.createTweenableShapes
     public Shape3d copyAndExpand(int piNumAddedVertices) {
+        Globals.statusPrint(bIctDebug, "At Shape3d.copyAndExpand");
+
         // Copy a shape object, also adding enough space for numAddedVertices 
         // new vertices
         Shape3d inShape = this;
         int iNumVertices = inShape.miNumVertices;
         Shape3d newShape = new Shape3d(iNumVertices + piNumAddedVertices);
         if(!newShape.isValid()) {
-            Globals.statusPrint("copyAndExpand: Unable to create new shape object");
+            Globals.statusPrint("Shape3d.copyAndExpand: Unable to create new shape object");
             return null;
         }
 
@@ -2287,6 +2267,8 @@ public:
     // Called from:
     //     Globals.createTweenableShapes
     public int divideLongestArc() {
+        Globals.statusPrint(bIctDebug, "At Shape3d.divideLongestArc");
+
         // Add a vertex to a shape object by finding the longest arc and
         // subdividing it.
         int iNumVertices = getNumVertices();
