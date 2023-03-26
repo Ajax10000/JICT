@@ -9,6 +9,7 @@ import core.Shape3d;
 
 import dtos.ColorAsBytes;
 import dtos.LineEqn;
+import dtos.OneInt;
 
 import fileUtils.FileUtils;
 
@@ -32,7 +33,7 @@ import structs.Point3d;
 public class Globals {
     private static JLabel lblStatus = null;
 
-    private static boolean bIctDebug = false;
+    private static boolean bIctDebug = true;
 
     // This variable came from ICT20.CPP
     private static Preferences prefs = Preferences.userNodeForPackage(IctApp.class);  // declare a global preference object
@@ -58,8 +59,8 @@ public class Globals {
         try {
             fw = new FileWriter(logFile, true);
         } catch (IOException ioe) {
-            System.out.println("Could not find file " + sLogFileName);
-            lblStatus.setText("statusPrint: Unable to open the JICT log file jict.log");
+            System.out.println("Globals.statusPrint: Could not find file " + sLogFileName);
+            lblStatus.setText("Globals.statusPrint: Unable to open the JICT log file jict.log");
             return;
         }
 
@@ -68,7 +69,7 @@ public class Globals {
             fw.write(psMessage + "\n");
         } catch (IOException ioe) {
             bErrWriting = true;
-            String sErrMsg = "statusPrint:IOException while trying to write to file " + sLogFileName;
+            String sErrMsg = "Globals.statusPrint: IOException while trying to write to file " + sLogFileName;
             System.out.println(sErrMsg);
             lblStatus.setText(sErrMsg);
         }
@@ -76,7 +77,7 @@ public class Globals {
         try {
             fw.close();
         } catch(IOException ioe) {
-            String sErrMsg = "statusPrint: IOException while trying to close file " + sLogFileName;
+            String sErrMsg = "Globals.statusPrint: IOException while trying to close file " + sLogFileName;
             System.out.println(sErrMsg);
             lblStatus.setText(sErrMsg);
             if (bErrWriting) {
@@ -86,6 +87,13 @@ public class Globals {
 
         // Display the message immediately on the status bar
         lblStatus.setText(psMessage);
+    } // statusPrint
+
+
+    public static void statusPrint(boolean pbDebug, String psMessage) {
+        if (pbDebug) {
+            statusPrint(psMessage);
+        }
     } // statusPrint
 
 
@@ -215,14 +223,14 @@ public class Globals {
         int iBpp = pInMImage.getBitsPerPixel();
         int iOutBPP = pOutMImage.getBitsPerPixel();
         if(iOutBPP != iBpp) {
-            String sMsgText = "blendz: inImage bpp: " + iBpp + " must match outImage bpp: " + iOutBPP;
+            String sMsgText = "Globals.blendz: inImage bpp: " + iBpp + " must match outImage bpp: " + iOutBPP;
             statusPrint(sMsgText);
             return -1;
         }
 
         int iMatteBPP = pMatteMImage.getBitsPerPixel();
         if(iMatteBPP != 8) {
-            statusPrint("blendz: Matte image must be 8 bits per pixel");
+            statusPrint("Globals.blendz: Matte image must be 8 bits per pixel");
             return -2;
         }
 
@@ -348,12 +356,12 @@ public class Globals {
         // The original must be opened for sequential access.
         // cutoutName: name of cutout image and shape file without the suffix
         if(pOrigMImage.getAccessMode() != JICTConstants.I_SEQUENTIAL) {
-            statusPrint("createCutout: original image access mode must be SEQUENTIAL");
+            statusPrint("Globals.createCutout: original image access mode must be SEQUENTIAL");
             return 1;
         }
 
         if (pOrigMImage.getColorSpec() == JICTConstants.I_ONEBITMONOCHROME) {
-            statusPrint("createCutout: original image colorSpec cannot be ONEBITMONOCHROME");
+            statusPrint("Globals.createCutout: original image colorSpec cannot be ONEBITMONOCHROME");
             return 2;
         }
 
@@ -391,7 +399,7 @@ public class Globals {
             iMinX = (int)pShape.mfMinX;
             iMaxX = (int)pShape.mfMaxX;
         } else {
-            statusPrint("createCutout: Shape object not supplied or has 0 vertices");
+            statusPrint("Globals.createCutout: Shape object not supplied or has 0 vertices");
             return -1;
         }
 
@@ -431,13 +439,13 @@ public class Globals {
         sShapeDir  = prefs.get("ShapeDir", "SHAPE/");
         sShapeName = sShapeDir + psCutoutName + ".shp";
 
-        sMsgText = "createCutout: Saving shape file: " + sShapeName;
+        sMsgText = "Globals.createCutout: Saving shape file: " + sShapeName;
         statusPrint(sMsgText);
 
         pShape.invertY(iCutoutHeight);
         int iStatus = pShape.writeShape(sShapeName);
         if(iStatus != 0) {
-            sMsgText = "createCutout: Unable to save the shape file. " + iStatus;
+            sMsgText = "Globals.createCutout: Unable to save the shape file. " + iStatus;
             statusPrint(sMsgText);
             return -1;
         }
@@ -450,14 +458,14 @@ public class Globals {
 
         MemImage cutoutMImg = new MemImage(iCutoutHeight, iCutoutWidth);
         if (!cutoutMImg.isValid()) {
-            sMsgText = "createCutout: Unable to open cutout alpha image: " + sbCutoutMImage;
+            sMsgText = "Globals.createCutout: Unable to open cutout alpha image: " + sbCutoutMImage;
             statusPrint(sMsgText);
             return 3;
         }
     
         MemImage cutoutGImg = new MemImage(iCutoutHeight, iCutoutWidth);
         if (!cutoutGImg.isValid()) {
-            sMsgText = "createCutout: Unable to open cutout g image: " + sbCutoutGImage;
+            sMsgText = "Globals.createCutout: Unable to open cutout g image: " + sbCutoutGImage;
             statusPrint(sMsgText);
             return 4;
         }
@@ -467,14 +475,14 @@ public class Globals {
         if(bColor) {
             cutoutRImg = new MemImage(iCutoutHeight, iCutoutWidth);
             if (!cutoutRImg.isValid()) {
-                sMsgText = "createCutout: Unable to open cutout r image: " + sbCutoutRImage;
+                sMsgText = "Globals.createCutout: Unable to open cutout r image: " + sbCutoutRImage;
                 statusPrint(sMsgText);
                 return 5;
             }
 
             cutoutBImg = new MemImage(iCutoutHeight, iCutoutWidth);
             if (!cutoutBImg.isValid()) {
-                sMsgText = "createCutout: Unable to open cutout b image: " + sbCutoutBImage;
+                sMsgText = "Globals.createCutout: Unable to open cutout b image: " + sbCutoutBImage;
                 statusPrint(sMsgText);
                 return 6;
             }
@@ -518,18 +526,18 @@ public class Globals {
         } // for iy
 
         // Smooth the mask
-        statusPrint("createCutout: Smoothing the cutout mask");
+        statusPrint("Globals.createCutout: Smoothing the cutout mask");
         cutoutMImg.alphaSmooth5();
     
         cutoutGImg.writeBMP(sbCutoutGImage);
-        sMsgText = "createCutout: Saving alpha image: " + sMaskPath;
+        sMsgText = "Globals.createCutout: Saving alpha image: " + sMaskPath;
         statusPrint(sMsgText);
         cutoutMImg.writeBMP(sMaskPath);
     
         if(bColor) {
             cutoutRImg.writeBMP(sbCutoutRImage);
             cutoutBImg.writeBMP(sbCutoutBImage);
-            sMsgText = "createCutout: Saving color cutout image: " + sCutoutPath;
+            sMsgText = "Globals.createCutout: Saving color cutout image: " + sCutoutPath;
             statusPrint(sMsgText);
             makeRGBimage(sbCutoutRImage.toString(), sbCutoutGImage.toString(), sbCutoutBImage.toString(), sCutoutPath);
         }
@@ -611,7 +619,7 @@ public class Globals {
             }
 
         default:
-            statusPrint("in_boundary: Image must have 8 or 24 bit pixels");
+            statusPrint("Globals.in_boundary: Image must have 8 or 24 bit pixels");
             return false;
         } // switch
     } // in_boundary
@@ -632,7 +640,7 @@ public class Globals {
     //     neighbor
     //     shapeFromImage
     public static boolean probe(MemImage pMImage, int piX, int piY, int piDir, 
-    Integer pINewX, Integer pINewY) {
+    OneInt pNewXOI, OneInt pNewYOI) {
         // Figure out coordinates of neighbor
         if ((piDir < 2) || (piDir > 6)) {
             ++piX;
@@ -651,8 +659,8 @@ public class Globals {
         }
 
         // Always return the new coordinates
-        pINewX = piX;
-        pINewY = piY;
+        pNewXOI.i = piX;
+        pNewYOI.i = piY;
 
         // Determine if the new sample point is in the boundary
         return (in_boundary(pMImage, piX, piY));
@@ -678,7 +686,7 @@ public class Globals {
     public static int neighbor(MemImage pMImage, 
     int piX, int piY, // these two are only used as parameters to method probe
     int piLastDir, // last direction
-    Integer pINewX, Integer pINewY) {
+    OneInt pNewXOI, OneInt pNewYOI) {
         int	i;
         int	iNewDir; // new direction
 
@@ -724,8 +732,8 @@ public class Globals {
 
         // Probe the neighbors, looking for one on the edge
         for (i = 0; i < 8; i++) {
-            // The following method sets parameters pINewX and PINewY
-            if (probe(pMImage, piX, piY, iNewDir, pINewX, pINewY)) {
+            // The following method sets parameters pNewXOI and PNewYOI
+            if (probe(pMImage, piX, piY, iNewDir, pNewXOI, pNewYOI)) {
                 // Found the next clockwise edge neighbor --
                 // its coordinates have already been
                 // stuffed into piNewX, piNewY
@@ -760,7 +768,8 @@ public class Globals {
     // which in turn is called from MorphDlg.onOK (when morph type = JICTConstants.I_TWOD)
     public static int shapeFromImage(MemImage pMImage, Shape3d pShape) {
         int	iX, iY;
-        Integer	iNewX = 0, iNewY = 0;
+        OneInt newXOI = new OneInt();
+        OneInt newYOI = new OneInt();
         int	iDir, iLastDir;
         int iStartX = 1;
         int iStartY = 1;
@@ -771,7 +780,7 @@ public class Globals {
         int iImWidth  = pMImage.getWidth();
         int iBpp      = pMImage.getBitsPerPixel();
         if((iBpp != 8) && (iBpp != 24)) {
-            statusPrint("shapeFromImage: Binary image must have 8 or 24 bit pixels.");
+            statusPrint("Globals.shapeFromImage: Binary image must have 8 or 24 bit pixels.");
             return -1;
         }
 
@@ -792,7 +801,7 @@ public class Globals {
         }
 
         if((iStartX < 0) || (iStartY < 0)) {
-            statusPrint("shapeFromImage: Binary image has no non-zero pixels");
+            statusPrint("Globals.shapeFromImage: Binary image has no non-zero pixels");
             return -1;
         }
 
@@ -813,7 +822,7 @@ public class Globals {
         iDir = 0;
 
         for ( ; ; ) {
-            if (probe(pMImage, iX, iY, iDir, iNewX, iNewY)) {
+            if (probe(pMImage, iX, iY, iDir, newXOI, newYOI)) {
                 // Found a neighbor in that direction (its coordinates are in iNewX, iNewY
                 // but we don't use them here)
 
@@ -826,7 +835,7 @@ public class Globals {
                 
                 // Fill in the vector -- the direction is arbitrary,
                 // since the point is isolated
-                pShape.addWorldVertex((float)iNewX, (float)iNewY, 0.0f);
+                pShape.addWorldVertex((float)newXOI.i, (float)newYOI.i, 0.0f);
 
                 return 0;
             }
@@ -839,21 +848,21 @@ public class Globals {
         // Follow the edge clockwise
         for ( ; ; ) {
             // Get the next point on the edge and the vector to it
-            iDir = neighbor(pMImage, iX, iY, iLastDir, iNewX, iNewY);
+            iDir = neighbor(pMImage, iX, iY, iLastDir, newXOI, newYOI);
 
             // Add the new point
             if(iDir != iLastDir) {
-                pShape.addWorldVertex((float)iNewX, (float)iNewY, 0.0f);
+                pShape.addWorldVertex((float)newXOI.i, (float)newYOI.i, 0.0f);
             }
 
             // Maybe done with boundary
-            if ( (iNewX == iStartX) && (iNewY == iStartY) ) {
+            if ( (newXOI.i == iStartX) && (newYOI.i == iStartY) ) {
                 return 0;
             }
 
             // Else get ready to continue following the edge
-            iX = iNewX;
-            iY = iNewY;
+            iX = newXOI.i;
+            iY = newYOI.i;
             iLastDir = iDir;
         } // for
     } // shapeFromImage
@@ -874,7 +883,7 @@ public class Globals {
             try {
                 psText = filein.readLine();
             } catch (IOException ioe) {
-                Globals.statusPrint("getNextMotionLine: IOException while reading from file");
+                Globals.statusPrint("Globals.getNextMotionLine: IOException while reading from file");
             }
 
             if(psText == null) {
@@ -916,7 +925,7 @@ public class Globals {
         int iFrameCounter, iRow, iCol;
 
         if(piBlurDepth > 15) {
-            statusPrint("motionBlur: blurDepth cannot be > 15");
+            statusPrint("Globals.motionBlur: blurDepth cannot be > 15");
             return -1;
         }
 
@@ -924,7 +933,7 @@ public class Globals {
         iStatus = FileUtils.getPathPieces(psFirstImagePath, sDirectory, sFileName, sPrefix, 
             iFrameNum, sInSuffix);
         if(iStatus != 0) {
-            statusPrint("motionBlur: Check the first image pathname");
+            statusPrint("Globals.motionBlur: Check the first image pathname");
             return -2;
         }
 
@@ -933,7 +942,7 @@ public class Globals {
         // We assume iBpp will have the value 8 or 24
         iStatus = readBMPHeader(psFirstImagePath, iImHeight, iImWidth, iBpp);
         if(iStatus != 0) {
-            sMsgText = "motionBlur: Cannot open: " + psFirstImagePath;
+            sMsgText = "Globals.motionBlur: Cannot open: " + psFirstImagePath;
             statusPrint(sMsgText);
             return -3;
         }
@@ -959,7 +968,7 @@ public class Globals {
                     } // switch
 
                     if(!aMImages[i + piBlurDepth].isValid()) {
-                        sMsgText = "motionBlur: Unable to open image: " + sbCurrentPath;
+                        sMsgText = "Globals.motionBlur: Unable to open image: " + sbCurrentPath;
                         statusPrint(sMsgText);
                         return -4;
                     }
@@ -985,7 +994,7 @@ public class Globals {
                 } // switch
 
                 if(!aMImages[iNumOpenImages - 1].isValid()) {
-                    sMsgText = "motionBlur: Unable to open image 2: " + sbCurrentPath;
+                    sMsgText = "Globals.motionBlur: Unable to open image 2: " + sbCurrentPath;
                     statusPrint(sMsgText);
                     return -4;
                 }
@@ -1024,7 +1033,7 @@ public class Globals {
                             break;
 
                         default:
-                            statusPrint("motionBlur: image must be 8 or 24 bits per pixel");
+                            statusPrint("Globals.motionBlur: image must be 8 or 24 bits per pixel");
                             return -1;
                         }  // switch
                     } // for blur
@@ -1049,7 +1058,7 @@ public class Globals {
             } // for iRow
 
             // Save the blurred image
-            sMsgText = "Saving: " + sbOutPath;
+            sMsgText = "Globals.motionBlur: Saving: " + sbOutPath;
             statusPrint(sMsgText);
             outMImage.writeBMP(sbOutPath);
         } // for iFrameCounter
@@ -1090,7 +1099,7 @@ public class Globals {
         // The shape object contains the projected 4 sided polygon and a z coordinate
         // at each of the projected vertices.
         if(bIctDebug) {
-            statusPrint("iwarpz input arguments");
+            statusPrint("Globals.iwarpz input arguments:");
 
             sMsgText = String.format("rx: %6.2f  ry: %6.2f  rz: %6.2f", pfRx, pfRy, pfRz);
             statusPrint(sMsgText);
@@ -1144,7 +1153,7 @@ public class Globals {
         float fYCentOffset = (iOutHeight - iInHeight) / 2.0f;
 
         if(bIctDebug) {
-            sMsgText = "iWarpz: Viewer location: vx: " + pfVx + ", vy: " + pfVy + ", vz: " + pfVz;
+            sMsgText = "Globals.iwarpz: Viewer location: vx: " + pfVx + ", vy: " + pfVy + ", vz: " + pfVz;
             statusPrint(sMsgText);
         }
 
@@ -1167,7 +1176,7 @@ public class Globals {
             true, fIntRefPointX, fIntRefPointY, fIntRefPointZ);
 
         if(bIctDebug) {
-            shape.printShape("Transformed Image Boundary:");
+            shape.printShape("Globals.iwarpz: Transformed Image Boundary:");
         }
 
         shape.screenBoundingBox();
@@ -1193,16 +1202,16 @@ public class Globals {
                 // aShape.iCurrVtxIdx++;
                 shape.incCurrentVertex();
 
-                sMsgText = String.format("transformed: %6.2f %6.2f %6.2f texture: %6.2f %6.2f %6.2f",
+                sMsgText = String.format("Globals.iwarpz: transformed: %6.2f %6.2f %6.2f texture: %6.2f %6.2f %6.2f",
                     fAnX, fAnY, fAnZ, 
                     fXo + fHalfInWidth, fYo + fHalfInHeight, fZo);
                 statusPrint(sMsgText);
             }
 
-            sMsgText = "read offsets: halfInWidth: " + fHalfInWidth + "  halfInHeight: " + fHalfInHeight;
+            sMsgText = "Globls.iwarpz: read offsets: halfInWidth: " + fHalfInWidth + "  halfInHeight: " + fHalfInHeight;
             statusPrint(sMsgText);
 
-            sMsgText = "write offsets: xCentOffset: " + fXCentOffset + "  yCentOffset: " + fYCentOffset;
+            sMsgText = "Globals.iwarpz: write offsets: xCentOffset: " + fXCentOffset + "  yCentOffset: " + fYCentOffset;
             statusPrint(sMsgText);
         } // if (bIctDebug)
 
@@ -1229,7 +1238,7 @@ public class Globals {
                 iaScreenXCoords, faXCoords, faYCoords, faZCoords);
 
             if (iStatus != 0) {
-                sMsgText = "iwarp: getInterval error: " + iStatus;
+                sMsgText = "Globals.iwarpz: getInterval error: " + iStatus;
                 statusPrint(sMsgText);
                 return 2;
             }
@@ -1246,7 +1255,7 @@ public class Globals {
 
             // The call to method getIntervals above set variable iNumXCoordsFound
             if (iNumXCoordsFound != 2) {
-                sMsgText = "iWarp: numCoords <> 2. y: " + iY + " numCoords " + iNumXCoordsFound;
+                sMsgText = "Globals.iwarpz: numCoords <> 2. y: " + iY + " numCoords " + iNumXCoordsFound;
                 statusPrint(sMsgText);
                 for(int i = 0; i < iNumXCoordsFound; i++) {
                     sMsgText = String.format("%d\t%d\t%6.2f\t%6.2f\t%6.2f", 
@@ -1371,7 +1380,7 @@ public class Globals {
 
         if(bIctDebug) {
             if(pZMImage != null) {
-                statusPrint("iwarpz: Writing zBuffer -  d:\\ict20\\output\\rawWarpz.bmp");
+                statusPrint("Globals.iwarpz: Writing zBuffer -  d:\\ict20\\output\\rawWarpz.bmp");
                 pZMImage.saveAs8("d:\\ict20\\output\\Warpz8.bmp");
             }
         }
@@ -1407,7 +1416,7 @@ public class Globals {
 
         int iNumShapeVertices = pShape.getNumVertices();
         if(iNumShapeVertices != 4) {
-            statusPrint("getIntervals: numShapeVertices must = 4");
+            statusPrint("Globals.getIntervals: numShapeVertices must = 4");
             return -1;
         }
 
@@ -1465,11 +1474,11 @@ public class Globals {
             iNewX = (int)fX;
             
             if(bIctDebug) {
-                sMsgText = "getIntervals: sx1: " + iSx1 + "  sx2: " + iSx2 + 
+                sMsgText = "Globals.getIntervals: sx1: " + iSx1 + "  sx2: " + iSx2 + 
                     "  sy1: " + iSy1 + " sy2: " + iSy2;
                 statusPrint(sMsgText);
 
-                sMsgText = "getIntervals: index: " + index + " newX: " + iNewX + 
+                sMsgText = "Globals.getIntervals: index: " + index + " newX: " + iNewX + 
                     "  Horz: " + lineEqn.bHorzFlag + "  vert: " + lineEqn.bVertFlag; 
                 statusPrint(sMsgText);
             }
@@ -1482,7 +1491,7 @@ public class Globals {
                 if(fTotalDistance != 0.0f) {
                     fRatio = fPartialDistance/fTotalDistance; // 0 <= ratio <= 1
                 } else {
-                    statusPrint("getIntervals: totalDistance cannot equal 0");
+                    statusPrint("Globals.getIntervals: totalDistance cannot equal 0");
                     return -1;
                 }
                 
@@ -1496,7 +1505,7 @@ public class Globals {
                     pfaYCoords[iTyCoordsIdx] = fTy2 + (fRatio * (fTy1 - fTy2));	
                     pfaZCoords[iTzCoordsIdx] = fTz2 + (fRatio * (fTz1 - fTz2));
                     if(bIctDebug) {
-                        statusPrint("diagPoint");
+                        statusPrint("Globals.getInterval: diagPoint");
                     }
 
                     iTxCoordsIdx++;
@@ -1516,7 +1525,7 @@ public class Globals {
                     iTempIndex++;
 
                     if(bIctDebug) {
-                        statusPrint("non diagPoint");
+                        statusPrint("Globals.getInterval: non diagPoint");
                     }
                 }
                 // end if not horizontal or vertical
@@ -1528,7 +1537,7 @@ public class Globals {
                     if(fTotalDistance != 0.0f) {
                         fRatio = fPartialDistance/fTotalDistance; // 0 <= ratio <= 1
                     } else {
-                        statusPrint("getIntervals: totalDistance cannot equal 0");
+                        statusPrint("Globals.getIntervals: totalDistance cannot equal 0");
                         return -1;
                     }
 
@@ -1546,7 +1555,7 @@ public class Globals {
                         intDistance[index-1] = MathUtils.intervalDistance(iMinY, iMaxY, piY);
                         piNumCoords++;
                         if(bIctDebug) {
-                            statusPrint("vertPoint");
+                            statusPrint("Globals.getIntervals: vertPoint");
                         }
                     } else {
                         // Store the point for possible later use
@@ -1601,7 +1610,7 @@ public class Globals {
         } // if numCoords == 1
 
         if(bIctDebug) {
-            statusPrint("getIntervals Found: intdist\t sx  \t tx  \t ty  \t tz");
+            statusPrint("Found: intdist\t sx  \t tx  \t ty  \t tz");
             for(i = 0; i < piNumCoords; i++) {
                 sMsgText = String.format("\t%d\t%d\t%6.2f\t%6.2f\t%6.2f", 
                     intDistance[i], piaScreenXCoords[i], pfaXCoords[i], pfaYCoords[i], pfaZCoords[i]);
@@ -1719,7 +1728,7 @@ public class Globals {
         }
 
         if (listLength < 1) {
-            statusPrint("RemoveDuplicates: Input list must have 2 or more members");
+            statusPrint("Globals.removeDuplicates: Input list must have 2 or more members");
             return -1;
         }
 
@@ -1755,7 +1764,7 @@ public class Globals {
         }
 
         if (listLength < 1) {
-            statusPrint("RemoveDuplicates: Input list must have 2 or more members");
+            statusPrint("Globals.removeDuplicates: Input list must have 2 or more members");
             return -1;
         }
 
@@ -1792,7 +1801,7 @@ public class Globals {
             return 0;
         }
         if (listLength < 1) {
-            statusPrint("RemoveDuplicates: Input list must have 2 or more members");
+            statusPrint("Globals.removeSimilar: Input list must have 2 or more members");
             return -1;
         }
 
@@ -1848,7 +1857,7 @@ public class Globals {
         if(warpIndicator) {
             midImage = new MemImage(outputRows, outputCols); // Open intermediate image
             if (!midImage.isValid()) {
-                statusPrint("Unable to open intermediate warp image");
+                statusPrint("Globals.iRender: Unable to open intermediate warp image");
                 return -1;
             }
 
@@ -1865,7 +1874,7 @@ public class Globals {
             // Open intermediate matte image
             midMaskImage = new MemImage(outputRows, outputCols);
             if (!midMaskImage.isValid()) {
-                statusPrint("Unable to open intermediate warp mask image");
+                statusPrint("Globals.iRender: Unable to open intermediate warp mask image");
                 return -1;
             }
             fwarpz(maskImage, midMaskImage, null, 
@@ -1944,7 +1953,7 @@ public class Globals {
         if(warpIndicator) {
             midImage = new MemImage(outputRows, outputCols); // open intermediate image
             if (!midImage.isValid()) {
-                statusPrint("iRenderz: Unable to open intermediate warp image");
+                statusPrint("Globals.iRenderz: Unable to open intermediate warp image");
                 return -1;
             }
 
@@ -1970,7 +1979,7 @@ public class Globals {
         if(blendIndicator) {
             alphaImage = new MemImage(outputRows, outputCols);
             if (!alphaImage.isValid()) {
-                statusPrint("iRenderz: Unable to open intermediate alpha image");
+                statusPrint("Globals.iRenderz: Unable to open intermediate alpha image");
                 return -1;
             }
 
@@ -2035,7 +2044,7 @@ public class Globals {
         if(
         pInMImage.getHeight() != pOutMImage.getHeight() || 
         pInMImage.getWidth() != pOutMImage.getWidth() ) {
-            statusPrint("antiAlias: Images must have equal size.");
+            statusPrint("Globals.antiAlias: Images must have equal size.");
             return -1;
         }
 
@@ -2043,7 +2052,7 @@ public class Globals {
         if(
         (pInMImage.getBitsPerPixel() != pOutMImage.getBitsPerPixel()) || 
         (pInMImage.getBitsPerPixel() != 8)) {
-            statusPrint("antiAlias: images must have 8 or 24 bit pixels.");
+            statusPrint("Globals.antiAlias: images must have 8 or 24 bit pixels.");
             return -2;
         }
 
@@ -2212,7 +2221,7 @@ public class Globals {
         // The shape object contains the projected 4 sided polygon and a z coordinate
         // at each of the projected vertices.
         if (bIctDebug) {
-            statusPrint("fWarp inputs:");
+            statusPrint("Globals.fWarp1 inputs:");
             sMsgText = String.format("rx: %6.2f  ry: %6.2f  rz: %6.2f", pfRx, pfRy, pfRz);
             statusPrint(sMsgText);
 
@@ -2267,7 +2276,7 @@ public class Globals {
         pfSx == 1.0f && pfSy == 1.0f && pfSz == 1.0f && 
         pfTz == 0.0f) {
             pInMImage.copy(pOutMImage, (int)pfTx + iXOffset, (int)pfTy + iYOffset);
-            statusPrint("fWarp: shortcut");
+            statusPrint("Globals.fWarp1: shortcut");
             return 0;
         }
         
@@ -2296,7 +2305,7 @@ public class Globals {
         } // for fY
     
         if (bIctDebug) {
-            statusPrint("fWarp1: Writing output -  d:\\ict20\\output\\rawfWarp.bmp");
+            statusPrint("Globals.fWarp1: Writing output -  d:\\ict20\\output\\rawfWarp.bmp");
             pOutMImage.writeBMP("d:\\ict20\\output\\rawfWarp.bmp");
         }
     
@@ -2335,7 +2344,7 @@ public class Globals {
         // The shape object contains the projected 4 sided polygon and a z coordinate
         // at each of the projected vertices.
         if (bIctDebug) {
-            statusPrint("fWarp inputs:");
+            statusPrint("Globals.fwarpz inputs:");
             sMsgText = String.format("rx: %6.2f  ry: %6.2f  rz: %6.2f", pfRx, pfRy, pfRz);
             statusPrint(sMsgText);
 
@@ -2382,7 +2391,7 @@ public class Globals {
         pfSx == 1.0f && pfSy == 1.0f && pfSz == 1.0f && 
         pfTz == 0.0f) {
             pInMImage.copy(pOutMImage, (int)(pfTx + fHalfWidth), (int)(pfTy + fHalfHeight));
-            statusPrint("fWarpz: shortcut");
+            statusPrint("Globals.fwarpz: shortcut");
             return 0;
         }
         
@@ -2502,12 +2511,12 @@ public class Globals {
     
         if (bIctDebug) {
             pZMImage.writeBMP("d:\\ict20\\output\\zBuffer32.bmp");
-            statusPrint("fWarp3: Writing z output - d:\\ict20\\output\\zBuffer32.bmp");
+            statusPrint("Globals.fwarpz: Writing z output - d:\\ict20\\output\\zBuffer32.bmp");
 
             pZMImage.saveAs8("d:\\ict20\\output\\zBuffer8.bmp");
-            statusPrint("fWarp3: Writing z output - d:\\ict20\\output\\zBuffer8.bmp");
+            statusPrint("Globals.fwarpz: Writing z output - d:\\ict20\\output\\zBuffer8.bmp");
         
-            statusPrint("fWarp3: Writing output -  c:\\ict\\output\\rawfWarp.bmp");
+            statusPrint("Globals.fwarpz: Writing output -  c:\\ict\\output\\rawfWarp.bmp");
             pOutMImage.writeBMP("c:\\ict\\output\\rawfWarp.bmp");
         }
     
@@ -2536,7 +2545,6 @@ public class Globals {
         int iYBufferIdx; // index into iaYBuffer
         int iYPrev1Idx = 0, iYPrev2Idx = 0; // indices into iaYBuffer
 
-        
         float[] faDBuffer;
         int iDBufferIdx; // index into faDBuffer
         int iDPrev1Idx = 0, iDPrev2Idx = 0; // indices into faDBuffer
@@ -2579,36 +2587,9 @@ public class Globals {
         int iNumCalcs = (int)(iInWidth * fInverseInc);
     
         iaXBuffer = new int[iNumCalcs];
-        /* if iaXBuffer is null, the JVM would have thrown an OutOfMemoryException
-        if (iaXBuffer == null) {
-            statusPrint("fwarpz2: Not enough memory for iaXBuffer");
-            return -1;
-        }
-        */
-
         iaYBuffer = new int[iNumCalcs];
-        /* if iaYBuffer is null, the JVM would have thrown an OutOfMemoryException
-        if (iaYBuffer == null) {
-            statusPrint("fwarpz2: Not enough memory for iaYBuffer");
-            return -1;
-        }
-        */
-    
         faDBuffer = new float[iNumCalcs];
-        /* if faDBuffer is null, the JVM would have thrown an OutOfMemoryException
-        if (faDBuffer == null) {
-            statusPrint("fwarpz2: Not enough memory for distance Buffer");
-            return -1;
-        }
-        */
-    
         iaIBuffer = new byte[iNumCalcs];
-        /* if iaBuffer is null, the JVM would have thrown an OutOfMemoryException
-        if (iaBuffer == null) {
-            statusPrint("fwarpz2: Not enough memory for iaBuffer");
-            return -1;
-        }
-        */
     
         /*
         // Temporary - for testing
@@ -2617,7 +2598,7 @@ public class Globals {
         pfVz = 512.0f;
         */
     
-        sMsgText = String.format("fwarpz2: Viewer location: vx: %f, vy: %f, vz: %f", pfVx, pfVy, pfVz);
+        sMsgText = String.format("Globals.fwarpz2: Viewer location: vx: %f, vy: %f, vz: %f", pfVx, pfVy, pfVz);
         statusPrint(sMsgText);
         iXBufferIdx = 0;
         iYBufferIdx = 0;
@@ -2769,7 +2750,7 @@ public class Globals {
         int iStatus;
         iStatus = readBMPHeader(psInputImagePath, iImHeight, iImWidth, iBitsPerPixel);
         if(iStatus != 0) {
-            statusPrint("createQMeshModel: Unable to open texture image");
+            statusPrint("Globals.createQMeshModel: Unable to open texture image");
             return -1;
         }
 
@@ -2944,14 +2925,14 @@ public class Globals {
             // append the file name
             sOutPath = psDestinationDir + File.pathSeparator + sFilenameWExt;
         } else {
-            statusPrint("createQMeshModel: Destination dir is not a directory: " + psDestinationDir);
+            statusPrint("Globals.createQMeshModel: Destination dir is not a directory: " + psDestinationDir);
             return -2;
         }
         
         // As a matter of convenience copy the texture image to the same directory
         // in which the surface images reside, if it isn't there already.
         if(!FileUtils.fileExists(sOutPath)) {
-            sMsgText = "createQMeshModel: Copying QMesh Model Texture Image to: " + sOutPath;
+            sMsgText = "Globals.createQMeshModel: Copying QMesh Model Texture Image to: " + sOutPath;
             statusPrint(sMsgText);
             CopyFile(psInputImagePath, sOutPath, 1);
         }
@@ -2965,7 +2946,7 @@ public class Globals {
         sbXPath.toString().equalsIgnoreCase(psInputImagePath) ||
         sbYPath.toString().equalsIgnoreCase(psInputImagePath) ||
         sbZPath.toString().equalsIgnoreCase(psInputImagePath)) {
-            statusPrint("createQMeshModel: A surface image may not have the same name as the texture image.");
+            statusPrint("Globals.createQMeshModel: A surface image may not have the same name as the texture image.");
             sMsgText = "textureImage: " + psInputImagePath;
             statusPrint(sMsgText);
 
@@ -2996,7 +2977,7 @@ public class Globals {
         fZMax = fZMin;
 
         // Get an approximate model centroid, bounding box and display it.
-        statusPrint("createQMeshModel: Calculating approximate mesh centroid and bounding box");
+        statusPrint("Globals.createQMeshModel: Calculating approximate mesh centroid and bounding box");
         fXBucket = 0.0f;
         fYBucket = 0.0f;
         fZBucket = 0.0f;
@@ -3030,24 +3011,24 @@ public class Globals {
         fRefY = fYBucket/fTotalCells;
         fRefZ = fZBucket/fTotalCells;
 
-        sMsgText = "QuadMesh centroid x: " + fRefX + " y: " + fRefY + " z: " + fRefZ;
+        sMsgText = "Globals.createQMeshModel: QuadMesh centroid x: " + fRefX + " y: " + fRefY + " z: " + fRefZ;
         statusPrint(sMsgText);
 
-        sMsgText = "QuadMesh BBox Mins x: " + fXMin + " y: " + fYMin + " z: " + fZMin;
+        sMsgText = "Globals.createQMeshModel: QuadMesh BBox Mins x: " + fXMin + " y: " + fYMin + " z: " + fZMin;
         statusPrint(sMsgText);
 
-        sMsgText = "QuadMesh BBox Maxs x: " + fXMax + " y: " + fYMax + " z: " + fZMax;
+        sMsgText = "Globals.createQMeshModel: QuadMesh BBox Maxs x: " + fXMax + " y: " + fYMax + " z: " + fZMax;
         statusPrint(sMsgText);
  
-        sMsgText = "Saving QMesh: " + sbXPath;
+        sMsgText = "Globals.createQMeshModel: Saving QMesh: " + sbXPath;
         statusPrint(sMsgText);
         xMImage.writeBMP(sbXPath);
 
-        sMsgText = "Saving QMesh: " + sbYPath;
+        sMsgText = "Globals.createQMeshModel: Saving QMesh: " + sbYPath;
         statusPrint(sMsgText);
         yMImage.writeBMP(sbYPath);
 
-        sMsgText = "Saving QMesh: " + sbZPath;
+        sMsgText = "Globals.createQMeshModel: Saving QMesh: " + sbZPath;
         statusPrint(sMsgText);
         zMImage.writeBMP(sbZPath);
         
@@ -3075,7 +3056,7 @@ public class Globals {
     public static int getMeshCentroid(MemImage pxMImage, MemImage pyMImage, MemImage pzMImage,
     Point3d pCentroid) {
         String sMsgText;
-        statusPrint("Calculating mesh centroid");
+        statusPrint("Globals.getMeshCentroid: Calculating mesh centroid");
 
         // Each image must be the same size.
         if(
@@ -3083,7 +3064,7 @@ public class Globals {
         pyMImage.getHeight() != pzMImage.getHeight() || 
         pxMImage.getWidth()  != pyMImage.getWidth()  ||  
         pyMImage.getWidth()  != pzMImage.getWidth()) {
-            statusPrint("getMeshCentroid: Surface images must have equal size.");
+            statusPrint("Globals.getMeshCentroid: Surface images must have equal size.");
             return -1;
         }
     
@@ -3092,7 +3073,7 @@ public class Globals {
         pxMImage.getBitsPerPixel() != 32 || 
         pyMImage.getBitsPerPixel() != 32 ||
         pzMImage.getBitsPerPixel() != 32) {
-            statusPrint("getMeshCentroid: Surface images must have 32 bit pixels.");
+            statusPrint("Globals.getMeshCentroid: Surface images must have 32 bit pixels.");
             return -2;
         }
     
@@ -3119,7 +3100,7 @@ public class Globals {
         pCentroid.fY = fY1/fTotalCells;
         pCentroid.fZ = fZ1/fTotalCells;
 
-        sMsgText = "Mesh centroid calculated: " + pCentroid.fX + " " + pCentroid.fY + " " + pCentroid.fZ;
+        sMsgText = "Globals.getMeshCentroid: Mesh centroid calculated: " + pCentroid.fX + " " + pCentroid.fY + " " + pCentroid.fZ;
         statusPrint(sMsgText);
 
         return 0;
@@ -3132,7 +3113,7 @@ public class Globals {
     //     RenderObject ctor that takes 4 parameters: a String, int, boolean and Point3d
     public static int translateMesh(MemImage pxMImage, MemImage pyMImage, MemImage pzMImage,
     float pfOffsetX, float pfOffsetY, float pfOffsetZ) {
-        statusPrint("Translating mesh.");
+        statusPrint("Globals.translateMesh: Translating mesh.");
 
         // Each image must be the same size.
         if(
@@ -3140,7 +3121,7 @@ public class Globals {
         pyMImage.getHeight() != pzMImage.getHeight() ||
         pxMImage.getWidth()  != pyMImage.getWidth()  || 
         pyMImage.getWidth()  != pzMImage.getWidth()) {
-            statusPrint("translateMesh: Surface images must have equal size.");
+            statusPrint("Globals.translateMesh: Surface images must have equal size.");
             return -1;
         }
     
@@ -3149,7 +3130,7 @@ public class Globals {
         pxMImage.getBitsPerPixel() != 32 || 
         pyMImage.getBitsPerPixel() != 32 ||
         pzMImage.getBitsPerPixel() != 32) {
-            statusPrint("translateMesh: Surface images must have 32 bit pixels.");
+            statusPrint("Globals.translateMesh: Surface images must have 32 bit pixels.");
             return -2;
         }
     
@@ -3177,7 +3158,7 @@ public class Globals {
             } // for col
         } // for row
 
-        statusPrint("Mesh translated."); 
+        statusPrint("Globals.translateMesh: Mesh translated."); 
         return 0;
     } // translateMesh
 
@@ -3198,7 +3179,7 @@ public class Globals {
         MemImage redMImage = new MemImage(psRedImage, 0, 0, 
             JICTConstants.I_SEQUENTIAL, 'R', JICTConstants.I_REDCOLOR);
         if (!redMImage.isValid()) {
-            sMsgBuffer = "makeRGBImage: Unable to open Red image: " + psRedImage;
+            sMsgBuffer = "Globals.makeRGBImage: Unable to open Red image: " + psRedImage;
             statusPrint(sMsgBuffer);
             return 1;
         }
@@ -3206,7 +3187,7 @@ public class Globals {
         MemImage greenMImage = new MemImage(psGreenImage, 0, 0, 
             JICTConstants.I_SEQUENTIAL,'R', JICTConstants.I_GREENCOLOR);
         if (!greenMImage.isValid()) {
-            sMsgBuffer = "makeRGBImage: Unable to open Green image: " + psGreenImage;
+            sMsgBuffer = "Globals.makeRGBImage: Unable to open Green image: " + psGreenImage;
             statusPrint(sMsgBuffer);
             return 1;
         }
@@ -3214,7 +3195,7 @@ public class Globals {
         MemImage blueMImage = new MemImage(psBlueImage, 0, 0, 
             JICTConstants.I_SEQUENTIAL,'R', JICTConstants.I_BLUECOLOR);
         if (!blueMImage.isValid()) {
-            sMsgBuffer = "makeRGBImage: Unable to open Blue image: %s" + psBlueImage;
+            sMsgBuffer = "Globals.makeRGBImage: Unable to open Blue image: %s" + psBlueImage;
             statusPrint(sMsgBuffer);
             return 1;
         }
@@ -3229,18 +3210,18 @@ public class Globals {
         iBWidth  = blueMImage.getWidth();
 
         if (!(iRWidth == iGWidth && iGWidth == iBWidth && iRWidth == iBWidth)) {
-            statusPrint("makeRGBImage: R,G, and B image widths are not equal.");
+            statusPrint("Globals.makeRGBImage: R, G, and B image widths are not equal.");
             return 1;
         }
         if (!(iRHeight == iGHeight && iGHeight == iBHeight && iRHeight == iBHeight)) {
-            statusPrint("makeRGBImage: R,G, and B image heights are not equal.");
+            statusPrint("Globals.makeRGBImage: R, G, and B image heights are not equal.");
             return 1;
         }
 
         MemImage RGBMImage = new MemImage(psOutFileName, iGHeight, iGWidth, 
             JICTConstants.I_SEQUENTIAL, 'W', JICTConstants.I_RGBCOLOR);
         if (!RGBMImage.isValid()) {
-            statusPrint("makeRGBImage: Unable to open RGB image.");
+            statusPrint("Globals.makeRGBImage: Unable to open RGB image.");
 
             redMImage.close();
             greenMImage.close();
@@ -3255,7 +3236,7 @@ public class Globals {
         for (int iY = 1; iY <= iGHeight; iY++) {
             iRStatus = redMImage.readNextRow();
             if (iRStatus != 0) {
-                statusPrint("makeRGBImage: red readNextRow error.");
+                statusPrint("Globals.makeRGBImage: red readNextRow error.");
 
                 redMImage.close();
                 greenMImage.close();
@@ -3265,7 +3246,7 @@ public class Globals {
 
             iGStatus = greenMImage.readNextRow();
             if (iGStatus != 0) {
-                statusPrint("makeRGBImage: green readNextRow error.");
+                statusPrint("Globals.makeRGBImage: green readNextRow error.");
 
                 redMImage.close();
                 greenMImage.close();
@@ -3275,7 +3256,7 @@ public class Globals {
 
             iBStatus = blueMImage.readNextRow();
             if (iBStatus != 0) {
-                statusPrint("makeRGBImage: blue readNextRow error.");
+                statusPrint("Globals.makeRGBImage: blue readNextRow error.");
 
                 redMImage.close();
                 greenMImage.close();
@@ -3422,13 +3403,13 @@ public class Globals {
 
         iRunningCount = 0;
         if(piNumIntervals == 0) {
-            statusPrint("indexToCoord: numIntervals is 0");
+            statusPrint("Globals.indexToCoord: numIntervals is 0");
             return -1;
         }
 
         int iMaxIndex = getTotalIntervalLength(piaIntervalList, piNumIntervals);
         if(piIndex > iMaxIndex) {
-            sMsgText = "indexToCoord: Index: " + piIndex + " > maxIndex: " + iMaxIndex;
+            sMsgText = "Globals.indexToCoord: Index: " + piIndex + " > maxIndex: " + iMaxIndex;
             statusPrint(sMsgText);
             return -2;
         }
@@ -3444,7 +3425,7 @@ public class Globals {
             }
         } // for i
 
-        sMsgText = "indexToCoord: Coord not found. Index: " + piIndex;
+        sMsgText = "Globals.indexToCoord: Coord not found. Index: " + piIndex;
         statusPrint(sMsgText);
 
         for(i = 0; i < piNumIntervals * 2; i += 2) {
@@ -3492,7 +3473,7 @@ public class Globals {
         int iBpp = pOutMImage.getBitsPerPixel();
         if(pZMImage != null) {
             if (pZMImage.getBitsPerPixel() != 32) {
-                statusPrint("fillTrianglez: z image must be 32 bits/pixel");
+                statusPrint("Globals.fillTrianglez: z image must be 32 bits/pixel");
                 return -1;
             }
         }
@@ -3988,53 +3969,26 @@ public class Globals {
         !xImage.isValid() ||
         !yImage.isValid() ||
         !zImage.isValid()) {
-            statusPrint("renderMesh: One or more quad-mesh image is not valid");
+            statusPrint("Globals.renderMesh: One or more quad-mesh image is not valid");
             return -1;
         }
 
         // Create the line buffer data structures
         xBuffer = new int[xImage.getWidth()];
-        /* Dead code, per the compiler
-        if (xBuffer == null) {
-            statusPrint("renderMesh: Not enough memory for xBuffer");
-            return -1;
-        }
-        */
-
         yBuffer = new int[yImage.getWidth()];
-        /* Dead code, per the compiler
-        if (yBuffer == null) {
-            statusPrint("renderMesh: Not enough memory for yBuffer");
-            return -1;
-        }
-        */
-
         dBuffer = new float[zImage.getWidth()];
-        /* Dead code, per the compiler
-        if (dBuffer == null) {
-            statusPrint("renderMesh: Not enough memory for Z Buffer");
-            return -1;
-        }
-        */
-
         iBuffer = new byte[textureImage.getWidth()];
-        /* Dead code, per the compiler
-        if (iBuffer == null) {
-            statusPrint("renderMeshz: Not enough memory for intensity Buffer");
-            return -1;
-        }
-        */
 
         MemImage outputImage = new MemImage(textureImage.getHeight(), textureImage.getWidth());
         if(!outputImage.isValid()) {
-            statusPrint("renderMeshZ: Not enough memory to open output image");
+            statusPrint("Globals.renderMesh: Not enough memory to open output image");
             return -1;
         }
         outputImage.setFileName("outputImage");
 
         MemImage midZImage = new MemImage(outputImage.getHeight(), outputImage.getWidth(), 32);
         if(!midZImage.isValid()) {
-            statusPrint("renderMeshZ: Not enough memory to open intermediate Z image");
+            statusPrint("Globals.renderMesh: Not enough memory to open intermediate Z image");
             return -1;
         }
 
@@ -4050,7 +4004,7 @@ public class Globals {
         vy = (float)outHeight/2.0f;
         vz = 512.0f;
 
-        String msgText = "renderMeshz: Viewer location: vx: " + vx + ", vy: " + vy + ", vz: " + vz;
+        String msgText = "Globals.renderMesh: Viewer location: vx: " + vx + ", vy: " + vy + ", vz: " + vz;
         statusPrint(msgText);
         xBufferIdx = 0; // index into xBuffer
         yBufferIdx = 0; // index into yBuffer
@@ -4249,13 +4203,13 @@ public class Globals {
         int mStatus;
         int aStatus = shapeFromImage(pInMImageA, inShapeA);
         if(aStatus != 0) {
-            statusPrint("tweenImage: shapeFromImage returned non-zero status. pInMImageA");
+            statusPrint("Globals.tweenImage: shapeFromImage returned non-zero status. pInMImageA");
             return -1;
         }
         
         aStatus = shapeFromImage(pInMImageB, inShapeB);
         if(aStatus != 0) {
-            statusPrint("tweenImage: shapeFromImage returned non-zero status. pInMImageB");
+            statusPrint("Globals.tweenImage: shapeFromImage returned non-zero status. pInMImageB");
             return -2;
         }
 
@@ -4276,7 +4230,7 @@ public class Globals {
         aStatus = createTweenableShapes(inShapeA, inShapeB, 
             outShapeA, outShapeB);
         if(aStatus != 0) {
-            statusPrint("tweenImage: Could not create tweenable shapes.");
+            statusPrint("Globals.tweenImage: Could not create tweenable shapes.");
             return -3;
         }
 
@@ -4291,7 +4245,7 @@ public class Globals {
         numvertsA = tempShapeA.getNumVertices();
         numvertsB = tempShapeB.getNumVertices();
         if(numvertsA != numvertsB) {
-            statusPrint("tweenImage: tweenShape could not create the target boundary.");
+            statusPrint("Globals.tweenImage: tweenShape could not create the target boundary.");
             return -3;
         }
 
@@ -4342,7 +4296,7 @@ public class Globals {
         MemImage maskImage = new MemImage(numYO, numXO);
         aStatus = RenderObject.maskFromShape(outShape, maskImage);
         if(aStatus != 0) {
-            statusPrint("tweenImage: Could not generate tweened mask image.");
+            statusPrint("Globals.tweenImage: Could not generate tweened mask image.");
             maskImage = null;
             outShape = null;
             return -3;
@@ -4355,7 +4309,7 @@ public class Globals {
         if(
         numXA == 0 || numYA == 0 ||
         numXB == 0 || numYB == 0) {
-            statusPrint("tweenImage: One of the images to be tweened has no rows or columns.");
+            statusPrint("Globals.tweenImage: One of the images to be tweened has no rows or columns.");
             maskImage = null;
             outShape = null;
             return -4;
@@ -4420,7 +4374,7 @@ public class Globals {
             aStatus = getRowIntervals(tempImageA, row, aIntervalList, numAIntervals);
             if(aStatus != 0) {
                 msgText = String.format( 
-                    "tweenImage: getRowIntervals error (image A) at row: %d", row);
+                    "Globals.tweenImage: getRowIntervals error (image A) at row: %d", row);
                 statusPrint(msgText);
                 return -9;
             }
@@ -4431,7 +4385,7 @@ public class Globals {
             mStatus = getRowIntervals(maskImage, row, mIntervalList, numMIntervals);
             if(mStatus != 0) {
                 msgText = String.format(
-                    "tweenImage: getRowIntervals error (mask image) at row: %d", row);
+                    "Globals.tweenImage: getRowIntervals error (mask image) at row: %d", row);
                 statusPrint(msgText);
                 return -10;
             }
@@ -4470,7 +4424,7 @@ public class Globals {
         for(row = 1; row < numYO; row++) {
             aStatus = getRowIntervals(tempImageB, row, bIntervalList, numBIntervals);
             if(aStatus != 0) {
-                msgText = String.format("tweenImage: getRowIntervals error (image B) at row: %d", row);
+                msgText = String.format("Globals.tweenImage: getRowIntervals error (image B) at row: %d", row);
                 statusPrint(msgText);
                 return -9;
             }
@@ -4480,7 +4434,7 @@ public class Globals {
             // Get mask image intervals
             mStatus = getRowIntervals(maskImage, row, mIntervalList, numMIntervals);
             if(mStatus != 0) {
-                msgText = String.format("tweenImage: getRowIntervals error (mask image) at row: %d", row);
+                msgText = String.format("Globals.tweenImage: getRowIntervals error (mask image) at row: %d", row);
                 statusPrint(msgText);
                 return -10;
             }
@@ -4580,7 +4534,7 @@ public class Globals {
         int numverts1 = shape1.getNumVertices();
         int numverts2 = shape2.getNumVertices();
         if(numverts1 != numverts2) {
-            statusPrint("tweenShape: shape1 and shape2 must have the same number of vertices");
+            statusPrint("Globals.tweenShape: shape1 and shape2 must have the same number of vertices");
             return -1;
         }
 
@@ -4637,7 +4591,7 @@ public class Globals {
             for(int i = 1; i <= iNumVerticesDiff; i++) {
                 iStatus = outShape1.divideLongestArc();
                 if(iStatus != 0) {
-                    statusPrint("createTweenableShapes: divideLongestArc error");
+                    statusPrint("Globals.createTweenableShapes: divideLongestArc error");
                     return iStatus;
                 }
 
@@ -4649,7 +4603,7 @@ public class Globals {
             for(int i = 1; i <= iNumVerticesDiff; i++) {
                 iStatus = outShape2.divideLongestArc();
                 if(iStatus != 0) {
-                    statusPrint("createTweenableShapes: divideLongestArc error");
+                    statusPrint("Globals.createTweenableShapes: divideLongestArc error");
                     return iStatus;
                 }
 
@@ -4680,7 +4634,7 @@ public class Globals {
         byte oBlueByte;
 
         if ((pfFraction < 0.0f) || (pfFraction > 1.0f)) {
-            statusPrint("tweenMesh: aFraction must be between 0 and 1");
+            statusPrint("Globals.tweenMesh: aFraction must be between 0 and 1");
             return -1;
         }
 
@@ -4689,13 +4643,13 @@ public class Globals {
         int iImWidth  = aTexture.getWidth();
         int bWidth    = bTexture.getWidth();
         if(iImWidth != bWidth){
-            statusPrint("tweenMesh: texture images must have same width.");
+            statusPrint("Globals.tweenMesh: texture images must have same width.");
             return -2;
         }
 
         int iBpp = aTexture.getBitsPerPixel();
         if ((iBpp != 8) && (iBpp != 24)) {
-            statusPrint("tweenMesh: Texture image must have 8 or 24 bit pixels.");
+            statusPrint("Globals.tweenMesh: Texture image must have 8 or 24 bit pixels.");
             return -3;
         }
 
