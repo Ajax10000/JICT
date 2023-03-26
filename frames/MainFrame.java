@@ -1221,7 +1221,6 @@ POPUP "Tools"
     // ON_COMMAND(ID_TOOLS_CREATETEXTUREIMAGE, OnToolsCreatetextureimage)
     public void onToolsCreateTextureImage() {
         MakeTextureDlg dlg = new MakeTextureDlg(this, true);
-        dlg.setVisible(true);	
     } // onToolsCreateTextureImage
 
 
@@ -1232,8 +1231,6 @@ POPUP "Tools"
         // Quad mesh model creation occurs in the dialog box
         // member functions.
         QuadMeshDlg dlg = new QuadMeshDlg(this, true);
-        dlg.setVisible(true);
-        // dlg.DoModal();	
     } // onToolsCreateMesh
 
 
@@ -1263,7 +1260,7 @@ POPUP "Tools"
     public void onToolsCreateAlphaImage() {
         String sMsgText;
 
-        Globals.statusPrint("Creating an Alpha-Channel Image");
+        Globals.statusPrint("MainFrame.onToolsCreateAlphaImage: Creating an Alpha-Channel Image");
         if(mbIsDirty) {         // If the client window has been drawn on, erase it
             mbIsDirty = false;
             repaint();
@@ -1294,7 +1291,7 @@ POPUP "Tools"
             FileUtils.constructPathName(sbCenteredName, sFileName, 'q');
             if(sbCenteredName.toString().equals(sFileName)) {
                 Globals.beep(10, 10);
-                Globals.statusPrint("onToolsCreateAlphaImage: Centered image name cannot equal original image name");
+                Globals.statusPrint("MainFrame.onToolsCreateAlphaImage: Centered image name cannot equal original image name");
                 return;
             }
 
@@ -1312,19 +1309,19 @@ POPUP "Tools"
             FileUtils.constructPathName(sbAlphaName, sFileName, 'a');
             if(sbAlphaName.toString().equals(sFileName)) {
                 Globals.beep(10, 10);
-                Globals.statusPrint("onToolsCreateAlphaImage: Alpha image name cannot equal original image name");
+                Globals.statusPrint("MainFrame.onToolsCreateAlphaImage: Alpha image name cannot equal original image name");
                 return;
             }
             
             if(inImage.isValid()) {
                 alphaImage = new MemImage(inImage.getHeight(), inImage.getWidth());
                 inImage.createAlphaImage(alphaImage);
-                Globals.statusPrint("Smoothing the Mask Image");
+                Globals.statusPrint("MainFrame.onToolsCreateAlphaImage: Smoothing the Mask Image");
                 alphaImage.alphaSmooth5();
 
                 Shape3d aShape = new Shape3d(8192);
                 if(!aShape.isValid()) {
-                    Globals.statusPrint("Unable to create new shape");
+                    Globals.statusPrint("MainFrame.onToolsCreateAlphaImage: Unable to create new shape");
                     return;
                 }
 
@@ -1341,19 +1338,19 @@ POPUP "Tools"
 
                 if(iStatus == 0) {
                     aShape.writeShape(sShapeFile);
-                    sMsgText = "Saved a shape file: " + sShapeFile + "  numVertices: " + aShape.getNumVertices();
+                    sMsgText = "MainFrame.onToolsCreateAlphaImage: Saved a shape file: " + sShapeFile + "  numVertices: " + aShape.getNumVertices();
                     Globals.statusPrint(sMsgText);
                 }
 
                 sbAlphaName = new StringBuffer("");
                 FileUtils.constructPathName(sbAlphaName, sFileName, 'a');
                 if(sbAlphaName.toString().equals(sFileName)) {
-                    Globals.statusPrint("Alpha Image Name cannot equal the original file name");
+                    Globals.statusPrint("MainFrame.onToolsCreateAlphaImage: Alpha Image Name cannot equal the original file name");
                     return;
                 }
 
                 alphaImage.writeBMP(sbAlphaName.toString());
-                sMsgText = "Saved an alpha image: " + sbAlphaName.toString();
+                sMsgText = "MainFrame.onToolsCreateAlphaImage: Saved an alpha image: " + sbAlphaName.toString();
                 Globals.statusPrint(sMsgText);
             }
         }
@@ -1368,7 +1365,6 @@ POPUP "Tools"
         // rotation angles (in degrees) for x, y, and z-axes, and 
         // scale factors for x and y axes.
         WarpParamDlg dlg = new WarpParamDlg(this, true);
-        dlg.setVisible(true);
     } // onToolsWarpImage
 
 
@@ -1472,7 +1468,6 @@ POPUP "Tools"
     // ON_COMMAND(ID_TOOLS_MOTIONBLUR, OnToolsMotionblur)
     public void onToolsMotionBlur() {
         MotionBlurDlg dlg = new MotionBlurDlg(this, true);
-        dlg.setVisible(true);
     } // onToolsMotionBlur
 
 
@@ -1481,7 +1476,6 @@ POPUP "Tools"
     // ON_COMMAND(ID_TOOLS_MORPHSEQUENCE, OnToolsMorphSequence)
     public void onToolsMorphSequence() {
         MorphDlg dlg = new MorphDlg(this, true);
-        dlg.setVisible(true);
     } // onToolsMorphSequence
 
 
