@@ -701,6 +701,6 @@ protected:
 
     // Called when the user clicks on the Cancel button
     private void onCancel() {
-        this.setVisible(false);
+        this.dispose();
     } // onCancel
 } // class MorphDlg
