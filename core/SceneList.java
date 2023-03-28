@@ -1079,7 +1079,7 @@ public:
                                 forwardMatrix.translate(xfrm.tx, xfrm.ty, xfrm.tz);
                                 viewModelMatrix.multiply(pViewMatrix, forwardMatrix);
                                 viewModelMatrix.transformAndProject(modelSE.mScreenRdrObject.mCurrentShape,
-                                    outputRowsOI.i, outputColumnsOI.i, true, 		   
+                                    true, 		   
                                     modelSE.pointOfReference.fX,
                                     modelSE.pointOfReference.fY,
                                     modelSE.pointOfReference.fZ);
