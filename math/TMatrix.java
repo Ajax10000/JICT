@@ -468,7 +468,6 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
     //     RenderObject.transformAndProject
     //     SceneList.render
     public void transformAndProject(Shape3d pShape, 
-    int piOutHeight, int piOutWidth, // piOutHeight and piOutWidth are not used
     boolean pbUseExternalCentroid,
     float pfCentroidX, float pfCentroidY, float pfCentroidZ) {
         // Default behavior is to rotate the object about its own centroid.
@@ -544,7 +543,10 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
             pShape.incCurrentVertex();
         }
     
-        pShape.translateW(refPt.fX, refPt.fY, refPt.fZ); // Move world coords back
-        pShape.translateS((int)refPt.fX, (int)refPt.fY); // Move screen coords back
+        // Move world coords back
+        pShape.translateW(refPt.fX, refPt.fY, refPt.fZ); 
+
+        // Move screen coords back
+        pShape.translateS((int)refPt.fX, (int)refPt.fY); 
     } // transformAndProject
 } // class TMatrix
