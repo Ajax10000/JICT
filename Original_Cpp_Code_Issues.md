@@ -124,12 +124,23 @@ In method renderShapez, parameter alphaImage is not used.
 
 ## Unused parameters in methods of sceneList
 
-In method render, the parameter hazeFogEnabled is not used. The method signature for SceneList::render is shown below.
+In file SCENELST.CPP, in method render, the parameter hazeFogEnabled is not used. The method signature for sceneList::render is shown below.
 
 ```cpp
     int sceneList::render(imageView *displayWindow, tMatrix *viewMatrix,
     int depthSortingEnabled, int zBufferEnabled, int antiAliasEnabled,
     int hazeFogEnabled)
+```
+
+## Unused parameters in methods of tMatrix
+
+In TMATRIX.CPP, in method transformAndProject, the parameters outHeight and outWidth are not used. The method signature for tMatrix::transformAndProject is shown below.
+
+```cpp
+    void tMatrix::transformAndProject(shape3d *aShape,
+    int outHeight, int outWidth,
+    int useExternalCentroid,
+    float centroidX, float centroidY, float centroidZ)
 ```
 
 # Minor Issues
