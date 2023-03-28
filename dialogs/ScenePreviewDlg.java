@@ -1,14 +1,21 @@
 package dialogs;
 
-import core.RenderObject;
-
 import frames.MainFrame;
 
 import globals.Globals;
 import globals.JICTConstants;
 
+import java.awt.Component;
+import java.awt.Dimension;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
 import java.text.DecimalFormat;
 
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -18,6 +25,9 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+
+import javax.swing.border.Border;
+import javax.swing.border.EtchedBorder;
 
 import math.MathUtils;
 
@@ -43,14 +53,7 @@ public class ScenePreviewDlg extends JDialog {
     // Set to true in method onCmdPlus
     // Read in method onOK
     protected boolean mbIsDirty;
-	// protected RenderObject mRndrObject; // not used
     protected float mfIncrScaleFactor;
-
-    private JButton btnOk;
-    private JButton btnCancel;
-    private JButton btnReset;
-    private JButton btnMinus;
-    private JButton btnPlus;
 
     private JCheckBox cbxRotationX;
     private JCheckBox cbxRotationY;
@@ -172,6 +175,11 @@ public class ScenePreviewDlg extends JDialog {
     // DDX_CBString(pDX, IDC_cmbModels, m_theModel);
 	String	m_theModel;
 
+    private int miDlgHeight = 260;
+    private int miDlgWidth = 700;
+    private Dimension mTinySpacerSize = new Dimension(5, 25);
+    private Dimension mSmallSpacerSize = new Dimension(10, 25);
+
     private DecimalFormat sixDotTwo = new DecimalFormat("####.##");
 
 /*
@@ -221,7 +229,7 @@ public:
 protected:
     CMainFrame *m_theFrame;
     short isDirty;
-	renderObject *anObject;
+	renderObject *anObject; // not used
     float incrementScaleFactor;
     void setTextBoxesWithViewTransform();
     void setTextBoxesWithModelTransform();
@@ -248,70 +256,510 @@ protected:
     //     MainFrame.onPreviewStillScene
     public ScenePreviewDlg(JFrame pParent, boolean pbModal) {
         super(pParent, pbModal);
+        setTitle("Scene Preview");
+        setSize(miDlgWidth, miDlgHeight);
 
         setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
         
         // Try to make the dialog appear as it does on the bottom part of 
         // Figure D.13 on page 285 of the book
-        JPanel topPnl;
-        JPanel botPnl;
-        setupTopPanel();
-        setupBottomPanel();
+        JPanel panel = new JPanel();
+        panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5)); // top, left, bottom, right
+        BoxLayout boxLayout = new BoxLayout(panel, BoxLayout.Y_AXIS);
+        panel.setLayout(boxLayout);
+
+        Box vertBox = Box.createVerticalBox();
+        Box topBox = addTopSection();
+        Box botBox = addBotSection();
+
+        vertBox.add(topBox);
+        vertBox.add(botBox);
+        panel.add(vertBox);
+        add(panel);
+
+        setVisible(true);
     }
 
-    private void setupTopPanel() {
-        JLabel lblRotation = new JLabel("Rotation");
-        JLabel lblScale = new JLabel("Scale");
-        JLabel lblTranslation = new JLabel("Translation");
 
-        JLabel lblRotX = new JLabel("X");
-        JLabel lblRotY = new JLabel("Y");
-        JLabel lblRotZ = new JLabel("Z");
+    // Called from the constructor
+    private Box addTopSection() {
+        Dimension lblSelModelSize = new Dimension(140, 25);
+        Dimension lblMoveViewPointSize = new Dimension(150, 25);
+        Dimension lblIncrementSize = new Dimension(90, 25);
+        Dimension lblRotationSize = new Dimension(80, 25);
+        Dimension lblScaleSize = new Dimension(50, 25);
+        Dimension lblTranslationSize = new Dimension(110, 25);
+        Dimension lblXSize = new Dimension(10, 25);
+        Dimension lblYSize = new Dimension(10, 25);
+        Dimension lblZSize = new Dimension(10, 25);
+        Dimension txtFldSize = new Dimension(10, 30);
+        Dimension btnPlusSize = new Dimension(10, 25);
+        Dimension btnMinusSize = new Dimension(10, 25);
+        Dimension btnResetSize = new Dimension(50, 25);
+        Dimension btnSize = new Dimension(80, 30);
+        Dimension buttonSpacerSize = new Dimension(80, 5);
 
-        JLabel lblSclX = new JLabel("X");
-        JLabel lblSclY = new JLabel("Y");
-        JLabel lblSclZ = new JLabel("Z");
+        Component[] tinySpacers = createArrayOfTinySpacers(2);
+        Component[] smallSpacers = createArrayOfSmallSpacers(6);
 
-        JLabel lblTrnX = new JLabel("X");
-        JLabel lblTrnY = new JLabel("Y");
-        JLabel lblTrnZ = new JLabel("Z");
+        Box horizBox   = Box.createHorizontalBox();
+        Component tinySpacer01 = Box.createRigidArea(mTinySpacerSize);
+        Component tinySpacer02 = Box.createRigidArea(mTinySpacerSize);
+        Component btnSpacer = Box.createRigidArea(buttonSpacerSize);
 
-        JLabel lblIncr = new JLabel("Increment");
+        // will hold model/model view section
+        Box vertBox01  = Box.createVerticalBox(); 
+        Box horizBox01 = Box.createHorizontalBox();
+
+        // will hold increment section
+        Box vertBox02  = Box.createVerticalBox(); 
+        Box horizBox02a = Box.createHorizontalBox();
+        Box horizBox02b = Box.createHorizontalBox();
+        Box horizBox02c = Box.createHorizontalBox();
+
+        // will hold labels for the rotation/scale/translation section
+        Box vertBox03  = Box.createVerticalBox(); 
+        Box horizBox03a = Box.createHorizontalBox();
+        Box horizBox03b = Box.createHorizontalBox();
+        Box horizBox03c = Box.createHorizontalBox();
+
+        // will hold rotation/scale/translation section
+        Box vertBox04  = Box.createVerticalBox(); 
+        Box horizBox04a = Box.createHorizontalBox();
+        Box horizBox04b = Box.createHorizontalBox();
+        Box horizBox04c = Box.createHorizontalBox();
+
+        // Will hold OK and Cancel buttons
+        Box vertBox05 = Box.createVerticalBox();
+
+        // Create the model/model view section
         JLabel lblSelModel = new JLabel("Select a Model");
+        lblSelModel.setSize(lblSelModelSize);
+        lblSelModel.setPreferredSize(lblSelModelSize);
 
-        btnPlus = new JButton("+");
-        btnMinus = new JButton("-");
-        btnReset = new JButton("Reset");
-    }
+        cbxMoveViewPt = new JCheckBox();
 
-    private void setupBottomPanel() {
+        JLabel lblMoveViewPoint = new JLabel("Move View Point");
+        lblMoveViewPoint.setSize(lblMoveViewPointSize);
+        lblMoveViewPoint.setPreferredSize(lblMoveViewPointSize);
+
+        horizBox01.add(cbxMoveViewPt);
+        horizBox01.add(lblMoveViewPoint);
+
+        vertBox01.add(lblSelModel);
+        // vertBox01.add(); // TODO: Add a JList here
+        vertBox01.add(horizBox01);
+
+        // Create the increment section
+        JLabel lblIncr = new JLabel("Increment");
+        lblIncr.setSize(lblIncrementSize);
+        lblIncr.setPreferredSize(lblIncrementSize);
+
+        horizBox02a.add(lblIncr);
+
+        JLabel lblIncrX = new JLabel("X");
+        lblIncrX.setSize(lblXSize);
+        lblIncrX.setPreferredSize(lblXSize);
+
+        txtIncrX = new JTextField("0.00", 6);
+        txtIncrX.setSize(txtFldSize);
+        txtIncrX.setPreferredSize(txtFldSize);
+
+        JLabel lblIncrY = new JLabel("Y");
+        lblIncrY.setSize(lblYSize);
+        lblIncrY.setPreferredSize(lblYSize);
+
+        txtIncrY = new JTextField("0.00", 6);
+        txtIncrY.setSize(txtFldSize);
+        txtIncrY.setPreferredSize(txtFldSize);
+
+        JLabel lblIncrZ = new JLabel("Z");
+        lblIncrZ.setSize(lblZSize);
+        lblIncrZ.setPreferredSize(lblZSize);
+
+        txtIncrZ = new JTextField("0.00", 6);
+        txtIncrZ.setSize(txtFldSize);
+        txtIncrZ.setPreferredSize(txtFldSize);
+
+        horizBox02b.add(lblIncrX);
+        horizBox02b.add(txtIncrX);
+        horizBox02b.add(tinySpacers[0]);
+        horizBox02b.add(lblIncrY);
+        horizBox02b.add(txtIncrY);
+        horizBox02b.add(tinySpacers[1]);
+        horizBox02b.add(lblIncrZ);
+        horizBox02b.add(txtIncrZ);
+
+        JButton btnPlus = new JButton("+");
+        btnPlus.setSize(btnPlusSize);
+        btnPlus.setPreferredSize(btnPlusSize);
+        btnPlus.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                onCmdPlus();
+            }
+        });
+
+        JButton btnReset = new JButton("Reset");
+        btnReset.setSize(btnResetSize);
+        btnReset.setPreferredSize(btnResetSize);
+        btnReset.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ae) {
+                onCmdReset();
+            }
+        });
+
+        JButton btnMinus = new JButton("-");
+        btnMinus.setSize(btnMinusSize);
+        btnMinus.setPreferredSize(btnMinusSize);
+        btnMinus.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                onCmdMinus();
+            }
+        });
+
+        horizBox02c.add(btnPlus);
+        horizBox02c.add(tinySpacer01);
+        horizBox02c.add(btnReset);
+        horizBox02c.add(tinySpacer02);
+        horizBox02c.add(btnMinus);
+
+        vertBox02.add(horizBox02a);
+        vertBox02.add(horizBox02b);
+        vertBox02.add(horizBox02c);
+
+        // Create the labels for the rotation/scale/translation section
         JLabel lblRotation = new JLabel("Rotation");
-        JLabel lblScale = new JLabel("Scale");
-        JLabel lblTranslation = new JLabel("Translation");
+        lblRotation.setSize(lblRotationSize);
+        lblRotation.setPreferredSize(lblRotationSize);
 
+        JLabel lblScale = new JLabel("Scale");
+        lblScale.setSize(lblScaleSize);
+        lblScale.setPreferredSize(lblScaleSize);
+
+        JLabel lblTranslation = new JLabel("Translation");
+        lblTranslation.setSize(lblTranslationSize);
+        lblTranslation.setPreferredSize(lblTranslationSize);
+
+        horizBox03a.add(lblRotation);
+        horizBox03b.add(lblScale);
+        horizBox03c.add(lblTranslation);
+
+        vertBox03.add(horizBox03a);
+        vertBox03.add(horizBox03b);
+        vertBox03.add(horizBox03c);
+
+        // Create the rotation/scale/translation section
         JLabel lblRotX = new JLabel("X");
+        lblRotX.setSize(lblXSize);
+        lblRotX.setPreferredSize(lblXSize);
+
         JLabel lblRotY = new JLabel("Y");
+        lblRotY.setSize(lblYSize);
+        lblRotY.setPreferredSize(lblYSize);
+
         JLabel lblRotZ = new JLabel("Z");
+        lblRotZ.setSize(lblZSize);
+        lblRotZ.setPreferredSize(lblZSize);
+
+        cbxRotationX = new JCheckBox();
+        cbxRotationY = new JCheckBox();
+        cbxRotationZ = new JCheckBox();
+
+        horizBox04a.add(lblRotX);
+        horizBox04a.add(cbxRotationX);
+        horizBox04a.add(smallSpacers[0]);
+        horizBox04a.add(lblRotY);
+        horizBox04a.add(cbxRotationY);
+        horizBox04a.add(smallSpacers[1]);
+        horizBox04a.add(lblRotZ);
+        horizBox04a.add(cbxRotationZ);
 
         JLabel lblSclX = new JLabel("X");
+        lblSclX.setSize(lblXSize);
+        lblSclX.setPreferredSize(lblXSize);
+
         JLabel lblSclY = new JLabel("Y");
+        lblSclY.setSize(lblYSize);
+        lblSclY.setPreferredSize(lblYSize);
+
         JLabel lblSclZ = new JLabel("Z");
+        lblSclZ.setSize(lblZSize);
+        lblSclZ.setPreferredSize(lblZSize);
+
+        cbxScaleX = new JCheckBox();
+        cbxScaleY = new JCheckBox();
+        cbxScaleZ = new JCheckBox();
+
+        horizBox04b.add(lblSclX);
+        horizBox04b.add(cbxScaleX);
+        horizBox04b.add(smallSpacers[2]);
+        horizBox04b.add(lblSclY);
+        horizBox04b.add(cbxScaleY);
+        horizBox04b.add(smallSpacers[3]);
+        horizBox04b.add(lblSclZ);
+        horizBox04b.add(cbxScaleZ);
 
         JLabel lblTrnX = new JLabel("X");
+        lblTrnX.setSize(lblXSize);
+        lblTrnX.setPreferredSize(lblXSize);
+
         JLabel lblTrnY = new JLabel("Y");
+        lblTrnY.setSize(lblYSize);
+        lblTrnY.setPreferredSize(lblYSize);
+
         JLabel lblTrnZ = new JLabel("Z");
+        lblTrnZ.setSize(lblZSize);
+        lblTrnZ.setPreferredSize(lblZSize);
 
-        txtRotationX    = new JTextField("0.00", 6);
-        txtRotationY    = new JTextField("0.00", 6);
-        txtRotationZ    = new JTextField("0.00", 6);
+        cbxTranslationX = new JCheckBox();
+        cbxTranslationY = new JCheckBox();
+        cbxTranslationZ = new JCheckBox();
 
-        txtScaleX       = new JTextField("0.00", 6);
-        txtScaleY       = new JTextField("0.00", 6);
-        txtScaleZ       = new JTextField("0.00", 6);
+        horizBox04c.add(lblTrnX);
+        horizBox04c.add(cbxTranslationX);
+        horizBox04c.add(smallSpacers[4]);
+        horizBox04c.add(lblTrnY);
+        horizBox04c.add(cbxTranslationY);
+        horizBox04c.add(smallSpacers[5]);
+        horizBox04c.add(lblTrnZ);
+        horizBox04c.add(cbxTranslationZ);
+
+        vertBox04.add(horizBox04a);
+        vertBox04.add(horizBox04b);
+        vertBox04.add(horizBox04c);
+
+        // Create the OK/Cancel button section
+        JButton btnOk = new JButton("OK");
+        btnOk.setSize(btnSize);
+        btnOk.setPreferredSize(btnSize);
+        btnOk.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ae) {
+                onOK();
+            }
+        });
+
+        JButton btnCancel = new JButton("Cancel");
+        btnCancel.setSize(btnSize);
+        btnCancel.setPreferredSize(btnSize);
+        btnCancel.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ae) {
+                onCancel();
+            }
+        });
+
+        vertBox05.add(btnOk);
+        vertBox05.add(btnSpacer);
+        vertBox05.add(btnCancel);
+
+        horizBox.add(vertBox01);
+        horizBox.add(vertBox02);
+        horizBox.add(vertBox03);
+        horizBox.add(vertBox04);
+        horizBox.add(vertBox05);
+
+        return horizBox;
+    }
+
+
+    // Called from the constructor
+    private Box addBotSection() {
+        final int iPnlWidth = miDlgWidth - 20;
+        final int iPnlHeight = miDlgHeight / 2;
+
+        Dimension lblRotationSize = new Dimension(80, 25);
+        Dimension lblScaleSize = new Dimension(50, 25);
+        Dimension lblTranslationSize = new Dimension(110, 25);
+
+        Dimension lblXSize = new Dimension(10, 25);
+        Dimension lblYSize = new Dimension(10, 25);
+        Dimension lblZSize = new Dimension(10, 25);
+
+        Dimension txtFldSize = new Dimension(70, 30);
+
+        Border loweredetched = BorderFactory.createEtchedBorder(EtchedBorder.LOWERED);
+        Component[] tinySpacers = createArrayOfTinySpacers(6);
+
+        Box horizBox   = Box.createHorizontalBox();
+
+        Box vertBox01  = Box.createVerticalBox(); // will hold rotation section
+        Box horizBox01 = Box.createHorizontalBox();
+
+        Box vertBox02  = Box.createVerticalBox(); // will hold scale section
+        Box horizBox02 = Box.createHorizontalBox();
+
+        Box vertBox03  = Box.createVerticalBox(); // will hold translation section
+        Box horizBox03 = Box.createHorizontalBox();
+
+        // Rotation section
+        JLabel lblRotation = new JLabel("Rotation");
+        lblRotation.setSize(lblRotationSize);
+        lblRotation.setPreferredSize(lblRotationSize);
+
+        JLabel lblRotX = new JLabel("X");
+        lblRotX.setSize(lblXSize);
+        lblRotX.setPreferredSize(lblXSize);
+
+        JLabel lblRotY = new JLabel("Y");
+        lblRotY.setSize(lblYSize);
+        lblRotY.setPreferredSize(lblYSize);
+
+        JLabel lblRotZ = new JLabel("Z");
+        lblRotZ.setSize(lblZSize);
+        lblRotZ.setPreferredSize(lblZSize);
+
+        txtRotationX = new JTextField("0.00", 6);
+        txtRotationX.setSize(txtFldSize);
+        txtRotationX.setPreferredSize(txtFldSize);
+        txtRotationX.setMaximumSize(txtFldSize);
+
+        txtRotationY = new JTextField("0.00", 6);
+        txtRotationY.setSize(txtFldSize);
+        txtRotationY.setPreferredSize(txtFldSize);
+        txtRotationY.setMaximumSize(txtFldSize);
+
+        txtRotationZ = new JTextField("0.00", 6);
+        txtRotationZ.setSize(txtFldSize);
+        txtRotationZ.setPreferredSize(txtFldSize);
+        txtRotationZ.setMaximumSize(txtFldSize);
+
+        horizBox01.add(lblRotX);
+        horizBox01.add(txtRotationX);
+        horizBox01.add(tinySpacers[0]);
+        horizBox01.add(lblRotY);
+        horizBox01.add(txtRotationY);
+        horizBox01.add(tinySpacers[1]);
+        horizBox01.add(lblRotZ);
+        horizBox01.add(txtRotationZ);
+
+        vertBox01.add(lblRotation);
+        vertBox01.add(horizBox01);
+
+        // Scale section
+        JLabel lblScale = new JLabel("Scale");
+        lblScale.setSize(lblScaleSize);
+        lblScale.setPreferredSize(lblScaleSize);
+
+        JLabel lblSclX = new JLabel("X");
+        lblSclX.setSize(lblXSize);
+        lblSclX.setPreferredSize(lblXSize);
+
+        JLabel lblSclY = new JLabel("Y");
+        lblSclY.setSize(lblYSize);
+        lblSclY.setPreferredSize(lblYSize);
+
+        JLabel lblSclZ = new JLabel("Z");
+        lblSclZ.setSize(lblZSize);
+        lblSclZ.setPreferredSize(lblZSize);
+
+        txtScaleX = new JTextField("0.00", 6);
+        txtScaleX.setSize(txtFldSize);
+        txtScaleX.setPreferredSize(txtFldSize);
+        txtScaleX.setMaximumSize(txtFldSize);
+
+        txtScaleY = new JTextField("0.00", 6);
+        txtScaleY.setSize(txtFldSize);
+        txtScaleY.setPreferredSize(txtFldSize);
+        txtScaleY.setMaximumSize(txtFldSize);
+
+        txtScaleZ = new JTextField("0.00", 6);
+        txtScaleZ.setSize(txtFldSize);
+        txtScaleZ.setPreferredSize(txtFldSize);
+        txtScaleZ.setMaximumSize(txtFldSize);
         
+        horizBox02.add(lblSclX);
+        horizBox02.add(txtScaleX);
+        horizBox02.add(tinySpacers[2]);
+        horizBox02.add(lblSclY);
+        horizBox02.add(txtScaleY);
+        horizBox02.add(tinySpacers[3]);
+        horizBox02.add(lblSclZ);
+        horizBox02.add(txtScaleZ);
+
+        vertBox02.add(lblScale);
+        vertBox02.add(horizBox02);
+
+        // Translation Section
+        JLabel lblTranslation = new JLabel("Translation");
+        lblTranslation.setSize(lblTranslationSize);
+        lblTranslation.setPreferredSize(lblTranslationSize);
+
+        JLabel lblTrnX = new JLabel("X");
+        lblTrnX.setSize(lblXSize);
+        lblTrnX.setPreferredSize(lblXSize);
+
+        JLabel lblTrnY = new JLabel("Y");
+        lblTrnY.setSize(lblYSize);
+        lblTrnY.setPreferredSize(lblYSize);
+
+        JLabel lblTrnZ = new JLabel("Z");
+        lblTrnZ.setSize(lblZSize);
+        lblTrnZ.setPreferredSize(lblZSize);
+
         txtTranslationX = new JTextField("0.00", 6);
+        txtTranslationX.setSize(txtFldSize);
+        txtTranslationX.setPreferredSize(txtFldSize);
+        txtTranslationX.setMaximumSize(txtFldSize);
+
         txtTranslationY = new JTextField("0.00", 6);
+        txtTranslationY.setSize(txtFldSize);
+        txtTranslationY.setPreferredSize(txtFldSize);
+        txtTranslationY.setMaximumSize(txtFldSize);
+
         txtTranslationZ = new JTextField("0.00", 6);
+        txtTranslationZ.setSize(txtFldSize);
+        txtTranslationZ.setPreferredSize(txtFldSize);
+        txtTranslationZ.setMaximumSize(txtFldSize);
+
+        horizBox03.add(lblTrnX);
+        horizBox03.add(txtTranslationX);
+        horizBox03.add(tinySpacers[4]);
+        horizBox03.add(lblTrnY);
+        horizBox03.add(txtTranslationY);
+        horizBox03.add(tinySpacers[5]);
+        horizBox03.add(lblTrnZ);
+        horizBox03.add(txtTranslationZ);
+
+        vertBox03.add(lblTranslation);
+        vertBox03.add(horizBox03);
+
+        Dimension pnlSize = new Dimension(iPnlWidth, iPnlHeight);
+        JPanel pnlCurrLocnAndOrtn = new JPanel();
+        pnlCurrLocnAndOrtn.setSize(pnlSize);
+        pnlCurrLocnAndOrtn.setMaximumSize(pnlSize);
+        pnlCurrLocnAndOrtn.setPreferredSize(pnlSize);
+
+        BoxLayout boxLayout = new BoxLayout(pnlCurrLocnAndOrtn, BoxLayout.X_AXIS);
+        pnlCurrLocnAndOrtn.setLayout(boxLayout);
+        pnlCurrLocnAndOrtn.setBorder(BorderFactory.createTitledBorder(loweredetched, "Current Location and Orientation"));
+
+        pnlCurrLocnAndOrtn.add(vertBox01);
+        pnlCurrLocnAndOrtn.add(vertBox02);
+        pnlCurrLocnAndOrtn.add(vertBox03);
+
+        horizBox.add(pnlCurrLocnAndOrtn);
+
+        return horizBox;
+    }
+
+    private Component[] createArrayOfTinySpacers(int piNumSpacers) {
+        Component[] tinySpacers = new Component[piNumSpacers];
+
+        for (int i = 0; i < piNumSpacers; i++) {
+            tinySpacers[i] = Box.createRigidArea(mTinySpacerSize);
+        }
+
+        return tinySpacers;
+    }
+
+
+    private Component[] createArrayOfSmallSpacers(int piNumSpacers) {
+        Component[] smallSpacers = new Component[piNumSpacers];
+
+        for (int i = 0; i < piNumSpacers; i++) {
+            smallSpacers[i] = Box.createRigidArea(mSmallSpacerSize);
+        }
+
+        return smallSpacers;
     }
 
 
@@ -610,6 +1058,12 @@ protected:
             mMainFrame.repaint();
         } // if (mbIsDirty)
     } // onOK
+
+
+    // Called when the Cancel button is clicked
+    public void onCancel() {
+        this.dispose();
+    }
 
 
     // This method originally came from SCENEPREVIEWDLG.CPP
