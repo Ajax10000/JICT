@@ -63,6 +63,16 @@ In the renderObject constructor that takes 4 parameters (a char \*, two ints, an
             break;
 ```
 
+## Unused field in SCNPREVW.H
+
+In the scene class defined in SCNPREVW.H there is a field named anObject of data type RenderObject:
+
+```cpp
+    renderObject *anObject;
+```
+
+This field is not used in SCNPREVW.H nor in SCENEPREVIEWDLG.CPP.
+
 ## Unused parameters in methods of renderObject
 
 In method previewMesh, parameters xOff and yOff are only used to modify local variables xOffset and yOffset, but these local variables are thereafter not used. Hence parameters xOff and yOff can be deleted assuming that local variables xOffset and yOffset are also deleted. Below is the method signature of previewMesh.
