@@ -851,32 +851,11 @@ protected:
             return;
         }
 
-        // Later in a double for loop, buffer xBuffer will be populated
+        // Later in a double for loop, buffers 
+        // xBuffer, yBuffer and iBuffer will be populated
         xBuffer = new int[mXImage.getWidth()];
-        /* Dead code, per compiler
-        if (xBuffer == null) {
-            Globals.statusPrint("RenderObject.previewMesh: Not enough memory for xBuffer");
-            return;
-        }
-        */
-
-        // Later in a double for loop, buffer yBuffer will be populated
         yBuffer = new int[mYImage.getWidth()];
-        /* Dead code, per compiler 
-        if (yBuffer == null) {
-            Globals.statusPrint("RenderObject.previewMesh: Not enough memory for yBuffer");
-            return;
-        }
-        */
-
-        // Later in a double for loop, buffer iBuffer will be populated
         iBuffer = new byte[mTextureImage.getWidth()];
-        /* Dead code, per compiler
-        if (iBuffer == null) {
-            Globals.statusPrint("RenderObject.previewMesh: Not enough memory for iBuffer");
-            return;
-        }
-        */
 
         xBufferIdx = 0;
         yBufferIdx = 0;
@@ -1047,29 +1026,11 @@ protected:
             return -1;
         }
 
+        // Later in a double for loop, buffers 
+        // xBuffer, yBuffer and iBuffer will be populated
         xBuffer = new int[mXImage.getWidth()];
-        /* Dead code, per the compiler
-        if (xBuffer == null) {
-            Globals.statusPrint("renderMesh: Not enough memory for xBuffer");
-            return -1;
-        }
-        */
-
         yBuffer = new int[mYImage.getWidth()];
-        /* Dead code, per the compiler
-        if (yBuffer == null) {
-            Globals.statusPrint("renderMesh: Not enough memory for yBuffer");
-            return -1;
-        }
-        */
-
         iBuffer = new byte[pInputMImage.getWidth()];
-        /* Dead code, per the compiler
-        if (iBuffer == null) {
-            Globals.statusPrint("renderMesh: Not enough memory for iBuffer");
-            return -1;
-        }
-        */
 
         xBufferIdx = 0;
         yBufferIdx = 0;
@@ -1206,37 +1167,12 @@ protected:
             return -1;
         }
 
+        // Later in a double for loop, buffers 
+        // xBuffer, yBuffer, iBuffer and dBuffer will be populated
         xBuffer = new int[mXImage.getWidth()];
-        /* Dead code, per compiler
-        if (xBuffer == null) {
-            Globals.statusPrint("RenderObject.renderMeshz: Not enough memory for xBuffer");
-            return -1;
-        }
-        */
-
         yBuffer = new int[mYImage.getWidth()];
-        /* Dead code, per compiler
-        if (yBuffer == null) {
-            Globals.statusPrint("RenderObject.renderMeshz: Not enough memory for yBuffer");
-            return -1;
-        }
-        */
-
         dBuffer = new float[mZImage.getWidth()];
-        /* Dead code, per compiler
-        if (dBuffer == null) {
-            Globals.statusPrint("RenderObject.renderMeshz: Not enough memory for distance Buffer");
-            return -1;
-        }
-        */
-
         iBuffer = new byte[pInputMImage.getWidth()];
-        /* Dead code, per compiler
-        if (iBuffer == null) {
-            Globals.statusPrint("RenderObject.renderMeshz: Not enough memory for iBuffer");
-            return -1;
-        }
-        */
 
         MemImage midImage = new MemImage(pOutputMImage.getHeight(), pOutputMImage.getWidth());
         if(!midImage.isValid()) {
@@ -1521,7 +1457,7 @@ protected:
         (this.miModelType == JICTConstants.I_SHAPE) || 
         (this.miModelType == JICTConstants.I_IMAGE)) {
             // The following method modifies parameter mCurrentShape
-            pTMatrix.transformAndProject(mCurrentShape, piOutHeight, piOutWidth, 
+            pTMatrix.transformAndProject(mCurrentShape,  
                 pbExternalCentroid,
                 pfCentroidX, pfCentroidY, pfCentroidZ);
         } else {
