@@ -1172,7 +1172,7 @@ public class Globals {
         shape.addWorldVertex(       1.0f, (float)iInHeight, 0.0f);
 
         // Transform and project the image coords, taking into account the reference point
-        viewModelMatrix.transformAndProject(shape, iOutHeight, iOutWidth, 
+        viewModelMatrix.transformAndProject(shape,  
             true, fIntRefPointX, fIntRefPointY, fIntRefPointZ);
 
         if(bIctDebug) {
