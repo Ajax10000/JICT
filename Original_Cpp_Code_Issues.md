@@ -73,6 +73,20 @@ In the scene class defined in SCNPREVW.H there is a field named anObject of data
 
 This field is not used in SCNPREVW.H nor in SCENEPREVIEWDLG.CPP.
 
+## Unused parameter in function of IWARP.CPP
+
+Function fwarpz2 in IWARP.CPP does not use the last 3 parameters, named refPointX, refPointY and refPointZ. The method signature of fwarpz2 is shown below.
+
+```cpp
+int fwarpz2(memImage *inputImage, memImage *outputImage, memImage *zBuffer,
+    float rx, float ry, float rz,
+    float sx, float sy, float sz,
+    float tx, float ty, float tz,
+    float vx, float vy, float vz,
+    tMatrix *viewMatrix,
+    float refPointX, float refPointY, float refpointZ)
+```
+
 ## Unused parameters in methods of renderObject
 
 In method previewMesh, parameters xOff and yOff are only used to modify local variables xOffset and yOffset, but these local variables are thereafter not used. Hence parameters xOff and yOff can be deleted assuming that local variables xOffset and yOffset are also deleted. Below is the method signature of previewMesh.
@@ -98,7 +112,7 @@ In method renderMeshz, parameter maskImage is not used.
     float vx, float vy, float vz)
 ```
 
-In method transformAndProjectPoint2, parameters outHeight and outWidth are not used.
+In function transformAndProjectPoint2, parameters outHeight and outWidth are not used.
 
 ```cpp
     void transformAndProjectPoint2(tMatrix *aMatrix,
