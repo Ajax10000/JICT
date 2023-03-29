@@ -2,6 +2,9 @@ package math;
 
 import core.Shape3d;
 
+import dtos.OneFloat;
+import dtos.OneInt;
+
 import globals.Globals;
 
 import java.text.DecimalFormat;
@@ -269,13 +272,13 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
     
     // Called from:
     //     transformAndProject
-    //     Globals.iwarpz
+    //     Globals.iwarpz (called twice)
     //     RenderObject.transformAndProjectPoint2
     public void transformPoint(float xIn, float yIn, float zIn, 
-    Float xOut, Float yOut, Float zOut) {
-        xOut = (xIn * mMatrix[0][0]) + (yIn * mMatrix[1][0]) + (zIn * mMatrix[2][0]) + mMatrix[3][0];
-        yOut = (xIn * mMatrix[0][1]) + (yIn * mMatrix[1][1]) + (zIn * mMatrix[2][1]) + mMatrix[3][1];
-        zOut = (xIn * mMatrix[0][2]) + (yIn * mMatrix[1][2]) + (zIn * mMatrix[2][2]) + mMatrix[3][2];
+    OneFloat pXOutOF, OneFloat pYOutOF, OneFloat pZOutOF) {
+        pXOutOF.f = (xIn * mMatrix[0][0]) + (yIn * mMatrix[1][0]) + (zIn * mMatrix[2][0]) + mMatrix[3][0];
+        pYOutOF.f = (xIn * mMatrix[0][1]) + (yIn * mMatrix[1][1]) + (zIn * mMatrix[2][1]) + mMatrix[3][1];
+        pZOutOF.f = (xIn * mMatrix[0][2]) + (yIn * mMatrix[1][2]) + (zIn * mMatrix[2][2]) + mMatrix[3][2];
     } // transformPoint
     
 
@@ -419,28 +422,31 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
     
 
     // Called from:
+    //     Globals.fwarp1
     //     Globals.fwarpz (called 4 times from here)
+    //     Globals.fwarpz2
+    //     Globals.renderMesh
     //     RenderObject.renderMeshz
     public void transformAndProjectPoint(float pfX, float pfY, float pfZ, 
-    Integer pISx, Integer pISy, 
+    OneInt pSxOI, OneInt pSyOI, 
     float pfRefX, float pfRefY, float pfRefZ, 
     int piOutHeight, int piOutWidth, 
-    Float pFTx, Float pFTy, Float pFTz) {
+    OneFloat pTxOF, OneFloat pTyOF, OneFloat pTzOF) {
         pfX -= pfRefX;    // move the reference point to the origin
         pfY -= pfRefY;
         pfZ -= pfRefZ;
 
         // The following method sets parameters pFTx, pFTy, and pFTz
-        transformPoint(pfX, pfY, pfZ, pFTx, pFTy, pFTz);
+        transformPoint(pfX, pfY, pfZ, pTxOF, pTyOF, pTzOF);
         //x += refX;    // move the point back
         //y += refY;
         //z += refZ;
     
         // Project to the screen
         float fD = -512.0f; // Distance from screen to center of projection: (0,0,-d)
-        float fW = (fD / (pFTz + fD));
-        pISx = (int)(((pFTx * fW) + pfRefX) + (piOutWidth/2) ); //offset to output image)
-        pISy = (int)(((pFTy * fW) + pfRefY) + (piOutHeight/2) );
+        float fW = (fD / (pTzOF.f + fD));
+        pSxOI.i = (int)(((pTxOF.f * fW) + pfRefX) + (piOutWidth/2) ); //offset to output image)
+        pSyOI.i = (int)(((pTyOF.f * fW) + pfRefY) + (piOutHeight/2) );
         //
         // output points are transformed, projected to the screen and then 
         // transformed into image space
@@ -489,6 +495,9 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
         pShape.initCurrentVertex();
         float fMaxtX = 0f, fMaxtY = 0f, fMaxtZ = 0f;
         float fMintX = 0f, fMintY = 0f, fMintZ = 0f;
+        OneFloat txOF = new OneFloat();
+        OneFloat tyOF = new OneFloat();
+        OneFloat tzOF = new OneFloat();
 
         // Transform the shape using the perspective matrix
         for (int index = 0; index < pShape.getNumVertices(); index++) {
@@ -497,9 +506,11 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
                 pShape.mCurrentVertex.x, 
                 pShape.mCurrentVertex.y, 
                 pShape.mCurrentVertex.z,
-                pShape.mCurrentVertex.tx, 
-                pShape.mCurrentVertex.ty, 
-                pShape.mCurrentVertex.tz);
+                txOF, tyOF, tzOF);
+            
+            pShape.mCurrentVertex.tx = txOF.f;
+            pShape.mCurrentVertex.ty = tyOF.f;
+            pShape.mCurrentVertex.tz = tzOF.f;
             
             if(index == 0) {
                 fMaxtX = fMintX = pShape.mCurrentVertex.tx;
