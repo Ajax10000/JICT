@@ -1,5 +1,7 @@
 package core;
 
+import dtos.OneFloat;
+import dtos.OneInt;
 import dtos.ScreenVertex;
 
 import fileUtils.FileUtils;
@@ -870,9 +872,12 @@ protected:
         int imWidth  = mTextureImage.getWidth();
         int row, col;
         float x1, y1, z1;
-        float tx = 0.0f, ty = 0.0f, tz = 0.0f;
+        OneFloat txOF = new OneFloat();
+        OneFloat tyOF = new OneFloat();
+        OneFloat tzOF = new OneFloat();
         byte i1;
-        Integer sx1 = 0, sy1 = 0;
+        OneInt sx1OI = new OneInt();
+        OneInt sy1OI = new OneInt();
         Point3d refPt = new Point3d();
         int meshIncrement = 6;
 
@@ -888,11 +893,17 @@ protected:
                 i1 = mTextureImage.getMPixel(col, row);
 
                 // Project to the screen
+                // The following method sets parameters sx1OI, sy1OI, 
+                // txOF, tyOF, and tzOF
+                // However we will not be using txOF, tyOF, nor tzOF
                 mMatrix.transformAndProjectPoint(x1, y1, z1, 
-                    sx1, sy1, 
+                    sx1OI, sy1OI, 
                     refPt.fX, refPt.fY, refPt.fZ, 
                     piScreenHeight, piScreenWidth, 
-                    tx, ty, tz);
+                    txOF, tyOF, tzOF);
+                
+                int sx1 = sx1OI.i;
+                int sy1 = sy1OI.i;
                 
                 if((row == 1) && (col == 1)) {	// Initialize the projected mesh bounding box
                     sxMin = sxMax = sx1;
@@ -1042,9 +1053,12 @@ protected:
         int outWidth  = pOutputMImage.getWidth();
         int row, col;
         float x1, y1, z1;
-        Float tx = 0f, ty = 0f, tz = 0f;
+        OneFloat txOF = new OneFloat();
+        OneFloat tyOF = new OneFloat();
+        OneFloat tzOF = new OneFloat();
         byte i1;
-        Integer sx1 = 0, sy1 = 0;
+        OneInt sx1OI = new OneInt();
+        OneInt sy1OI = new OneInt();
         Point3d refPt = new Point3d();
         // int meshIncrement = 6; // variable not used
 
@@ -1062,10 +1076,16 @@ protected:
                 i1 = pInputMImage.getMPixel(col, row);
 
                 // Project to the screen
-                mMatrix.transformAndProjectPoint(x1, y1, z1, sx1, sy1, 
+                // The following method sets parameters sx1OI, sy1OI, 
+                // txOF, tyOF, and tzOF.
+                // However we will not be using txOF, tyOF nor tzOF.
+                mMatrix.transformAndProjectPoint(x1, y1, z1, 
+                    sx1OI, sy1OI, 
                     refPt.fX, refPt.fY, refPt.fZ, 
                     outHeight, outWidth, 
-                    tx, ty, tz);
+                    txOF, tyOF, tzOF);
+                int sx1 = sx1OI.i;
+                int sy1 = sy1OI.i;
                 if(row == 1) {
                     xBuffer[xBufferIdx] = sx1;
                     xBufferIdx++;
@@ -1209,7 +1229,8 @@ protected:
         int row, col;
         float x1, y1, z1;
         byte i1;
-        Integer sx1 = 0, sy1 = 0;
+        OneInt sx1OI = new OneInt();
+        OneInt sy1OI = new OneInt();
         Point3d refPt = new Point3d();
         Point3d c1 = new Point3d();
         Point3d c2 = new Point3d();
@@ -1229,7 +1250,9 @@ protected:
 
         // Get the model's referencePoint
         mCurrentShape.getReferencePoint(refPt);
-        float tx = 0.0f, ty = 0.0f, tz = 0.0f;
+        OneFloat txOF = new OneFloat();
+        OneFloat tyOF = new OneFloat();
+        OneFloat tzOF = new OneFloat();
 
         for (row = 1; row <= imHeight; row++) {
             for (col = 1; col <= imWidth; col++) {
@@ -1239,10 +1262,19 @@ protected:
                 i1 = pInputMImage.getMPixel(col, row);
 
                 // Project to the screen
-                mMatrix.transformAndProjectPoint(x1, y1, z1, sx1, sy1, 
+                // The following method sets parameters sx1OI, sy1OI, 
+                // txOF, yOF, and tzOF.
+                mMatrix.transformAndProjectPoint(x1, y1, z1, 
+                    sx1OI, sy1OI, 
                     refPt.fX, refPt.fY, refPt.fZ, 
                     outHeight, outWidth, 
-                    tx, ty, tz);
+                    txOF, tyOF, tzOF);
+                
+                int sx1 = sx1OI.i;
+                int sy1 = sy1OI.i;
+                float tx = txOF.f;
+                float ty = tyOF.f;
+                float tz = tzOF.f;
 
                 if(row == 1) {
                     xBuffer[xBufferIdx] = sx1;
@@ -1488,12 +1520,19 @@ protected:
         // Use Wein87 projection, described in the book 
         // Computer Graphcs: Principles and Practice, 2nd ed.,
         // by Foley, van Dam, Feiner and Hughes, p 256
-        Float tx = 0.0f, ty = 0.0f, tz = 0.0f;
+        OneFloat txOF = new OneFloat(); 
+        OneFloat tyOF = new OneFloat(); 
+        OneFloat tzOF = new OneFloat();
         pfX -= pfRefX;
         pfY -= pfRefY;
         pfZ -= pfRefZ;
-        // The following will set parameters tx, ty and tz
-        pTMatrix.transformPoint(pfX, pfY, pfZ, tx, ty, tz);
+        // The following will set parameters txOF, tyOF and tzOF
+        pTMatrix.transformPoint(pfX, pfY, pfZ, txOF, tyOF, tzOF);
+
+        float tx, ty, tz;
+        tx = txOF.f;
+        ty = tyOF.f;
+        tz = tzOF.f;
 
         // Undo the previous translation by pfRefX, pfRefY and pfRefZ (why?)
         pfX += pfRefX;
