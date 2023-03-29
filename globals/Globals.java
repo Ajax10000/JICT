@@ -10,6 +10,7 @@ import core.Shape3d;
 import dtos.ColorAsBytes;
 import dtos.LineEqn;
 import dtos.OneInt;
+import dtos.OneFloat;
 
 import fileUtils.FileUtils;
 
@@ -1190,7 +1191,9 @@ public class Globals {
         if (bIctDebug) {
             // Inverse check. Map transformed shape cornerpoints into original image
             shape.initCurrentVertex();
-            Float fXo = 0.0f, fYo = 0.0f, fZo = 0.0f;
+            OneFloat xoOF = new OneFloat();
+            OneFloat yoOF = new OneFloat();
+            OneFloat zoOF = new OneFloat();
 
             for (int index = 1; index <= shape.getNumVertices(); index++) {
                 float fAnX = shape.mCurrentVertex.tx;
@@ -1198,13 +1201,13 @@ public class Globals {
                 float fAnZ = shape.mCurrentVertex.tz;
 
                 // The following method sets fXo, fYo, and fZo
-                inverseMatrix.transformPoint (fAnX, fAnY, fAnZ, fXo, fYo, fZo);
+                inverseMatrix.transformPoint(fAnX, fAnY, fAnZ, xoOF, yoOF, zoOF);
                 // aShape.iCurrVtxIdx++;
                 shape.incCurrentVertex();
 
                 sMsgText = String.format("Globals.iwarpz: transformed: %6.2f %6.2f %6.2f texture: %6.2f %6.2f %6.2f",
                     fAnX, fAnY, fAnZ, 
-                    fXo + fHalfInWidth, fYo + fHalfInHeight, fZo);
+                    xoOF.f + fHalfInWidth, yoOF.f + fHalfInHeight, zoOF.f);
                 statusPrint(sMsgText);
             }
 
@@ -1216,7 +1219,9 @@ public class Globals {
         } // if (bIctDebug)
 
         float fXIn, fYIn, fZIn;
-        float fXOut, fYOut, fZOut;
+        OneFloat xOutOF = new OneFloat();
+        OneFloat yOutOF = new OneFloat();
+        OneFloat zOutOF = new OneFloat();
         // float xOut1, yOut1, zOut1; // these variables are not used
         // float xOut2, yOut2, zOut2; // these variables are not used
         // float xOut3, yOut3, zOut3; // these variables are not used
@@ -1308,8 +1313,11 @@ public class Globals {
                 fYIn = (iY - fHalfInHeight)* fW;
 
                 // The following method sets fXOut, fYOut and fZOut
-                inverseMatrix.transformPoint(fXIn, fYIn, fZIn, fXOut, fYOut, fZOut);
-
+                inverseMatrix.transformPoint(fXIn, fYIn, fZIn, xOutOF, yOutOF, zOutOF);
+                float fXOut = xOutOF.f;
+                float fYOut = yOutOF.f;
+                float fZOut = zOutOF.f;
+                
                 if(bIctDebug) {
                     if(
                     (iX == (int)iaScreenXCoords[0]) || 
@@ -2281,12 +2289,15 @@ public class Globals {
         }
         
         float fXIn, fYIn, fZIn; 
-        Integer xOut = 0, yOut = 0;
+        OneInt xOutOI = new OneInt();
+        OneInt yOutOI = new OneInt();
         byte bytIntensity;
 
         // Loop through the texture coordinates, projecting to the screen
         fZIn = 0.0f;
-        float fAtx = 0.0f, fAty = 0.0f, fAtz = 0.0f;
+        OneFloat atxOF = new OneFloat();
+        OneFloat atyOF = new OneFloat();
+        OneFloat atzOF = new OneFloat();
         float fIncrement = 1.0f;
     
         for (fY = 1; fY <= iInHeight; fY += fIncrement) {
@@ -2295,12 +2306,17 @@ public class Globals {
             for(fX = 1; fX < iInWidth; fX += fIncrement) {
                 bytIntensity = pInMImage.getMPixel((int)fX, (int)fY);
                 fXIn = fX - fHalfWidth;
-                forwardMatrix.transformAndProjectPoint(fXIn, fYIn, fZIn, xOut, yOut, 
+
+                // The following method sets parameters xOutOI, yOutOI, 
+                // atxOF, atyOF, and atzOF.
+                // However, we will not be using atxOF, atyOF, nor atzOF.
+                forwardMatrix.transformAndProjectPoint(fXIn, fYIn, fZIn, 
+                    xOutOI, yOutOI, 
                     pfRefPointX, pfRefPointY, pfRefPointZ, 
                     iOutHeight, iOutWidth, 
-                    fAtx, fAty, fAtz);
+                    atxOF, atyOF, atzOF);
         
-                pOutMImage.setMPixel((int)xOut, (int)yOut, bytIntensity);
+                pOutMImage.setMPixel(xOutOI.i, yOutOI.i, bytIntensity);
             } // for fX
         } // for fY
     
@@ -2396,10 +2412,14 @@ public class Globals {
         }
         
         float fXIn, fYIn, fZIn; 
-        Integer iXOut1 = 0, iYOut1 = 0;
-        Integer iXOut2 = 0, iYOut2 = 0;
-        Integer iXOut3 = 0, iYOut3 = 0;
-        Integer iXOut4 = 0, iYOut4 = 0;
+        OneInt xOut1OI = new OneInt();
+        OneInt yOut1OI = new OneInt();
+        OneInt xOut2OI = new OneInt();
+        OneInt yOut2OI = new OneInt();
+        OneInt xOut3OI = new OneInt();
+        OneInt yOut3OI = new OneInt();
+        OneInt xOut4OI = new OneInt();
+        OneInt yOut4OI = new OneInt();
         Byte bytIntensity1 = (byte)0;
         Byte bytIntensity2 = (byte)0;
         Byte bytIntensity3 = (byte)0;
@@ -2407,7 +2427,9 @@ public class Globals {
 
         // Loop through the texture coordinates, projecting to the screen
         fZIn = 0.0f;
-        Float fAtx = 0.0f, fAty = 0.0f, fAtz = 0.0f;
+        OneFloat atxOF = new OneFloat();
+        OneFloat atyOF = new OneFloat();
+        OneFloat atzOF = new OneFloat();
         float fIncr = 0.5f;                  // oversample 2:1
         float fInvIncr = 1.0f / fIncr;
         float fD1 = 0.0f, fD2 = 0.0f, fD3 = 0.0f, fD4 = 0.0f;
@@ -2457,54 +2479,54 @@ public class Globals {
                 // Note also that the last 3 parameters (fAtx, fAty, and fAtz) are 
                 // output parameters.
                 forwardMatrix.transformAndProjectPoint(fXIn - fIncr, fYIn, fZIn, 
-                    iXOut1, iYOut1, 
+                    xOut1OI, yOut1OI, 
                     pfRefPointX, pfRefPointY, pfRefPointZ, 
                     iOutHeight, iOutWidth, 
-                    fAtx, fAty, fAtz);
+                    atxOF, atyOF, atzOF);
                 if(pZMImage != null) {
                     // fD1 = distance between viewpoint (pfVx, pfVy, pfVz) and 
-                    // transformed/projected point (fXIn - fIncr, fYIn, fZIn) => (fAtx, fAty, fAtz)
-                    fD1 = MathUtils.getDistance3d(pfVx, pfVy, pfVz, fAtx, fAty, fAtz);
+                    // transformed/projected point (fXIn - fIncr, fYIn, fZIn) => (atxOF, atyOF, atzOF)
+                    fD1 = MathUtils.getDistance3d(pfVx, pfVy, pfVz, atxOF.f, atyOF.f, atzOF.f);
                 }
             
                 forwardMatrix.transformAndProjectPoint(fXIn, fYIn, fZIn, 
-                    iXOut2, iYOut2, 
+                    xOut2OI, yOut2OI, 
                     pfRefPointX, pfRefPointY, pfRefPointZ, 
                     iOutHeight, iOutWidth, 
-                    fAtx, fAty, fAtz);
+                    atxOF, atyOF, atzOF);
                 if(pZMImage != null) {
                     // fD2 = distance between viewpoint (pfVx, pfVy, pfVz) and 
-                    // transformed/projected point (fXIn, fYIn, fZIn) => (fAtx, fAty, fAtz)
-                    fD2 = MathUtils.getDistance3d(pfVx, pfVy, pfVz, fAtx, fAty, fAtz);
+                    // transformed/projected point (fXIn, fYIn, fZIn) => (atxOF, atyOF, atzOF)
+                    fD2 = MathUtils.getDistance3d(pfVx, pfVy, pfVz, atxOF.f, atyOF.f, atzOF.f);
                 }
             
                 forwardMatrix.transformAndProjectPoint(fXIn, fYIn - fIncr, fZIn, 
-                    iXOut3, iYOut3, 
+                    xOut3OI, yOut3OI, 
                     pfRefPointX, pfRefPointY, pfRefPointZ, 
                     iOutHeight, iOutWidth, 
-                    fAtx, fAty, fAtz);
+                    atxOF, atyOF, atzOF);
                 if(pZMImage != null) {
                     // fD3 = distance between viewpoint (pfVx, pfVy, pfVz) and 
-                    // transformed/projected point (fXIn, fYIn - fIncr, fZIn) => (fAtx, fAty, fAtz)
-                    fD3 = MathUtils.getDistance3d(pfVx, pfVy, pfVz, fAtx, fAty, fAtz);
+                    // transformed/projected point (fXIn, fYIn - fIncr, fZIn) => (atxOF, atyOF, atzOF)
+                    fD3 = MathUtils.getDistance3d(pfVx, pfVy, pfVz, atxOF.f, atyOF.f, atzOF.f);
                 }
             
                 forwardMatrix.transformAndProjectPoint(fXIn - fIncr, fYIn - fIncr, fZIn, 
-                    iXOut4, iYOut4, 
+                    xOut4OI, yOut4OI, 
                     pfRefPointX, pfRefPointY, pfRefPointZ, 
                     iOutHeight, iOutWidth, 
-                    fAtx, fAty, fAtz);
+                    atxOF, atyOF, atzOF);
                 if(pZMImage != null) {
                     // fD4 = distance between viewpoint (pfVx, pfVy, pfVz) and 
-                    // transformed/projected point (fXIn - fIncr, fYIn - fIncr, fZIn) => (fAtx, fAty, fAtz)
-                    fD4 = MathUtils.getDistance3d(pfVx, pfVy, pfVz, fAtx, fAty, fAtz);
+                    // transformed/projected point (fXIn - fIncr, fYIn - fIncr, fZIn) => (atxOF, atyOF, atzOF)
+                    fD4 = MathUtils.getDistance3d(pfVx, pfVy, pfVz, atxOF.f, atyOF.f, atzOF.f);
                 }
             
                 pOutMImage.fillPolyz(
-                    iXOut1, iYOut1, bytIntensity1, fD1, 
-                    iXOut2, iYOut2, bytIntensity2, fD2, 
-                    iXOut3, iYOut3, bytIntensity3, fD3, 
-                    iXOut4, iYOut4, bytIntensity4, fD4, 
+                    xOut1OI.i, yOut1OI.i, bytIntensity1, fD1, 
+                    xOut2OI.i, yOut2OI.i, bytIntensity2, fD2, 
+                    xOut3OI.i, yOut3OI.i, bytIntensity3, fD3, 
+                    xOut4OI.i, yOut4OI.i, bytIntensity4, fD4, 
                     pZMImage);
             }
         }
@@ -2530,10 +2552,9 @@ public class Globals {
     public static int fwarpz2(MemImage pInputMImage, MemImage pOutputMImage, MemImage zBufMImage, 
     float pfRx, float pfRy, float pfRz, 
     float pfSx, float pfSy, float pfSz, 
-    Float pfTx, Float pfTy, Float pfTz, 
+    OneFloat pTxOF, OneFloat pTyOF, OneFloat pTzOF, 
     float pfVx, float pfVy, float pfVz, 
-    TMatrix pViewMatrix, 
-    float pfRefPointX, float pfRefPointY, float pfRefpointZ) { // the last 3 parameters are not used
+    TMatrix pViewMatrix) {
         String sMsgText;
 
         // Create the line buffer data structures
@@ -2566,7 +2587,7 @@ public class Globals {
         float fZRadians = pfRz * JICTConstants.F_DTR;
         forwardMatrix.scale(pfSx, pfSy, pfSz);
         forwardMatrix.rotate(fXRadians, fYRadians, fZRadians);
-        forwardMatrix.translate(pfTx, pfTy, pfTz);
+        forwardMatrix.translate(pTxOF.f, pTyOF.f, pTzOF.f);
         TMatrix viewModelMatrix = new TMatrix();
         viewModelMatrix.multiply(pViewMatrix, forwardMatrix);
     
@@ -2610,7 +2631,8 @@ public class Globals {
         ColorAsBytes cab1;
         byte byt1 = (byte)0;
         // byte bytGreen1; // not used
-        Integer iSx1 = 0, iSy1 = 0;
+        OneInt sx1OI = new OneInt();
+        OneInt sy1OI = new OneInt();
         float fRefX = 0.0f, fRefY = 0.0f, fRefZ = 0.0f;
     
         // fInverseInc * fIncrement = 1.0
@@ -2631,20 +2653,28 @@ public class Globals {
                 }
     
                 // Project to the screen
-                // The following method sets parameters iSx1, iSy1, pfTx, pfTy, and pfTz
-                viewModelMatrix.transformAndProjectPoint(fX1, fY1, fZ1, iSx1, iSy1, 
-                    fRefX, fRefY, fRefZ, iOutHeight, iOutWidth, pfTx, pfTy, pfTz);
+                // The following method sets parameters sx1OI, sy1OI, 
+                // pTxOF, pTyOF, and pTzOF
+                viewModelMatrix.transformAndProjectPoint(fX1, fY1, fZ1, 
+                    sx1OI, sy1OI, 
+                    fRefX, fRefY, fRefZ, 
+                    iOutHeight, iOutWidth, 
+                    pTxOF, pTyOF, pTzOF);
+
+                int iSx1 = sx1OI.i;
+                int iSy1 = sy1OI.i;
+
                 if(fRow == 1.0f) {
-                    iaXBuffer[iXBufferIdx] = iSx1.byteValue();
+                    iaXBuffer[iXBufferIdx] = (byte)iSx1;
                     iXBufferIdx++;
 
-                    iaYBuffer[iYBufferIdx] = iSy1.byteValue();
+                    iaYBuffer[iYBufferIdx] = (byte)iSy1;
                     iYBufferIdx++;
 
                     iaIBuffer[iIBufferIdx] = byt1;
                     iIBufferIdx++;
 
-                    faDBuffer[iDBufferIdx] = MathUtils.getDistance3d(pfTx, pfTy, pfTz, pfVx, pfVy, pfVz);
+                    faDBuffer[iDBufferIdx] = MathUtils.getDistance3d(pTxOF.f, pTyOF.f, pTzOF.f, pfVx, pfVy, pfVz);
                     iDBufferIdx++;
                 }
             
@@ -2670,7 +2700,7 @@ public class Globals {
                     iDPrev2Idx++;
 
                     if(zBufMImage != null) {
-                        fDTemp1 = MathUtils.getDistance3d(pfTx, pfTy, pfTz, pfVx, pfVy, pfVz);
+                        fDTemp1 = MathUtils.getDistance3d(pTxOF.f, pTyOF.f, pTzOF.f, pfVx, pfVy, pfVz);
                     }
                 }
     
@@ -2679,7 +2709,7 @@ public class Globals {
                     iYTemp2 = iSy1;
                     bytTemp2 = byt1;
                     if(zBufMImage != null) {
-                        fDTemp2 = MathUtils.getDistance3d(pfTx, pfTy, pfTz, pfVx, pfVy, pfVz);
+                        fDTemp2 = MathUtils.getDistance3d(pTxOF.f, pTyOF.f, pTzOF.f, pfVx, pfVy, pfVz);
                     }
          
                     // Render the quadrangle intensities
@@ -3938,7 +3968,7 @@ public class Globals {
     // This method originally came from RENDER.CPP
     // 
     // Class RenderObject also has a renderMesh method, but that one takes 
-    // 3 parameters, 2 MemImages and a blendIndicator.
+    // 2 parameters, specifically 2 MemImages.
     // 
     // Called from: 
     //     MorphDlg
@@ -4013,9 +4043,12 @@ public class Globals {
 
         byte i1;
         int row, col;
-        Integer sx1 = 0, sy1 = 0;
+        OneInt sx1OI = new OneInt();
+        OneInt sy1OI = new OneInt();
         float x1, y1, z1;
-        Float tx = 0.0f, ty = 0.0f, tz = 0.0f;
+        OneFloat txOF = new OneFloat();
+        OneFloat tyOF = new OneFloat();
+        OneFloat tzOF = new OneFloat();
         float refX, refY, refZ;
         refX = 0.0f;
         refY = 0.0f;
@@ -4029,10 +4062,20 @@ public class Globals {
                 i1 = textureImage.getMPixel(col, row);
 
                 // Project to the screen
-                // The following method sets sx1, sy1, tx, ty, and tz
-                aMatrix.transformAndProjectPoint(x1, y1, z1, sx1, sy1, 
-                  refX, refY, refZ, outHeight, outWidth, tx, ty, tz);
+                // The following method sets parameters sx1OI, sy1OI, 
+                // txOF, tyOF, and tzOF
+                aMatrix.transformAndProjectPoint(x1, y1, z1, 
+                    sx1OI, sy1OI, 
+                    refX, refY, refZ, 
+                    outHeight, outWidth, 
+                    txOF, tyOF, tzOF);
  
+                int sx1 = sx1OI.i;
+                int sy1 = sy1OI.i;
+                float tx = txOF.f;
+                float ty = tyOF.f;
+                float tz = tzOF.f;
+
                 if(row == 1) {
                     xBuffer[xBufferIdx] = sx1;
                     xBufferIdx++;
