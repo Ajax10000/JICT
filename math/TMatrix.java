@@ -16,7 +16,7 @@ import structs.Point3d;
 public class TMatrix {
     private boolean bIctDebug = false;
     protected float[][] mMatrix = new float[4][4];    // Composite transformation matrix
-    protected float[][] rxMat = new float[4][4];			 // X rotation matrix
+    protected float[][] rxMat = new float[4][4];	         // X rotation matrix
     protected float[][] ryMat = new float[4][4];			 // Y rotation matrix
     protected float[][] rzMat = new float[4][4];			 // Z rotation matrix
     protected float[][] scMat = new float[4][4];			 // Scaling matrix
@@ -62,10 +62,8 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
     //     RenderObject ctor that takes 4 parameters: a String, int, boolean and Point3d
     //     SceneList.calcCompoundModelRefPoint
     public TMatrix() {
-        if (bIctDebug) {
-            String sMsgText = String.format("TMatrix constructor 1.");
-            Globals.statusPrint(sMsgText);
-        }
+        Globals.statusPrint(bIctDebug, "TMatrix ctor 1.");
+
         setIdentity();
     } // TMatrix ctor
     
@@ -73,10 +71,8 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
     // Called from:
     //     Globals.iwarpz
     public TMatrix(TMatrix pMatrix) {
-        if(bIctDebug) {
-            String sMsgText = String.format("TMatrix constructor 2.");
-            Globals.statusPrint(sMsgText);
-        }
+        Globals.statusPrint(bIctDebug, "TMatrix ctor 2.");
+
         matcopy(mMatrix, pMatrix.mMatrix);
     } // TMatrix ctor
     
@@ -115,6 +111,7 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
         mMatrix[0][2]= 0.0f; mMatrix[1][2]= 0.0f; mMatrix[2][2]= 1.0f; mMatrix[3][2]= 0.0f;
         mMatrix[0][3]= 0.0f; mMatrix[1][3]= 0.0f; mMatrix[2][3]= 0.0f; mMatrix[3][3]= 1.0f;
 
+        // Set our fields
         matcopy(rxMat, mMatrix);
         matcopy(ryMat, mMatrix);
         matcopy(rzMat, mMatrix);
@@ -124,9 +121,7 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
 
 
     public void finalize() { // no objects were declared with new ==> nothing to free
-        if (bIctDebug) {
-            Globals.statusPrint("TMatrix destructor");
-        }
+        Globals.statusPrint(bIctDebug, "TMatrix dtor");
     } // finalize
 
 
@@ -136,14 +131,14 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
     //     SceneList.preview
     //     SceneList.previewStill
     //     SceneList.render
-    public void scale(float sx, float sy, float sz) {
+    public void scale(float pfSx, float pfSy, float pfSz) {
         float[][] mat = new float[4][4];
 
         // Setup the scale matrix.
         // See p 72 of the book Visual Special Effects Toolkit in C++.
-        scMat[0][0]= sx;   scMat[1][0]= 0.0f; scMat[2][0]= 0.0f; scMat[3][0]= 0.0f;
-        scMat[0][1]= 0.0f; scMat[1][1]= sy;   scMat[2][1]= 0.0f; scMat[3][1]= 0.0f;
-        scMat[0][2]= 0.0f; scMat[1][2]= 0.0f; scMat[2][2]= sz;   scMat[3][2]= 0.0f;
+        scMat[0][0]= pfSx; scMat[1][0]= 0.0f; scMat[2][0]= 0.0f; scMat[3][0]= 0.0f;
+        scMat[0][1]= 0.0f; scMat[1][1]= pfSy; scMat[2][1]= 0.0f; scMat[3][1]= 0.0f;
+        scMat[0][2]= 0.0f; scMat[1][2]= 0.0f; scMat[2][2]= pfSz; scMat[3][2]= 0.0f;
         scMat[0][3]= 0.0f; scMat[1][3]= 0.0f; scMat[2][3]= 0.0f; scMat[3][3]= 1.0f;
 
         // Set mat = scMat * mMatrix
@@ -161,14 +156,14 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
     //     SceneList.previewStill
     //     SceneList.render
     //     ScenePreviewDlg.onCmdPlus
-    public void translate(float tx, float ty, float tz) {
+    public void translate(float pfTx, float pfTy, float pfTz) {
         float[][] mat = new float[4][4];
         
         // Setup the translation matrix.
         // See p 71 of the book Visual Special Effects Toolkit in C++.
-        trMat[0][0]= 1.0f; trMat[1][0]= 0.0f; trMat[2][0]= 0.0f; trMat[3][0]= tx;
-        trMat[0][1]= 0.0f; trMat[1][1]= 1.0f; trMat[2][1]= 0.0f; trMat[3][1]= ty;
-        trMat[0][2]= 0.0f; trMat[1][2]= 0.0f; trMat[2][2]= 1.0f; trMat[3][2]= tz;
+        trMat[0][0]= 1.0f; trMat[1][0]= 0.0f; trMat[2][0]= 0.0f; trMat[3][0]= pfTx;
+        trMat[0][1]= 0.0f; trMat[1][1]= 1.0f; trMat[2][1]= 0.0f; trMat[3][1]= pfTy;
+        trMat[0][2]= 0.0f; trMat[1][2]= 0.0f; trMat[2][2]= 1.0f; trMat[3][2]= pfTz;
         trMat[0][3]= 0.0f; trMat[1][3]= 0.0f; trMat[2][3]= 0.0f; trMat[3][3]= 1.0f;
 
         // Set mat = trMat * mMatrix
@@ -186,26 +181,30 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
     //     SceneList.peviewStill
     //     SceneList.render
     //     ScenePreviewDlg.onCmdPlus
-    public void rotate(float rx, float ry, float rz) {
+    public void rotate(float pfRx, float pfRy, float pfRz) {
         float[][] mat1 = new float[4][4];
         float[][] mat2 = new float[4][4];
     
         // Setup x-axis rotation matrix.
         // See p 72 of the book Visual Special Effects Toolkit in C++.
-        rxMat[0][0]= 1.0f; rxMat[1][0]= 0.0f;                rxMat[2][0]= 0.0f;                rxMat[3][0]= 0.0f;
-        rxMat[0][1]= 0.0f; rxMat[1][1]= (float)Math.cos(rx); rxMat[2][1]=-(float)Math.sin(rx); rxMat[3][1]= 0.0f;
-        rxMat[0][2]= 0.0f; rxMat[1][2]= (float)Math.sin(rx); rxMat[2][2]= (float)Math.cos(rx); rxMat[3][2]= 0.0f;
-        rxMat[0][3]= 0.0f; rxMat[1][3]= 0.0f;                rxMat[2][3]= 0.0f;                rxMat[3][3]= 1.0f;
+        float fCosRx = (float)Math.cos(pfRx);
+        float fSinRx = (float)Math.sin(pfRx);
+        rxMat[0][0]= 1.0f; rxMat[1][0]= 0.0f;   rxMat[2][0]= 0.0f;   rxMat[3][0]= 0.0f;
+        rxMat[0][1]= 0.0f; rxMat[1][1]= fCosRx; rxMat[2][1]=-fSinRx; rxMat[3][1]= 0.0f;
+        rxMat[0][2]= 0.0f; rxMat[1][2]= fSinRx; rxMat[2][2]= fCosRx; rxMat[3][2]= 0.0f;
+        rxMat[0][3]= 0.0f; rxMat[1][3]= 0.0f;   rxMat[2][3]= 0.0f;   rxMat[3][3]= 1.0f;
 
         // Set mat1 = rxMat * mMatrix
         matmult(mat1, rxMat, mMatrix);
     
         // Setup y-axis rotation matrix.
         // See p 72 of the book Visual Special Effects Toolkit in C++.
-        ryMat[0][0]= (float)Math.cos(ry); ryMat[1][0]= 0.0f; ryMat[2][0]=(float)Math.sin(ry); ryMat[3][0]= 0.0f;
-        ryMat[0][1]= 0.0f;                ryMat[1][1]= 1.0f; ryMat[2][1]= 0.0f;               ryMat[3][1]= 0.0f;
-        ryMat[0][2]=-(float)Math.sin(ry); ryMat[1][2]= 0.0f; ryMat[2][2]=(float)Math.cos(ry); ryMat[3][2]= 0.0f;
-        ryMat[0][3]= 0.0f;                ryMat[1][3]= 0.0f; ryMat[2][3]= 0.0f;               ryMat[3][3]= 1.0f;
+        float fCosRy = (float)Math.cos(pfRy);
+        float fSinRy = (float)Math.sin(pfRy);
+        ryMat[0][0]= fCosRy; ryMat[1][0]= 0.0f; ryMat[2][0]= fSinRy; ryMat[3][0]= 0.0f;
+        ryMat[0][1]= 0.0f;   ryMat[1][1]= 1.0f; ryMat[2][1]= 0.0f;   ryMat[3][1]= 0.0f;
+        ryMat[0][2]=-fSinRy; ryMat[1][2]= 0.0f; ryMat[2][2]= fCosRy; ryMat[3][2]= 0.0f;
+        ryMat[0][3]= 0.0f;   ryMat[1][3]= 0.0f; ryMat[2][3]= 0.0f;   ryMat[3][3]= 1.0f;
 
         // Set mat2 = ryMat * mat1 
         //          = ryMat * rxMat * mMatrix
@@ -213,10 +212,12 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
     
         // Setup z-axis rotation matrix.
         // See p 72 of the book Visual Special Effects Toolkit in C++.
-        rzMat[0][0]=(float)Math.cos(rz); rzMat[1][0]=-(float)Math.sin(rz); rzMat[2][0]= 0.0f; rzMat[3][0]= 0.0f;
-        rzMat[0][1]=(float)Math.sin(rz); rzMat[1][1]= (float)Math.cos(rz); rzMat[2][1]= 0.0f; rzMat[3][1]= 0.0f;
-        rzMat[0][2]= 0.0f;               rzMat[1][2]= 0.0f;                rzMat[2][2]= 1.0f; rzMat[3][2]= 0.0f;
-        rzMat[0][3]= 0.0f;               rzMat[1][3]= 0.0f;                rzMat[2][3]= 0.0f; rzMat[3][3]= 1.0f;
+        float fCosRz = (float)Math.cos(pfRz);
+        float fSinRz = (float)Math.sin(pfRz);
+        rzMat[0][0]= fCosRz; rzMat[1][0]=-fSinRz; rzMat[2][0]= 0.0f; rzMat[3][0]= 0.0f;
+        rzMat[0][1]= fSinRz; rzMat[1][1]= fCosRz; rzMat[2][1]= 0.0f; rzMat[3][1]= 0.0f;
+        rzMat[0][2]= 0.0f;   rzMat[1][2]= 0.0f;   rzMat[2][2]= 1.0f; rzMat[3][2]= 0.0f;
+        rzMat[0][3]= 0.0f;   rzMat[1][3]= 0.0f;   rzMat[2][3]= 0.0f; rzMat[3][3]= 1.0f;
 
         // Set mMatrix = rzMat * mat2
         //             = rzMat * ryMat * rxMat * mMatrix
@@ -229,12 +230,12 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
     //     rotate
     //     scale
     //     translate
-    public static void matmult(float[][] result, float[][] mat1, float[][] mat2) {
+    public static void matmult(float[][] pfaResult, float[][] pfaMat1, float[][] pfaMat2) {
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
-                result[j][i] = 0.0f;
+                pfaResult[j][i] = 0.0f;
                 for (int k = 0; k < 4; k++) {
-                    result[j][i] += mat1[k][i] * mat2[j][k];  //row = row x column
+                    pfaResult[j][i] += pfaMat1[k][i] * pfaMat2[j][k];  //row = row x column
                 } // for k
             } // for j
         } // for i
@@ -248,25 +249,25 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
     //     setIdentity
     //     translate
     //     transpose
-    public static void matcopy(float[][] dest, float[][] source) {
+    public static void matcopy(float[][] pfaDest, float[][] pfaSrc) {
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
-                dest[j][i] = source[j][i];
+                pfaDest[j][i] = pfaSrc[j][i];
             } // for j
         } // for i
     } // matcopy
     
     
     public void transpose() {
-        float[][] mat1 = new float[4][4];
+        float[][] faMat1 = new float[4][4];
 
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
-                mat1[i][j] = mMatrix[j][i];
+                faMat1[i][j] = mMatrix[j][i];
             }
         }
 
-        matcopy(mMatrix, mat1);
+        matcopy(mMatrix, faMat1);
     } // transpose
     
     
@@ -274,58 +275,60 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
     //     transformAndProject
     //     Globals.iwarpz (called twice)
     //     RenderObject.transformAndProjectPoint2
-    public void transformPoint(float xIn, float yIn, float zIn, 
+    public void transformPoint(float pfXIn, float pfYIn, float pfZIn, 
     OneFloat pXOutOF, OneFloat pYOutOF, OneFloat pZOutOF) {
-        pXOutOF.f = (xIn * mMatrix[0][0]) + (yIn * mMatrix[1][0]) + (zIn * mMatrix[2][0]) + mMatrix[3][0];
-        pYOutOF.f = (xIn * mMatrix[0][1]) + (yIn * mMatrix[1][1]) + (zIn * mMatrix[2][1]) + mMatrix[3][1];
-        pZOutOF.f = (xIn * mMatrix[0][2]) + (yIn * mMatrix[1][2]) + (zIn * mMatrix[2][2]) + mMatrix[3][2];
+        // Set the output parameters
+        pXOutOF.f = (pfXIn * mMatrix[0][0]) + (pfYIn * mMatrix[1][0]) + (pfZIn * mMatrix[2][0]) + mMatrix[3][0];
+        pYOutOF.f = (pfXIn * mMatrix[0][1]) + (pfYIn * mMatrix[1][1]) + (pfZIn * mMatrix[2][1]) + mMatrix[3][1];
+        pZOutOF.f = (pfXIn * mMatrix[0][2]) + (pfYIn * mMatrix[1][2]) + (pfZIn * mMatrix[2][2]) + mMatrix[3][2];
     } // transformPoint
     
 
     // Called from:
     //     transformAndProjectPoint1
-    public void transformPoint1(Point3d in, Point3d out) {
-        out.fX = (in.fX * mMatrix[0][0]) + (in.fY * mMatrix[1][0]) + (in.fZ * mMatrix[2][0]) + mMatrix[3][0];
-        out.fY = (in.fX * mMatrix[0][1]) + (in.fY * mMatrix[1][1]) + (in.fZ * mMatrix[2][1]) + mMatrix[3][1];
-        out.fZ = (in.fX * mMatrix[0][2]) + (in.fY * mMatrix[1][2]) + (in.fZ * mMatrix[2][2]) + mMatrix[3][2];
+    public void transformPoint1(Point3d pIn, Point3d pOut) {
+        // Set our output parameter
+        pOut.fX = (pIn.fX * mMatrix[0][0]) + (pIn.fY * mMatrix[1][0]) + (pIn.fZ * mMatrix[2][0]) + mMatrix[3][0];
+        pOut.fY = (pIn.fX * mMatrix[0][1]) + (pIn.fY * mMatrix[1][1]) + (pIn.fZ * mMatrix[2][1]) + mMatrix[3][1];
+        pOut.fZ = (pIn.fX * mMatrix[0][2]) + (pIn.fY * mMatrix[1][2]) + (pIn.fZ * mMatrix[2][2]) + mMatrix[3][2];
     } // transformPoint1
     
 
     // Called from:
     //     Globals.iwarpz
-    public void display(String heading) {
-        String msgText;
+    public void display(String psHeading) {
+        String sMsgText;
 
-        Globals.statusPrint(heading);
+        Globals.statusPrint(psHeading);
         DecimalFormat sixDotTwo = new DecimalFormat("####.##");
 
-        msgText = 
+        sMsgText = 
             sixDotTwo.format(mMatrix[0][0]) + "\t" + 
             sixDotTwo.format(mMatrix[1][0]) + "\t" + 
             sixDotTwo.format(mMatrix[2][0]) + "\t" + 
             sixDotTwo.format(mMatrix[3][0]) + "\t";
-        Globals.statusPrint(msgText);
+        Globals.statusPrint(sMsgText);
     
-        msgText = 
+        sMsgText = 
             sixDotTwo.format(mMatrix[0][1]) + "\t" + 
             sixDotTwo.format(mMatrix[1][1]) + "\t" + 
             sixDotTwo.format(mMatrix[2][1]) + "\t" + 
             sixDotTwo.format(mMatrix[3][1]) + "\t";
-        Globals.statusPrint(msgText);
+        Globals.statusPrint(sMsgText);
     
-        msgText = 
+        sMsgText = 
             sixDotTwo.format(mMatrix[0][2]) + "\t" + 
             sixDotTwo.format(mMatrix[1][2]) + "\t" + 
             sixDotTwo.format(mMatrix[2][2]) + "\t" + 
             sixDotTwo.format(mMatrix[3][2]) + "\t";
-        Globals.statusPrint(msgText);
+        Globals.statusPrint(sMsgText);
     
-        msgText = 
+        sMsgText = 
             sixDotTwo.format(mMatrix[0][3]) + "\t" + 
             sixDotTwo.format(mMatrix[1][3]) + "\t" + 
             sixDotTwo.format(mMatrix[2][3]) + "\t" + 
             sixDotTwo.format(mMatrix[3][3]) + "\t";
-        Globals.statusPrint(msgText);
+        Globals.statusPrint(sMsgText);
     } // display
     
 
@@ -436,7 +439,7 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
         pfY -= pfRefY;
         pfZ -= pfRefZ;
 
-        // The following method sets parameters pFTx, pFTy, and pFTz
+        // The following method sets parameters pTxOF, pTyOF, and pTzOF
         transformPoint(pfX, pfY, pfZ, pTxOF, pTyOF, pTzOF);
         //x += refX;    // move the point back
         //y += refY;
@@ -445,6 +448,8 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
         // Project to the screen
         float fD = -512.0f; // Distance from screen to center of projection: (0,0,-d)
         float fW = (fD / (pTzOF.f + fD));
+
+        // Set output parameters pSxOI and pSyOI
         pSxOI.i = (int)(((pTxOF.f * fW) + pfRefX) + (piOutWidth/2) ); //offset to output image)
         pSyOI.i = (int)(((pTyOF.f * fW) + pfRefY) + (piOutHeight/2) );
         //
@@ -454,18 +459,18 @@ void tMatrix::transformAndProjectPoint1(point3d *p, point2d *s, point3d *ref,
     } // transformAndProjectPoint
     
 
-    public void transformAndProjectPoint1(Point3d p, Point2d s, Point3d ref, 
-    int piOutHeight, int piOutWidth, Point3d t) {
-        p.fX -= ref.fX;
-        p.fY -= ref.fY;
-        p.fZ -= ref.fZ;
-        transformPoint1(p, t);
+    public void transformAndProjectPoint1(Point3d pP, Point2d pS, Point3d pRef, 
+    int piOutHeight, int piOutWidth, Point3d pT) {
+        pP.fX -= pRef.fX;
+        pP.fY -= pRef.fY;
+        pP.fZ -= pRef.fZ;
+        transformPoint1(pP, pT);
         
         // Project to the screen
         float fD = -512.0f; // Distance from screen to center of projection: (0,0,-d)
-        float fW = (fD / (t.fZ + fD));
-        s.x = ((t.fX * fW) + ref.fX) + (piOutWidth/2); // Center in output image
-        s.y = ((t.fY * fW) + ref.fY) + (piOutHeight/2);
+        float fW = (fD / (pT.fZ + fD));
+        pS.x = ((pT.fX * fW) + pRef.fX) + (piOutWidth/2); // Center in output image
+        pS.y = ((pT.fY * fW) + pRef.fY) + (piOutHeight/2);
     } // transformAndProjectPoint1
     
     
