@@ -1,14 +1,16 @@
 package math;
 
+import dtos.OneFloat;
+
 import structs.Point3d;
 
 public class Vect {
     // This method originally came from VECTOR.CPP
     public static void vectorAdd(Point3d result, Point3d p1, Point3d p2) {
+        // Set the output parameter
         result.fX = p1.fX + p2.fX;
         result.fY = p1.fY + p2.fY;
         result.fZ = p1.fZ + p2.fZ;
-        return;
     } // vectorAdd
     
 
@@ -17,11 +19,10 @@ public class Vect {
     // Called from:
     //     RenderObject.transformAndProjectPoint2
     public static void vectorSubtract(Point3d result, Point3d p1, Point3d p2) {
+        // Set the output parameter
         result.fX = p1.fX - p2.fX;
         result.fY = p1.fY - p2.fY;
         result.fZ = p1.fZ - p2.fZ;
-
-        return;
     } // vectorSubtract
     
 
@@ -54,8 +55,6 @@ public class Vect {
             p1.fY /= fMag;
             p1.fZ /= fMag;
         }
-
-        return;
     } // vectorNormalize
     
 
@@ -70,11 +69,10 @@ public class Vect {
         float fW2 = p1.fY - p2.fY;
         float fW3 = p1.fZ - p2.fZ;
         
+        // Set the output parameter
         result.fX = (fV2 * fW3) - (fV3 * fW2);
         result.fY = (fV3 * fW1) - (fV1 * fW3);
         result.fZ = (fV1 * fW2) - (fV2 * fW1);
-    
-        return;
     } // crossProduct
     
 
@@ -88,10 +86,12 @@ public class Vect {
     
 
     // This method originally came from VECTOR.CPP
-    public static void getNormal1(float x0, float y0, float z0, 
+    // Could not find where this method is called from.
+    public static void getNormal1(
+    float x0, float y0, float z0, 
     float x1, float y1, float z1, 
     float x2, float y2, float z2, 
-    Float xN, Float yN, Float zN) {
+    OneFloat xNOF, OneFloat yNOF, OneFloat zNOF) {
         //  Compute the surface normal of the three input points
         float xv = x1 - x0;
         float yv = y1 - y0;
@@ -101,9 +101,10 @@ public class Vect {
         float yw = y2 - y1;
         float zw = z2 - z1;
         
-        xN = (yv * zw) - (zv * yw);
-        yN = (zv * xw) - (xv * zw);
-        zN = (xv * yw) - (yv * xw);
+        // Set the output parameters
+        xNOF.f = (yv * zw) - (zv * yw);
+        yNOF.f = (zv * xw) - (xv * zw);
+        zNOF.f = (xv * yw) - (yv * xw);
     } // getNormal1
     
 
@@ -122,9 +123,9 @@ public class Vect {
         float yw = p2.fY - p1.fY;
         float zw = p2.fZ - p1.fZ;
         
+        // Set the output parameter
         result.fX = (yv * zw) - (zv * yw);
         result.fY = (zv * xw) - (xv * zw);
         result.fZ = (xv * yw) - (yv * xw);
-        return;
     } // getNormal2
 } // class Vect
