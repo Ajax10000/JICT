@@ -1,5 +1,7 @@
 package dialogs;
 
+import dtos.OneFloat;
+
 import frames.MainFrame;
 
 import java.awt.Component;
@@ -390,9 +392,9 @@ protected:
         // Get the floating point values the user entered.
         // If they are valid floating point values, store them in the appropriate 
         // MainFrame class field.
-        Float parsedFloatValue = 0.0f;
+        OneFloat parsedFloatValue = new OneFloat();
         if (getFloatValue(m_rx, parsedFloatValue) == null) {
-            mMainFrame.mWarpRotateX = parsedFloatValue.floatValue();
+            mMainFrame.mWarpRotateX = parsedFloatValue.f;
         } else {
             JOptionPane.showMessageDialog(this, "Rotation value entered in x-axis is not a valid number.");
             fldRotAboutXAxis.requestFocusInWindow();
@@ -400,7 +402,7 @@ protected:
         }
 
         if (getFloatValue(m_ry, parsedFloatValue) == null) {
-            mMainFrame.mWarpRotateY = parsedFloatValue.floatValue();
+            mMainFrame.mWarpRotateY = parsedFloatValue.f;
         } else {
             JOptionPane.showMessageDialog(this, "Rotation value entered in y-axis is not a valid number.");
             fldRotAboutYAxis.requestFocusInWindow();
@@ -408,7 +410,7 @@ protected:
         }
 
         if (getFloatValue(m_rz, parsedFloatValue) == null) {
-            mMainFrame.mWarpRotateZ = parsedFloatValue.floatValue();
+            mMainFrame.mWarpRotateZ = parsedFloatValue.f;
         } else {
             JOptionPane.showMessageDialog(this, "Rotation value entered in z-axis is not a valid number.");
             fldRotAboutZAxis.requestFocusInWindow();
@@ -416,7 +418,7 @@ protected:
         }
 
         if (getFloatValue(m_sx, parsedFloatValue) == null) {
-            mMainFrame.mWarpScaleX = parsedFloatValue.floatValue();
+            mMainFrame.mWarpScaleX = parsedFloatValue.f;
         } else {
             JOptionPane.showMessageDialog(this, "Scale value entered in x-axis is not a valid number.");
             fldSclAlongXAxis.requestFocusInWindow();
@@ -424,7 +426,7 @@ protected:
         }
 
         if (getFloatValue(m_sy, parsedFloatValue) == null) {
-            mMainFrame.mWarpScaleY = parsedFloatValue.floatValue();
+            mMainFrame.mWarpScaleY = parsedFloatValue.f;
         } else {
             JOptionPane.showMessageDialog(this, "Scale value entered in y-axis is not a valid number.");
             fldSclAlongYAxis.requestFocusInWindow();
@@ -436,9 +438,9 @@ protected:
     } // onOk
 
 
-    private NumberFormatException getFloatValue(String psFloatAsString, Float pFValue) {
+    private NumberFormatException getFloatValue(String psFloatAsString, OneFloat pValueOF) {
         try {
-            pFValue = Float.valueOf(psFloatAsString);
+            pValueOF.f = Float.valueOf(psFloatAsString);
         } catch (NumberFormatException nfe) {
             return nfe;
         }
