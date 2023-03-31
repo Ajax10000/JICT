@@ -1089,7 +1089,7 @@ public class Globals {
         String sMsgText;
         int iX, iY;
         int iStatus;
-        Integer iNumXCoordsFound;
+        OneInt numXCoordsFoundOI = new OneInt();
         // ia => integer array
         int[] iaScreenXCoords = new int[JICTConstants.I_MAXWVERTICES];
         // fa => float array
@@ -1239,7 +1239,8 @@ public class Globals {
 
         // Loop through the screen coordinates, filling in with inverse mapped pixels
         for (iY = (int)fMinY; iY <= (int)fMaxY; iY++) {
-            iStatus = getIntervals(shape, iY, iNumXCoordsFound, JICTConstants.I_MAXWVERTICES,
+            iStatus = getIntervals(shape, iY, numXCoordsFoundOI, 
+                JICTConstants.I_MAXWVERTICES,
                 iaScreenXCoords, faXCoords, faYCoords, faZCoords);
 
             if (iStatus != 0) {
@@ -1250,7 +1251,7 @@ public class Globals {
 
             if (bIctDebug) {
                 statusPrint("y:\tsx  \ttx  \tty  \ttz");
-                for(int i = 0; i < iNumXCoordsFound; i++) {
+                for(int i = 0; i < numXCoordsFoundOI.i; i++) {
                     sMsgText = String.format("%d\t%d\t%6.2f\t%6.2f\t%6.2f" , 
                         iY, iaScreenXCoords[i],
                         faXCoords[i], faYCoords[i], faZCoords[i]);
@@ -1259,10 +1260,10 @@ public class Globals {
             } // if (bIctDebug)
 
             // The call to method getIntervals above set variable iNumXCoordsFound
-            if (iNumXCoordsFound != 2) {
-                sMsgText = "Globals.iwarpz: numCoords <> 2. y: " + iY + " numCoords " + iNumXCoordsFound;
+            if (numXCoordsFoundOI.i != 2) {
+                sMsgText = "Globals.iwarpz: numCoords <> 2. y: " + iY + " numCoords " + numXCoordsFoundOI.i;
                 statusPrint(sMsgText);
-                for(int i = 0; i < iNumXCoordsFound; i++) {
+                for(int i = 0; i < numXCoordsFoundOI.i; i++) {
                     sMsgText = String.format("%d\t%d\t%6.2f\t%6.2f\t%6.2f", 
                         iY, iaScreenXCoords[i],
                         faXCoords[i], faYCoords[i], faZCoords[i]);
@@ -1404,7 +1405,7 @@ public class Globals {
     // and iwarpz in turn is called from tweenImage
     // which in turn is called by MorphDlg.onOK (when morph type = JICTConstants.I_TWOD)
     // and iwarpz is also called from MainFrame.onWarpParamDlgClosed
-    public static int getIntervals(Shape3d pShape, int piY, Integer piNumCoords,
+    public static int getIntervals(Shape3d pShape, int piY, OneInt pNumCoordsOI,
     int piNumAllocatedXCoords, // this parameter is not used
     int[] piaScreenXCoords,
     float[] pfaXCoords, float[] pfaYCoords, float[] pfaZCoords) {
@@ -1437,7 +1438,7 @@ public class Globals {
         iTxCoordsIdx = 0;
         iTyCoordsIdx = 0;
         iTzCoordsIdx = 0;
-        piNumCoords   = 0;
+        pNumCoordsOI.i = 0;
         int iSx1, iSy1, iSx2, iSy2;
         int iMinX, iMaxX, iMinY, iMaxY;
         float fTx1, fTy1, fTz1;
@@ -1521,7 +1522,7 @@ public class Globals {
                     iTzCoordsIdx++;
                     iCurrentScreenXIdx++;
                     intDistance[index-1] = MathUtils.intervalDistance(iMinX, iMaxX, (int)fX);
-                    piNumCoords++;
+                    pNumCoordsOI.i++;
                     // end if between sx1 and sx2
                 } else { 
                     // Store the point for possible later use
@@ -1561,7 +1562,7 @@ public class Globals {
                         iTyCoordsIdx++;
                         iTzCoordsIdx++;
                         intDistance[index-1] = MathUtils.intervalDistance(iMinY, iMaxY, piY);
-                        piNumCoords++;
+                        pNumCoordsOI.i++;
                         if(bIctDebug) {
                             statusPrint("Globals.getIntervals: vertPoint");
                         }
@@ -1582,17 +1583,19 @@ public class Globals {
         }
 
         // Sort the found x coordinates in ascending order
-        insertionSort(piaScreenXCoords, pfaXCoords, pfaYCoords, pfaZCoords, piNumCoords);
-        removeDuplicates(piaScreenXCoords, pfaXCoords, pfaYCoords, pfaZCoords, piNumCoords);
+        insertionSort(piaScreenXCoords, pfaXCoords, pfaYCoords, pfaZCoords, pNumCoordsOI.i);
+        removeDuplicates(piaScreenXCoords, pfaXCoords, pfaYCoords, pfaZCoords, pNumCoordsOI);
 
-        if(piNumCoords > 2) {
-            removeSimilar(piaScreenXCoords, pfaXCoords, pfaYCoords, pfaZCoords, piNumCoords, 2);
+        if(pNumCoordsOI.i > 2) {
+            removeSimilar(piaScreenXCoords, 
+                pfaXCoords, pfaYCoords, pfaZCoords, 
+                pNumCoordsOI, 2);
         }
 
         int iMinIntDist = 999999999;
         int iCol = 0;
 
-        if (piNumCoords == 1) {
+        if (pNumCoordsOI.i == 1) {
             for(i = 0; i < iTempIndex; i++) {
                 if(intDistance[i] < iMinIntDist) {
                     iCol = i;
@@ -1602,24 +1605,24 @@ public class Globals {
 
             // Correct missed points due to roundoff
             if(iMinIntDist < 3) {
-                piNumCoords++;
+                pNumCoordsOI.i++;
                 pfaXCoords[1] = faTempXCoords[iCol];
                 pfaYCoords[1] = faTempYCoords[iCol];
                 pfaZCoords[1] = faTempZCoords[iCol];
                 piaScreenXCoords[1] = iaTempScreenXCoords[iCol];
-                insertionSort(piaScreenXCoords, pfaXCoords, pfaYCoords, pfaZCoords, piNumCoords);
+                insertionSort(piaScreenXCoords, pfaXCoords, pfaYCoords, pfaZCoords, pNumCoordsOI.i);
             } else {
-                piNumCoords++;
+                pNumCoordsOI.i++;
                 pfaXCoords[1] = pfaXCoords[0];
                 pfaYCoords[1] = pfaYCoords[0];
                 pfaZCoords[1] = pfaZCoords[0];
                 piaScreenXCoords[1] = piaScreenXCoords[0];
             }
-        } // if numCoords == 1
+        } // if piNumCoords == 1
 
         if(bIctDebug) {
             statusPrint("Found: intdist\t sx  \t tx  \t ty  \t tz");
-            for(i = 0; i < piNumCoords; i++) {
+            for(i = 0; i < pNumCoordsOI.i; i++) {
                 sMsgText = String.format("\t%d\t%d\t%6.2f\t%6.2f\t%6.2f", 
                     intDistance[i], piaScreenXCoords[i], pfaXCoords[i], pfaYCoords[i], pfaZCoords[i]);
                 statusPrint(sMsgText);
@@ -1723,33 +1726,37 @@ public class Globals {
     // 
     // There is another method named removeDuplicates that takes 6 parameters.
     // This method here takes 5 parameters.
-    // 
+    // Shapes3d.java also has a removeDuplicates method:
+    // public int removeDuplicates()
+    // RenderOjects also has a removeDuplicates method:
+    // void removeDuplicates(int paiList[], int piListLength)
+    //
     // Called from:
     //     getIntervals
-    public static int removeDuplicates(int theList[], 
-    float theItemData1[], float theItemData2[], float theItemData3[], 
-    Integer listLength) {
+    public static int removeDuplicates(int piaList[], 
+    float pfaItemData1[], float pfaItemData2[], float pfaItemData3[], 
+    OneInt pListLengthOI) {
         // Remove duplicates from a list pre-sorted in ascending order.
         // listlength is 1 relative.
-        if (listLength == 1) {
+        if (pListLengthOI.i == 1) {
             return 0;
         }
 
-        if (listLength < 1) {
+        if (pListLengthOI.i < 1) {
             statusPrint("Globals.removeDuplicates: Input list must have 2 or more members");
             return -1;
         }
 
-        for (int index = 0; index + 1 < listLength; index++) {
-            if (theList[index + 1] == theList[index]) {
-                for (int index2 = index; index2 < listLength; index2++) {
-                    theList[index2] = theList[index2 + 1];
-                    theItemData1[index2] = theItemData1[index2 + 1];
-                    theItemData2[index2] = theItemData2[index2 + 1];
-                    theItemData3[index2] = theItemData3[index2 + 1];
+        for (int index = 0; index + 1 < pListLengthOI.i; index++) {
+            if (piaList[index + 1] == piaList[index]) {
+                for (int index2 = index; index2 < pListLengthOI.i; index2++) {
+                    piaList[index2] = piaList[index2 + 1];
+                    pfaItemData1[index2] = pfaItemData1[index2 + 1];
+                    pfaItemData2[index2] = pfaItemData2[index2 + 1];
+                    pfaItemData3[index2] = pfaItemData3[index2 + 1];
                 } // for index2
 
-                listLength--;
+                pListLengthOI.i--;
                 index--;
             }
         } // for index
@@ -1762,31 +1769,36 @@ public class Globals {
     // 
     // There is another method named removeDuplicates that takes 5 parameters.
     // This method here takes 6 parameters.
-    public static int removeDuplicates(int theList[], int theItemData1[], 
-    float theItemData2[], float theItemData3[], float theItemData4[], 
-    Integer listLength) {
+    // Shapes3d.java also has a removeDuplicates method:
+    // public int removeDuplicates()
+    // RenderOjects also has a removeDuplicates method:
+    // void removeDuplicates(int paiList[], int piListLength)
+    public static int removeDuplicates(int piaList[], 
+    int piaItemData1[], 
+    float pfaItemData2[], float pfaItemData3[], float pfaItemData4[], 
+    OneInt pListLengthOI) {
         // Remove duplicates from a list pre-sorted in ascending order.
         // listlength is 1 relative.
-        if (listLength == 1) {
+        if (pListLengthOI.i == 1) {
             return 0;
         }
 
-        if (listLength < 1) {
+        if (pListLengthOI.i < 1) {
             statusPrint("Globals.removeDuplicates: Input list must have 2 or more members");
             return -1;
         }
 
-        for (int index = 0; index + 1 < listLength; index++) {
-            if (theList[index + 1] == theList[index]) {
-                for (int index2 = index; index2 < listLength; index2++) {
-                    theList[index2] = theList[index2 + 1];
-                    theItemData1[index2] = theItemData1[index2 + 1];
-                    theItemData2[index2] = theItemData2[index2 + 1];
-                    theItemData3[index2] = theItemData3[index2 + 1];
-                    theItemData4[index2] = theItemData4[index2 + 1];
+        for (int index = 0; index + 1 < pListLengthOI.i; index++) {
+            if (piaList[index + 1] == piaList[index]) {
+                for (int index2 = index; index2 < pListLengthOI.i; index2++) {
+                    piaList[index2] = piaList[index2 + 1];
+                    piaItemData1[index2] = piaItemData1[index2 + 1];
+                    pfaItemData2[index2] = pfaItemData2[index2 + 1];
+                    pfaItemData3[index2] = pfaItemData3[index2 + 1];
+                    pfaItemData4[index2] = pfaItemData4[index2 + 1];
                 } // for index2
 
-                listLength--;
+                pListLengthOI.i--;
                 index--;
             }
         } // for index
@@ -1799,30 +1811,30 @@ public class Globals {
     // 
     // Called from:
     //     getIntervals
-    public static int removeSimilar(int theList[], 
-    float theItemData1[], float theItemData2[], float theItemData3[], 
-    Integer listLength, int difference) {
+    public static int removeSimilar(int piaList[], 
+    float pfaItemData1[], float pfaItemData2[], float pfaItemData3[], 
+    OneInt pListLengthOI, int piDifference) {
         // Remove items from a list that are less then difference units apart.  
         // The list is assumed to pre-sorted in ascending order.
         // listlength is 1 relative.
-        if (listLength == 1) {
+        if (pListLengthOI.i == 1) {
             return 0;
         }
-        if (listLength < 1) {
+        if (pListLengthOI.i < 1) {
             statusPrint("Globals.removeSimilar: Input list must have 2 or more members");
             return -1;
         }
 
-        for (int index = 0; index + 1 < listLength; index++) {
-            if (Math.abs(theList[index + 1] - theList[index]) < difference) {
-                for (int index2 = index; index2 < listLength; index2++) {
-                    theList[index2] = theList[index2 + 1];
-                    theItemData1[index2] = theItemData1[index2 + 1];
-                    theItemData2[index2] = theItemData2[index2 + 1];
-                    theItemData3[index2] = theItemData3[index2 + 1];
+        for (int index = 0; index + 1 < pListLengthOI.i; index++) {
+            if (Math.abs(piaList[index + 1] - piaList[index]) < piDifference) {
+                for (int index2 = index; index2 < pListLengthOI.i; index2++) {
+                    piaList[index2] = piaList[index2 + 1];
+                    pfaItemData1[index2] = pfaItemData1[index2 + 1];
+                    pfaItemData2[index2] = pfaItemData2[index2 + 1];
+                    pfaItemData3[index2] = pfaItemData3[index2 + 1];
                 } // for index2
 
-                listLength--;
+                pListLengthOI.i--;
                 index--;
             }
         } // for index
