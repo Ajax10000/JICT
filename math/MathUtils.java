@@ -8,13 +8,15 @@ public class MathUtils {
     // Called from:
     //     Globals.fillTrianglez
     //     Shape3d.getWorldVertex
-    public static float interpolate(float desired1, float desired2, float reference1, float reference2, float referenceCurrent) {
-        if(reference1 == reference2) { 
-            return desired1;
+    public static float interpolate(float pfDesired1, float pfDesired2, 
+    float pfRef1, float pfRef2, float pRefCurr) {
+        if(pfRef1 == pfRef2) { 
+            return pfDesired1;
         }
 
-        return desired1 - (desired1 - desired2) * ((reference1 - referenceCurrent) / 
-                          (reference1 - reference2));
+        pfDesired1 = pfDesired1 - (pfDesired1 - pfDesired2) * 
+            ((pfRef1 - pRefCurr) / (pfRef1 - pfRef2));
+        return pfDesired1;
     } // interpolate
 
 
@@ -25,22 +27,22 @@ public class MathUtils {
     //
     // Called from:
     //     ScenePreviewDlg.onCmdPlus
-    public static float fPolar(float angle) {
-        if(angle > 0.0f) {
-            while(angle >= 360.0f) {
-                angle -= 360.0f;
+    public static float fPolar(float pfAngle) {
+        if(pfAngle > 0.0f) {
+            while(pfAngle >= 360.0f) {
+                pfAngle -= 360.0f;
             }
         } else {
-            while(angle <= 0.0f) {
-                angle += 360.0f;
+            while(pfAngle <= 0.0f) {
+                pfAngle += 360.0f;
             }
         }
 
-        if(angle == 360.0f) {
-            angle = 0.0f;
+        if(pfAngle == 360.0f) {
+            pfAngle = 0.0f;
         }
 
-        return angle;
+        return pfAngle;
     } // fPolar
 
 
@@ -49,28 +51,37 @@ public class MathUtils {
     // Called from:
     //     Shape3d.addVertices
     //     Shape3d.getBoundaryPoint
-    public static float polarAtan(float run, float rise) {
+    public static float polarAtan(float pfRun, float pfRise) {
         //  This arcTangent returns a result between 0 and 2Pi radians;
-        float rayAngle = (float)Math.atan2(rise, run);
-        if(rayAngle < 0.0f) {
-            rayAngle = 3.1415926f + (3.1415926f + rayAngle);
+        float fRayAngle = (float)Math.atan2(pfRise, pfRun);
+        if(fRayAngle < 0.0f) {
+            fRayAngle = 3.1415926f + (3.1415926f + fRayAngle);
         }
 
-        return rayAngle;
+        return fRayAngle;
     } // polarAtan
 
 
     // This method originally came from UTILS.CPP
-    public static float bound(float value, float minValue, float maxValue) {
-        if (value < minValue) {
-            value = minValue;
+    // 
+    // Called from:
+    //     Globals.antiAlias
+    //     Globals.fillTrianglez (called 6 times)
+    //     Globals.getLight
+    //     GPipe.addFace
+    //     MemImage.alphaSmooth3
+    //     MemImage.alphaSmooth5
+    //     MemImage.alphaSmooth7
+    public static float bound(float pfValue, float pfMinValue, float pfMaxValue) {
+        if (pfValue < pfMinValue) {
+            pfValue = pfMinValue;
         }
 
-        if(value > maxValue) {
-            value = maxValue;
+        if(pfValue > pfMaxValue) {
+            pfValue = pfMaxValue;
         }
 
-        return value;
+        return pfValue;
     } // bound
 
 
@@ -80,8 +91,12 @@ public class MathUtils {
     //     getIntervals
     //     Shape3d.divideLongestArc
     //     Shape3d.getBoundaryPoint
-    public static float getDistance2d(float x1, float y1, float x2, float y2) {
-        return (float)Math.sqrt(((x1 - x2) * (x1 - x2)) + ((y1 - y2) * (y1 - y2)));
+    public static float getDistance2d(float pfX1, float pfY1, float pfX2, float pfY2) {
+        float fXDiffSqrd = (pfX1 - pfX2) * (pfX1 - pfX2);
+        float fYDiffSqrd = (pfY1 - pfY2) * (pfY1 - pfY2);
+        float fDist = (float)Math.sqrt(fXDiffSqrd + fYDiffSqrd);
+
+        return fDist;
     } // getDistance2d
       
 
@@ -94,9 +109,14 @@ public class MathUtils {
     //     RenderObject.transformAndProjectPoint2
     //     SceneList.depthSort
     //     Shape3d.getWorldDistance
-    public static float getDistance3d(float x1, float y1, float z1, float x2, float y2, float z2) {
-        return (float)Math.sqrt(((x1 - x2) * (x1 - x2)) + ((y1 - y2) * (y1 - y2)) +
-          ((z1 - z2) * (z1 - z2)));
+    public static float getDistance3d(float pfX1, float pfY1, float pfZ1, 
+    float pfX2, float pfY2, float pfZ2) {
+        float fXDiffSqrd = (pfX1 - pfX2) * (pfX1 - pfX2);
+        float fYDiffSqrd = (pfY1 - pfY2) * (pfY1 - pfY2);
+        float fZDiffSqrd = (pfZ1 - pfZ2) * (pfZ1 - pfZ2);
+        float fDist = (float)Math.sqrt(fXDiffSqrd + fYDiffSqrd + fZDiffSqrd);
+
+        return fDist;
     } // getDistance3d
 
 
@@ -130,11 +150,11 @@ public class MathUtils {
     // 
     // Called from:
     //     Shape3d.getBoundaryPoint
-    public static void getFLineEquation(float x1, float y1, float x2, float y2, 
+    public static void getFLineEquation(float pfX1, float pfY1, float pfX2, float pfY2, 
     LineEqn pLineEqn) {
         // Determine the line equation y = mx + b from 2 (float) points on the line
-        float fRise = (y2 - y1);
-        float fRun  = (x2 - x1);
+        float fRise = (pfY2 - pfY1);
+        float fRun  = (pfX2 - pfX1);
 
         // Set the output parameter pLineEqn
         if (fRise == 0.0f) {
@@ -147,7 +167,7 @@ public class MathUtils {
         if (!(pLineEqn.bVertFlag || pLineEqn.bHorzFlag)) {
             pLineEqn.fM = fRise / fRun;
             float m = pLineEqn.fM;
-            pLineEqn.fB = y2 - (m * x2);
+            pLineEqn.fB = pfY2 - (m * pfX2);
         }
     } // getFLineEquation
 
@@ -156,17 +176,17 @@ public class MathUtils {
     // 
     // Called from:
     //     getIntervals
-    public static int intervalDistance(int a, int b, int c) {
+    public static int intervalDistance(int piA, int piB, int piC) {
         // Returns 0 if c is inside the interval (a,b).  i.e. a <= c <= b
         // else returns distance between c and interval (a,b)
-        int b1 = a - c;
-        int b2 = c - b;
-        int b3 = Math.max(b1, b2);
+        int iB1 = piA - piC;
+        int iB2 = piC - piB;
+        int iB3 = Math.max(iB1, iB2);
 
-        if(b3 < 0) {
+        if(iB3 < 0) {
             return 0;
         } else {
-            return b3;
+            return iB3;
         }
     } // intervalDistance
 } // class MathUtils
