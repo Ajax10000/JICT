@@ -464,7 +464,7 @@ public:
         mPenRotation.fZ += pfAngleRad;
     } // setPenZRotation
 
-    
+
     // This method originally came from GPIPE.CPP
     // 
     // Called from:
@@ -475,7 +475,7 @@ public:
         mPenTranslation.fZ += pfTranZ;
     } // setPenTranslation
 
-    
+
     // This method originally came from GPIPE.CPP
     // 
     // Called from:
@@ -498,7 +498,7 @@ public:
         mViewMatrix.rotate(-mViewAngle.fX, -mViewAngle.fY, -mViewAngle.fZ);
         mViewMatrix.translate(-mViewPoint.fX, -mViewPoint.fY, -mViewPoint.fZ);
     } // setViewMatrix
-    
+
 
     // This method originally came from GPIPE.CPP
     public void setViewPenMatrix() {
@@ -523,7 +523,7 @@ public:
         return iStatus;
     } // saveZBuffer
 
-    
+
     // This method originally came from GPIPE.CPP
     // 
     // Called from:
@@ -532,7 +532,7 @@ public:
         int iStatus = mOutputImage.writeBMP(psOutputPath); 
         return iStatus;
     } // saveOutputImage
-    
+
 
     // This method originally came from GPIPE.CPP
     // 
@@ -542,7 +542,7 @@ public:
         mbZBufferEnabled = pbIndicator;
     } // setZBuffer
 
-    
+
     // This method originally came from GPIPE.CPP
     // 
     // Called from:
@@ -561,35 +561,35 @@ public:
 
         p1.fX = -pfWidth/2.0f * VP;
         p1.fY = -pfHeight/2.0f * VP;
-        p1.fZ = pfDepth/2.0f * VP;
+        p1.fZ =  pfDepth/2.0f * VP;
 
-        p2.fX = pfWidth/2.0f * VP;
+        p2.fX =  pfWidth/2.0f * VP;
         p2.fY = -pfHeight/2.0f * VP;
-        p2.fZ = pfDepth/2.0f * VP;
+        p2.fZ =  pfDepth/2.0f * VP;
 
         p3.fX = pfWidth/2.0f * VP;
         p3.fY = pfHeight/2.0f * VP;
         p3.fZ = pfDepth/2.0f * VP;
 
         p4.fX = -pfWidth/2.0f * VP;
-        p4.fY = pfHeight/2.0f * VP;
-        p4.fZ = pfDepth/2.0f * VP;
+        p4.fY =  pfHeight/2.0f * VP;
+        p4.fZ =  pfDepth/2.0f * VP;
         addFace(p1, p2, p3, p4); //front
 
         p1.fX = -pfWidth/2.0f * VP;
         p1.fY = -pfHeight/2.0f * VP;
         p1.fZ = -pfDepth/2.0f * VP;
 
-        p2.fX = pfWidth/2.0f * VP;
+        p2.fX =  pfWidth/2.0f * VP;
         p2.fY = -pfHeight/2.0f * VP;
         p2.fZ = -pfDepth/2.0f * VP;
 
-        p3.fX = pfWidth/2.0f * VP;
-        p3.fY = pfHeight/2.0f * VP;
+        p3.fX =  pfWidth/2.0f * VP;
+        p3.fY =  pfHeight/2.0f * VP;
         p3.fZ = -pfDepth/2.0f * VP;
 
         p4.fX = -pfWidth/2.0f * VP;
-        p4.fY = pfHeight/2.0f * VP;
+        p4.fY =  pfHeight/2.0f * VP;
         p4.fZ = -pfDepth/2.0f * VP;
         addFace(p4, p3, p2, p1); //back
 
@@ -599,60 +599,60 @@ public:
 
         p2.fX = -pfWidth/2.0f * VP;
         p2.fY = -pfHeight/2.0f * VP;
-        p2.fZ = pfDepth/2.0f * VP;
+        p2.fZ =  pfDepth/2.0f * VP;
 
         p3.fX = -pfWidth/2.0f * VP;
-        p3.fY = pfHeight/2.0f * VP;
-        p3.fZ = pfDepth/2.0f * VP;
+        p3.fY =  pfHeight/2.0f * VP;
+        p3.fZ =  pfDepth/2.0f * VP;
 
         p4.fX = -pfWidth/2.0f * VP;
-        p4.fY = pfHeight/2.0f * VP;
+        p4.fY =  pfHeight/2.0f * VP;
         p4.fZ = -pfDepth/2.0f * VP;
         addFace(p1, p2, p3, p4); //left
 
-        p1.fX = pfWidth/2.0f * VP;
+        p1.fX =  pfWidth/2.0f * VP;
         p1.fY = -pfHeight/2.0f * VP;
         p1.fZ = -pfDepth/2.0f * VP;
 
-        p2.fX = pfWidth/2.0f * VP;
+        p2.fX =  pfWidth/2.0f * VP;
         p2.fY = -pfHeight/2.0f * VP;
-        p2.fZ = pfDepth/2.0f * VP;
+        p2.fZ =  pfDepth/2.0f * VP;
 
         p3.fX = pfWidth/2.0f * VP;
         p3.fY = pfHeight/2.0f * VP;
         p3.fZ = pfDepth/2.0f * VP;
 
-        p4.fX = pfWidth/2.0f * VP;
-        p4.fY = pfHeight/2.0f * VP;
+        p4.fX =  pfWidth/2.0f * VP;
+        p4.fY =  pfHeight/2.0f * VP;
         p4.fZ = -pfDepth/2.0f * VP;
         addFace(p4, p3, p2, p1); //right
 
         p1.fX = -pfWidth/2.0f * VP;
-        p1.fY = pfHeight/2.0f * VP;
-        p1.fZ = pfDepth/2.0f * VP;
+        p1.fY =  pfHeight/2.0f * VP;
+        p1.fZ =  pfDepth/2.0f * VP;
 
         p2.fX = pfWidth/2.0f * VP;
         p2.fY = pfHeight/2.0f * VP;
         p2.fZ = pfDepth/2.0f * VP;
 
-        p3.fX = pfWidth/2.0f * VP;
-        p3.fY = pfHeight/2.0f * VP;
+        p3.fX =  pfWidth/2.0f * VP;
+        p3.fY =  pfHeight/2.0f * VP;
         p3.fZ = -pfDepth/2.0f * VP;
 
         p4.fX = -pfWidth/2.0f * VP;
-        p4.fY = pfHeight/2.0f * VP;
+        p4.fY =  pfHeight/2.0f * VP;
         p4.fZ = -pfDepth/2.0f * VP;
         addFace(p4, p3, p2, p1); //top
 
         p1.fX = -pfWidth/2.0f * VP;
         p1.fY = -pfHeight/2.0f * VP;
-        p1.fZ = pfDepth/2.0f * VP;
+        p1.fZ =  pfDepth/2.0f * VP;
 
-        p2.fX = pfWidth/2.0f * VP;
+        p2.fX =  pfWidth/2.0f * VP;
         p2.fY = -pfHeight/2.0f * VP;
-        p2.fZ = pfDepth/2.0f * VP;
+        p2.fZ =  pfDepth/2.0f * VP;
 
-        p3.fX = pfWidth/2.0f * VP;
+        p3.fX =  pfWidth/2.0f * VP;
         p3.fY = -pfHeight/2.0f * VP;
         p3.fZ = -pfDepth/2.0f * VP;
 
@@ -662,7 +662,7 @@ public:
         addFace(p1, p2, p3, p4); //bottom
     } // addCube
 
-    
+
     // This method originally came from GPIPE.CPP
     public void addSphere(float pfRadius) { 
         float fTempAngle, fRowRadius, fYValue;
@@ -746,7 +746,7 @@ public:
         } // for i
     } // addCylTop
 
-    
+
     // This method originally came from GPIPE.CPP
     public void addCylBottom(float pfHeight, float pfRadius) { 
         float fTempAngle = 0.0f;
@@ -771,7 +771,7 @@ public:
         } // for i
     } // addCylBottom
 
-    
+
     // This method originally came from GPIPE.CPP
     public void addCylSides(float pfHeight, float pfRadius) { 
         float fTempAngle = 0.0f;
@@ -802,7 +802,7 @@ public:
         } // for i
     } // addCylSides
 
-    
+
     // This method originally came from GPIPE.CPP
     public void addConeBottom(float pfHeight, float pfBottomRadius) { 
         float fTempAngle = 0.0f;
